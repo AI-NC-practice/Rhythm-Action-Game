@@ -1,14 +1,14 @@
 {
-  "_help": "project-setup 스킬이 첫 세션에서 채운다. 하네스 스크립트와 스킬이 이 값을 읽는다.",
-  "project_name": null,
-  "game_title": null,
-  "namespace": null,
-  "exe_name": null,
-  "repo_url": null,
-  "branch": "main",
-  "unity_version": null,
-  "unity_editor": null,
-  "blender_exe": null,
-  "uses_varco": true,
-  "setup_done": false
+    "_help":  "project-setup 스킬이 첫 세션에서 채운다. 하네스 스크립트와 스킬이 이 값을 읽는다.",
+    "project_name":  "Rhythm-Action-Game",
+    "game_title":  "Rhythm-Action-Game",
+    "namespace":  "RhythmActionGame",
+    "exe_name":  "RhythmActionGame",
+    "repo_url":  "https://github.com/AI-NC-practice/Rhythm-Action-Game.git",
+    "branch":  "main",
+    "unity_version":  "6000.4.0f1",
+    "unity_editor":  "C:\\Program Files\\Unity\\Hub\\Editor\\6000.4.0f1\\Editor\\Unity.exe",
+    "blender_exe":  "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+    "uses_varco":  true,
+    "setup_done":  true
 }

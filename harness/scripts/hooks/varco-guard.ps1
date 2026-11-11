@@ -6,7 +6,7 @@
 # Exit 2 = block the tool call; stderr is sent back to Claude.
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 # 입력을 못 읽으면 막는다 (fail-closed). 조용히 허용하면 run_flow가 예산 로그에 남지 않을 수 있다.
-try { $j = [Console]::In.ReadToEnd() | ConvertFrom-Json }
+try { $j = (New-Object System.IO.StreamReader([Console]::OpenStandardInput(), [System.Text.Encoding]::UTF8)).ReadToEnd() | ConvertFrom-Json }
 catch { [Console]::Error.WriteLine('varco-guard: could not read hook input; blocked to keep the run budget accurate. Retry the call.'); exit 2 }
 $tool = "$($j.tool_name)" -replace '^mcp__varco-3d__', ''
 

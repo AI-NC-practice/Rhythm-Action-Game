@@ -5,7 +5,7 @@
 #  - git commit: staged secret-looking files or text               -> blocked
 # Exit 2 = block the tool call; stderr is sent back to Claude.
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-try { $j = [Console]::In.ReadToEnd() | ConvertFrom-Json } catch { exit 0 }
+try { $j = (New-Object System.IO.StreamReader([Console]::OpenStandardInput(), [System.Text.Encoding]::UTF8)).ReadToEnd() | ConvertFrom-Json } catch { exit 0 }
 $cmd = "$($j.tool_input.command)"
 if ($cmd -notmatch '\bgit\b') { exit 0 }
 

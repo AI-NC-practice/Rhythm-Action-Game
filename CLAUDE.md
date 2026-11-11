@@ -1,9 +1,9 @@
-# {{GAME_TITLE}} — Claude 작업 규칙
+# Rhythm-Action-Game — Claude 작업 규칙
 
 > 이 파일은 템플릿에서 왔다. `{{...}}` 자리표시가 남아 있으면 아직 초기 설정 전이다 → `project-setup` 스킬을 먼저 실행한다.
 
-Unity {{UNITY_VERSION}} 게임. 기획은 `docs/GDD.md`, 작업 목록은 `harness/tasks.json`, 프로젝트 값은 `harness/project.json`.
-GitHub: `{{REPO_URL}}`, 브랜치 `{{BRANCH}}`.
+Unity 6000.4.0f1 게임. 기획은 `docs/GDD.md`, 작업 목록은 `harness/tasks.json`, 프로젝트 값은 `harness/project.json`.
+GitHub: `https://github.com/AI-NC-practice/Rhythm-Action-Game`, 브랜치 `main`.
 
 ## 진행 방식 (가장 중요)
 - **새 프로젝트 첫 세션**: `harness/project.json`의 `setup_done`이 false면 `project-setup` 스킬로 시작한다
@@ -47,8 +47,8 @@ GitHub: `{{REPO_URL}}`, 브랜치 `{{BRANCH}}`.
 ## 명령어 (모두 프로젝트 루트에서)
 ```
 powershell -NoProfile -ExecutionPolicy Bypass -File harness/scripts/unity-verify.ps1        # 컴파일 + EditMode/PlayMode 테스트
-powershell -NoProfile -ExecutionPolicy Bypass -File harness/scripts/unity-exec.ps1 -Method {{NAMESPACE}}.EditorTools.SceneBuilder.BuildAll   # 씬 생성
-powershell -NoProfile -ExecutionPolicy Bypass -File harness/scripts/unity-exec.ps1 -Method {{NAMESPACE}}.EditorTools.BuildScript.BuildFinal  # 빌드
+powershell -NoProfile -ExecutionPolicy Bypass -File harness/scripts/unity-exec.ps1 -Method RhythmActionGame.EditorTools.SceneBuilder.BuildAll   # 씬 생성
+powershell -NoProfile -ExecutionPolicy Bypass -File harness/scripts/unity-exec.ps1 -Method RhythmActionGame.EditorTools.BuildScript.BuildFinal  # 빌드
 powershell -NoProfile -ExecutionPolicy Bypass -File harness/scripts/smoke-test-build.ps1    # 빌드한 exe를 화면 없이 실행해 로그 검사
 powershell -NoProfile -ExecutionPolicy Bypass -File harness/scripts/download-asset.ps1 -Id <id> -Url "<url>"   # 생성된 GLB 내려받기 + 검사
 powershell -NoProfile -ExecutionPolicy Bypass -File harness/scripts/check-glb.ps1 -Path Assets/Art/Models/<id>.glb  # 삼각형/용량 검사
@@ -59,8 +59,8 @@ Unity 배치 모드는 1~3분 걸린다. 결과 요약은 `harness/reports/verif
 PowerShell 스크립트에 한글을 쓰면 **UTF-8 BOM**으로 저장한다 (Windows PowerShell 5.1은 BOM이 없으면 CP949로 읽어 줄이 사라질 수 있다).
 
 ## 코드 구조
-- `Assets/Scripts/` (asmdef `{{NAMESPACE}}.Game`, 네임스페이스 `{{NAMESPACE}}`) — 게임 코드
-- `Assets/Editor/` (asmdef `{{NAMESPACE}}.Editor`) — SceneBuilder, 빌드 스크립트
+- `Assets/Scripts/` (asmdef `RhythmActionGame.Game`, 네임스페이스 `RhythmActionGame`) — 게임 코드
+- `Assets/Editor/` (asmdef `RhythmActionGame.Editor`) — SceneBuilder, 빌드 스크립트
 - `Assets/Tests/EditMode/`, `Assets/Tests/PlayMode/` — 테스트
 - `Assets/Art/Models/` — VARCO 3D GLB/FBX, `Assets/Art/Animations/Mixamo/` — 사용자가 넣은 Mixamo 동작
 - 입력은 Input System (`Keyboard.current`, `Mouse.current`) 사용. 구 Input Manager 금지.

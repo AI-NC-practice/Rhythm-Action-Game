@@ -9,7 +9,7 @@ $state = Join-Path $root 'harness\.stop-hook-state'
 $tasksFile = Join-Path $root 'harness\tasks.json'
 
 $inputJson = $null
-try { $inputJson = [Console]::In.ReadToEnd() | ConvertFrom-Json } catch { }
+try { $inputJson = (New-Object System.IO.StreamReader([Console]::OpenStandardInput(), [System.Text.Encoding]::UTF8)).ReadToEnd() | ConvertFrom-Json } catch { }
 $hookActive = $false
 if ($inputJson -and $inputJson.stop_hook_active) { $hookActive = $true }
 

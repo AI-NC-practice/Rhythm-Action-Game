@@ -4,7 +4,7 @@
 #    or the user deletes harness/gdd.lock to reopen it for joint editing.
 # Exit 2 = block the tool call; stderr is sent back to Claude.
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-try { $j = [Console]::In.ReadToEnd() | ConvertFrom-Json }
+try { $j = (New-Object System.IO.StreamReader([Console]::OpenStandardInput(), [System.Text.Encoding]::UTF8)).ReadToEnd() | ConvertFrom-Json }
 catch { [Console]::Error.WriteLine('protect-gdd: could not read hook input; blocked. Retry the call.'); exit 2 }
 
 $path = "$($j.tool_input.file_path)" -replace '\\', '/'
