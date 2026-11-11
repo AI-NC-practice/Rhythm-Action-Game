@@ -1,0 +1,72 @@
+# ============================================================
+# Unity + 하네스 프로젝트 .gitignore (unity-harness-template)
+# Unity가 자동으로 다시 만드는 폴더, 빌드 결과물, 개인 설정, 비밀 정보는 올리지 않는다.
+# 반드시 올리는 것: Assets/ (.meta 포함), Packages/, ProjectSettings/, docs/, harness/, .claude/ (공용 설정)
+# ============================================================
+
+# --- Unity 자동 생성 폴더 (언제든 다시 만들어짐, 용량 큼) ---
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+
+# --- 빌드 결과물 (공유가 필요하면 GitHub Releases 사용) ---
+/[Bb]uild/
+/[Bb]uilds/
+*.apk
+*.aab
+*.unitypackage
+crashlytics-build.properties
+sysinfo.txt
+
+# --- IDE가 자동 생성하는 파일 ---
+*.csproj
+*.sln
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.pidb.meta
+*.pdb
+*.pdb.meta
+*.mdb
+*.mdb.meta
+*.booproj
+*.opendb
+*.VC.db
+.vs/
+.vscode/
+.idea/
+.consulo/
+
+# --- 하네스 실행 중 생기는 파일 ---
+harness/reports/*.log
+harness/reports/*.xml
+harness/.loop-active
+harness/.stop-hook-state
+harness/.commit-msg.txt
+Assets/Art/Models/**/*.part
+
+# --- Claude 개인 설정 (공용 설정 .claude/settings.json은 올림) ---
+.claude/settings.local.json
+
+# --- 비밀 정보 ---
+.env
+.env.*
+*.pem
+*.key
+
+# --- OS 잡파일 ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- 공유용 게임 패키지 (용량이 커서 git에 올리지 않음, Builds/Final에서 다시 만들 수 있음) ---
+/*.zip
+
+# --- Python 캐시 (Blender 스크립트 실행 시 생김) ---
+__pycache__/
+*.pyc

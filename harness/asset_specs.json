@@ -1,0 +1,50 @@
+{
+  "_help": "VARCO 3D 생성 명세 (MCP: TextInput -> GenerateImage -> Generate3D [-> Rig -> Animate]). flow_id는 이 프로젝트 전용 플로우 ID (사용자가 VARCO에서 새로 만든 뒤 기록, 다른 프로젝트 플로우 재사용 금지). polygon_count는 목표 삼각형 수, texture_size는 텍스처 해상도. Git LFS 없이 올리기 위해 파일 1개당 15MB 이하. status: pending | generated | failed | blocked. calls.image 최대 3, calls.mesh 최대 2. 움직이는 캐릭터는 rig(humanoid | humanoid-fingers | quadruped)와 animations(get_animation_catalog의 key 목록)를 넣는다.",
+  "defaults": {
+    "flow_id": null,
+    "flow_name": null,
+    "max_run_flow_calls": 45,
+    "max_image_calls_per_asset": 3,
+    "max_mesh_calls_per_asset": 2,
+    "topology": "tri",
+    "max_triangles": 5000,
+    "max_file_mb": 15,
+    "license": "PRIVATE",
+    "export": "glb",
+    "pivot_to_bottom": true,
+    "style_suffix": "single object only, nothing else in the image, isolated on a plain seamless light gray studio background, full view, centered, 3/4 view, realistic",
+    "tpose_suffix": "standing in a T-pose, both arms stretched straight out horizontally, legs straight and slightly apart, single object only, nothing else in the image, isolated on a plain seamless light gray studio background, front view, full view head to feet, centered, realistic"
+  },
+  "assets": [
+    {
+      "id": "example_prop",
+      "name": "(예시) 정적 소품",
+      "height_m": 1.0,
+      "polygon_count": 3000,
+      "texture_size": 1024,
+      "prompt": "old wooden chair",
+      "nodes": { "text": null, "image": null, "mesh": null },
+      "calls": { "image": 0, "mesh": 0 },
+      "status": "pending",
+      "triangles": null,
+      "file_mb": null,
+      "notes": "예시 항목. project-setup 단계에서 GDD 5장에 맞게 바꾼다."
+    },
+    {
+      "id": "example_character",
+      "name": "(예시) 움직이는 캐릭터",
+      "height_m": 1.8,
+      "polygon_count": 5000,
+      "texture_size": 2048,
+      "prompt": "full body featureless white art mannequin",
+      "rig": "humanoid",
+      "animations": ["walk_looping", "standing_idle_1_looping"],
+      "nodes": { "text": null, "image": null, "mesh": null, "rig": null, "animate": [] },
+      "calls": { "image": 0, "mesh": 0 },
+      "status": "pending",
+      "triangles": null,
+      "file_mb": null,
+      "notes": "예시 항목. rig가 있으면 tpose_suffix를 쓰고 Generate3D tPose=1, 결과는 FBX(Humanoid)로 받는다."
+    }
+  ]
+}

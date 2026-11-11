@@ -1,0 +1,26 @@
+# 줄바꿈 자동 정리 (Windows/다른 OS 간 차이 방지)
+* text=auto
+
+# Unity 텍스트 에셋: 항상 LF
+*.cs        text eol=lf diff=csharp
+*.unity     text eol=lf
+*.prefab    text eol=lf
+*.asset     text eol=lf
+*.mat       text eol=lf
+*.meta      text eol=lf
+*.asmdef    text eol=lf
+*.json      text eol=lf
+*.md        text eol=lf
+
+# PowerShell 스크립트: Windows 줄바꿈 유지
+*.ps1       text eol=crlf
+
+# 바이너리 (Git LFS는 쓰지 않음, 파일당 20MB 이하로 관리)
+*.glb       binary
+*.fbx       binary
+*.png       binary
+*.jpg       binary
+*.psd       binary
+*.ttf       binary
+*.wav       binary
+*.mp3       binary

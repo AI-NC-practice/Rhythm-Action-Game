@@ -1,0 +1,68 @@
+using System.IO;
+using System.Linq;
+using UnityEditor;
+using UnityEditor.Animations;
+using UnityEngine;
+
+namespace {{NAMESPACE}}.EditorTools
+{
+    /// <summary>
+    /// VARCO Rig + Animate 결과(FBX)를 Unity Humanoid로 가져오는 설정 예시. 경로와 클립 이름을 프로젝트에 맞게 바꿔 쓴다.
+    /// 실행: harness/scripts/unity-exec.ps1 -Method {{NAMESPACE}}.EditorTools.HumanoidImport.Setup
+    /// </summary>
+    public static class HumanoidImport
+    {
+        public const string Dir = "Assets/Art/Models/{{CHARACTER_ID}}";
+        public const string FbxPath = Dir + "/{{CHARACTER_ID}}_anim.fbx";
+        public const string GlbPath = Dir + "/{{CHARACTER_ID}}_anim.glb";
+        public const string ControllerPath = Dir + "/{{CHARACTER_ID}}Anim.controller";
+        public const string ClipName = "Walk";
+
+        public static void Setup()
+        {
+            // 1) FBX: Humanoid 아바타 + 반복 재생 클립
+            var imp = (ModelImporter)AssetImporter.GetAtPath(FbxPath);
+            imp.animationType = ModelImporterAnimationType.Human;
+            imp.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
+            imp.importAnimation = true;
+            imp.materialImportMode = ModelImporterMaterialImportMode.ImportStandard;
+            var clips = imp.defaultClipAnimations;
+            Debug.Log($"[HumanoidImport] FBX default clips: {clips.Length} ({string.Join(", ", clips.Select(c => $"{c.takeName} {c.firstFrame}-{c.lastFrame}"))})");
+            // 가장 긴 테이크를 걷기 클립으로 사용
+            var take = clips.OrderByDescending(c => c.lastFrame - c.firstFrame).First();
+            take.name = ClipName;
+            take.loopTime = true;
+            take.lockRootRotation = true;
+            take.lockRootHeightY = true;
+            take.lockRootPositionXZ = true;
+            take.keepOriginalPositionY = true;
+            imp.clipAnimations = new[] { take };
+            imp.SaveAndReimport();
+
+            // 2) Animator Controller (걷기 하나를 반복)
+            var clip = AssetDatabase.LoadAllAssetsAtPath(FbxPath).OfType<AnimationClip>().First(c => !c.name.StartsWith("__preview__"));
+            if (File.Exists(ControllerPath)) AssetDatabase.DeleteAsset(ControllerPath);
+            var ctrl = AnimatorController.CreateAnimatorControllerAtPathWithClip(ControllerPath, clip);
+            EditorUtility.SetDirty(ctrl);
+            AssetDatabase.SaveAssets();
+
+            Report();
+        }
+
+        public static void Report()
+        {
+            var avatar = AssetDatabase.LoadAllAssetsAtPath(FbxPath).OfType<Avatar>().FirstOrDefault();
+            Debug.Log($"[HumanoidImport] FBX avatar: {(avatar == null ? "none" : $"valid={avatar.isValid} human={avatar.isHuman}")}");
+            foreach (var c in AssetDatabase.LoadAllAssetsAtPath(FbxPath).OfType<AnimationClip>().Where(c => !c.name.StartsWith("__preview__")))
+                Debug.Log($"[HumanoidImport] FBX clip '{c.name}' length={c.length:F2}s fps={c.frameRate} loop={c.isLooping} humanMotion={c.humanMotion}");
+            var fbx = AssetDatabase.LoadAssetAtPath<GameObject>(FbxPath);
+            var smr = fbx.GetComponentInChildren<SkinnedMeshRenderer>();
+            Debug.Log($"[HumanoidImport] FBX skinned mesh: bones={smr?.bones.Length} tris={(smr ? smr.sharedMesh.triangles.Length / 3 : 0)} materials={smr?.sharedMaterials.Length} mainTex={(smr && smr.sharedMaterial ? (smr.sharedMaterial.mainTexture != null).ToString() : "n/a")}");
+
+            var glbClips = AssetDatabase.LoadAllAssetsAtPath(GlbPath).OfType<AnimationClip>().ToArray();
+            var glb = AssetDatabase.LoadAssetAtPath<GameObject>(GlbPath);
+            var gsmr = glb ? glb.GetComponentInChildren<SkinnedMeshRenderer>() : null;
+            Debug.Log($"[HumanoidImport] GLB: clips={glbClips.Length} ({string.Join(", ", glbClips.Select(c => $"{c.name} {c.length:F2}s legacy={c.legacy}"))}) bones={gsmr?.bones.Length} animComp={(glb ? glb.GetComponent<Animation>() != null : false)}");
+        }
+    }
+}
