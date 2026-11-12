@@ -14,10 +14,12 @@ namespace RhythmActionGame.Tests
         {
             Assert.AreEqual(6, All.Length);
             var chart = StageChart.Load();
-            foreach (var e in chart.Obstacles)
+            // beta1-1: GDD 4.4 기존 장애물만 분류한다 (새 사건 8종은 GDD-beta B2.2)
+            var legacy = chart.Obstacles.Where(e => EventCatalog.Get(e.kind).Category.HasValue).ToArray();
+            foreach (var e in legacy)
                 Assert.IsTrue(Traversal.KeyFits(Traversal.Categorize(e.kind), e.Key), $"{e.kind} {e.key}");
             // 차트에 6종이 모두 나온다
-            CollectionAssert.AreEquivalent(All, chart.Obstacles.Select(e => Traversal.Categorize(e.kind)).Distinct());
+            CollectionAssert.AreEquivalent(All, legacy.Select(e => Traversal.Categorize(e.kind)).Distinct());
         }
 
         [Test]

@@ -142,7 +142,7 @@ namespace RhythmActionGame.Tests
         [UnityTest]
         public IEnumerator T06_RoofPerfect_KickExecution_SlowMotionDoesNotAffectBeat()
         {
-            yield return Load(124);  // 128: 창 든 포졸 (지붕)
+            yield return Load(126);  // 128: 창 든 포졸 (지붕). beta1-1: 124 추격 사건(GDD-beta B3 차트)을 건너뛰려고 126에서 시작
             yield return UntilCombat();
             var enc = dir.CurrentEncounter;
             Assert.AreEqual(ArrowKey.Right, enc.Cues[0].Key, "찌르기 →");

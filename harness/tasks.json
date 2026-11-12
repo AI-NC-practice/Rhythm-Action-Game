@@ -268,10 +268,10 @@
                                          "SceneBuilder.BuildAll로 Game 씬 재생성, 개발자 모드 챕터 1~6 시작 지점이 새 구간과 맞음 — 테스트",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "in_progress",
+                      "status":  "done",
                       "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "새 stage1.json: 판정 72(사건 42 + 전투 30), 지붕·높이·대치·포위·무사 위치 유지, 슬로모션 후보 5곳 뒤 2박 비움. ChartCheck 도구. 평가 PASS 1회차."
                   },
                   {
                       "id":  "B05",
@@ -291,8 +291,8 @@
                                          "연출 끄기 스위치 + 개발자 모드 F1 토글",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "in_progress",
+                      "attempts":  1,
                       "max_attempts":  3,
                       "notes":  ""
                   },

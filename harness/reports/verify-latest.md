@@ -1,7 +1,7 @@
 ﻿# Unity verify report
-time: 2026-11-12 14:59:28
+time: 2026-11-12 15:05:21
 
-## EditMode : total=96 passed=96 failed=0 skipped=0 result=Passed
+## EditMode : total=102 passed=102 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Config_MatchGddBetaB1
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_LabelPose_PopThenRise_045s
@@ -25,6 +25,12 @@ time: 2026-11-12 14:59:28
   - [Passed] RhythmActionGame.Tests.B03_EventMotionTests.B03_EachKind_PerfectNormalFail_DifferentMotion("chase")
   - [Passed] RhythmActionGame.Tests.B03_EventMotionTests.B03_EventProps_BuildGrayBoxParts
   - [Passed] RhythmActionGame.Tests.B03_EventMotionTests.B03_Motion_WaitsForResult
+  - [Passed] RhythmActionGame.Tests.B04_ChartTests.B04_DevChapterStarts_MatchSections_FirstJudgeAfter2Beats
+  - [Passed] RhythmActionGame.Tests.B04_ChartTests.B04_FirstTwoEvents8BeatsApart_NoOverlap_JudgeGap05
+  - [Passed] RhythmActionGame.Tests.B04_ChartTests.B04_Flow_FollowsProposal013
+  - [Passed] RhythmActionGame.Tests.B04_ChartTests.B04_NoJudgeInsideSlowMotionWindow
+  - [Passed] RhythmActionGame.Tests.B04_ChartTests.B04_SectionsKept_PathLength600To700
+  - [Passed] RhythmActionGame.Tests.B04_ChartTests.B04_TotalJudgements_65To75_SurroundAndBossKept
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_BeatAndSpeed_MatchGdd41
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_Judge_MatchGdd42
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_ObstacleAndCombat_MatchGdd44To46

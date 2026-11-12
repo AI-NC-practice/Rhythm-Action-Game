@@ -62,7 +62,7 @@ namespace RhythmActionGame.Tests
         [UnityTest]
         public IEnumerator T07_Surround_Layout_FiveEnemiesRadius4()
         {
-            yield return Load(180);
+            yield return Load(181);   // beta1-1: 180 낮은 담 사건(GDD-beta B3 차트)을 건너뛴다
             var stop = MapLayout.PointAt(184 * GameConfig.MetersPerBeat);
             Assert.AreEqual(5, dir.surroundEnemies.Length);
             Assert.AreEqual(3, dir.surroundEnemies.Count(e => e.kind == "sword"), "칼 3");
@@ -77,7 +77,7 @@ namespace RhythmActionGame.Tests
         [UnityTest]
         public IEnumerator T07_Surround_AllSuccess_Windmill_DefeatsAll_SlowMo_Spin360()
         {
-            yield return Load(180);
+            yield return Load(181);   // beta1-1: 180 낮은 담 사건(GDD-beta B3 차트)을 건너뛴다
             yield return UntilCombat();
             var enc = dir.CurrentEncounter;
             Assert.AreEqual(12, enc.Cues.Count, "순차 5 + 동시 3 + 윈드밀 4");
@@ -111,7 +111,7 @@ namespace RhythmActionGame.Tests
         [UnityTest]
         public IEnumerator T07_Surround_Phase1And2Fail_LoseHp_ButContinue()
         {
-            yield return Load(180);
+            yield return Load(181);   // beta1-1: 180 낮은 담 사건(GDD-beta B3 차트)을 건너뛴다
             yield return UntilCombat();
             var enc = dir.CurrentEncounter;
             var cues = enc.Cues.ToList();
@@ -133,7 +133,7 @@ namespace RhythmActionGame.Tests
         [UnityTest]
         public IEnumerator T07_Windmill_Fail_RetriesOnlyPhase3NextBar()
         {
-            yield return Load(180);
+            yield return Load(181);   // beta1-1: 180 낮은 담 사건(GDD-beta B3 차트)을 건너뛴다
             yield return UntilCombat();
             var enc = dir.CurrentEncounter;
             var cues = enc.Cues.ToList();
@@ -156,7 +156,7 @@ namespace RhythmActionGame.Tests
         [UnityTest]
         public IEnumerator T07_Surround_CameraTurnsToAttacker_In0_2s_AndDropsForSimultaneous()
         {
-            yield return Load(180);
+            yield return Load(181);   // beta1-1: 180 낮은 담 사건(GDD-beta B3 차트)을 건너뛴다
             yield return UntilCombat();
             var enc = dir.CurrentEncounter;
             var cues = enc.Cues.ToList();

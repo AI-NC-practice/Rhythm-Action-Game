@@ -20,8 +20,8 @@ namespace RhythmActionGame.Tests
         [Test]
         public void T04_Chart_Counts_MatchGdd49()
         {
+            // beta1-1: GDD-beta B3이 "장애물 20"을 대신한다 (판정 수 65~75는 B04_ChartTests). 일반 적(대치) 4, 포위 1, 무사 1은 그대로.
             var c = StageChart.Load();
-            Assert.AreEqual(GameConfig.StageObstacleCount, c.Obstacles.Count(), "장애물 20개");
             Assert.AreEqual(GameConfig.StageNormalEnemyCount, c.Enemies.Count(), "일반 적 4명");
             Assert.AreEqual(1, c.events.Count(e => e.IsSurround), "포위 전투 1회");
             Assert.AreEqual(1, c.events.Count(e => e.IsBoss), "무사 1명");
@@ -37,8 +37,8 @@ namespace RhythmActionGame.Tests
             {
                 Assert.GreaterOrEqual(e.runBeat, 0);
                 Assert.IsFalse(string.IsNullOrEmpty(e.kind), $"{e.runBeat} 종류 없음");
-                if (e.IsObstacle) Assert.DoesNotThrow(() => StageChart.ParseKey(e.key), $"{e.runBeat} 키 오류");
-                if (e.IsEnemy)
+                if (e.IsRunEvent) Assert.DoesNotThrow(() => EventCatalog.SlotsFor(e), $"{e.runBeat} 키 오류");
+                if (e.IsDuel)
                 {
                     Assert.AreEqual(GameConfig.NormalEnemyAttacks, e.attacks.Length, $"{e.runBeat} 일반 적 공격 2회");
                     foreach (var a in e.attacks) Assert.DoesNotThrow(() => StageChart.ParseKey(a.key));
@@ -50,15 +50,18 @@ namespace RhythmActionGame.Tests
         [Test]
         public void T04_Chart_ObstacleGapAtLeast4Beats()
         {
+            // beta1-1: GDD-beta B2.1 — 사건 사이 간격 0박 이상 (사건 시작부터 다음 시작까지는 최소 4박 = 가장 짧은 사건 길이)
             var c = StageChart.Load();
-            Assert.GreaterOrEqual(StageChart.MinObstacleGap(c), GameConfig.MinObstacleGapBeats);
+            var runs = c.events.Where(e => e.IsRunEvent).OrderBy(e => e.runBeat).ToArray();
+            for (int i = 1; i < runs.Length; i++)
+                Assert.GreaterOrEqual(runs[i].runBeat - runs[i - 1].runBeat, GameConfig.MinObstacleGapBeats, $"{runs[i - 1].runBeat} → {runs[i].runBeat}");
         }
 
         [Test]
         public void T04_Chart_ObstacleKeysMatchGdd3()
         {
             var c = StageChart.Load();
-            foreach (var e in c.Obstacles)
+            foreach (var e in c.Obstacles.Where(o => EventCatalog.Get(o.kind).Category.HasValue))   // GDD 4.4 기존 장애물만 (새 사건 키는 B02·B04 테스트)
             {
                 switch (e.kind)
                 {
@@ -77,9 +80,12 @@ namespace RhythmActionGame.Tests
         public void T04_Chart_EventsDoNotOverlap()
         {
             var c = StageChart.Load();
-            var evs = c.events.OrderBy(e => e.runBeat).ToArray();
+            // beta1-1: 사건은 종류별 길이(4·6박)만큼 차지한다 (GDD-beta B2.1). 전투는 그 자리에서 멈추므로 길이 0, 복선은 판정 없음.
+            var evs = c.events.Where(e => !e.IsForeshadow).OrderBy(e => e.runBeat).ToArray();
             for (int i = 1; i < evs.Length; i++)
-                Assert.GreaterOrEqual(evs[i].runBeat - evs[i - 1].runBeat, GameConfig.ObstacleBeats, $"{evs[i - 1].runBeat}와 {evs[i].runBeat} 겹침");
+                Assert.GreaterOrEqual(evs[i].runBeat, evs[i - 1].runBeat + ChartCheck.Length(evs[i - 1]), $"{evs[i - 1].runBeat}와 {evs[i].runBeat} 겹침");
+            for (int i = 1; i < evs.Length; i++)
+                Assert.Greater(evs[i].runBeat, evs[i - 1].runBeat, "같은 박자에 두 이벤트 없음");
         }
 
         [Test]

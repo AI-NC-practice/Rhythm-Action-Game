@@ -17,7 +17,10 @@ namespace RhythmActionGame.Tests
             var lights = Object.FindObjectsByType<Light>();
             Assert.IsTrue(lights.Any(l => l.type == LightType.Directional), "방향광");
             var all = Object.FindObjectsByType<Transform>();
-            Assert.AreEqual(20, all.Count(t => t.name.StartsWith("Obstacle_")), "장애물 20개");
+            // beta1-1: GDD-beta B3 차트 — 기존 장애물은 Obstacle_*, 새 사건·안 멈추는 적·복선은 EventProp_*
+            var chart = StageChart.Load();
+            Assert.AreEqual(chart.Obstacles.Count(e => !EventProps.Needs(e)), all.Count(t => t.name.StartsWith("Obstacle_")), "기존 장애물 소품");
+            Assert.AreEqual(chart.events.Count(EventProps.Needs), Object.FindObjectsByType<EventProp>(FindObjectsInactive.Include).Length, "새 사건 소품을 SceneBuilder가 만듦 (복선은 숨김 상태 포함)");
             Assert.AreEqual(4, all.Count(t => System.Text.RegularExpressions.Regex.IsMatch(t.name, @"^Enemy_\d\d_")), "일반 적 4명");
             Assert.AreEqual(5, all.Count(t => t.name.StartsWith("Enemy_Surround_")), "포위 5명");
             Assert.IsNotNull(GameObject.Find("Enemy_Boss"));
