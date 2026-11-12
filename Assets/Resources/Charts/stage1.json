@@ -1,0 +1,49 @@
+{
+  "name": "stage1",
+  "bpm": 120,
+  "runBeats": 264,
+  "events": [
+    { "runBeat": 12,  "type": "obstacle", "kind": "cart",          "key": "Up",    "section": 1 },
+    { "runBeat": 20,  "type": "obstacle", "kind": "clothesline",   "key": "Down",  "section": 1 },
+    { "runBeat": 28,  "type": "obstacle", "kind": "jars",          "key": "Left",  "section": 1 },
+    { "runBeat": 36,  "type": "obstacle", "kind": "low_wall",      "key": "Up",    "section": 1 },
+
+    { "runBeat": 60,  "type": "obstacle", "kind": "low_wall",      "key": "Up",    "section": 2 },
+    { "runBeat": 68,  "type": "obstacle", "kind": "wall_run",      "key": "Right", "section": 2 },
+    { "runBeat": 76,  "type": "obstacle", "kind": "wall_run",      "key": "Left",  "section": 2 },
+    { "runBeat": 84,  "type": "obstacle", "kind": "eave",          "key": "Down",  "section": 2 },
+    { "runBeat": 92,  "type": "enemy",    "kind": "sword", "onRoof": false, "section": 2,
+      "attacks": [ { "attack": "horizontal", "key": "Down" }, { "attack": "overhead", "key": "Left" } ] },
+    { "runBeat": 100, "type": "obstacle", "kind": "roof_climb",    "key": "Up",    "section": 2 },
+
+    { "runBeat": 112, "type": "obstacle", "kind": "roof_jump",     "key": "Up",    "section": 3 },
+    { "runBeat": 120, "type": "obstacle", "kind": "roof_jump",     "key": "Up",    "section": 3 },
+    { "runBeat": 128, "type": "enemy",    "kind": "spear", "onRoof": true,  "section": 3,
+      "attacks": [ { "attack": "thrust", "key": "Right" }, { "attack": "upward", "key": "Up" } ] },
+    { "runBeat": 136, "type": "obstacle", "kind": "eave",          "key": "Down",  "section": 3 },
+    { "runBeat": 144, "type": "obstacle", "kind": "roof_jump",     "key": "Up",    "section": 3 },
+    { "runBeat": 152, "type": "enemy",    "kind": "sword", "onRoof": true,  "section": 3,
+      "attacks": [ { "attack": "overhead", "key": "Right" }, { "attack": "horizontal", "key": "Down" } ] },
+    { "runBeat": 164, "type": "obstacle", "kind": "drop_down",     "key": "Down",  "section": 3 },
+
+    { "runBeat": 184, "type": "surround", "kind": "yard", "onRoof": false, "section": 4 },
+
+    { "runBeat": 200, "type": "obstacle", "kind": "low_wall",      "key": "Up",    "section": 5 },
+    { "runBeat": 208, "type": "obstacle", "kind": "jars",          "key": "Right", "section": 5 },
+    { "runBeat": 216, "type": "obstacle", "kind": "wall_run",      "key": "Left",  "section": 5 },
+    { "runBeat": 224, "type": "obstacle", "kind": "roof_climb",    "key": "Up",    "section": 5 },
+    { "runBeat": 232, "type": "obstacle", "kind": "eave",          "key": "Down",  "section": 5 },
+    { "runBeat": 240, "type": "enemy",    "kind": "spear", "onRoof": true,  "section": 5,
+      "attacks": [ { "attack": "upward", "key": "Up" }, { "attack": "thrust", "key": "Left" } ] },
+    { "runBeat": 248, "type": "obstacle", "kind": "gate_climb",    "key": "Up",    "section": 5 },
+
+    { "runBeat": 260, "type": "boss",     "kind": "boss",  "onRoof": true,  "section": 6,
+      "attacks": [
+        { "attack": "overhead",   "key": "Left",  "gap": 2 },
+        { "attack": "horizontal", "key": "Down",  "gap": 1 },
+        { "attack": "upward",     "key": "Up",    "gap": 1 },
+        { "attack": "overhead",   "key": "Right", "gap": 2 },
+        { "attack": "horizontal", "key": "Down",  "gap": 1 }
+      ] }
+  ]
+}
