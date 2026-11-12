@@ -75,7 +75,7 @@ namespace RhythmActionGame
             bool allDone = encounter.Cues.Where(c => c.Tag is CombatStep s && s.Phase == 3 && !c.Cancelled).All(c => c.Judged);
             if (!allDone) return;
             DefeatEnemies(ExecutionKind.Windmill);
-            if (slowMotion != null) slowMotion.Trigger();
+            TriggerStorySlowMotion();
             WindmillSpinning = true;
             WindmillSpinDegrees = 0;
             FinishEncounter(ExecutionKind.Windmill);

@@ -17,6 +17,7 @@ namespace RhythmActionGame
         public PauseMenu pause;
         public ResultScreen result;
         public SpeedFx speedFx;
+        public PresentationDirector presentation;
         public bool autoStart = true;
 
         public static GameBootstrap Instance { get; private set; }
@@ -52,6 +53,7 @@ namespace RhythmActionGame
             Time.timeScale = 1f;
             AudioListener.volume = GameSettings.Volume / 100f;
             if (score != null) score.Board.Reset();
+            if (presentation != null) presentation.ResetAll();
             player.ResetTo(runBeat);
             clock.ResetSpeed();
             clock.StartClock();

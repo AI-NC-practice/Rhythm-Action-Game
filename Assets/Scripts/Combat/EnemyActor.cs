@@ -8,8 +8,18 @@ namespace RhythmActionGame
     /// 적 하나 (회색 상자 단계). 공격할 때 무기를 휘두르고 트레일·잔상을 남기며, 쓰러질 때 결과별 동작을 한다.
     /// 상태 이름(State)으로 결과를 구분한다. 모델과 Animator 연결은 T14.
     /// </summary>
-    public class EnemyActor : MonoBehaviour
+    public class EnemyActor : MonoBehaviour, IHitStoppable
     {
+        /// <summary>Hit Stop 중 (GDD-beta B5): 무기 자세·쓰러지는 동작·잔상을 멈춘다. 전역 시간은 그대로.</summary>
+        public bool Frozen { get; private set; }
+
+        public void SetFrozen(bool frozen)
+        {
+            Frozen = frozen;
+            var anim = GetComponentInChildren<Animator>();
+            if (anim != null) anim.speed = frozen ? 0f : 1f;
+        }
+
         public string kind = "sword";
         public bool onRoof;
         /// <summary>무기 회전 축 (어깨 위치).</summary>
@@ -67,7 +77,7 @@ namespace RhythmActionGame
         /// <summary>공격 진행도 p(0 = 원 등장, 1 = 목표 박자)에 맞춰 무기를 휘두른다.</summary>
         public void Attack(string attack, float p)
         {
-            if (Defeated) return;
+            if (Defeated || Frozen) return;
             SaveHome();
             attacking = true;
             State = "Attack_" + attack;
@@ -118,7 +128,7 @@ namespace RhythmActionGame
             var startRot = transform.rotation;
             if (how == ExecutionKind.DisarmSlash && weaponPivot != null) weaponPivot.gameObject.SetActive(false); // 칼을 빼앗김
             float dur = how == ExecutionKind.KickOffRoof || how == ExecutionKind.Windmill ? 1.0f : 0.6f;
-            for (float t = 0; t < dur; t += Time.deltaTime)
+            for (float t = 0; t < dur; t += Frozen ? 0f : Time.deltaTime)
             {
                 float k = t / dur;
                 switch (how)

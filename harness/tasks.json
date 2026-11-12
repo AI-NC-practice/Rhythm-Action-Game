@@ -291,10 +291,10 @@
                                          "연출 끄기 스위치 + 개발자 모드 F1 토글",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "in_progress",
+                      "status":  "done",
                       "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "PresentationDirector/CameraFx/TimeFx, FxOffset 층, GameConfig.Fx 프리셋 18개, 회전 주인, Hit Stop(IHitStoppable), 16박 빈도 제한, F1 토글. 평가 PASS 1회차."
                   },
                   {
                       "id":  "B06",
@@ -311,8 +311,8 @@
                                          "판정 원이 모든 효과보다 위에 그려짐 (Overlay Canvas 20) — 테스트",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "in_progress",
+                      "attempts":  1,
                       "max_attempts":  3,
                       "notes":  ""
                   },

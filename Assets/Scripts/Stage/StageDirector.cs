@@ -220,8 +220,20 @@ namespace RhythmActionGame
         {
             EventSlowMotionRequested?.Invoke(run);
             if (!AllowEventSlowMotion || State != StageState.Running) return;
-            if (slowMotion != null) slowMotion.Trigger();
-            player.BeginRemap(run.EndBeat, clock.SpeedMultiplier);
+            bool accepted;
+            if (presentation != null) accepted = presentation.RequestSlowMotion(SlowMoMode.Candidate);   // 16박 빈도 제한 (B05)
+            else { if (slowMotion != null) slowMotion.Trigger(); accepted = true; }
+            if (accepted) player.BeginRemap(run.EndBeat, clock.SpeedMultiplier);
+        }
+
+        /// <summary>연출 시스템 (GDD-beta B5). 없으면 슬로모션을 직접 건다.</summary>
+        public PresentationDirector presentation;
+
+        /// <summary>처형·윈드밀 슬로모션 (GDD 4.2): 빈도 제한 없이 항상. 연출 시스템이 있으면 거기에 기록한다.</summary>
+        void TriggerStorySlowMotion()
+        {
+            if (presentation != null) presentation.RequestSlowMotion(SlowMoMode.Always);
+            else if (slowMotion != null) slowMotion.Trigger();
         }
 
         partial void OnCombatCueJudgedImpl(JudgeCue cue, Judgement r);

@@ -219,5 +219,78 @@ namespace RhythmActionGame
         public const float JudgeExposure = -0.4f;
         /// <summary>판정 중 비네트 세기 (URP Vignette intensity).</summary>
         public const float JudgeVignette = 0.3f;
+
+        // ---------------- GDD-beta B5 연출 시스템 (제안서 2~4장) ----------------
+        /// <summary>연출 수치. 제안서 2장 표와 3장 등급표, 4장 겹침 규칙의 값.</summary>
+        public static class Fx
+        {
+            // 4장 겹침 규칙
+            /// <summary>기울기(롤) 합계 한도 (도).</summary>
+            public const float RollLimit = 10f;
+            /// <summary>고개(피치) 합계 한도 (도).</summary>
+            public const float PitchLimit = 35f;
+            /// <summary>최종 FOV 범위 (도).</summary>
+            public const float FovMin = 45f;
+            public const float FovMax = 85f;
+            /// <summary>흔들림 세기 합계 한도.</summary>
+            public const float TraumaMax = 1f;
+            /// <summary>흔들림 세기가 초당 줄어드는 양.</summary>
+            public const float TraumaDecayPerSecond = 1.5f;
+            /// <summary>흔들림 세기 1일 때 최대 위치 흔들림 (m). 실제 = 세기² × 이 값.</summary>
+            public const float ShakeMaxPosition = 0.08f;
+            /// <summary>흔들림 세기 1일 때 최대 회전 흔들림 (도).</summary>
+            public const float ShakeMaxRotation = 3f;
+            /// <summary>연출이 끝나고 원래 카메라로 돌아오는 최대 시간 (초).</summary>
+            public const float RecoverSeconds = 0.5f;
+            /// <summary>사건·전투 슬로모션 빈도 제한 (박자): 직전 슬로모션 시작 후 이 박자 안이면 거절.</summary>
+            public const float SlowMoMinGapBeats = 16f;
+
+            static FxPreset P(string name, int grade, float hitStop = 0, SlowMoMode slow = SlowMoMode.None, float trauma = 0, float hz = 20,
+                float kick = 0, float side = 0, float height = 0, float pitch = 0, float roll = 0, float wobble = 0, float fov = 0,
+                float rise = 0.03f, float hold = 0.05f, float release = 0.25f) =>
+                new FxPreset { Name = name, Grade = grade, HitStop = hitStop, SlowMo = slow, Trauma = trauma, ShakeHz = hz, KickBack = kick, SideShift = side,
+                    Height = height, Pitch = pitch, Roll = roll, YawWobble = wobble, Fov = fov, Rise = rise, Hold = hold, Release = release };
+
+            // A. 적의 공격 예고 (등급 2): 휘두르기 직전 FOV −2°, 공격 쪽 롤 2°
+            public static readonly FxPreset AttackWarn = P("AttackWarn", 2, fov: -2f, roll: 2f, rise: 0.1f, hold: 0.15f, release: 0.2f);
+            // B. PERFECT 방어 (등급 3): Hit Stop 0.07, 흔들림 0.35 (25 Hz), 뒤로 0.05 m·위로 1.5°, FOV −3° 펀치 → 0.25초 복귀
+            public static readonly FxPreset ParryPerfect = P("ParryPerfect", 3, hitStop: 0.07f, trauma: 0.35f, hz: 25f, kick: 0.05f, pitch: -1.5f, fov: -3f, rise: 0.02f, hold: 0.05f, release: 0.25f);
+            // B. PERFECT 회피: Hit Stop 0.05, 피하는 쪽 0.1 m·롤 4°, 0.25초 복귀
+            public static readonly FxPreset DodgePerfect = P("DodgePerfect", 3, hitStop: 0.05f, side: 0.1f, roll: 4f, rise: 0.05f, hold: 0.05f, release: 0.25f);
+            // B. 무사 마지막 공격 PERFECT 패링 (슬로모션 후보)
+            public static readonly FxPreset ParryPerfectFinale = P("ParryPerfectFinale", 3, hitStop: 0.07f, slow: SlowMoMode.Candidate, trauma: 0.35f, hz: 25f, kick: 0.05f, pitch: -1.5f, fov: -3f, rise: 0.02f, hold: 0.05f, release: 0.25f);
+            // C. NORMAL 방어·회피 (등급 2): Hit Stop 0.03, 뒤로 0.12 m, yaw ±2° (12 Hz), 흔들림 0.2, 높이 −0.08 m, 0.35초
+            public static readonly FxPreset DefendNormal = P("DefendNormal", 2, hitStop: 0.03f, trauma: 0.2f, hz: 12f, kick: 0.12f, height: -0.08f, wobble: 2f, rise: 0.03f, hold: 0.05f, release: 0.3f);
+            // D. FAIL 피격 (등급 3): Hit Stop 0.05, 흔들림 0.6 (20 Hz), 맞은 쪽 롤 6°, 아래로 4°, FOV +4°, 0.45초
+            public static readonly FxPreset Hit = P("Hit", 3, hitStop: 0.05f, trauma: 0.6f, hz: 20f, pitch: 4f, roll: 6f, fov: 4f, rise: 0.03f, hold: 0.07f, release: 0.35f);
+            // E. 처형 (등급 4): Hit Stop 0.1 → 슬로모션, 적 쪽 0.3 m, FOV 58→50 (−8°), 롤 8°, 0.5초에 복귀
+            public static readonly FxPreset Execution = P("Execution", 4, hitStop: 0.1f, slow: SlowMoMode.Always, trauma: 0.3f, hz: 15f, kick: -0.3f, roll: 8f, fov: -8f, rise: 0.08f, hold: 0.4f, release: 0.5f);
+            // E. 발차기 처형: 아래로 10°
+            public static readonly FxPreset ExecutionKick = P("ExecutionKick", 4, hitStop: 0.1f, slow: SlowMoMode.Always, trauma: 0.3f, hz: 15f, kick: -0.3f, pitch: 10f, fov: -8f, rise: 0.08f, hold: 0.4f, release: 0.5f);
+            // F1. 포위 1단계 회전: 롤 3°, 도착 흔들림 0.1
+            public static readonly FxPreset SurroundTurn = P("SurroundTurn", 3, trauma: 0.1f, roll: 3f, rise: 0.1f, hold: 0.1f, release: 0.2f);
+            // F2. 포위 2단계 동시 공격: FOV +6°, 위로 8° (PERFECT면 슬로모션 후보)
+            public static readonly FxPreset Simultaneous = P("Simultaneous", 3, fov: 6f, pitch: -8f, rise: 0.15f, hold: 0.3f, release: 0.3f);
+            public static readonly FxPreset SimultaneousPerfect = P("SimultaneousPerfect", 3, hitStop: 0.05f, slow: SlowMoMode.Candidate, trauma: 0.25f, fov: 6f, pitch: -8f, rise: 0.05f, hold: 0.3f, release: 0.3f);
+            // F3. 윈드밀 화살표 하나: FOV +2° (4개 쌓여 최대 +8°)
+            public static readonly FxPreset WindmillArrow = P("WindmillArrow", 3, fov: 2f, rise: 0.05f, hold: 1.2f, release: 0.4f);
+            // F3. 윈드밀 마무리 (등급 5): Hit Stop 0.08 → 슬로모션, 흔들림 0.6
+            public static readonly FxPreset WindmillFinish = P("WindmillFinish", 5, hitStop: 0.08f, slow: SlowMoMode.Always, trauma: 0.6f, hz: 18f, rise: 0.05f, hold: 0.4f, release: 0.5f);
+            // G. 도약 (PERFECT): 위로 6°, 공중 FOV +3°
+            public static readonly FxPreset JumpPerfect = P("JumpPerfect", 2, pitch: -6f, fov: 3f, rise: 0.15f, hold: 0.2f, release: 0.3f);
+            // G. 착지: PERFECT 흔들림 0.1·높이 −0.05, NORMAL 0.25·−0.15·롤 3°, FAIL 0.5
+            public static readonly FxPreset LandPerfect = P("LandPerfect", 1, trauma: 0.1f, height: -0.05f, rise: 0.03f, hold: 0.02f, release: 0.2f);
+            public static readonly FxPreset LandNormal = P("LandNormal", 1, trauma: 0.25f, height: -0.15f, roll: 3f, rise: 0.03f, hold: 0.05f, release: 0.3f);
+            public static readonly FxPreset LandFail = P("LandFail", 2, trauma: 0.5f, height: -0.2f, rise: 0.03f, hold: 0.07f, release: 0.35f);
+            // 사건 PERFECT 슬로모션 후보 (기와 미끄러짐, 밧줄 넘기, 긴 도약, 닫히는 대문, 돌진 적)
+            public static readonly FxPreset EventPerfectSlow = P("EventPerfectSlow", 3, slow: SlowMoMode.Candidate, trauma: 0.15f, fov: 3f, rise: 0.05f, hold: 0.35f, release: 0.4f);
+
+            public static readonly FxPreset[] All =
+            {
+                AttackWarn, ParryPerfect, DodgePerfect, ParryPerfectFinale, DefendNormal, Hit, Execution, ExecutionKick,
+                SurroundTurn, Simultaneous, SimultaneousPerfect, WindmillArrow, WindmillFinish, JumpPerfect, LandPerfect, LandNormal, LandFail, EventPerfectSlow,
+            };
+        }
+
     }
 }

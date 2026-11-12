@@ -1,7 +1,7 @@
 ﻿# Unity verify report
-time: 2026-11-12 15:05:21
+time: 2026-11-12 15:13:56
 
-## EditMode : total=102 passed=102 failed=0 skipped=0 result=Passed
+## EditMode : total=105 passed=105 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Config_MatchGddBetaB1
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_LabelPose_PopThenRise_045s
@@ -31,6 +31,9 @@ time: 2026-11-12 15:05:21
   - [Passed] RhythmActionGame.Tests.B04_ChartTests.B04_NoJudgeInsideSlowMotionWindow
   - [Passed] RhythmActionGame.Tests.B04_ChartTests.B04_SectionsKept_PathLength600To700
   - [Passed] RhythmActionGame.Tests.B04_ChartTests.B04_TotalJudgements_65To75_SurroundAndBossKept
+  - [Passed] RhythmActionGame.Tests.B05_FxConfigTests.B05_AllPresets_ReleaseWithin05s_AndEnvelope
+  - [Passed] RhythmActionGame.Tests.B05_FxConfigTests.B05_Presets_MatchProposalSection2
+  - [Passed] RhythmActionGame.Tests.B05_FxConfigTests.B05_Rules_MatchProposalSection4
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_BeatAndSpeed_MatchGdd41
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_Judge_MatchGdd42
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_ObstacleAndCombat_MatchGdd44To46
@@ -105,7 +108,7 @@ time: 2026-11-12 15:05:21
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_SpeedFx_Intensity
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_Texts_MatchGdd48
 
-## PlayMode : total=55 passed=55 failed=0 skipped=0 result=Passed
+## PlayMode : total=63 passed=63 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -124,6 +127,14 @@ time: 2026-11-12 15:05:21
   - [Passed] RhythmActionGame.Tests.B03_NewEventsTests.B03_Props_SpawnedAndAnimated
   - [Passed] RhythmActionGame.Tests.B03_NewEventsTests.B03_RopeSwing_ResultsGiveDifferentCameraStates
   - [Passed] RhythmActionGame.Tests.B03_NewEventsTests.B03_SlowMotionRequests_OnlyCandidatesOnPerfect
+  - [Passed] RhythmActionGame.Tests.B05_PresentationCoreTests.B05_AllPresets_RecoverWithin05s
+  - [Passed] RhythmActionGame.Tests.B05_PresentationCoreTests.B05_Disable_ClearsAndBlocks_F1Toggle
+  - [Passed] RhythmActionGame.Tests.B05_PresentationCoreTests.B05_GameScene_EventSlowMotion_RespectsLimit
+  - [Passed] RhythmActionGame.Tests.B05_PresentationCoreTests.B05_HitStop_LocalOnly_LongerWins_IgnoredDuringSlowMo
+  - [Passed] RhythmActionGame.Tests.B05_PresentationCoreTests.B05_JudgeStaysAccurate_DuringHitStopAndSlowMo
+  - [Passed] RhythmActionGame.Tests.B05_PresentationCoreTests.B05_Layers_ClampedPerSection4
+  - [Passed] RhythmActionGame.Tests.B05_PresentationCoreTests.B05_SlowMotion_FrequencyLimit16Beats
+  - [Passed] RhythmActionGame.Tests.B05_PresentationCoreTests.B05_YawOwner_Priority
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_ChapterStartBeats_MatchSections
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(1)
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(4)

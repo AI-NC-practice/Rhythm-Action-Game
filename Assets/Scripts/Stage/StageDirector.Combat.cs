@@ -160,7 +160,7 @@ namespace RhythmActionGame
             {
                 var how = CombatRules.ExecutionFor(r, encounter.Event.onRoof, encounter.EnemyIndex);
                 DefeatEnemies(how);
-                if (r == Judgement.Perfect && slowMotion != null) slowMotion.Trigger();
+                if (r == Judgement.Perfect) TriggerStorySlowMotion();
                 FinishEncounter(how);
             }
         }

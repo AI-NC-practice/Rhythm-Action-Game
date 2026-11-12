@@ -118,7 +118,9 @@ namespace RhythmActionGame.EditorTools
             var motion = new GameObject("Motion");   // 장애물·전투 카메라 연출 (StageDirector)
             motion.transform.SetParent(rig.transform, false);
             var cam = CreateCamera("PlayerCamera", Vector3.zero, Quaternion.identity);
-            cam.transform.SetParent(motion.transform, false);
+            var fxOffset = new GameObject("FxOffset");   // 연출 층 (CameraFx, GDD-beta B5)
+            fxOffset.transform.SetParent(motion.transform, false);
+            cam.transform.SetParent(fxOffset.transform, false);
             cam.fieldOfView = GameConfig.FovDefault;
             cam.nearClipPlane = 0.05f;
             cam.farClipPlane = 600f;
@@ -153,6 +155,18 @@ namespace RhythmActionGame.EditorTools
             propDirector.player = follower;
             propDirector.propRoot = eventProps;
 
+            // 연출 시스템 (GDD-beta B5)
+            var cameraFx = systems.AddComponent<CameraFx>();
+            cameraFx.fxOffset = fxOffset.transform;
+            cameraFx.judgeFx = fx;
+            var timeFx = systems.AddComponent<TimeFx>();
+            timeFx.slowMotion = director.slowMotion;
+            timeFx.clock = clock;
+            var presentation = systems.AddComponent<PresentationDirector>();
+            presentation.cameraFx = cameraFx;
+            presentation.timeFx = timeFx;
+            director.presentation = presentation;
+
             var boot = new GameObject("GameBootstrap").AddComponent<GameBootstrap>();
             boot.director = director;
             boot.clock = clock;
@@ -161,6 +175,7 @@ namespace RhythmActionGame.EditorTools
             boot.fx = fx;
             boot.player = follower;
             boot.playerCamera = cam;
+            boot.presentation = presentation;
 
             BuildGameExtra(boot, chart);
             EditorSceneManager.SaveScene(scene, GameScenePath);

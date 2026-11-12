@@ -25,6 +25,9 @@ namespace RhythmActionGame
         /// <summary>평소 FOV에 더할 값 (속도감 효과, T08).</summary>
         public float FovBonus;
 
+        /// <summary>연출 층의 FOV 합 (CameraFx, GDD-beta B5). 최종 FOV는 45~85°로 자른다.</summary>
+        public float FxFov;
+
         public float Weight => weight;
         public float Saturation => color != null ? color.saturation.value : 0f;
         /// <summary>판정 중 노출 (GDD-beta B1.4).</summary>
@@ -94,7 +97,7 @@ namespace RhythmActionGame
             if (cam != null)
             {
                 float baseFov = GameConfig.FovDefault + FovBonus;
-                cam.fieldOfView = Mathf.Lerp(baseFov, GameConfig.FovZoom, weight);
+                cam.fieldOfView = Mathf.Clamp(Mathf.Lerp(baseFov, GameConfig.FovZoom, weight) + FxFov, GameConfig.Fx.FovMin, GameConfig.Fx.FovMax);
                 cam.transform.localRotation = Quaternion.Slerp(Quaternion.identity, turnTarget, weight);
             }
         }

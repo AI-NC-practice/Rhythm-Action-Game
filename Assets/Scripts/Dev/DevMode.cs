@@ -78,7 +78,17 @@ namespace RhythmActionGame
                     }
                 }
             }
+            if (kb != null && kb.f1Key.wasPressedThisFrame) ToggleFx();
             Refresh();
+        }
+
+        /// <summary>F1: 연출 전체 켜기/끄기 (GDD-beta B5).</summary>
+        public static bool ToggleFx()
+        {
+            PresentationDirector.DefaultEnabled = !PresentationDirector.DefaultEnabled;
+            if (PresentationDirector.Instance != null) PresentationDirector.Instance.Enabled = PresentationDirector.DefaultEnabled;
+            if (Instance != null) Instance.shownSection = -2;   // 문구 갱신
+            return PresentationDirector.DefaultEnabled;
         }
 
         void Refresh()
@@ -88,7 +98,8 @@ namespace RhythmActionGame
             if (section == shownSection && label.text.Length > 0) return;
             shownSection = section;
             string where = section > 0 ? $"  |  현재 {section}. {MapLayout.Sections[section - 1].Name}" : "";
-            label.text = $"[개발자 모드] 숫자 1~{MapLayout.Sections.Length}: 챕터 이동{where}";
+            string fx = PresentationDirector.DefaultEnabled ? "켬" : "끔";
+            label.text = $"[개발자 모드] 숫자 1~{MapLayout.Sections.Length}: 챕터 이동  |  F1: 연출 {fx}{where}";
         }
 
         public string LabelText => label.text;
