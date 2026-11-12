@@ -95,3 +95,6 @@ PresentationHooks를 만들었다. 게임 코드를 바꾸지 않고 판정·사
 
 ### 2026-11-12 B08 [beta] 합성 효과음 + 장단 반주 — done
 SfxSynth로 효과음 13종(금속 챙, 저음 쿵, 둔한 탕, 타격, 바람, 먼지, 귀 울림, 북, 징, 칼날 칭, UI, 장구 궁편·채편)을 코드로 합성했다. 에디터 도구 SfxSynthTool은 이 소리를 Assets/Audio/Sfx/Sfx_*.wav(16비트 모노)로 저장하며, SceneBuilder.BuildAll이 이 도구를 부른다. SfxPlayer는 AudioSource 8개를 쓰고 같은 종류는 동시에 3개까지만 낸다. 덕킹은 Music 그룹 음량만 줄이고(겹치면 가장 깊은 값) 재생 위치와 속도는 건드리지 않는다. AudioMixer 에셋은 코드로 만드는 공개 API가 없어 SfxPlayer가 그룹 역할을 한다. 상황별 소리는 FxLooks.Sounds에 정리했다(PERFECT 패링 챙+쿵 −4 dB, 피격 타격+쿵+귀 울림 −8 dB, 처형 타격+쿵+징 −6 dB, 윈드밀 화살표 북 등). Game 씬에서는 메트로놈 대신 JangguBacking이 마디마다 덩−쿵−덕−덩−쿵−덕(첫 박 강세)을 PlayScheduled로 예약한다. 평가 PASS(1회차), EditMode 111/111, PlayMode 80/80. 다음 작업: B09(사람 확인).
+
+### 2026-11-12 B09 [사용자] beta 플레이 확인 — needs_user
+B01~B08을 넣고 회색 상자 빌드를 다시 만들었다(Builds/Gray/RhythmActionGame.exe, 99 MB). smoke-test를 통과했고, -startGame으로 게임 씬을 25초 돌렸을 때 오류가 없었다. 사용자 플레이 피드백을 기다린다(템포, 연출, 가독성, 소리). 개발자 모드: 숫자 1~6은 챕터 이동, F1은 연출 켜기/끄기.

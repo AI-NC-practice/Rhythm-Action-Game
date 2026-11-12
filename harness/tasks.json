@@ -367,10 +367,10 @@
                                          "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과 후 exe 경로 안내",
                                          "사용자가 개발자 모드로 챕터별 플레이 후 템포·연출·가독성 피드백을 줌, 수정 작업은 사용자 승인 후 추가"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "needs_user",
+                      "attempts":  1,
                       "max_attempts":  1,
-                      "notes":  ""
+                      "notes":  "Builds/Gray/RhythmActionGame.exe 다시 빌드(99 MB) + smoke-test 통과(타이틀 12초, -startGame 게임 씬 25초 오류 없음). 사용자 플레이 피드백 대기."
                   },
                   {
                       "id":  "B10",
