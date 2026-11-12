@@ -120,10 +120,10 @@
                                          "공격 중 무기에 TrailRenderer와 잔상 오브젝트가 생기고, 카메라가 공격 지점을 따라감",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "in_progress",
+                      "status":  "done",
                       "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "StageDirector.Combat(정지·다음 마디 예약·재도전·처형·재개), CombatRules, EnemyActor(무기 휘두르기·트레일·잔상·쓰러짐), SlowMotion. 평가 PASS(1회차)."
                   },
                   {
                       "id":  "T07",
@@ -141,8 +141,8 @@
                                          "무사: 공격 5회(1~2박자 간격 혼합) + 마무리, 쓰러뜨리면 스테이지 클리어 상태 — PlayMode 테스트",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "in_progress",
+                      "attempts":  1,
                       "max_attempts":  3,
                       "notes":  ""
                   },

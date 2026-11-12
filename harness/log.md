@@ -30,3 +30,6 @@ MapLayout(+Z/+X로 꺾이는 수평 경로 660 m, 구간 6개, 높이 키프레�
 
 ### 2026-11-12 T05 장애물 파쿠르 + 체력 — done
 StageDirector(차트 장애물을 3박 앞에서 판정 예약, 판정 원 위치는 장애물 중심, 4박 통과 동안 결과별 카메라 연출, FAIL 시 체력 −1, 체력 0이면 GameOver), Traversal(장애물 6종 분류·키 검사·결과별 궤적, 상태 이름 예: Vault_Perfect), PlayerHealth를 만들었다. 카메라 계층은 CameraRig → Motion → PlayerCamera. 평가 PASS(1회차), EditMode 60/60, PlayMode 13/13. 평가자 참고: 4박 PlayMode 검증이 수레 한 종류에만 있음. 다음 작업: T06.
+
+### 2026-11-12 T06 일반 적 전투 — done
+적 위치에 도착하면 멈추고 다음 마디 첫 박에 원이 뜨도록 공격 2회(2박 간격)와 마무리(↑)를 예약한다. FAIL이면 체력 −1 후 다음 마디부터 그 적을 처음부터 다시 한다. 마무리 PERFECT는 지붕이면 발차기, 땅이면 칼 뺏기/찌르기(적 번호로 번갈아), NORMAL은 밀쳐 쓰러뜨리기. 처형 PERFECT에 슬로모션(timeScale 0.3, 실제 0.4초)을 건다. EnemyActor(회색 상자 적: 무기 축·무기·무기 끝 트레일, 잔상 0.1초 간격 최대 3개, 상태 이름), 판정 원과 카메라가 무기 끝을 따라간다. JudgeSystem에 Cancel 추가. 평가 PASS(1회차), EditMode 64/64, PlayMode 18/18. 다음 작업: T07.

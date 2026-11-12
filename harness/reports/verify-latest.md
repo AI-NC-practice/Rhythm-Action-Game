@@ -1,7 +1,7 @@
 ﻿# Unity verify report
-time: 2026-11-12 09:56:59
+time: 2026-11-12 10:02:02
 
-## EditMode : total=60 passed=60 failed=0 skipped=0 result=Passed
+## EditMode : total=64 passed=64 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_BeatAndSpeed_MatchGdd41
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_Judge_MatchGdd42
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_ObstacleAndCombat_MatchGdd44To46
@@ -62,8 +62,12 @@ time: 2026-11-12 09:56:59
   - [Passed] RhythmActionGame.Tests.T05_TraversalTests.T05_Offsets_StartAndEndOnPath
   - [Passed] RhythmActionGame.Tests.T05_TraversalTests.T05_SixCategories_AndChartKeysFit
   - [Passed] RhythmActionGame.Tests.T05_TraversalTests.T05_ThreeResults_HaveDifferentMotion
+  - [Passed] RhythmActionGame.Tests.T06_CombatRulesTests.T06_ChartAttackKeys_MatchGdd45
+  - [Passed] RhythmActionGame.Tests.T06_CombatRulesTests.T06_Execution_ByPlaceAndResult
+  - [Passed] RhythmActionGame.Tests.T06_CombatRulesTests.T06_NextBar
+  - [Passed] RhythmActionGame.Tests.T06_CombatRulesTests.T06_NormalEnemy_TwoAttacksTwoBeatsApart_ThenFinisherUp
 
-## PlayMode : total=13 passed=13 failed=0 skipped=0 result=Passed
+## PlayMode : total=18 passed=18 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Font_HasJudgeGlyphs
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Fx_GrayAndZoom_EnterAndExit
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Label_ShownFor0_6Seconds
@@ -77,5 +81,10 @@ time: 2026-11-12 09:56:59
   - [Passed] RhythmActionGame.Tests.T05_ObstacleRunTests.T05_Fail_LosesHpAndSpeed_MusicKeepsGoing
   - [Passed] RhythmActionGame.Tests.T05_ObstacleRunTests.T05_Fail_SpeedNotBelowMin
   - [Passed] RhythmActionGame.Tests.T05_ObstacleRunTests.T05_ThreeFails_GameOver
+  - [Passed] RhythmActionGame.Tests.T06_CombatTests.T06_Attack_TrailAfterimages_CameraFollowsWeapon
+  - [Passed] RhythmActionGame.Tests.T06_CombatTests.T06_DefenseFail_LosesHp_RetriesFromFirstAttackNextBar
+  - [Passed] RhythmActionGame.Tests.T06_CombatTests.T06_FinisherFail_RetriesWholeEnemy
+  - [Passed] RhythmActionGame.Tests.T06_CombatTests.T06_RoofPerfect_KickExecution_SlowMotionDoesNotAffectBeat
+  - [Passed] RhythmActionGame.Tests.T06_CombatTests.T06_StopsAtEnemy_AllPerfect_DisarmOnGround_ResumesNextBar
 
 OVERALL: PASS

@@ -13,6 +13,8 @@ namespace RhythmActionGame
         public Vector3? WorldPoint;
         public bool Appeared;
         public bool Judged;
+        /// <summary>판정 없이 취소됨 (전투 재도전 등). Judged도 true가 된다.</summary>
+        public bool Cancelled;
         public Judgement Result;
         /// <summary>같은 장면의 다른 시스템(장애물, 적)이 결과를 받을 때 쓰는 꼬리표.</summary>
         public object Tag;
@@ -64,6 +66,14 @@ namespace RhythmActionGame
         }
 
         public void ClearAll() => cues.Clear();
+
+        /// <summary>판정하지 않고 취소한다 (이벤트 없음). 목록에서는 다음 Tick에 빠진다.</summary>
+        public void Cancel(JudgeCue cue)
+        {
+            if (cue == null || cue.Judged) return;
+            cue.Judged = true;
+            cue.Cancelled = true;
+        }
 
         void Update()
         {

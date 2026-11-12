@@ -83,7 +83,7 @@ namespace RhythmActionGame.EditorTools
             BuildRoofs(map);
             BuildAlley(map);
             BuildObstacles(map, chart);
-            BuildEnemies(map, chart);
+            var enemies = BuildEnemies(map, chart);
 
             // 시스템
             var systems = new GameObject("Systems");
@@ -140,6 +140,9 @@ namespace RhythmActionGame.EditorTools
             director.judge = judge;
             director.player = follower;
             director.motion = motion.transform;
+            director.normalEnemies = enemies.Normal.ToArray();
+            director.slowMotion = systems.AddComponent<SlowMotion>();
+            BuildDirectorExtra(director, enemies);
 
             var boot = new GameObject("GameBootstrap").AddComponent<GameBootstrap>();
             boot.director = director;
@@ -245,8 +248,16 @@ namespace RhythmActionGame.EditorTools
             }
         }
 
-        static void BuildEnemies(Transform map, ChartData chart)
+        public class EnemySet
         {
+            public readonly List<EnemyActor> Normal = new List<EnemyActor>();
+            public readonly List<EnemyActor> Surround = new List<EnemyActor>();
+            public EnemyActor Boss;
+        }
+
+        static EnemySet BuildEnemies(Transform map, ChartData chart)
+        {
+            var set = new EnemySet();
             var parent = new GameObject("Enemies").transform;
             parent.SetParent(map);
             int i = 0;
@@ -264,30 +275,92 @@ namespace RhythmActionGame.EditorTools
                         bool sword = k < GameConfig.SurroundSwordCount;
                         float ang = k * 360f / GameConfig.SurroundEnemyCount;
                         var dir = Quaternion.AngleAxis(ang, Vector3.up) * fwd;
-                        Capsule(ring, $"Enemy_Surround_{k}_{(sword ? "sword" : "spear")}", stop + dir * GameConfig.SurroundRadius, -dir, 1.75f, sword ? EnemyColorSword : EnemyColorSpear);
+                        set.Surround.Add(Enemy(ring, $"Enemy_Surround_{k}_{(sword ? "sword" : "spear")}", sword ? "sword" : "spear", false, stop + dir * GameConfig.SurroundRadius, -dir, 1.75f, sword ? EnemyColorSword : EnemyColorSpear));
                     }
                     continue;
                 }
                 var pos = MapLayout.PointAt(e.Distance + 3f);
-                if (e.IsBoss) Capsule(parent, "Enemy_Boss", pos, -fwd, 1.85f, new Color(0.45f, 0.08f, 0.08f));
-                else Capsule(parent, $"Enemy_{i++:00}_{e.kind}", pos, -fwd, 1.75f, e.kind == "spear" ? EnemyColorSpear : EnemyColorSword);
+                if (e.IsBoss) set.Boss = Enemy(parent, "Enemy_Boss", "boss", e.onRoof, pos, -fwd, 1.85f, new Color(0.45f, 0.08f, 0.08f));
+                else set.Normal.Add(Enemy(parent, $"Enemy_{i++:00}_{e.kind}", e.kind, e.onRoof, pos, -fwd, 1.75f, e.kind == "spear" ? EnemyColorSpear : EnemyColorSword));
             }
+            return set;
         }
 
         static readonly Color EnemyColorSword = new Color(0.8f, 0.2f, 0.2f);
         static readonly Color EnemyColorSpear = new Color(0.2f, 0.35f, 0.8f);
 
-        // ------------------------------------------------------------------ 도구
-        static GameObject Capsule(Transform parent, string name, Vector3 feet, Vector3 facing, float height, Color color)
+        /// <summary>T07이 포위 전투·무사 참조를 연결하는 자리.</summary>
+        static partial void BuildDirectorExtra(StageDirector director, EnemySet enemies);
+
+        /// <summary>적 하나: 발 위치 루트(EnemyActor) + 몸 캡슐 + 어깨 축 + 무기 + 무기 끝(트레일).</summary>
+        static EnemyActor Enemy(Transform parent, string name, string kind, bool onRoof, Vector3 feet, Vector3 facing, float height, Color color)
         {
-            var go = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            go.name = name;
-            go.transform.SetParent(parent);
-            go.transform.position = feet + Vector3.up * height * 0.5f;
-            go.transform.rotation = Quaternion.LookRotation(new Vector3(facing.x, 0, facing.z));
-            go.transform.localScale = new Vector3(0.6f, height * 0.5f, 0.6f);
-            go.GetComponent<MeshRenderer>().sharedMaterial = Mat("Enemy_" + ColorUtility.ToHtmlStringRGB(color), color);
-            return go;
+            var root = new GameObject(name);
+            root.transform.SetParent(parent);
+            root.transform.SetPositionAndRotation(feet, Quaternion.LookRotation(new Vector3(facing.x, 0, facing.z)));
+
+            var body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            body.name = "Body";
+            body.transform.SetParent(root.transform, false);
+            body.transform.localPosition = Vector3.up * height * 0.5f;
+            body.transform.localScale = new Vector3(0.6f, height * 0.5f, 0.6f);
+            body.GetComponent<MeshRenderer>().sharedMaterial = Mat("Enemy_" + ColorUtility.ToHtmlStringRGB(color), color);
+
+            var pivot = new GameObject("WeaponPivot").transform;
+            pivot.SetParent(root.transform, false);
+            pivot.localPosition = new Vector3(0.35f, height * 0.78f, 0.1f);
+            float len = kind == "spear" ? 2.2f : 1.0f;
+            var weapon = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            weapon.name = kind == "spear" ? "Prop_weapon_spear" : "Prop_weapon_sword";
+            Object.DestroyImmediate(weapon.GetComponent<Collider>());
+            weapon.transform.SetParent(pivot, false);
+            weapon.transform.localPosition = new Vector3(0, 0, len * 0.5f);
+            weapon.transform.localScale = new Vector3(0.06f, 0.06f, len);
+            weapon.GetComponent<MeshRenderer>().sharedMaterial = Mat("Weapon", new Color(0.85f, 0.87f, 0.9f));
+            var tip = new GameObject("WeaponTip").transform;
+            tip.SetParent(pivot, false);
+            tip.localPosition = new Vector3(0, 0, len);
+
+            var ghost = GhostMat();
+            var trail = tip.gameObject.AddComponent<TrailRenderer>();
+            trail.time = 0.15f;
+            trail.startWidth = 0.12f;
+            trail.endWidth = 0f;
+            trail.sharedMaterial = ghost;
+            trail.emitting = false;
+            trail.shadowCastingMode = ShadowCastingMode.Off;
+
+            var actor = root.AddComponent<EnemyActor>();
+            actor.kind = kind;
+            actor.onRoof = onRoof;
+            actor.weaponPivot = pivot;
+            actor.weaponTip = tip;
+            actor.trail = trail;
+            actor.ghostMaterial = ghost;
+            return actor;
+        }
+
+        /// <summary>잔상·트레일용 반투명 URP Unlit 머티리얼.</summary>
+        static Material GhostMat()
+        {
+            const string path = "Assets/Art/Materials/Ghost.mat";
+            var m = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (m == null)
+            {
+                m = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+                AssetDatabase.CreateAsset(m, path);
+            }
+            m.SetFloat("_Surface", 1f);   // Transparent
+            m.SetFloat("_Blend", 0f);     // Alpha
+            m.SetFloat("_ZWrite", 0f);
+            m.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha);
+            m.SetFloat("_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
+            m.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            m.renderQueue = (int)RenderQueue.Transparent;
+            m.SetOverrideTag("RenderType", "Transparent");
+            m.SetColor("_BaseColor", new Color(0.75f, 0.9f, 1f, 0.45f));
+            EditorUtility.SetDirty(m);
+            return m;
         }
 
         /// <summary>경로 거리 [a, b] 를 따라 놓는 상자. centerY는 발 높이 기준이 아니라 월드 y(지면 0 기준).</summary>
