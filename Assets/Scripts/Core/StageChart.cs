@@ -34,6 +34,8 @@ namespace RhythmActionGame
         public string[] keys;
         /// <summary>적 등장 방식 (GDD-beta B2.3): duel(기본) | charge | ambush | chase.</summary>
         public string approach;
+        /// <summary>복선(foreshadow)이 보이는 길이 (박자, GDD-beta B2.3).</summary>
+        public int span;
 
         public bool IsObstacle => type == StageChart.TypeObstacle;
         public bool IsEnemy => type == StageChart.TypeEnemy;
@@ -43,6 +45,8 @@ namespace RhythmActionGame
         public bool IsRunEvent => IsObstacle || (IsEnemy && !IsDuel);
         /// <summary>사건 목록(EventCatalog)의 키: 장애물은 kind, 안 멈추는 적은 approach.</summary>
         public string EventKind => IsEnemy ? approach : kind;
+        /// <summary>복선: 판정 없이 먼 지붕에 적이 보임 (GDD-beta B2.3).</summary>
+        public bool IsForeshadow => type == StageChart.TypeForeshadow;
         public bool IsSurround => type == StageChart.TypeSurround;
         public bool IsBoss => type == StageChart.TypeBoss;
         public ArrowKey Key => StageChart.ParseKey(key);
@@ -71,6 +75,7 @@ namespace RhythmActionGame
         public const string TypeEnemy = "enemy";
         public const string TypeSurround = "surround";
         public const string TypeBoss = "boss";
+        public const string TypeForeshadow = "foreshadow";
         public const string DefaultStage = "stage1";
 
         public static ChartData Load(string name = DefaultStage)

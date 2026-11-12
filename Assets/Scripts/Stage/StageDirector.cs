@@ -56,6 +56,8 @@ namespace RhythmActionGame
             public int HpLost;
             public double StartBeat => Event.runBeat;
             public double EndBeat => Event.runBeat + Def.Beats;
+            public List<double> SlotOffsets = new List<double>();
+            public List<ArrowKey> SlotKeys = new List<ArrowKey>();
             public bool AllJudged { get { foreach (var r in Results) if (!r.HasValue) return false; return true; } }
         }
 
@@ -111,7 +113,11 @@ namespace RhythmActionGame
             SetState(StageState.Running);
             player.Running = true;
             ApplyMotion(Vector3.zero, Vector3.zero);
+            StageReset?.Invoke();
         }
+
+        /// <summary>ResetStage가 끝났을 때 (사건 소품 초기화용).</summary>
+        public event Action StageReset;
 
         partial void ResetCombat();
         /// <summary>전투 이벤트를 만나면 처리한다. 처리했으면 true (T06에서 구현).</summary>
@@ -140,6 +146,7 @@ namespace RhythmActionGame
             {
                 var ev = Chart.events[nextEvent];
                 double ahead = ev.runBeat - player.RunBeat;
+                if (ev.IsForeshadow) { nextEvent++; continue; }   // 복선은 판정 없음 (EventPropDirector가 보여 준다)
                 if (!ev.IsRunEvent)
                 {
                     // 멈추는 전투(대치·포위·무사): 적 위치에 도착하면 시작
@@ -173,6 +180,8 @@ namespace RhythmActionGame
             var point = MapLayout.PointAt((ev.runBeat + def.Beats * 0.5f) * GameConfig.MetersPerBeat) + Vector3.up;
             foreach (var s in run.Slots)
             {
+                run.SlotOffsets.Add(s.Offset);
+                run.SlotKeys.Add(s.Key.Value);
                 double runTarget = ev.runBeat + s.Offset;
                 run.Cues.Add(judge.Schedule(player.ClockBeatOfRun(runTarget), s.Key.Value, point, run));
             }
@@ -233,8 +242,12 @@ namespace RhythmActionGame
                 current.Started = true;
             }
             if (current == null) return;
-            if (!current.HasResult || !current.HasCategory) { ApplyMotion(Vector3.zero, Vector3.zero); return; }
-            Traversal.Offset(current.Category, current.Result, current.Side, TraversalProgress, out var pos, out var euler);
+            if (!current.HasResult) { ApplyMotion(Vector3.zero, Vector3.zero); return; }
+            Vector3 pos, euler;
+            if (current.HasCategory)
+                Traversal.Offset(current.Category, current.Result, current.Side, TraversalProgress, out pos, out euler);
+            else
+                EventMotion.Offset(current.Def.Kind, current.SlotOffsets, current.SlotKeys, current.Results, current.Def.Beats, TraversalProgress, out pos, out euler);
             ApplyMotion(pos, euler);
         }
 

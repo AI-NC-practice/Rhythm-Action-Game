@@ -69,3 +69,6 @@ BuildScript.BuildGray로 Builds/Gray/RhythmActionGame.exe(99 MB)를 만들고 sm
 
 ### 2026-11-12 B02 [beta] 사건 시스템 + 안 멈추는 적 + 이동 시간 재배치 — done
 EventCatalog에 사건 목록을 만들었다. 기존 장애물 10개 kind는 4박·판정 1개, 새 사건 8종은 GDD-beta B2.2 표대로, 돌진·매복·추격은 B2.3대로다. StageDirector는 장애물 하나 대신 사건 하나를 판정 여러 개로 예약하고 결과별로 기록한다. FAIL마다 체력을 깎되 술독·화살은 사건당 최대 1이다. 차트에 keys(판정별 키)와 approach(적 등장 방식)를 더했고, 멈춰서 싸우는 일반 적은 approach가 없거나 duel인 것뿐이다. 달리는 중 PERFECT 슬로모션은 TimeRemap으로 보이는 위치만 늦췄다가 사건 끝까지 따라잡게 했다(SlowMotionRampSeconds 0.08). 고친 것: 판정 목표 박자를 "시계 박자 + (목표 − 달린 박자)"로 계산하면 같은 프레임 안 갱신 순서 때문에 한 프레임(실제 게임에서 약 16 ms)만큼 어긋났다. 그래서 PathFollower.ClockBeatOfRun 기준으로 바꿨다. 평가 PASS(1회차), EditMode 83/83, PlayMode 50/50. 다음 작업: B03.
+
+### 2026-11-12 B03 [beta] 새 사건 8종 + 적 등장 방식 (회색 상자) — done
+EventMotion을 만들었다. 사건 안 판정마다 결과가 나오면, 그 판정부터 다음 판정까지 결과별 카메라 동작(높이·앞뒤·좌우·고개·기울기·흔들림)을 한다. EventProps는 소품을 코드로 만든다(기왓장, 밧줄과 기둥, 굴러오는 독, 차양, 대문 문짝, 화살, 지붕 틈 모서리, 깃발 줄, 복선 그림자, 적 캡슐). SceneBuilder가 스테이지 차트용 소품을 만들고, EventPropDirector는 차트에 있는데 씬에 없는 소품(시험 차트)을 실행 중에 만든다. 적 동작: 돌진은 앞에서 달려와 PERFECT면 쓰러지고, 매복은 키 반대쪽 담 뒤에서 튀어나오고, 추격은 옆 지붕에서 나란히 달린다. 조합은 rope_swing에 approach: charge를 붙인 형태다. 복선은 차트 type "foreshadow"와 span으로 정한다. 평가 PASS(1회차), EditMode 96/96, PlayMode 55/55. 다음 작업: B04.

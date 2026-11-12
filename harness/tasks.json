@@ -247,10 +247,10 @@
                                          "슬로모션 후보(GDD-beta B4의 2·3번)가 PERFECT일 때 슬로모션 요청을 냄 — 테스트",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "in_progress",
+                      "status":  "done",
                       "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "EventMotion(판정별 결과 동작), EventProp/EventProps(회색 상자 소품·적 움직임·복선), EventPropDirector(시험 차트면 실행 중 생성). 평가 PASS 1회차."
                   },
                   {
                       "id":  "B04",
@@ -268,8 +268,8 @@
                                          "SceneBuilder.BuildAll로 Game 씬 재생성, 개발자 모드 챕터 1~6 시작 지점이 새 구간과 맞음 — 테스트",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "in_progress",
+                      "attempts":  1,
                       "max_attempts":  3,
                       "notes":  ""
                   },

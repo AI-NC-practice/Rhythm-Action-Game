@@ -83,6 +83,7 @@ namespace RhythmActionGame.EditorTools
             BuildRoofs(map);
             BuildAlley(map);
             BuildObstacles(map, chart);
+            var eventProps = BuildEventProps(map, chart);
             var enemies = BuildEnemies(map, chart);
 
             // 시스템
@@ -145,6 +146,12 @@ namespace RhythmActionGame.EditorTools
             director.normalEnemies = enemies.Normal.ToArray();
             director.slowMotion = systems.AddComponent<SlowMotion>();
             BuildDirectorExtra(director, enemies);
+
+            // 새 사건·안 멈추는 적·복선 소품 진행 (GDD-beta B2)
+            var propDirector = systems.AddComponent<EventPropDirector>();
+            propDirector.director = director;
+            propDirector.player = follower;
+            propDirector.propRoot = eventProps;
 
             var boot = new GameObject("GameBootstrap").AddComponent<GameBootstrap>();
             boot.director = director;
@@ -226,6 +233,7 @@ namespace RhythmActionGame.EditorTools
             int i = 0;
             foreach (var e in chart.Obstacles)
             {
+                if (EventProps.Needs(e)) continue;   // 새 사건은 BuildEventProps
                 float d = (e.runBeat + GameConfig.ObstacleBeats * 0.5f) * GameConfig.MetersPerBeat;
                 var p = MapLayout.PointAt(d, out var fwd);
                 var root = new GameObject($"Obstacle_{i++:00}_{e.kind}").transform;
@@ -250,6 +258,16 @@ namespace RhythmActionGame.EditorTools
             }
         }
 
+        /// <summary>새 사건·안 멈추는 적·복선의 회색 상자 소품 (GDD-beta B2.2, B2.3).</summary>
+        static Transform BuildEventProps(Transform map, ChartData chart)
+        {
+            var parent = new GameObject("EventProps").transform;
+            parent.SetParent(map);
+            foreach (var e in chart.events)
+                if (EventProps.Needs(e)) EventProps.Build(e, parent, Mat);
+            return parent;
+        }
+
         public class EnemySet
         {
             public readonly List<EnemyActor> Normal = new List<EnemyActor>();
@@ -265,7 +283,7 @@ namespace RhythmActionGame.EditorTools
             int i = 0;
             foreach (var e in chart.events)
             {
-                if (e.IsObstacle) continue;
+                if (e.IsRunEvent || e.IsForeshadow) continue;   // 달리며 처리하는 사건·복선은 EventProps가 만든다
                 var stop = MapLayout.PointAt(e.Distance, out var fwd);
                 if (e.IsSurround)
                 {
