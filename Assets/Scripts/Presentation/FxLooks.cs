@@ -65,6 +65,12 @@ namespace RhythmActionGame
                     screen.Add(new ScreenPulse(ScreenChannel.Vignette, GameConfig.Fx.ParkourFailVignette, GameConfig.Fx.HitVignetteSeconds, GameConfig.Fx.Vermilion));
                     vfx.Add(new Vfx(VfxKind.Dust));
                     break;
+                case "Rewind":
+                    // B9.4 되감기: 채도 −90, 노출 −0.5 (0.8초) + 거꾸로 흐르는 먹 줄기
+                    screen.Add(new ScreenPulse(ScreenChannel.Saturation, GameConfig.RewindSaturation, GameConfig.RewindSeconds));
+                    screen.Add(new ScreenPulse(ScreenChannel.Exposure, GameConfig.RewindExposure, GameConfig.RewindSeconds));
+                    vfx.Add(new Vfx(VfxKind.RewindStreak));
+                    break;
                 case "LandPerfect":
                     vfx.Add(new Vfx(VfxKind.Dust, GameConfig.Fx.DustCount / 2));
                     break;
@@ -117,6 +123,7 @@ namespace RhythmActionGame
                 case "LandPerfect": case "LandNormal": sfx.Add(SfxKind.DustPuff); break;                        // G: 착지 먼지
                 case "LandFail": case "ParkourFail": sfx.Add(SfxKind.BodyHit); sfx.Add(SfxKind.DustPuff); break;
                 case "EventPerfectSlow": sfx.Add(SfxKind.Whoosh); sfx.Add(SfxKind.Buk); break;
+                case "Rewind": sfx.Add(SfxKind.TapeRewind); break;                                               // B9.4 되감기 소리
             }
         }
     }

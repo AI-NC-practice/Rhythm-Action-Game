@@ -123,7 +123,8 @@ namespace RhythmActionGame.Tests
         [UnityTest]
         public IEnumerator T05_ThreeFails_GameOver()
         {
-            yield return Load(8);    // 12 수레, 20 빨랫줄, 28 항아리 → 모두 무입력
+            yield return Load(8);    // 12 수레, 20 빨랫줄, 24 항아리 → 모두 무입력
+            dir.AllowDeathRewind = false;   // beta1-1: GDD-beta B9.3은 챕터 되감기가 기본. 게임 오버 경로(GDD 4.7)를 검사
             yield return AdvanceTo(12.0, 0.05);
             Assert.AreEqual(0, dir.Health.Hp);
             Assert.AreEqual(StageState.GameOver, dir.State);

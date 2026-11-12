@@ -89,7 +89,7 @@ namespace RhythmActionGame
             }
         }
 
-        static bool IsFlash(VfxKind k) => k == VfxKind.BrushBurst || k == VfxKind.InkSlash || k == VfxKind.InkX || k == VfxKind.WhiteFlash;
+        static bool IsFlash(VfxKind k) => k == VfxKind.BrushBurst || k == VfxKind.InkSlash || k == VfxKind.InkX || k == VfxKind.WhiteFlash || k == VfxKind.RewindStreak;
 
         /// <summary>
         /// 이펙트 하나를 재생한다. 섬광은 등급이 낮으면 거절될 수 있다(false).
@@ -119,7 +119,8 @@ namespace RhythmActionGame
         {
             if (flash != null && grade < flash.Grade) return false;      // 동시에 하나, 등급 높은 쪽
             float secs = kind == VfxKind.BrushBurst ? GameConfig.Fx.BrushBurstSeconds
-                       : kind == VfxKind.WhiteFlash ? GameConfig.Fx.WhiteFlashSeconds : GameConfig.Fx.InkSlashSeconds;
+                       : kind == VfxKind.WhiteFlash ? GameConfig.Fx.WhiteFlashSeconds
+                       : kind == VfxKind.RewindStreak ? GameConfig.RewindSeconds : GameConfig.Fx.InkSlashSeconds;
             Color col = tint ?? (kind == VfxKind.BrushBurst ? VfxFactory.DancheongTeal : kind == VfxKind.WhiteFlash ? Color.white : VfxFactory.Ink);
             flash = new Flash { Kind = kind, Grade = grade, Seconds = secs, Color = col };
             var rt = flashImage.rectTransform;
@@ -139,6 +140,14 @@ namespace RhythmActionGame
                     rt.sizeDelta = new Vector2(w * GameConfig.Fx.InkSlashWidth, w * GameConfig.Fx.InkSlashWidth * 0.6f);
                     rt.anchoredPosition = Vector2.zero;
                     rt.localRotation = Quaternion.identity;
+                    break;
+                case VfxKind.RewindStreak:
+                    // 화면을 가로지르는 먹 줄기 (오른쪽 → 왼쪽으로 거꾸로 흐름)
+                    flashImage.sprite = VfxFactory.InkSlash;
+                    rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+                    rt.sizeDelta = new Vector2(w * 1.2f, h * 0.5f);
+                    rt.anchoredPosition = new Vector2(w * 0.5f, 0f);
+                    rt.localRotation = Quaternion.Euler(0, 180f, 0);
                     break;
                 case VfxKind.InkX:
                     flashImage.sprite = VfxFactory.InkX;
@@ -190,7 +199,13 @@ namespace RhythmActionGame
             float alpha = GameConfig.Fx.FlashMaxAlpha * (1f - u);
             var c = flash.Color; c.a = Mathf.Min(alpha, GameConfig.Fx.FlashMaxAlpha);
             flashImage.color = c;
-            if (flash.Kind == VfxKind.BrushBurst) flashImage.rectTransform.localScale = Vector3.one * Mathf.Lerp(0.6f, 1.15f, Mathf.Sqrt(u));
+            if (flash.Kind == VfxKind.RewindStreak)
+            {
+                float w = GameConfig.UiReferenceHeight * 16f / 9f;
+                flashImage.rectTransform.anchoredPosition = new Vector2(Mathf.Lerp(w * 0.5f, -w * 0.5f, u), 0f);
+                flashImage.rectTransform.localScale = Vector3.one;
+            }
+            else if (flash.Kind == VfxKind.BrushBurst) flashImage.rectTransform.localScale = Vector3.one * Mathf.Lerp(0.6f, 1.15f, Mathf.Sqrt(u));
             else flashImage.rectTransform.localScale = Vector3.one * Mathf.Lerp(1.05f, 1f, u);
         }
 

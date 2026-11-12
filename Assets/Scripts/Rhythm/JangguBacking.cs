@@ -28,6 +28,11 @@ namespace RhythmActionGame
 
         void Awake() => EnsureInit();
 
+        // 되감기(GDD-beta B9.2)로 박자가 옮겨지면 예약을 다시 한다
+        void OnEnable() { if (clock != null) clock.Restarted += OnRestarted; }
+        void OnDisable() { if (clock != null) clock.Restarted -= OnRestarted; }
+        void OnRestarted(double beat) => ResetSchedule();
+
         void EnsureInit()
         {
             if (sources != null) return;

@@ -64,12 +64,10 @@ namespace RhythmActionGame
                 if (r == Judgement.Fail) Health.Damage();
                 return;
             }
-            // 3단계 윈드밀
+            // 3단계 윈드밀 (GDD-beta B9.2): FAIL이면 체력을 깎지 않고 첫 화살표 1마디 앞으로 되감는다
             if (r == Judgement.Fail)
             {
-                Health.Damage();
-                if (Health.IsDead) return;
-                RetryWindmill();
+                RewindWindmill();
                 return;
             }
             bool allDone = encounter.Cues.Where(c => c.Tag is CombatStep s && s.Phase == 3 && !c.Cancelled).All(c => c.Judged);
@@ -81,17 +79,19 @@ namespace RhythmActionGame
             FinishEncounter(ExecutionKind.Windmill);
         }
 
-        /// <summary>윈드밀만 다음 마디에 다시 (남은 화살표 취소).</summary>
-        void RetryWindmill()
+        /// <summary>윈드밀 FAIL (GDD-beta B9.2): 첫 화살표 1마디 앞으로 되감고, 같은 박자에 3단계를 다시 예약한다.</summary>
+        void RewindWindmill()
         {
-            foreach (var c in encounter.Cues)
-                if (c.Tag is CombatStep s && s.Phase == 3) judge.Cancel(c);
-            encounter.Cues.RemoveAll(c => c.Cancelled || (c.Tag is CombatStep s && s.Phase == 3));
+            var e = encounter;
+            var steps = e.Steps.Where(s => s.Phase == 3).ToList();
+            double first = e.StartBeat + steps.Min(s => s.OffsetBeats);
             WindmillAttempts++;
             windmillFails++;
-            double start = CombatRules.FirstTargetBeat(clock.CurrentBeat);
-            foreach (var s in CombatPatterns.WindmillSteps(0))
-                encounter.Cues.Add(judge.Schedule(start + s.OffsetBeats, s.Key, null, s));
+            BeginRewind(RewindKind.Windmill, first - GameConfig.RewindLeadBeats, () =>
+            {
+                e.Cues.RemoveAll(c => c.Tag is CombatStep s && s.Phase == 3);
+                foreach (var s in steps) e.Cues.Add(judge.Schedule(e.StartBeat + s.OffsetBeats, s.Key, null, s));
+            });
         }
 
         partial void OnEncounterFinished(Encounter e)

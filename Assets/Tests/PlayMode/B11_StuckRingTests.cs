@@ -65,23 +65,25 @@ namespace RhythmActionGame.Tests
         [UnityTest]
         public IEnumerator B11_DuelFailRetry_CancelledRingsRemoved()
         {
-            yield return Load(88);
+            // beta1-1: GDD-beta B9 — 일반 적은 다시 하지 않으므로, 판정을 지우는 경로인 무사 되감기로 검사한다
+            yield return Load(256);
+            float rt = 50f;
+            dir.RewindRealTime = () => rt;
             yield return UntilCombat();
-            var enc = dir.CurrentEncounter;
-            var first = enc.Cues.ToList();
-            // 둘째 공격 원이 떠 있는 상태에서 첫 공격 FAIL → 다음 마디부터 처음부터 (나머지 원 취소)
+            var first = dir.CurrentEncounter.Cues.ToList();
             yield return AdvanceTo(boot.clock.TimeOfBeat(first[0].TargetBeat) + 0.1);    // 첫 공격 판정 창 안, 둘째 원은 이미 등장
             Assert.IsTrue(view.Rings.Any(r => r.Cue == first[1]), "둘째 원이 떠 있음");
-            yield return Hit(first[0], null);
+            yield return AdvanceTo(boot.clock.TimeOfBeat(first[0].TargetBeat) + 0.2);    // 첫 공격 무입력 FAIL → 되감기
             yield return null;
-            Assert.IsTrue(first[1].Cancelled, "재도전으로 취소됨");
-            Assert.IsFalse(view.Rings.Any(r => first.Contains(r.Cue)), "취소된 원이 사라짐");
-            AssertNoDeadRings("일반 적 재도전");
-            // 다시 시작한 공격의 원은 정상으로 뜬다
+            Assert.IsTrue(dir.Rewinding);
+            Assert.IsFalse(view.Rings.Any(r => first.Contains(r.Cue)), "지운 판정의 원이 사라짐");
+            AssertNoDeadRings("무사 되감기");
+            rt += GameConfig.RewindSeconds + 0.01f;
+            yield return null;
             var again = dir.CurrentEncounter.Cues.Where(c => !c.Judged).ToList();
             yield return AdvanceTo(boot.clock.TimeOfBeat(again[0].TargetBeat - 1.0));
-            Assert.IsTrue(view.Rings.Any(r => r.Cue == again[0]), "재도전 원 등장");
-            AssertNoDeadRings("재도전 중");
+            Assert.IsTrue(view.Rings.Any(r => r.Cue == again[0]), "되감은 뒤 원 등장");
+            AssertNoDeadRings("되감은 뒤");
         }
 
         [UnityTest]
@@ -106,6 +108,7 @@ namespace RhythmActionGame.Tests
             yield return Load(20);                              // 24 항아리, 28 술독 ...
             yield return AdvanceTo(boot.clock.TimeOfBeat(8.5));     // 달리기 28.5박: 술독 원들이 떠 있음
             Assert.Greater(view.Rings.Count, 0, "원이 떠 있음");
+            dir.AllowDeathRewind = false;   // beta1-1: 게임 오버 경로 (챕터 되감기는 B19 테스트)
             dir.Health.Damage(); dir.Health.Damage(); dir.Health.Damage();
             yield return null;
             Assert.AreEqual(StageState.GameOver, dir.State);

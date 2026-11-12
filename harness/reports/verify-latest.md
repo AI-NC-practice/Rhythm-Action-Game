@@ -1,5 +1,5 @@
 ﻿# Unity verify report
-time: 2026-11-12 17:07:36
+time: 2026-11-12 17:47:50
 
 ## EditMode : total=126 passed=126 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
@@ -129,7 +129,7 @@ time: 2026-11-12 17:07:36
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_SpeedFx_Intensity
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_Texts_MatchGdd48
 
-## PlayMode : total=97 passed=97 failed=0 skipped=0 result=Passed
+## PlayMode : total=103 passed=103 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -190,6 +190,12 @@ time: 2026-11-12 17:07:36
   - [Passed] RhythmActionGame.Tests.B17_FlashyFxTests.B17_GameScene_AdditiveMaterialAsset
   - [Passed] RhythmActionGame.Tests.B17_FlashyFxTests.B17_Normal_And_Fail_Distinct
   - [Passed] RhythmActionGame.Tests.B17_FlashyFxTests.B17_Perfect_LightningFlareShockSparksCore
+  - [Passed] RhythmActionGame.Tests.B19_RewindTests.B19_Config_MatchGddBetaB9
+  - [Passed] RhythmActionGame.Tests.B19_RewindTests.B19_Duel_AttackFailContinues_FinisherFailPushDown
+  - [Passed] RhythmActionGame.Tests.B19_RewindTests.B19_Duel_FinisherFail_PushDown_SpeedDown_ResumesNextBar
+  - [Passed] RhythmActionGame.Tests.B19_RewindTests.B19_HpZero_RewindsToChapterStart_KeepsScore_RankDash
+  - [Passed] RhythmActionGame.Tests.B19_RewindTests.B19_RewindPresentation_PausedClock_FxSoundStreak
+  - [Passed] RhythmActionGame.Tests.B19_RewindTests.B19_Windmill_Fail_RewindsToFirstArrowMinusOneBar_NoHpLoss
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_ChapterStartBeats_MatchSections
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(1)
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(4)

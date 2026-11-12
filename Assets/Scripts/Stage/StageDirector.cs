@@ -108,6 +108,7 @@ namespace RhythmActionGame
             pending.Clear();
             current = null;
             LastRun = null;
+            Rewinding = false;
             Health.Reset();
             nextEvent = 0;
             while (nextEvent < Chart.events.Length && Chart.events[nextEvent].runBeat < runBeat) nextEvent++;
@@ -135,7 +136,9 @@ namespace RhythmActionGame
 
         void Update()
         {
-            if (Chart == null || clock == null || !clock.IsRunning) return;
+            if (Chart == null || clock == null) return;
+            if (Rewinding) { UpdateRewind(); return; }   // 되감기 연출 중 (GDD-beta B9.4)
+            if (!clock.IsRunning) return;
             if (State == StageState.GameOver || State == StageState.Cleared) return;
             if (State == StageState.Running) ScheduleUpcoming();
             UpdateTraversal();
@@ -274,6 +277,7 @@ namespace RhythmActionGame
 
         void OnDied()
         {
+            if (AllowDeathRewind) { RewindToChapter(); return; }   // GDD-beta B9.3: 게임 오버 대신 챕터 처음으로
             SetState(StageState.GameOver);
             if (player != null) player.Running = false;
             if (judge != null) judge.ClearAll();

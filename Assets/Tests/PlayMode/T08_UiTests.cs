@@ -204,6 +204,7 @@ namespace RhythmActionGame.Tests
         public IEnumerator T08_Result_GameOver_RankDash()
         {
             yield return LoadGame();
+            boot.director.AllowDeathRewind = false;   // beta1-1: GDD-beta B9.3 기본은 챕터 되감기. 게임 오버 결과 화면(GDD 4.8)을 검사
             boot.director.Health.Damage();
             boot.director.Health.Damage();
             boot.director.Health.Damage();

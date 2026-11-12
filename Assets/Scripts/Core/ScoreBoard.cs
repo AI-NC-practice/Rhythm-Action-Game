@@ -38,6 +38,7 @@ namespace RhythmActionGame
         public void Reset()
         {
             Perfect = Normal = Fail = Score = Combo = MaxCombo = 0;
+            Rewound = false;
             MaxSpeed = GameConfig.SpeedStart;
             Changed?.Invoke();
         }
@@ -55,7 +56,10 @@ namespace RhythmActionGame
             return "C";
         }
 
-        public string Rank(bool cleared) => Rank(cleared, Perfect, Normal, Fail);
+        /// <summary>체력 0으로 챕터 처음으로 되감은 적이 있는지 (GDD-beta B9.3). 있으면 클리어해도 랭크 "-".</summary>
+        public bool Rewound { get; set; }
+
+        public string Rank(bool cleared) => Rewound ? "-" : Rank(cleared, Perfect, Normal, Fail);
     }
 
     /// <summary>화면 문구 (GDD 4.8). 테스트가 문구를 그대로 비교한다.</summary>

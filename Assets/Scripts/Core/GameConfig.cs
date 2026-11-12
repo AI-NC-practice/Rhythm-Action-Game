@@ -264,6 +264,15 @@ namespace RhythmActionGame
         public const int FxSparksNormal = 8;
         public const float FxSparkSpeedPx = 900f;
 
+        // ---------------- GDD-beta B9 실패 규칙과 되감기 ----------------
+        /// <summary>되감기 연출 길이 (실제 초). 이 동안 박자 시계를 멈춘다.</summary>
+        public const float RewindSeconds = 0.8f;
+        /// <summary>되감는 지점: 다시 할 첫 판정보다 이만큼 앞 (박, 1마디).</summary>
+        public const double RewindLeadBeats = 4.0;
+        /// <summary>되감기 화면: 채도 −90, 노출 −0.5.</summary>
+        public const float RewindSaturation = -90f;
+        public const float RewindExposure = -0.5f;
+
         // ---------------- GDD-beta B1.4 판정 화면 ----------------
         /// <summary>판정 중 노출 (URP Color Adjustments postExposure, EV).</summary>
         public const float JudgeExposure = -0.4f;
@@ -391,6 +400,8 @@ namespace RhythmActionGame
             // G. 파쿠르 FAIL (착지·충돌): 흔들림 0.5 + 붉은 테두리 0.3
             public static readonly FxPreset ParkourFail = P("ParkourFail", 2, trauma: 0.5f, hz: 18f, height: -0.2f, rise: 0.03f, hold: 0.07f, release: 0.35f);
             public const float ParkourFailVignette = 0.3f;
+            // B9.4 되감기: 카메라가 뒤로 0.3 m 물러났다 돌아옴 (0.8초)
+            public static readonly FxPreset Rewind = P("Rewind", 4, kick: 0.3f, pitch: -3f, rise: 0.2f, hold: 0.3f, release: 0.3f);
             /// <summary>적 공격 예고: 목표 박자 몇 박 전에 (휘두르기 직전, 제안서 2장 A).</summary>
             public const float AttackWarnLeadBeats = 0.5f;
 
@@ -428,7 +439,7 @@ namespace RhythmActionGame
             public static readonly FxPreset[] All =
             {
                 AttackWarn, ParryPerfect, DodgePerfect, ParryPerfectFinale, DefendNormal, Hit, Execution, ExecutionKick,
-                SurroundTurn, Simultaneous, SimultaneousPerfect, WindmillArrow, WindmillFinish, JumpPerfect, LandPerfect, LandNormal, LandFail, EventPerfectSlow, ParkourFail,
+                SurroundTurn, Simultaneous, SimultaneousPerfect, WindmillArrow, WindmillFinish, JumpPerfect, LandPerfect, LandNormal, LandFail, EventPerfectSlow, ParkourFail, Rewind,
             };
         }
 

@@ -104,29 +104,28 @@ namespace RhythmActionGame.Tests
         [UnityTest]
         public IEnumerator T06_DefenseFail_LosesHp_RetriesFromFirstAttackNextBar()
         {
+            // beta1-1: GDD-beta B9.1 — 공격 FAIL은 체력 −1·속도 ×0.8 후 다음 공격으로 넘어간다 (다시 하지 않음)
             yield return Load(88);
             yield return UntilCombat();
             for (int i = 0; i < 4; i++) boot.clock.ApplyJudgement(Judgement.Perfect);   // 1.20배
             var enc = dir.CurrentEncounter;
-            double firstTarget = enc.Cues[0].TargetBeat;
+            var first = enc.Cues.ToList();
             yield return Hit(0, null);                       // 무입력 → FAIL
             Assert.AreEqual(2, dir.Health.Hp, "체력 −1");
             Assert.AreEqual(1.0f, boot.clock.SpeedMultiplier, 1e-4f, "1.2 × 0.8 = 0.96 → 1.00");
-            Assert.AreEqual(2, enc.Attempts, "재도전");
-            Assert.AreEqual(3, enc.Cues.Count);
-            Assert.AreEqual(ArrowKey.Down, enc.Cues[0].Key, "첫 공격부터 다시");
-            Assert.Greater(enc.Cues[0].TargetBeat, firstTarget);
-            Assert.AreEqual(0.0, (enc.Cues[0].TargetBeat - 2.0) % 4.0, 1e-6, "다음 마디에 원 등장");
-            Assert.AreEqual(CombatRules.FirstTargetBeat(firstTarget + 0.15 * 2), enc.Cues[0].TargetBeat, 1e-6);
-            yield return Hit(0, 0.0);
-            yield return Hit(1, 0.1);
-            yield return Hit(2, 0.1);                        // NORMAL 마무리
+            Assert.AreEqual(1, enc.Attempts, "다시 하지 않음");
+            Assert.IsFalse(first[1].Cancelled, "다음 공격 그대로");
+            Assert.IsFalse(first[2].Cancelled, "마무리 그대로");
+            yield return Hit(1, 0.0);
+            yield return Hit(2, 0.12);                       // NORMAL 마무리
             Assert.AreEqual(ExecutionKind.PushDown, enc.Execution);
+            Assert.IsTrue(enc.Done);
         }
 
         [UnityTest]
         public IEnumerator T06_FinisherFail_RetriesWholeEnemy()
         {
+            // beta1-1: GDD-beta B9.1 — 마무리 FAIL은 체력 −1 + 엉겁결에 밀쳐 쓰러뜨리기로 끝나고 다음 마디에 다시 달린다
             yield return Load(88);
             yield return UntilCombat();
             var enc = dir.CurrentEncounter;
@@ -134,9 +133,13 @@ namespace RhythmActionGame.Tests
             yield return Hit(1, 0.0);
             yield return Hit(2, null);                       // 마무리 무입력
             Assert.AreEqual(2, dir.Health.Hp);
-            Assert.AreEqual(2, enc.Attempts);
-            Assert.IsFalse(enc.Done);
-            Assert.AreEqual(ArrowKey.Down, enc.Cues[0].Key);
+            Assert.AreEqual(1, enc.Attempts, "다시 하지 않음");
+            Assert.IsTrue(enc.Done, "전투 끝");
+            Assert.AreEqual(ExecutionKind.PushDown, enc.Execution, "밀쳐 쓰러뜨리기");
+            StringAssert.StartsWith("Defeated_PushDown", dir.normalEnemies[0].State);
+            double resume = enc.ResumeBeat;
+            yield return AdvanceTo(boot.clock.TimeOfBeat(resume) + 0.1);
+            Assert.AreEqual(StageState.Running, dir.State, "다음 마디에 다시 달림");
         }
 
         [UnityTest]

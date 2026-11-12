@@ -26,6 +26,7 @@ namespace RhythmActionGame.Tests
             boot.judge.readKeyboard = false;
             boot.judge.OffsetSource = () => 0f;
             dir.slowMotion.RealTime = () => realTime;
+            dir.RewindRealTime = () => realTime;
             dir.SpinDeltaTime = () => 0.05f;     // 카메라 연출 1프레임 = 0.05초
             boot.StartRun(startRunBeat);
             yield return null;
@@ -133,21 +134,34 @@ namespace RhythmActionGame.Tests
         [UnityTest]
         public IEnumerator T07_Windmill_Fail_RetriesOnlyPhase3NextBar()
         {
+            // beta1-1: GDD-beta B9.2 — 윈드밀 FAIL은 체력을 깎지 않고, 곡·박자 시계를 첫 화살표 1마디 앞으로 되감아 3단계만 다시
             yield return Load(181);   // beta1-1: 180 낮은 담 사건(GDD-beta B3 차트)을 건너뛴다
             yield return UntilCombat();
             var enc = dir.CurrentEncounter;
             var cues = enc.Cues.ToList();
             foreach (var c in cues.Where(c => PhaseOf(c) != 3)) yield return Hit(c, 0.0);
             var wind = cues.Where(c => PhaseOf(c) == 3).ToList();
+            double firstWind = wind[0].TargetBeat;
+            int hp = dir.Health.Hp;
             yield return Hit(wind[0], 0.0);
             yield return Hit(wind[1], null);                 // 윈드밀 FAIL
-            Assert.AreEqual(2, dir.Health.Hp);
+            Assert.AreEqual(hp, dir.Health.Hp, "체력 그대로");
+            Assert.IsTrue(dir.Rewinding, "되감기 중");
+            Assert.AreEqual(RewindKind.Windmill, dir.LastRewind);
             Assert.AreEqual(2, dir.WindmillAttempts);
-            Assert.IsFalse(enc.Done);
+            Assert.AreEqual(0, boot.judge.Cues.Count(c => !c.Judged), "남은 판정 모두 지움");
+            double paused = boot.clock.CurrentBeat;
+            now += 0.5;
+            yield return null;
+            Assert.AreEqual(paused, boot.clock.CurrentBeat, 1e-9, "되감는 동안 박자 시계 멈춤");
+            realTime += GameConfig.RewindSeconds + 0.01f;
+            yield return null;
+            Assert.IsFalse(dir.Rewinding);
+            Assert.AreEqual(firstWind - 4.0, boot.clock.CurrentBeat, 0.05, "첫 화살표 1마디 앞으로 되감음");
             var retry = enc.Cues.Where(c => !c.Judged && PhaseOf(c) == 3).ToList();
             Assert.AreEqual(4, retry.Count, "윈드밀 4개만 다시");
+            Assert.AreEqual(firstWind, retry[0].TargetBeat, 1e-6, "같은 박자에 다시");
             Assert.AreEqual(0, enc.Cues.Count(c => !c.Judged && PhaseOf(c) != 3), "1·2단계는 다시 하지 않음");
-            Assert.AreEqual(0.0, (retry[0].TargetBeat - 2.0) % 4.0, 1e-6, "다음 마디에 등장");
             foreach (var c in retry) yield return Hit(c, 0.0);
             Assert.IsTrue(enc.Done);
             Assert.IsTrue(dir.surroundEnemies.All(e => e.Defeated));
@@ -195,17 +209,27 @@ namespace RhythmActionGame.Tests
         [UnityTest]
         public IEnumerator T07_Boss_Fail_RetriesFromFirstAttack()
         {
+            // beta1-1: GDD-beta B9.2 — 무사 FAIL은 체력을 깎지 않고 첫 공격 1마디 앞으로 되감아 처음부터 다시
             yield return Load(256);
             yield return UntilCombat();
             var enc = dir.CurrentEncounter;
             var cues = enc.Cues.ToList();
+            double first = cues[0].TargetBeat;
             yield return Hit(cues[0], 0.0);
             yield return Hit(cues[1], 0.0);
             yield return Hit(cues[2], null);
-            Assert.AreEqual(2, dir.Health.Hp);
+            Assert.AreEqual(3, dir.Health.Hp, "체력 그대로");
+            Assert.IsTrue(dir.Rewinding);
+            Assert.AreEqual(RewindKind.Boss, dir.LastRewind);
+            realTime += GameConfig.RewindSeconds + 0.01f;
+            yield return null;
+            Assert.AreEqual(first - 4.0, boot.clock.CurrentBeat, 0.05, "첫 공격 1마디 앞");
             Assert.AreEqual(2, enc.Attempts);
-            Assert.AreEqual(6, enc.Cues.Count(c => !c.Judged));
+            Assert.AreEqual(6, enc.Cues.Count(c => !c.Judged), "공격 5 + 마무리 다시");
+            Assert.AreEqual(first, enc.Cues[0].TargetBeat, 1e-6, "같은 박자에 다시");
             Assert.AreEqual(StageState.Combat, dir.State);
+            foreach (var c in enc.Cues.ToList()) yield return Hit(c, 0.0);
+            Assert.AreEqual(StageState.Cleared, dir.State, "되감은 뒤 성공하면 클리어");
         }
     }
 }

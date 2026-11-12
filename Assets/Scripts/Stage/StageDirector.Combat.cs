@@ -151,9 +151,16 @@ namespace RhythmActionGame
 
             if (r == Judgement.Fail)
             {
+                // GDD-beta B9.2: 무사는 체력을 깎지 않고 첫 공격 1마디 앞으로 되감는다
+                if (encounter.Event.IsBoss) { RewindBoss(); return; }
+                // GDD-beta B9.1: 일반 적은 체력 −1 후 다음 공격으로 (다시 하지 않음). 마무리 FAIL은 밀쳐 쓰러뜨리기로 끝
                 Health.Damage();
-                if (Health.IsDead) return;
-                RetryEncounter();
+                if (Health.IsDead || Rewinding || encounter == null) return;
+                if (step.Kind == CombatStepKind.Finisher)
+                {
+                    DefeatEnemies(ExecutionKind.PushDown);
+                    FinishEncounter(ExecutionKind.PushDown);
+                }
                 return;
             }
             if (step.Kind == CombatStepKind.Finisher)
@@ -166,6 +173,19 @@ namespace RhythmActionGame
         }
 
         partial void OnSpecialStepJudged(CombatStep step, Judgement r, ref bool handled);
+
+        /// <summary>무사 FAIL (GDD-beta B9.2): 첫 공격 1마디 앞으로 되감고, 같은 박자에 공격을 처음부터 다시 예약한다.</summary>
+        void RewindBoss()
+        {
+            var e = encounter;
+            if (e.Actors != null) foreach (var a in e.Actors) if (a != null && !a.Defeated) a.EndAttack(Judgement.Fail);
+            BeginRewind(RewindKind.Boss, e.StartBeat - GameConfig.RewindLeadBeats, () =>
+            {
+                e.Attempts++;
+                e.Cues.Clear();
+                foreach (var s in e.Steps) e.Cues.Add(judge.Schedule(e.StartBeat + s.OffsetBeats, s.Key, AttackPoint(s), s));
+            });
+        }
 
         /// <summary>남은 판정을 취소하고 다음 마디부터 첫 공격부터 다시.</summary>
         public void RetryEncounter()

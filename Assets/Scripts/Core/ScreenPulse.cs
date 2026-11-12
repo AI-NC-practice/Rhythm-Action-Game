@@ -44,5 +44,6 @@ namespace RhythmActionGame
         Dust,          // 흙먼지 (월드 파티클)
         TileDebris,    // 기왓장 파편 (월드 파티클)
         HanjiDebris,   // 한지 조각 (월드 파티클)
+        RewindStreak,  // 되감기: 화면을 가로지르며 거꾸로 흐르는 먹 줄기 (GDD-beta B9.4)
     }
 }

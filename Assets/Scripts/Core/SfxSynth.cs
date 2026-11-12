@@ -19,6 +19,7 @@ namespace RhythmActionGame
         UiTick,       // UI
         JangguKung,   // 장구 궁편 (낮은 소리) — 반주
         JangguDeok,   // 장구 채편 (높은 소리) — 반주
+        TapeRewind,   // 되감기 (GDD-beta B9.4)
     }
 
     /// <summary>
@@ -48,6 +49,7 @@ namespace RhythmActionGame
                 case SfxKind.UiTick: return 0.04f;
                 case SfxKind.JangguKung: return 0.3f;
                 case SfxKind.JangguDeok: return 0.1f;
+                case SfxKind.TapeRewind: return 0.8f;
                 default: return 0.2f;
             }
         }
@@ -137,6 +139,17 @@ namespace RhythmActionGame
                         phase += 2.0 * Math.PI * f / SampleRate;
                         v = Mathf.Exp(-t / 0.12f) * (float)Math.Sin(phase);
                         if (t < 0.003f) v += Noise() * 0.5f;
+                        break;
+                    }
+                    case SfxKind.TapeRewind:
+                    {
+                        // 테이프를 거꾸로 감는 소리: 높아지며 빨라지는 떨림 + 바람 노이즈, 끝에 뚝 끊김
+                        float u = t / Seconds(k);
+                        float f = Mathf.Lerp(180f, 1400f, u * u);
+                        phase += 2.0 * Math.PI * f / SampleRate;
+                        lp += 0.12f * (Noise() - lp);
+                        float flutter = 0.6f + 0.4f * Mathf.Sin(2f * Mathf.PI * Mathf.Lerp(8f, 30f, u) * t);
+                        v = ((float)Math.Sin(phase) * 0.5f + lp * 2f) * flutter * Mathf.Min(1f, t / 0.03f) * (u < 0.92f ? 1f : (1f - u) / 0.08f);
                         break;
                     }
                     case SfxKind.JangguDeok:

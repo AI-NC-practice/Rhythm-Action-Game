@@ -29,12 +29,20 @@ namespace RhythmActionGame
             if (judge != null) judge.clock = clock;
             if (player != null) player.clock = clock;
             if (ringView != null) ringView.Bind(judge, clock, playerCamera);
-            if (director != null) { director.clock = clock; director.judge = judge; director.player = player; }
+            if (director != null) { director.clock = clock; director.judge = judge; director.player = player; director.ChapterRewindRequested += OnChapterRewind; }
+        }
+
+        /// <summary>체력 0 → 챕터 처음으로 되감기 (GDD-beta B9.3): 점수는 이어 가고, 랭크는 "-"로 남긴다.</summary>
+        void OnChapterRewind(double runBeat)
+        {
+            StartRun(runBeat, keepScore: true);
+            if (score != null) score.Board.Rewound = true;
         }
 
         void OnDestroy()
         {
             if (Instance == this) Instance = null;
+            if (director != null) director.ChapterRewindRequested -= OnChapterRewind;
         }
 
         /// <summary>다음 Game 씬 시작 위치(달리기 박자). 개발자 모드 챕터 이동이 쓴다. 한 번 쓰면 0으로 돌아간다.</summary>
@@ -49,11 +57,14 @@ namespace RhythmActionGame
         }
 
         /// <summary>runBeat 위치(달리기 박자)부터 스테이지를 시작한다. 박자 시계는 0박부터.</summary>
-        public void StartRun(double runBeat = 0)
+        public void StartRun(double runBeat = 0) => StartRun(runBeat, keepScore: false);
+
+        /// <summary>keepScore면 점수·판정 수를 이어 간다 (챕터 되감기).</summary>
+        public void StartRun(double runBeat, bool keepScore)
         {
             Time.timeScale = 1f;
             AudioListener.volume = GameSettings.Volume / 100f;
-            if (score != null) score.Board.Reset();
+            if (score != null && !keepScore) score.Board.Reset();
             if (presentation != null) presentation.ResetAll();
             player.ResetTo(runBeat);
             clock.ResetSpeed();

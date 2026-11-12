@@ -85,6 +85,24 @@ namespace RhythmActionGame
             if (music != null) music.UnPause();
         }
 
+        /// <summary>
+        /// 되감기 (GDD-beta B9.2): 지금 멈춰 있든 아니든 beat 박자부터 다시 진행한다. 속도 배율은 그대로, 음악도 같은 위치로 옮긴다.
+        /// </summary>
+        public void RestartAt(double beat)
+        {
+            timeline.Start(Now, beat);
+            timeline.SetSpeed(Speed.Speed, Now);
+            if (music != null && music.clip != null)
+            {
+                music.time = (float)(beat * GameConfig.SecondsPerBeat) % music.clip.length;
+                music.Play();
+            }
+            Restarted?.Invoke(beat);
+        }
+
+        /// <summary>RestartAt으로 박자가 옮겨졌을 때 (반주 예약을 다시 하도록).</summary>
+        public event Action<double> Restarted;
+
         public void StopClock()
         {
             timeline.Stop();

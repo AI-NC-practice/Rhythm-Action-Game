@@ -539,10 +539,10 @@
                                          "기존 재도전 테스트(T06, T07, B11)를 GDD-beta B9 규칙으로 바꾸고 근거 주석을 단다",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "in_progress",
-                      "attempts":  1,
+                      "status":  "done",
+                      "attempts":  2,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "일반 적은 다음 공격·마무리 FAIL은 PushDown, 무사·윈드밀 되감기(체력 그대로, 1마디 앞), 체력 0 챕터 되감기(점수 유지, 랭크 -), 되감기 연출 0.8초. 1회차 FAIL(지운 원이 같은 프레임에 남음) → 숨긴 뒤 Destroy로 수정. 평가 PASS 2회차."
                   },
                   {
                       "id":  "B20",
@@ -559,8 +559,8 @@
                                          "SceneBuilder.BuildAll로 Game 씬 재생성",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "in_progress",
+                      "attempts":  1,
                       "max_attempts":  3,
                       "notes":  ""
                   },
