@@ -1,7 +1,7 @@
 ﻿# Unity verify report
-time: 2026-11-12 10:02:02
+time: 2026-11-12 10:05:40
 
-## EditMode : total=64 passed=64 failed=0 skipped=0 result=Passed
+## EditMode : total=68 passed=68 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_BeatAndSpeed_MatchGdd41
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_Judge_MatchGdd42
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_ObstacleAndCombat_MatchGdd44To46
@@ -66,8 +66,12 @@ time: 2026-11-12 10:02:02
   - [Passed] RhythmActionGame.Tests.T06_CombatRulesTests.T06_Execution_ByPlaceAndResult
   - [Passed] RhythmActionGame.Tests.T06_CombatRulesTests.T06_NextBar
   - [Passed] RhythmActionGame.Tests.T06_CombatRulesTests.T06_NormalEnemy_TwoAttacksTwoBeatsApart_ThenFinisherUp
+  - [Passed] RhythmActionGame.Tests.T07_PatternTests.T07_Boss_FiveAttacks_Mixed1And2Beats_ThenFinisher
+  - [Passed] RhythmActionGame.Tests.T07_PatternTests.T07_Surround_Phase1_FiveSequential_OneBeatApart
+  - [Passed] RhythmActionGame.Tests.T07_PatternTests.T07_Surround_Phase2_ThreeSimultaneous_OneCueEach
+  - [Passed] RhythmActionGame.Tests.T07_PatternTests.T07_Surround_Phase3_FourArrowsHalfBeatApart
 
-## PlayMode : total=18 passed=18 failed=0 skipped=0 result=Passed
+## PlayMode : total=25 passed=25 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Font_HasJudgeGlyphs
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Fx_GrayAndZoom_EnterAndExit
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Label_ShownFor0_6Seconds
@@ -86,5 +90,12 @@ time: 2026-11-12 10:02:02
   - [Passed] RhythmActionGame.Tests.T06_CombatTests.T06_FinisherFail_RetriesWholeEnemy
   - [Passed] RhythmActionGame.Tests.T06_CombatTests.T06_RoofPerfect_KickExecution_SlowMotionDoesNotAffectBeat
   - [Passed] RhythmActionGame.Tests.T06_CombatTests.T06_StopsAtEnemy_AllPerfect_DisarmOnGround_ResumesNextBar
+  - [Passed] RhythmActionGame.Tests.T07_SurroundBossTests.T07_Boss_Fail_RetriesFromFirstAttack
+  - [Passed] RhythmActionGame.Tests.T07_SurroundBossTests.T07_Boss_FiveAttacks_ThenFinisher_StageClear
+  - [Passed] RhythmActionGame.Tests.T07_SurroundBossTests.T07_Surround_AllSuccess_Windmill_DefeatsAll_SlowMo_Spin360
+  - [Passed] RhythmActionGame.Tests.T07_SurroundBossTests.T07_Surround_CameraTurnsToAttacker_In0_2s_AndDropsForSimultaneous
+  - [Passed] RhythmActionGame.Tests.T07_SurroundBossTests.T07_Surround_Layout_FiveEnemiesRadius4
+  - [Passed] RhythmActionGame.Tests.T07_SurroundBossTests.T07_Surround_Phase1And2Fail_LoseHp_ButContinue
+  - [Passed] RhythmActionGame.Tests.T07_SurroundBossTests.T07_Windmill_Fail_RetriesOnlyPhase3NextBar
 
 OVERALL: PASS
