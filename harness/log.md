@@ -45,3 +45,14 @@ BuildScript.BuildGray로 Builds/Gray/RhythmActionGame.exe(99 MB)를 만들고 sm
 
 ### 2026-11-12 [사용자 요청] 개발자 모드: 숫자 키 챕터 이동 — 추가
 숫자 키 1~6(키패드 포함)을 누르면 해당 챕터(MapLayout.Sections: 0/56/108/176/196/252박) 시작 지점에서 Game 씬을 새로 연다. 적, 점수, 체력은 모두 초기화된다. 타이틀 화면, 일시정지 중, 결과 화면에서도 동작한다. 화면 위쪽 가운데에 "[개발자 모드] … 현재 N. 챕터 이름"이 노란 글씨로 표시된다. Assets/Scripts/Dev/DevMode.cs는 `#if UNITY_EDITOR || RAG_DEV` 안에 있다. BuildGray만 RAG_DEV를 정의하므로 BuildFinal에서는 코드째 빠진다. GameBootstrap.PendingStartBeat로 시작 위치를 넘긴다. PlayMode 테스트 DevModeTests 4개를 추가했다. EditMode 73/73, PlayMode 37/37. 회색 상자 빌드를 다시 만들었고 smoke-test를 통과했다. tasks.json의 작업은 아니며 T09는 계속 needs_user다.
+
+### 2026-11-12 T09 [사용자] 회색 상자 플레이 확인 — done
+사용자 피드백 네 가지를 받았다. ① 장애물 간격이 너무 멀고 박진감이 떨어진다. ② 이전 판정 문구가 다음 화살표를 가린다. ③ 화살표가 화면 가장자리나 밖에서 나온다. ④ 세키로식 역동적 전투 연출(카메라, Hit Stop, 슬로모션, VFX, 사운드, 화면 효과)과 로스트아크 카멘 "대격돌"식 판정 이펙트를 참고하고 싶다.
+
+### 2026-11-12 [브랜치] beta1-1 시작 — main은 T09까지에서 멈춤
+사용자 결정에 따라 피드백 개선과 연출 강화는 main이 아니라 새 브랜치 `beta1-1`에서 진행한다. main은 T09 완료 상태로 두고, T10 이후 작업은 beta 결과를 보고 다시 정한다. 사용자 결정 사항은 다음과 같다.
+- docs/GDD.md는 어느 브랜치에서도 수정하지 않는다. beta1-1에는 보충 문서 docs/GDD-beta.md를 두고, 사용자가 승인한 변경만 적는다. beta1-1에서는 보충 문서가 GDD보다 우선한다.
+- 대격돌은 연출만 가져온다. 게임 규칙(연속 입력 구간)은 추가하지 않는다.
+- 회색 상자 위에서 판정 UI 개선, 템포, 카메라·Hit Stop·슬로모션·VFX·화면 효과를 먼저 한다. 애니메이션의 무게감은 모델(T10~T12)이 들어온 뒤에 한다.
+- 효과음은 무료 도구로 만든다. 도구 선택은 사용자가 정한다.
+- 순서: 제안 문서 docs/proposals/dynamic-presentation.md 작성 → 사용자 승인 → GDD-beta.md와 작업 목록에 반영 → 구현.
