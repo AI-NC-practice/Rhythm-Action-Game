@@ -367,17 +367,110 @@
                                          "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과 후 exe 경로 안내",
                                          "사용자가 개발자 모드로 챕터별 플레이 후 템포·연출·가독성 피드백을 줌, 수정 작업은 사용자 승인 후 추가"
                                      ],
-                      "status":  "needs_user",
+                      "status":  "done",
                       "attempts":  1,
                       "max_attempts":  1,
-                      "notes":  "Builds/Gray/RhythmActionGame.exe 다시 빌드(99 MB) + smoke-test 통과(타이틀 12초, -startGame 게임 씬 25초 오류 없음). 사용자 플레이 피드백 대기."
+                      "notes":  "Builds/Gray/RhythmActionGame.exe 다시 빌드(99 MB) + smoke-test 통과(타이틀 12초, -startGame 게임 씬 25초 오류 없음). 사용자 플레이 피드백 대기. 피드백 받음(2026-11-12): ① 화살표가 안 사라지고 남는 구간 ② 화면 타이밍과 실제 판정이 어긋나고 어려움 ③ 키가 안 눌린 느낌 ④ 원·판정 반응 이펙트가 약함. 수정 작업 B11~B15 추가(사용자 승인)."
+                  },
+                  {
+                      "id":  "B11",
+                      "title":  "[beta] 남는 화살표 버그",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "B09"
+                                     ],
+                      "acceptance":  [
+                                         "취소된 판정(전투 재도전, 윈드밀 재도전)의 판정 원이 화면에서 사라짐 — PlayMode 테스트(일반 적 FAIL 재도전, 윈드밀 FAIL 재도전)",
+                                         "JudgeSystem.ClearAll(게임 오버, 다시 시작, 챕터 이동) 뒤 남는 판정 원이 없음 — 테스트",
+                                         "판정이 끝난(Judged) 원은 어떤 경로로든 다음 프레임까지 화면에서 사라짐 — 테스트",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "B12",
+                      "title":  "[beta] 타이밍 정확도 (부드러운 박자 시계 + 입력 시각)",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "B11"
+                                     ],
+                      "acceptance":  [
+                                         "GDD-beta B8.1: 박자 시계가 오디오 시계(dspTime)를 실제 시간으로 보간해 매 프레임 부드럽게 진행, 뒤로 가지 않음, dspTime과의 차이는 DSP 버퍼 한 개 길이 이하 — EditMode 테스트(주입한 dsp·실제 시간)",
+                                         "GDD-beta B8.1: 키 입력은 Input System 이벤트 시각(실제로 누른 시각)을 박자 시계 시각으로 바꿔 판정 — 테스트(프레임보다 앞선 입력 시각으로 PERFECT 판정)",
+                                         "GDD-beta B8.1: 화면 표시 지연 보정(판정 원을 보정값만큼 앞당겨 그림) 기본값이 GameConfig에 있고 판정 창(±60/±150 ms)은 그대로 — 테스트",
+                                         "음악·반주 예약(PlayScheduled)은 실제 dspTime 기준 그대로 — 기존 B08 테스트 통과",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "B13",
+                      "title":  "[beta] 입력 반응 표시",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "B12"
+                                     ],
+                      "acceptance":  [
+                                         "GDD-beta B8.2: 방향키를 누를 때마다 가장 이른 판정 원이 반응(눌림 펄스) — 테스트",
+                                         "GDD-beta B8.2: 목표 −300 ms보다 일찍 눌러 무시된 입력은 원 아래에 \"빠름\" 표시 (판정·점수 변화 없음) — 테스트",
+                                         "GDD-beta B8.2: 원이 없을 때 누른 키는 화면 아래 가운데에 작은 키 표시 — 테스트",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "B14",
+                      "title":  "[beta] 판정 원 이펙트",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "B13"
+                                     ],
+                      "acceptance":  [
+                                         "GDD-beta B8.3: 모든 판정에서 원 자리에 반응 이펙트 — PERFECT: 원이 터지며 커짐 + 붓획 조각 + 금빛, NORMAL: 작은 청록 고리, FAIL: 붉은 원이 흔들리며 깨짐 — 결과별로 다름을 테스트",
+                                         "판정 원 이펙트는 판정 문구·화면 이펙트 층(Canvas 10)에 있고 다음 판정 원(Canvas 20)을 가리지 않음, 0.35초 안에 사라짐 — 테스트",
+                                         "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "B15",
+                      "title":  "[사용자] beta 재확인",
+                      "type":  "human",
+                      "depends_on":  [
+                                         "B14"
+                                     ],
+                      "acceptance":  [
+                                         "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과 후 exe 경로 안내",
+                                         "사용자가 플레이 후 남는 화살표·타이밍·입력 반응·판정 이펙트 피드백을 줌, 판정 창 조정 여부를 정함"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  1,
+                      "notes":  ""
                   },
                   {
                       "id":  "B10",
                       "title":  "[사용자+Claude] Suno 음악 생성·적용",
                       "type":  "human",
                       "depends_on":  [
-                                         "B09"
+                                         "B15"
                                      ],
                       "acceptance":  [
                                          "사용자가 인앱 브라우저에서 Suno에 로그인, Claude가 프롬프트 작성·생성 (국악 퓨전, 120 BPM, 보컬 없음, 약 2분 30초)",
