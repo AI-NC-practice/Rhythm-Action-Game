@@ -30,7 +30,7 @@ description: harness/tasks.json의 작업을 순서대로 실행하는 메인 �
 
 ## 3. 작업 시작
 - status를 `in_progress`로, `attempts`를 1 올려서 저장한다.
-- `docs/GDD.md`에서 이 작업과 관련된 절을 읽는다.
+- `docs/GDD.md`에서 이 작업과 관련된 절을 읽는다. `docs/GDD-beta.md`가 있으면 그 문서가 우선한다.
 - 작업의 `skill` 필드에 적힌 스킬(`unity-feature`, `varco3d-asset`, `blender-tools`) 절차를 따른다.
 
 ## 4. 자체 점검

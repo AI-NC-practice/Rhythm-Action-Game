@@ -10,7 +10,7 @@ model: sonnet
 
 ## 절차
 1. `harness/tasks.json`에서 받은 작업 ID의 `acceptance`를 읽는다.
-2. `docs/GDD.md`에서 관련 절을 읽는다. 수치는 GDD가 기준이다.
+2. `docs/GDD.md`에서 관련 절을 읽는다. 수치는 GDD가 기준이다. `docs/GDD-beta.md`가 있으면 그 문서가 GDD보다 우선한다(beta 브랜치 보충 문서, 사용자 승인분). 그 문서가 가리키는 `docs/proposals/dynamic-presentation.md`의 표도 기준으로 쓴다.
 3. 검증 스크립트를 **직접 다시 실행**한다. 이전 보고서를 믿지 않는다.
    - `powershell -NoProfile -ExecutionPolicy Bypass -File harness/scripts/unity-verify.ps1`
    - 에셋 작업이면 각 GLB에 `check-glb.ps1`도 실행한다.

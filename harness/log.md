@@ -59,3 +59,6 @@ BuildScript.BuildGray로 Builds/Gray/RhythmActionGame.exe(99 MB)를 만들고 sm
 
 ### 2026-11-12 [beta1-1] 효과음·음악 방식 결정
 사용자가 제안서 9.2 추천안을 승인했다. 효과음은 먼저 코드 합성(SfxSynth)으로 만들고, 핵심 효과음 5~10개는 나중에 ElevenLabs로 교체한다. 음악은 Suno(국악 퓨전, 120 BPM, 보컬 없음)로 만든다. 로그인은 사용자가 하고, 생성과 다운로드는 Claude가 한다(다운로드 전 승인). 곡이 들어오기 전까지는 합성 장단 반주를 쓴다. 로컬 AI(Python 설치)는 대안으로 둔다. 제안서 7장의 충돌 항목 13개는 아직 승인 대기다.
+
+### 2026-11-12 [beta1-1] 제안서 승인 → GDD-beta.md, 작업 B01~B10 추가
+사용자가 제안서 7장 항목 13개를 모두 승인했다. 승인 내용을 docs/GDD-beta.md(B1 판정 UI, B2 사건, B3 맵·차트, B4 슬로모션, B5 연출 시스템, B6 에셋, B7 효과음·음악)로 옮겼다. tasks.json에서 T09 뒤, T10 앞에 B01~B10을 추가했다. 평가자(evaluator)와 run-tasks 스킬에 "docs/GDD-beta.md가 있으면 우선한다"는 줄을 더했다. 다음 작업: B01.
