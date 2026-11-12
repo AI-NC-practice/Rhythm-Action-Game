@@ -218,6 +218,7 @@ namespace RhythmActionGame
             var t = UiFactory.CreateText(labelLayer, "JudgeLabel", JudgeRules.Label(r), GameConfig.JudgeLabelFontSize, color, new Vector2(400, 70));
             var label = new Label { Text = t, ShownAt = RealTime(), BasePos = RingLayout.LabelPosition(pos) };
             labels.Add(label);
+            SpawnRingFx(pos, r);
             PoseLabel(label, RealTime());
         }
 
@@ -232,6 +233,8 @@ namespace RhythmActionGame
             foreach (var r in rings) UpdateRing(r);
             float now = RealTime();
             FadeFloaters(earlyLabels, now);
+            for (int i = ringFx.Count - 1; i >= 0; i--)
+                if (!PoseRingFx(ringFx[i], now)) { if (ringFx[i].Root != null) Destroy(ringFx[i].Root.gameObject); ringFx.RemoveAt(i); }
             FadeFloaters(keyEchoes, now);
             for (int i = labels.Count - 1; i >= 0; i--)
             {
@@ -298,6 +301,100 @@ namespace RhythmActionGame
                 f.Text.rectTransform.anchoredPosition = f.BasePos + new Vector2(0f, 12f * u);
             }
         }
+
+        /// <summary>판정 원 이펙트 하나 (GDD-beta B8.3).</summary>
+        public class RingFx
+        {
+            public Judgement Result;
+            public RectTransform Root;
+            public Image Main;
+            public Image[] Parts;      // PERFECT: 붓획 조각, FAIL: 갈라진 두 쪽
+            public float ShownAt, Seconds;
+            public Vector2 BasePos;
+        }
+        readonly List<RingFx> ringFx = new List<RingFx>();
+        public IReadOnlyList<RingFx> RingEffects => ringFx;
+        public static readonly Color PerfectFxColor = new Color(1f, 0.82f, 0.25f);
+        public static readonly Color NormalFxColor = new Color(0.15f, 0.85f, 0.75f);
+        public static readonly Color FailFxColor = new Color(0.9f, 0.2f, 0.12f);
+
+        void SpawnRingFx(Vector2 pos, Judgement r)
+        {
+            EnsureLabelLayer();
+            var root = new GameObject("RingFx_" + r, typeof(RectTransform)).GetComponent<RectTransform>();
+            root.SetParent(labelLayer, false);
+            root.anchoredPosition = pos;
+            var fx = new RingFx { Result = r, Root = root, ShownAt = RealTime(), BasePos = pos };
+            float d = GameConfig.RingTargetDiameterPx;
+            switch (r)
+            {
+                case Judgement.Perfect:
+                    fx.Seconds = GameConfig.RingFxPerfectSeconds;
+                    fx.Main = UiFactory.CreateImage(root, "Burst", UiFactory.Ring, PerfectFxColor, d);
+                    var glow = UiFactory.CreateImage(root, "Glow", UiFactory.Glow, PerfectFxColor, d * 1.6f);
+                    var brush = UiFactory.CreateImage(root, "Brush", VfxFactory.BrushBurst, NormalFxColor, d * 2.2f);
+                    fx.Parts = new[] { glow, brush };
+                    break;
+                case Judgement.Normal:
+                    fx.Seconds = GameConfig.RingFxNormalSeconds;
+                    fx.Main = UiFactory.CreateImage(root, "Ring", UiFactory.Ring, NormalFxColor, d);
+                    fx.Parts = new Image[0];
+                    break;
+                default:
+                    fx.Seconds = GameConfig.RingFxFailSeconds;
+                    fx.Main = UiFactory.CreateImage(root, "Crack", UiFactory.Disc, new Color(FailFxColor.r, FailFxColor.g, FailFxColor.b, 0.35f), d);
+                    var left = UiFactory.CreateImage(root, "HalfL", UiFactory.Ring, FailFxColor, d);
+                    var right = UiFactory.CreateImage(root, "HalfR", UiFactory.Ring, FailFxColor, d);
+                    left.type = right.type = Image.Type.Filled;
+                    left.fillMethod = right.fillMethod = Image.FillMethod.Horizontal;
+                    left.fillOrigin = 0; right.fillOrigin = 1;
+                    left.fillAmount = right.fillAmount = 0.5f;
+                    fx.Parts = new[] { left, right };
+                    break;
+            }
+            ringFx.Add(fx);
+            PoseRingFx(fx, fx.ShownAt);
+        }
+
+        /// <summary>판정 원 이펙트 모양. 끝나면 false.</summary>
+        bool PoseRingFx(RingFx fx, float now)
+        {
+            float u = (now - fx.ShownAt) / fx.Seconds;
+            if (u >= 1f || fx.Root == null) return false;
+            float fade = 1f - u;
+            switch (fx.Result)
+            {
+                case Judgement.Perfect:
+                {
+                    float s = Mathf.Lerp(1f, GameConfig.RingFxPerfectScale, 1f - (1f - u) * (1f - u));
+                    fx.Main.rectTransform.localScale = Vector3.one * s;
+                    SetA(fx.Main, fade);
+                    SetA(fx.Parts[0], 0.6f * fade);
+                    fx.Parts[1].rectTransform.localScale = Vector3.one * Mathf.Lerp(0.5f, 1f, Mathf.Sqrt(u));
+                    SetA(fx.Parts[1], 0.8f * fade);
+                    break;
+                }
+                case Judgement.Normal:
+                    fx.Main.rectTransform.localScale = Vector3.one * Mathf.Lerp(1f, GameConfig.RingFxNormalScale, u);
+                    SetA(fx.Main, 0.8f * fade);
+                    break;
+                default:
+                {
+                    float shake = Mathf.Sin(u * Mathf.PI * 10f) * GameConfig.RingFxFailShakePx * (1f - u);
+                    fx.Root.anchoredPosition = fx.BasePos + new Vector2(shake, 0f);
+                    float split = GameConfig.RingFxFailSplitPx * Mathf.Sqrt(u);
+                    fx.Parts[0].rectTransform.anchoredPosition = new Vector2(-split, -split * 0.5f);
+                    fx.Parts[1].rectTransform.anchoredPosition = new Vector2(split, split * 0.5f);
+                    SetA(fx.Main, 0.35f * fade);
+                    SetA(fx.Parts[0], fade);
+                    SetA(fx.Parts[1], fade);
+                    break;
+                }
+            }
+            return true;
+        }
+
+        static void SetA(Image i, float a) { var c = i.color; c.a = a; i.color = c; }
 
         /// <summary>키 반응 펄스 배율 (1 → 1.15 → 1, 0.12초).</summary>
         public static float PulseScale(float age)

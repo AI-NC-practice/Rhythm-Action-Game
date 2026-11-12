@@ -232,6 +232,20 @@ namespace RhythmActionGame
         public const float KeyEchoSeconds = 0.3f;
         public const float KeyEchoBottomPx = 120f;
 
+        // ---------------- GDD-beta B8.3 판정 원 이펙트 (Claude가 정함, 0.35초 이하) ----------------
+        /// <summary>PERFECT: 금빛 고리가 1 → 1.8배로 커지며 사라짐 + 붓획 조각, 0.3초.</summary>
+        public const float RingFxPerfectSeconds = 0.3f;
+        public const float RingFxPerfectScale = 1.8f;
+        /// <summary>NORMAL: 청록 고리가 1 → 1.3배, 0.25초.</summary>
+        public const float RingFxNormalSeconds = 0.25f;
+        public const float RingFxNormalScale = 1.3f;
+        /// <summary>FAIL: 붉은 원이 흔들리며(±8 px) 두 쪽으로 갈라짐(±14 px), 0.35초.</summary>
+        public const float RingFxFailSeconds = 0.35f;
+        public const float RingFxFailShakePx = 8f;
+        public const float RingFxFailSplitPx = 14f;
+        /// <summary>판정 원 이펙트 최대 길이 (GDD-beta B8.3).</summary>
+        public const float RingFxMaxSeconds = 0.35f;
+
         // ---------------- GDD-beta B1.4 판정 화면 ----------------
         /// <summary>판정 중 노출 (URP Color Adjustments postExposure, EV).</summary>
         public const float JudgeExposure = -0.4f;

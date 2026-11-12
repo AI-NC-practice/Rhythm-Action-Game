@@ -444,10 +444,10 @@
                                          "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "in_progress",
+                      "status":  "done",
                       "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "판정 원 이펙트: PERFECT 금빛 1.8배+빛+붓획, NORMAL 청록 1.3배, FAIL 붉은 원 흔들림+갈라짐, Canvas 10, 0.35초 이하. 빌드+smoke 통과. 평가 PASS 1회차."
                   },
                   {
                       "id":  "B15",
@@ -460,10 +460,10 @@
                                          "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과 후 exe 경로 안내",
                                          "사용자가 플레이 후 남는 화살표·타이밍·입력 반응·판정 이펙트 피드백을 줌, 판정 창 조정 여부를 정함"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "needs_user",
+                      "attempts":  1,
                       "max_attempts":  1,
-                      "notes":  ""
+                      "notes":  "Builds/Gray/RhythmActionGame.exe 다시 빌드 + smoke-test 통과(타이틀 12초, -startGame 게임 씬 25초 오류 없음). 사용자 재확인 대기."
                   },
                   {
                       "id":  "B10",
