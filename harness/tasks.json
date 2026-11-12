@@ -575,10 +575,10 @@
                                          "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과, 테스트 패키지 zip 다시 만들기",
                                          "사용자가 템포·실패 규칙·되감기 연출을 확인하고 피드백을 줌"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "needs_user",
+                      "attempts":  1,
                       "max_attempts":  1,
-                      "notes":  ""
+                      "notes":  "Builds/Gray 다시 빌드 + smoke-test 통과, 테스트 패키지 RhythmActionGame-beta1-1-dev2.zip(37.9 MB, 개발자 모드·읽어주세요 포함, 압축 풀어 -startGame 20초 오류 없음). 사용자 확인 대기."
                   },
                   {
                       "id":  "B10",
