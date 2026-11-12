@@ -261,8 +261,8 @@ namespace RhythmActionGame.Tests
             t = 3.5; boot.judge.Tick();
             boot.judge.Submit(ArrowKey.Up, boot.clock.TimeOfBeat(8) + 0.059);   // +59 ms (슬로모션 중)
             t = 5.0; boot.judge.Tick();
-            boot.judge.Submit(ArrowKey.Up, boot.clock.TimeOfBeat(12) + 0.065);  // +65 ms → NORMAL
-            CollectionAssert.AreEqual(new[] { Judgement.Perfect, Judgement.Perfect, Judgement.Normal }, results, "PERFECT 창 ±60 ms 그대로");
+            boot.judge.Submit(ArrowKey.Up, boot.clock.TimeOfBeat(12) + 0.095);  // +95 ms → NORMAL (GDD-beta B8.4: PERFECT ±90)
+            CollectionAssert.AreEqual(new[] { Judgement.Perfect, Judgement.Perfect, Judgement.Normal }, results, "PERFECT 창(GDD-beta B8.4 ±90 ms) 그대로");
             boot.director.slowMotion.Cancel();
             Time.timeScale = 1f;
         }

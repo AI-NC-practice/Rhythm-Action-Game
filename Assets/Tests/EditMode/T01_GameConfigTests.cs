@@ -26,8 +26,8 @@ namespace RhythmActionGame.Tests
         public void T01_Judge_MatchGdd42()
         {
             Assert.AreEqual(2f, GameConfig.ApproachBeats, Eps);
-            Assert.AreEqual(60f, GameConfig.PerfectWindowMs, Eps);
-            Assert.AreEqual(150f, GameConfig.NormalWindowMs, Eps);
+            Assert.AreEqual(90f, GameConfig.PerfectWindowMs, Eps);   // beta1-1: GDD-beta B8.4 (GDD 4.2는 60)
+            Assert.AreEqual(180f, GameConfig.NormalWindowMs, Eps);   // beta1-1: GDD-beta B8.4 (GDD 4.2는 150)
             Assert.AreEqual(300f, GameConfig.EarlyIgnoreMs, Eps);
             Assert.AreEqual(-60f, GameConfig.JudgeSaturation, Eps);
             Assert.AreEqual(0.15f, GameConfig.JudgeEnterSeconds, Eps);

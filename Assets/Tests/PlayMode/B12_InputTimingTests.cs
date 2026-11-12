@@ -40,8 +40,8 @@ namespace RhythmActionGame.Tests
         {
             judge.Schedule(4, ArrowKey.Up);                    // 목표 2.0초
             now = 1.5; judge.Tick();
-            // 프레임은 목표 +70 ms (프레임 시각이면 NORMAL), 실제로 누른 시각은 +20 ms
-            now = 2.07;
+            // 프레임은 목표 +120 ms (프레임 시각이면 NORMAL, GDD-beta B8.4 ±90), 실제로 누른 시각은 +20 ms
+            now = 2.12;
             judge.SubmitRealtime(ArrowKey.Up, 1000.0 + 2.02);
             CollectionAssert.AreEqual(new[] { Judgement.Perfect }, results, "누른 시각으로 판정 → PERFECT");
 

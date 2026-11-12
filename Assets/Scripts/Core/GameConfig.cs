@@ -33,10 +33,10 @@ namespace RhythmActionGame
         // ---------------- GDD 4.2 판정 ----------------
         /// <summary>판정 원이 목표 시점보다 몇 박자 먼저 나타나는지.</summary>
         public const float ApproachBeats = 2f;
-        /// <summary>PERFECT 판정 창 (± ms, 실제 시간).</summary>
-        public const float PerfectWindowMs = 60f;
-        /// <summary>NORMAL 판정 창 (± ms, 실제 시간).</summary>
-        public const float NormalWindowMs = 150f;
+        /// <summary>PERFECT 판정 창 (± ms, 실제 시간). beta1-1: GDD-beta B8.4가 GDD 4.2의 60을 90으로 바꿨다.</summary>
+        public const float PerfectWindowMs = 90f;
+        /// <summary>NORMAL 판정 창 (± ms, 실제 시간). beta1-1: GDD-beta B8.4가 GDD 4.2의 150을 180으로 바꿨다.</summary>
+        public const float NormalWindowMs = 180f;
         /// <summary>이보다 이른 입력(목표 − ms)은 무시한다. 이 값과 NORMAL 창 사이 입력은 FAIL.</summary>
         public const float EarlyIgnoreMs = 300f;
 

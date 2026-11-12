@@ -59,8 +59,8 @@ namespace RhythmActionGame.Tests
         [Test]
         public void B12_Config_JudgeWindowsUnchanged_LatencyDefaults()
         {
-            Assert.AreEqual(60f, GameConfig.PerfectWindowMs, "판정 창 그대로 (GDD 4.2)");
-            Assert.AreEqual(150f, GameConfig.NormalWindowMs);
+            Assert.AreEqual(90f, GameConfig.PerfectWindowMs, "판정 창 = GDD-beta B8.4 (B12에서는 바꾸지 않음, B16에서 완화)");
+            Assert.AreEqual(180f, GameConfig.NormalWindowMs);
             Assert.AreEqual(16f, GameConfig.DisplayLatencyMs, "화면 표시 지연 보정 기본값");
             Assert.AreEqual(0.1, GameConfig.InputMaxAgeSeconds, 1e-9);
         }

@@ -1,7 +1,7 @@
 ﻿# Unity verify report
-time: 2026-11-12 16:36:25
+time: 2026-11-12 17:00:42
 
-## EditMode : total=115 passed=115 failed=0 skipped=0 result=Passed
+## EditMode : total=126 passed=126 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Config_MatchGddBetaB1
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_LabelPose_PopThenRise_045s
@@ -44,6 +44,17 @@ time: 2026-11-12 16:36:25
   - [Passed] RhythmActionGame.Tests.B12_SmoothClockTests.B12_FromRealtime_MapsInputEventTime_NotInFuture
   - [Passed] RhythmActionGame.Tests.B12_SmoothClockTests.B12_Smooth_AdvancesEveryFrame_WithinOneBuffer_NeverBackwards
   - [Passed] RhythmActionGame.Tests.B12_SmoothClockTests.B12_Smooth_StallCapped_DspBackwardsResets
+  - [Passed] RhythmActionGame.Tests.B16_JudgeWindowTests.B16_Boundaries(-90.0d,Perfect)
+  - [Passed] RhythmActionGame.Tests.B16_JudgeWindowTests.B16_Boundaries(89.9d,Perfect)
+  - [Passed] RhythmActionGame.Tests.B16_JudgeWindowTests.B16_Boundaries(-89.9d,Perfect)
+  - [Passed] RhythmActionGame.Tests.B16_JudgeWindowTests.B16_Boundaries(90.1d,Normal)
+  - [Passed] RhythmActionGame.Tests.B16_JudgeWindowTests.B16_Boundaries(-90.1d,Normal)
+  - [Passed] RhythmActionGame.Tests.B16_JudgeWindowTests.B16_Boundaries(179.9d,Normal)
+  - [Passed] RhythmActionGame.Tests.B16_JudgeWindowTests.B16_Boundaries(-180.0d,Normal)
+  - [Passed] RhythmActionGame.Tests.B16_JudgeWindowTests.B16_Boundaries(-180.1d,Fail)
+  - [Passed] RhythmActionGame.Tests.B16_JudgeWindowTests.B16_Boundaries(-299.9d,Fail)
+  - [Passed] RhythmActionGame.Tests.B16_JudgeWindowTests.B16_Config_MatchGddBetaB84
+  - [Passed] RhythmActionGame.Tests.B16_JudgeWindowTests.B16_TooEarlyIgnored_LateMissedAfter180
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_BeatAndSpeed_MatchGdd41
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_Judge_MatchGdd42
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_ObstacleAndCombat_MatchGdd44To46
@@ -67,7 +78,7 @@ time: 2026-11-12 16:36:25
   - [Passed] RhythmActionGame.Tests.T02_BeatAndSpeedTests.T02_Timeline_TimeOfBeat
   - [Passed] RhythmActionGame.Tests.T03_JudgeRulesTests.T03_EarlierThan300_IsIgnored(-300.1d)
   - [Passed] RhythmActionGame.Tests.T03_JudgeRulesTests.T03_EarlierThan300_IsIgnored(-1000.0d)
-  - [Passed] RhythmActionGame.Tests.T03_JudgeRulesTests.T03_EarlyBetween150And300_IsFail(-150.1d)
+  - [Passed] RhythmActionGame.Tests.T03_JudgeRulesTests.T03_EarlyBetween150And300_IsFail(-180.1d)
   - [Passed] RhythmActionGame.Tests.T03_JudgeRulesTests.T03_EarlyBetween150And300_IsFail(-200.0d)
   - [Passed] RhythmActionGame.Tests.T03_JudgeRulesTests.T03_EarlyBetween150And300_IsFail(-299.9d)
   - [Passed] RhythmActionGame.Tests.T03_JudgeRulesTests.T03_JudgeSystem_AppearsTwoBeatsBefore_PerfectRaisesSpeed
@@ -79,13 +90,13 @@ time: 2026-11-12 16:36:25
   - [Passed] RhythmActionGame.Tests.T03_JudgeRulesTests.T03_OuterRing_Shrinks360To120OverTwoBeats
   - [Passed] RhythmActionGame.Tests.T03_JudgeRulesTests.T03_SettingsOffset_ClampedAndSnappedTo5ms
   - [Passed] RhythmActionGame.Tests.T03_JudgeRulesTests.T03_TimingOffset_IsAddedToTarget
-  - [Passed] RhythmActionGame.Tests.T03_JudgeRulesTests.T03_WithinNormalWindow_IsNormal(60.1d)
-  - [Passed] RhythmActionGame.Tests.T03_JudgeRulesTests.T03_WithinNormalWindow_IsNormal(-60.1d)
-  - [Passed] RhythmActionGame.Tests.T03_JudgeRulesTests.T03_WithinNormalWindow_IsNormal(149.9d)
-  - [Passed] RhythmActionGame.Tests.T03_JudgeRulesTests.T03_WithinNormalWindow_IsNormal(-149.9d)
+  - [Passed] RhythmActionGame.Tests.T03_JudgeRulesTests.T03_WithinNormalWindow_IsNormal(90.1d)
+  - [Passed] RhythmActionGame.Tests.T03_JudgeRulesTests.T03_WithinNormalWindow_IsNormal(-90.1d)
+  - [Passed] RhythmActionGame.Tests.T03_JudgeRulesTests.T03_WithinNormalWindow_IsNormal(179.9d)
+  - [Passed] RhythmActionGame.Tests.T03_JudgeRulesTests.T03_WithinNormalWindow_IsNormal(-179.9d)
   - [Passed] RhythmActionGame.Tests.T03_JudgeRulesTests.T03_WithinPerfectWindow_IsPerfect(0.0d)
-  - [Passed] RhythmActionGame.Tests.T03_JudgeRulesTests.T03_WithinPerfectWindow_IsPerfect(59.9d)
-  - [Passed] RhythmActionGame.Tests.T03_JudgeRulesTests.T03_WithinPerfectWindow_IsPerfect(-59.9d)
+  - [Passed] RhythmActionGame.Tests.T03_JudgeRulesTests.T03_WithinPerfectWindow_IsPerfect(89.9d)
+  - [Passed] RhythmActionGame.Tests.T03_JudgeRulesTests.T03_WithinPerfectWindow_IsPerfect(-89.9d)
   - [Passed] RhythmActionGame.Tests.T03_JudgeRulesTests.T03_WrongKey_IsFail(0.0d)
   - [Passed] RhythmActionGame.Tests.T03_JudgeRulesTests.T03_WrongKey_IsFail(100.0d)
   - [Passed] RhythmActionGame.Tests.T03_JudgeRulesTests.T03_WrongKey_IsFail(-250.0d)

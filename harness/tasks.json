@@ -479,10 +479,10 @@
                                          "기존 테스트 중 ±60/±150 경계를 쓰던 것은 GDD-beta 값으로 바꾸고 근거 주석을 단다",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "PERFECT ±90 ms, NORMAL ±180 ms (GDD-beta B8.4), 관련 테스트 갱신. 평가 PASS 1회차."
                   },
                   {
                       "id":  "B17",
@@ -501,8 +501,8 @@
                                          "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "in_progress",
+                      "attempts":  1,
                       "max_attempts":  3,
                       "notes":  ""
                   },
