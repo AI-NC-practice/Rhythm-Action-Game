@@ -42,3 +42,6 @@ StageDirector(차트 장애물을 3박 앞에서 판정 예약, 판정 원 위�
 
 ### 2026-11-12 T09 [사용자] 회색 상자 플레이 확인 — needs_user
 BuildScript.BuildGray로 Builds/Gray/RhythmActionGame.exe(99 MB)를 만들고 smoke-test-build.ps1을 통과했다. 기본 smoke-test는 타이틀만 돌기 때문에 실행 인자 -startGame(타이틀이 바로 게임 씬을 연다)을 추가해 게임 씬도 화면 없이 20초 돌려 로그에 오류가 없음을 확인했다. 사용자 플레이 피드백을 기다린다.
+
+### 2026-11-12 [사용자 요청] 개발자 모드: 숫자 키 챕터 이동 — 추가
+숫자 키 1~6(키패드 포함)을 누르면 해당 챕터(MapLayout.Sections: 0/56/108/176/196/252박) 시작 지점에서 Game 씬을 새로 연다. 적, 점수, 체력은 모두 초기화된다. 타이틀 화면, 일시정지 중, 결과 화면에서도 동작한다. 화면 위쪽 가운데에 "[개발자 모드] … 현재 N. 챕터 이름"이 노란 글씨로 표시된다. Assets/Scripts/Dev/DevMode.cs는 `#if UNITY_EDITOR || RAG_DEV` 안에 있다. BuildGray만 RAG_DEV를 정의하므로 BuildFinal에서는 코드째 빠진다. GameBootstrap.PendingStartBeat로 시작 위치를 넘긴다. PlayMode 테스트 DevModeTests 4개를 추가했다. EditMode 73/73, PlayMode 37/37. 회색 상자 빌드를 다시 만들었고 smoke-test를 통과했다. tasks.json의 작업은 아니며 T09는 계속 needs_user다.

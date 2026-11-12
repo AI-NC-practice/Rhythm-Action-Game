@@ -35,9 +35,15 @@ namespace RhythmActionGame
             if (Instance == this) Instance = null;
         }
 
+        /// <summary>다음 Game 씬 시작 위치(달리기 박자). 개발자 모드 챕터 이동이 쓴다. 한 번 쓰면 0으로 돌아간다.</summary>
+        public static double PendingStartBeat;
+
         void Start()
         {
-            if (autoStart) StartRun();
+            if (!autoStart) return;
+            double b = PendingStartBeat;
+            PendingStartBeat = 0;
+            StartRun(b);
         }
 
         /// <summary>runBeat 위치(달리기 박자)부터 스테이지를 시작한다. 박자 시계는 0박부터.</summary>

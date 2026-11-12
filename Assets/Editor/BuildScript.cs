@@ -15,12 +15,12 @@ namespace RhythmActionGame.EditorTools
         const string ExeName = "RhythmActionGame.exe";
 
         [MenuItem("RhythmActionGame/Build Gray (Windows)")]
-        public static void BuildGray() => Build("Builds/Gray");
+        public static void BuildGray() => Build("Builds/Gray", "RAG_DEV");   // 개발자 모드 포함
 
         [MenuItem("RhythmActionGame/Build Final (Windows)")]
-        public static void BuildFinal() => Build("Builds/Final");
+        public static void BuildFinal() => Build("Builds/Final");            // 개발자 모드 없음
 
-        static void Build(string dir)
+        static void Build(string dir, params string[] defines)
         {
             var scenes = EditorBuildSettings.scenes.Where(s => s.enabled).Select(s => s.path).ToArray();
             if (scenes.Length == 0) throw new Exception("Build Settings에 씬이 없다. SceneBuilder.BuildAll을 먼저 실행할 것.");
@@ -33,6 +33,7 @@ namespace RhythmActionGame.EditorTools
                 target = BuildTarget.StandaloneWindows64,
                 targetGroup = BuildTargetGroup.Standalone,
                 options = BuildOptions.None,
+                extraScriptingDefines = defines,
             };
             var report = BuildPipeline.BuildPlayer(options);
             var s = report.summary;

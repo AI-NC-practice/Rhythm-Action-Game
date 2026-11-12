@@ -1,5 +1,5 @@
 ﻿# Unity verify report
-time: 2026-11-12 10:14:24
+time: 2026-11-12 11:28:18
 
 ## EditMode : total=73 passed=73 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_BeatAndSpeed_MatchGdd41
@@ -76,7 +76,11 @@ time: 2026-11-12 10:14:24
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_SpeedFx_Intensity
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_Texts_MatchGdd48
 
-## PlayMode : total=33 passed=33 failed=0 skipped=0 result=Passed
+## PlayMode : total=37 passed=37 failed=0 skipped=0 result=Passed
+  - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_ChapterStartBeats_MatchSections
+  - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(1)
+  - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(4)
+  - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(6)
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Font_HasJudgeGlyphs
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Fx_GrayAndZoom_EnterAndExit
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Label_ShownFor0_6Seconds
