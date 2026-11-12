@@ -12,8 +12,26 @@ namespace RhythmActionGame
         [Tooltip("음악을 재생하는 AudioSource. 없으면 음악 없이 박자만 센다(메트로놈 단계).")]
         public AudioSource music;
 
-        /// <summary>테스트에서 바꿔 끼우는 시계. 기본은 AudioSettings.dspTime.</summary>
-        public Func<double> TimeSource = () => AudioSettings.dspTime;
+        static SmoothClock smooth;
+        /// <summary>부드러운 오디오 시계 (GDD-beta B8.1): dspTime을 실제 시간으로 보간. 모든 BeatClock이 함께 쓴다.</summary>
+        public static SmoothClock Smooth => smooth ?? (smooth = new SmoothClock(() => AudioSettings.dspTime, () => Time.realtimeSinceStartupAsDouble, DspBufferSeconds()));
+
+        /// <summary>DSP 버퍼 한 개 길이 (초).</summary>
+        public static double DspBufferSeconds()
+        {
+            AudioSettings.GetDSPBufferSize(out int len, out int _);
+            int rate = AudioSettings.outputSampleRate;
+            return rate > 0 && len > 0 ? len / (double)rate : 1024.0 / 48000.0;
+        }
+
+        /// <summary>테스트에서 바꿔 끼우는 시계. 기본은 dspTime을 보간한 부드러운 시계 (GDD-beta B8.1).</summary>
+        public Func<double> TimeSource = () => Smooth.Now();
+
+        /// <summary>
+        /// 실제 시간(realtimeSinceStartup 기준, Input System 이벤트 시각)을 이 시계의 시각으로 바꾼다 (GDD-beta B8.1).
+        /// 테스트에서 바꿔 끼운다.
+        /// </summary>
+        public Func<double, double> RealtimeToClock = rt => Smooth.FromRealtime(rt);
 
         readonly BeatTimeline timeline = new BeatTimeline();
         public SpeedState Speed { get; } = new SpeedState();

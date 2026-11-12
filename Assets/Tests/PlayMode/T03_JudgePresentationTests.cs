@@ -39,6 +39,7 @@ namespace RhythmActionGame.Tests
             canvas.transform.SetParent(root.transform);
             view = canvas.gameObject.AddComponent<JudgeRingView>();
             view.RealTime = () => realTime;
+            view.displayLatencyMs = 0f;   // 원 크기 공식(GDD 4.2) 검사: 지연 보정(B8.1)은 B12 테스트가 따로 본다
             view.Bind(judge, clock, cam);
 
             fx = root.AddComponent<JudgeFx>();

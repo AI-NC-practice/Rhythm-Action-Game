@@ -109,3 +109,6 @@ B01~B08을 넣고 회색 상자 빌드를 다시 만들었다(Builds/Gray/Rhythm
 
 ### 2026-11-12 B11 [beta] 남는 화살표 버그 — done
 원인은 이랬다. JudgeSystem.Cancel(전투·윈드밀 재도전)과 ClearAll(게임 오버, 다시 시작)이 아무 이벤트를 보내지 않아서 JudgeRingView가 원을 지우지 못했다. 이제 둘 다 CueCancelled 이벤트를 보내고, JudgeRingView는 이 이벤트를 받으면 문구 없이 원을 지운다. 안전망으로 Refresh에서 끝난(Judged) 판정의 원을 매 프레임 지운다. 평가 PASS(1회차), EditMode 111/111, PlayMode 84/84. 다음 작업: B12.
+
+### 2026-11-12 B12 [beta] 타이밍 정확도 — done
+SmoothClock을 만들었다. dspTime이 DSP 버퍼 단위(약 21 ms)로 끊겨 갱신되는 사이를 실제 시간으로 보간해 매 프레임 진행한다. 뒤로 가지 않고, dsp보다 버퍼 한 개 이상 앞서지 않는다. BeatClock의 기본 시계를 이것으로 바꿨다. 키 입력은 프레임 시각이 아니라 Input System 이벤트 시각(Keyboard.lastUpdateTime)을 박자 시계 시각으로 바꿔 판정하고(SubmitRealtime), 0.1초보다 오래되거나 미래인 값은 잘라 쓴다. 판정 원은 화면 표시 지연만큼(16 ms, 60 Hz 한 프레임) 앞당겨 그린다. 판정 창(±60/±150 ms)은 그대로다. T03·B01 테스트의 원 크기·위치 검사는 지연 보정을 0으로 두고 보도록 바꿨다. 평가 PASS(1회차), EditMode 115/115, PlayMode 86/86. 다음 작업: B13.

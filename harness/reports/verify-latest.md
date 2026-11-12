@@ -1,7 +1,7 @@
 ﻿# Unity verify report
-time: 2026-11-12 16:22:04
+time: 2026-11-12 16:27:04
 
-## EditMode : total=111 passed=111 failed=0 skipped=0 result=Passed
+## EditMode : total=115 passed=115 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Config_MatchGddBetaB1
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_LabelPose_PopThenRise_045s
@@ -40,6 +40,10 @@ time: 2026-11-12 16:22:04
   - [Passed] RhythmActionGame.Tests.B08_SfxSynthTests.B08_Timbre_LowIsLow_MetalIsHigh_JingRings
   - [Passed] RhythmActionGame.Tests.B08_SfxSynthTests.B08_Wav_Header16BitMono44k
   - [Passed] RhythmActionGame.Tests.B08_SfxSynthTests.B08_WavFiles_InAssetsAudioSfx
+  - [Passed] RhythmActionGame.Tests.B12_SmoothClockTests.B12_Config_JudgeWindowsUnchanged_LatencyDefaults
+  - [Passed] RhythmActionGame.Tests.B12_SmoothClockTests.B12_FromRealtime_MapsInputEventTime_NotInFuture
+  - [Passed] RhythmActionGame.Tests.B12_SmoothClockTests.B12_Smooth_AdvancesEveryFrame_WithinOneBuffer_NeverBackwards
+  - [Passed] RhythmActionGame.Tests.B12_SmoothClockTests.B12_Smooth_StallCapped_DspBackwardsResets
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_BeatAndSpeed_MatchGdd41
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_Judge_MatchGdd42
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_ObstacleAndCombat_MatchGdd44To46
@@ -114,7 +118,7 @@ time: 2026-11-12 16:22:04
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_SpeedFx_Intensity
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_Texts_MatchGdd48
 
-## PlayMode : total=84 passed=84 failed=0 skipped=0 result=Passed
+## PlayMode : total=86 passed=86 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -162,6 +166,8 @@ time: 2026-11-12 16:22:04
   - [Passed] RhythmActionGame.Tests.B11_StuckRingTests.B11_DuelFailRetry_CancelledRingsRemoved
   - [Passed] RhythmActionGame.Tests.B11_StuckRingTests.B11_GameOverAndRestart_ClearRings
   - [Passed] RhythmActionGame.Tests.B11_StuckRingTests.B11_WindmillFailRetry_CancelledRingsRemoved
+  - [Passed] RhythmActionGame.Tests.B12_InputTimingTests.B12_EventTime_UsedInsteadOfFrameTime
+  - [Passed] RhythmActionGame.Tests.B12_InputTimingTests.B12_Ring_DrawnAheadByDisplayLatency
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_ChapterStartBeats_MatchSections
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(1)
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(4)

@@ -406,10 +406,10 @@
                                          "음악·반주 예약(PlayScheduled)은 실제 dspTime 기준 그대로 — 기존 B08 테스트 통과",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "in_progress",
+                      "status":  "done",
                       "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "SmoothClock(dsp 보간, 단조, ≤버퍼), Input System 이벤트 시각 판정(SubmitRealtime), 화면 지연 보정 16 ms. 판정 창 그대로. 평가 PASS 1회차."
                   },
                   {
                       "id":  "B13",
@@ -425,8 +425,8 @@
                                          "GDD-beta B8.2: 원이 없을 때 누른 키는 화면 아래 가운데에 작은 키 표시 — 테스트",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "in_progress",
+                      "attempts":  1,
                       "max_attempts":  3,
                       "notes":  ""
                   },

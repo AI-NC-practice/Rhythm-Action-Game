@@ -43,6 +43,7 @@ namespace RhythmActionGame.Tests
             view = canvas.gameObject.AddComponent<JudgeRingView>();
             view.RealTime = () => realTime;
             view.CanvasSize = () => Hd;
+            view.displayLatencyMs = 0f;   // 위치·크기 검사: 지연 보정(B8.1)은 B12 테스트가 따로 본다
             view.Bind(judge, clock, cam);
 
             fx = root.AddComponent<JudgeFx>();

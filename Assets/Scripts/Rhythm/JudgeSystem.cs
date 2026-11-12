@@ -99,11 +99,25 @@ namespace RhythmActionGame
         {
             var kb = Keyboard.current;
             if (kb == null) return;
+            // 프레임 시각이 아니라 Input System 이벤트 시각(실제로 누른 시각)으로 판정한다 (GDD-beta B8.1)
+            double pressed = kb.lastUpdateTime;
+            if (kb.upArrowKey.wasPressedThisFrame) SubmitRealtime(ArrowKey.Up, pressed);
+            if (kb.downArrowKey.wasPressedThisFrame) SubmitRealtime(ArrowKey.Down, pressed);
+            if (kb.leftArrowKey.wasPressedThisFrame) SubmitRealtime(ArrowKey.Left, pressed);
+            if (kb.rightArrowKey.wasPressedThisFrame) SubmitRealtime(ArrowKey.Right, pressed);
+        }
+
+        /// <summary>
+        /// 실제 시간(Input System 이벤트 시각)으로 입력 하나를 처리한다. 박자 시계 시각으로 바꾸고,
+        /// 지금보다 늦거나 InputMaxAgeSeconds보다 오래된 값은 잘라 쓴다 (GDD-beta B8.1).
+        /// </summary>
+        public void SubmitRealtime(ArrowKey key, double realTime)
+        {
             double now = clock.Now;
-            if (kb.upArrowKey.wasPressedThisFrame) Submit(ArrowKey.Up, now);
-            if (kb.downArrowKey.wasPressedThisFrame) Submit(ArrowKey.Down, now);
-            if (kb.leftArrowKey.wasPressedThisFrame) Submit(ArrowKey.Left, now);
-            if (kb.rightArrowKey.wasPressedThisFrame) Submit(ArrowKey.Right, now);
+            double t = clock.RealtimeToClock(realTime);
+            if (double.IsNaN(t) || t > now) t = now;
+            if (t < now - GameConfig.InputMaxAgeSeconds) t = now - GameConfig.InputMaxAgeSeconds;
+            Submit(key, t);
         }
 
         double TargetTime(JudgeCue cue) => clock.TimeOfBeat(cue.TargetBeat);

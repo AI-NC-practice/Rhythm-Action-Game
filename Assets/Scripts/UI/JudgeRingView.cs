@@ -18,6 +18,8 @@ namespace RhythmActionGame
         public Camera worldCamera;
         /// <summary>판정 문구를 올릴 층 (sortingOrder 10 Canvas). 없으면 Awake에서 만든다.</summary>
         public RectTransform labelLayer;
+        /// <summary>화면 표시 지연 보정 (ms, GDD-beta B8.1): 원을 이만큼 앞당겨 그려 눈에 보이는 겹침 순간이 판정 목표와 맞게 한다.</summary>
+        public float displayLatencyMs = GameConfig.DisplayLatencyMs;
 
         /// <summary>원 하나의 화면 요소.</summary>
         public class Ring
@@ -246,7 +248,8 @@ namespace RhythmActionGame
         {
             if (clock != null)
             {
-                double until = r.Cue.TargetBeat - clock.CurrentBeat;
+                double lead = displayLatencyMs / 1000.0 * clock.SpeedMultiplier / GameConfig.SecondsPerBeat;   // 지연 보정 (박)
+                double until = r.Cue.TargetBeat - (clock.CurrentBeat + lead);
                 float d = JudgeRules.OuterRingDiameter(until);
                 r.Outer.rectTransform.sizeDelta = new Vector2(d, d);
             }

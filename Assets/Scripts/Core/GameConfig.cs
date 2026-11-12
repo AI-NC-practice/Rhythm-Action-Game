@@ -214,6 +214,12 @@ namespace RhythmActionGame
         /// <summary>빛 테두리 지름 (px). GDD-beta에 없음, Claude가 정함 (목표 원 120 px의 1.6배).</summary>
         public const float RingGlowDiameterPx = 192f;
 
+        // ---------------- GDD-beta B8.1 타이밍 정확도 ----------------
+        /// <summary>화면 표시 지연 보정 (ms): 판정 원을 이만큼 앞당겨 그린다 (60 Hz 한 프레임). GDD-beta에 없음, Claude가 정함.</summary>
+        public const float DisplayLatencyMs = 16f;
+        /// <summary>입력 이벤트 시각을 믿는 최대 과거 (초). 이보다 오래된 시각은 잘라 쓴다. Claude가 정함.</summary>
+        public const double InputMaxAgeSeconds = 0.1;
+
         // ---------------- GDD-beta B1.4 판정 화면 ----------------
         /// <summary>판정 중 노출 (URP Color Adjustments postExposure, EV).</summary>
         public const float JudgeExposure = -0.4f;
