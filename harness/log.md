@@ -15,3 +15,6 @@ Unity 6000.4.0f1 URP 프로젝트(Hub가 만든 하위 폴더)를 저장소 루�
 GDD를 사용자와 함께 쓰고 확정했다(harness/gdd.lock). 작업 목록 16개와 VARCO 에셋 명세 11개를 사용자가 승인했다.
 하네스 수정: 훅 4개(protect-gdd, varco-guard, git-guard, stop-check)가 표준 입력을 CP949로 읽어 한글 입력에서 JSON 파싱에 실패했다 → UTF-8 StreamReader로 읽도록 고쳤다.
 환경: VARCO 등급 CREATOR, Blender 5.2.3, GPU RTX 3060 8GB. VARCO 포인트 사용 0. 다음 작업: T01.
+
+### 2026-11-12 T01 기본 설정 + GameConfig 수치 — done
+템플릿 잔여물(Readme, TutorialInfo, SampleScene, SampleSceneProfile)을 지우고 Build Settings 씬 목록을 비웠다. GameConfig.cs에 GDD 4.1~4.9 수치를 넣고 GDD 값과 비교하는 EditMode 테스트 6개를 만들었다. 첫 검증은 Unity 라이선스 오류(exit 198)로 실행되지 않아 사용자가 Hub에서 다시 로그인했다. 평가 PASS(1회차), EditMode 6/6. 다음 작업: T02.

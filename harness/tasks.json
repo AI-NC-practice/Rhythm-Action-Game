@@ -1,291 +1,323 @@
 {
-  "_help": "status: pending | in_progress | done | failed | needs_user | blocked. Claude는 status, attempts, notes만 바꾼다. 작업 추가/삭제/기준 변경은 사용자 승인 후. 모든 수치는 docs/GDD.md와 Assets/Scripts/Core/GameConfig.cs에서 일치해야 한다.",
-  "tasks": [
-    {
-      "id": "T01",
-      "title": "기본 설정 + GameConfig 수치",
-      "type": "unity",
-      "skill": "unity-feature",
-      "depends_on": [],
-      "acceptance": [
-        "템플릿 잔여물(Readme, TutorialInfo, SampleScene과 그 에셋) 제거",
-        "Assets/Scripts, Assets/Editor, Assets/Tests/EditMode, Assets/Tests/PlayMode asmdef가 컴파일됨",
-        "GameConfig.cs에 GDD 수치 정의: BPM 120, 기본 이동 5 m/s, 속도 배율 1.00~1.30, PERFECT +0.05, FAIL ×0.8, 판정 창 ±60/±150 ms, 이른 입력 무시 −300 ms, 원 등장 2박자, 장애물 4박자, 체력 3, 타이밍 보정 −200~+200 ms(5 ms), 점수 300/100/0, 랭크 기준 90/75/50%, FOV 70/58, 채도 −60%",
-        "GameConfig 값이 GDD 값과 같은지 확인하는 EditMode 테스트 통과",
-        "unity-verify.ps1 전체 통과"
-      ],
-      "status": "pending",
-      "attempts": 0,
-      "max_attempts": 3,
-      "notes": ""
-    },
-    {
-      "id": "T02",
-      "title": "박자 시계 + 메트로놈 + 속도 배율",
-      "type": "unity",
-      "skill": "unity-feature",
-      "depends_on": ["T01"],
-      "acceptance": [
-        "BeatClock: AudioSettings.dspTime 기준으로 현재 박자(소수 포함)를 계산하고, 일시정지/재개 시 박자가 이어진다",
-        "Metronome: AudioClip.Create로 만든 클릭음을 매 박 재생, 4박마다 강세",
-        "SpeedController: PERFECT → min(s+0.05, 1.30), NORMAL → 그대로, FAIL → max(s×0.8, 1.00) — 경계값 포함 EditMode 테스트 통과",
-        "속도 배율이 음악 재생 속도와 이동 속도(5 m/s × s)에 함께 적용되고, 1박자 이동 거리가 s와 무관하게 2.5 m인지 EditMode 테스트로 확인",
-        "unity-verify.ps1 전체 통과"
-      ],
-      "status": "pending",
-      "attempts": 0,
-      "max_attempts": 3,
-      "notes": ""
-    },
-    {
-      "id": "T03",
-      "title": "판정 시스템 + 판정 원 UI + 회색 화면/줌 연출",
-      "type": "unity",
-      "skill": "unity-feature",
-      "depends_on": ["T02"],
-      "acceptance": [
-        "Judge: 정답 키 ±60 ms → PERFECT, ±150 ms → NORMAL, 다른 키/−300~−150 ms 입력/+150 ms까지 무입력 → FAIL, −300 ms보다 이른 입력은 무시 — 경계값 EditMode 테스트 통과",
-        "타이밍 보정 값이 목표 시점에 더해지는지 EditMode 테스트 통과",
-        "입력은 Input System Keyboard.current의 방향키 4개 사용 (구 Input Manager 사용 없음, grep으로 확인)",
-        "판정 원 UI: 목표 2박자 전 등장, 바깥 원 지름 360→120 px로 선형 축소, 가운데 화살표 아이콘, 판정 후 \"PERFECT\"/\"NORMAL\"/\"FAIL\" 문구 0.6초 표시 — PlayMode 테스트로 등장 시점·크기·문구 확인",
-        "판정 중 URP Volume 채도 −60%, FOV 70→58 전환, 판정 후 0.2초 동안 복귀 — PlayMode 테스트로 값 확인",
-        "unity-verify.ps1 전체 통과"
-      ],
-      "status": "pending",
-      "attempts": 0,
-      "max_attempts": 3,
-      "notes": ""
-    },
-    {
-      "id": "T04",
-      "title": "회색 상자 맵 + 경로 + 차트",
-      "type": "unity",
-      "skill": "unity-feature",
-      "depends_on": ["T03"],
-      "acceptance": [
-        "SceneBuilder.BuildAll이 Title, Game 씬을 코드로 생성하고 Build Settings에 등록",
-        "Game 씬: GDD 4.9의 구간 6개를 기본 도형으로 배치 (골목, 돌담·지붕 오르기, 기와지붕 높이 4~6 m·간격 3~5 m, 마당, 궁궐 담, 성문), 경로 폭 3 m, 조명 포함",
-        "웨이포인트 경로 전체 길이 600~700 m, 플레이어(캡슐 + 카메라 눈높이 1.65 m)가 박자에 맞춰 경로를 자동 이동 — PlayMode 테스트로 4박자 후 이동 거리 10 m(±0.1 m) 확인",
-        "차트 데이터(JSON 또는 ScriptableObject): 장애물 20개, 일반 적 4명, 포위 전투 1회(5명), 무사 1명, 각 이벤트의 박자·종류·키 — EditMode 테스트로 개수와 장애물 간 최소 간격 4박자 확인",
-        "unity-verify.ps1 전체 통과"
-      ],
-      "status": "pending",
-      "attempts": 0,
-      "max_attempts": 3,
-      "notes": ""
-    },
-    {
-      "id": "T05",
-      "title": "장애물 파쿠르 + 체력",
-      "type": "unity",
-      "skill": "unity-feature",
-      "depends_on": ["T04"],
-      "acceptance": [
-        "장애물 6종(낮은 담/수레/항아리, 지붕 오르기·건너뛰기, 처마·빨랫줄, 뛰어내리기, 옆 장애물, 벽타기)이 GDD 3장의 키로 판정됨",
-        "판정 결과와 관계없이 장애물 통과에 4박자가 걸림 — PlayMode 테스트로 세 결과 모두 확인",
-        "결과별 이동 연출 3가지가 서로 다름 (회색 상자 단계에서는 카메라 궤적·흔들림으로 표현, 이름 있는 상태로 구분)",
-        "FAIL 시 체력 −1, 속도 ×0.8(최소 1.00), 음악 정지·되감기 없음 — PlayMode 테스트",
-        "체력 0이면 게임 오버 상태로 전환 — PlayMode 테스트",
-        "unity-verify.ps1 전체 통과"
-      ],
-      "status": "pending",
-      "attempts": 0,
-      "max_attempts": 3,
-      "notes": ""
-    },
-    {
-      "id": "T06",
-      "title": "일반 적 전투",
-      "type": "unity",
-      "skill": "unity-feature",
-      "depends_on": ["T05"],
-      "acceptance": [
-        "적 등장 시 자동 이동 정지, 전투 끝나면 다음 마디 첫 박에 다시 이동 — PlayMode 테스트",
-        "칼 든 포졸·창 든 포졸: 공격 2회(2박자 간격) + 마무리 1회, 공격 종류별 키(가로베기 ↓, 내려베기·찌르기 ←/→, 올려베기 ↑, 마무리 ↑)",
-        "방어 또는 마무리 FAIL 시 체력 −1, 속도 ×0.8, 다음 마디부터 그 적의 첫 공격부터 다시 — PlayMode 테스트",
-        "마무리 PERFECT: 지붕 위면 발차기 처형, 땅 위면 칼 뺏기/찌르기 처형 상태로 분기 — EditMode 또는 PlayMode 테스트",
-        "처형 연출 중 Time.timeScale 0.3이 0.4초(실시간) 적용되고 BeatClock은 영향받지 않음 — PlayMode 테스트",
-        "공격 중 무기에 TrailRenderer와 잔상 오브젝트가 생기고, 카메라가 공격 지점을 따라감",
-        "unity-verify.ps1 전체 통과"
-      ],
-      "status": "pending",
-      "attempts": 0,
-      "max_attempts": 3,
-      "notes": ""
-    },
-    {
-      "id": "T07",
-      "title": "포위 전투 + 최종 무사",
-      "type": "unity",
-      "skill": "unity-feature",
-      "depends_on": ["T06"],
-      "acceptance": [
-        "포위 전투: 적 5명(칼 3, 창 2)이 반지름 4 m 원으로 배치",
-        "1단계 순차 공격 5회(1박자 간격), 2단계 동시 공격 3회(원 1개·키 1개로 판정), 3단계 반 박자 간격 화살표 4개 — 차트대로 생성되는지 PlayMode 테스트",
-        "3단계 4개 모두 NORMAL 이상이면 5명 모두 쓰러짐 + 슬로모션 + 카메라 360° 회전, FAIL이면 체력 −1 후 다음 마디에 3단계만 다시 — PlayMode 테스트",
-        "1·2단계 FAIL은 체력 −1, 전투는 이어 감",
-        "무사: 공격 5회(1~2박자 간격 혼합) + 마무리, 쓰러뜨리면 스테이지 클리어 상태 — PlayMode 테스트",
-        "unity-verify.ps1 전체 통과"
-      ],
-      "status": "pending",
-      "attempts": 0,
-      "max_attempts": 3,
-      "notes": ""
-    },
-    {
-      "id": "T08",
-      "title": "UI/메뉴 + 점수·랭크 + 속도감 효과",
-      "type": "unity",
-      "skill": "unity-feature",
-      "depends_on": ["T07"],
-      "acceptance": [
-        "타이틀: \"Rhythm-Action-Game\", \"시작\", \"설정\", \"종료\" (맑은 고딕)",
-        "설정: \"타이밍 보정\"(−200~+200, 5 ms 단위, 표시 예 \"+15ms\"), \"음량\"(0~100, 기본 80), \"돌아가기\", PlayerPrefs 저장·불러오기 — PlayMode 테스트",
-        "HUD: 하트 3개, \"x1.00\" 형식 속도, 점수, \"콤보 N\"(N≥2일 때만)",
-        "일시정지(Esc): \"일시정지\", \"계속\", \"타이틀로\", 일시정지 중 음악과 BeatClock 정지 — PlayMode 테스트",
-        "결과: \"스테이지 클리어\"/\"게임 오버\", \"PERFECT n\", \"NORMAL n\", \"FAIL n\", \"최고 속도 x1.30\" 형식, \"점수 n\", \"랭크 X\", \"다시 하기\", \"타이틀로\"",
-        "점수(300/100/0)와 랭크(S ≥90% 그리고 FAIL 0, A ≥75%, B ≥50%, C, 게임 오버 \"-\") EditMode 테스트 통과",
-        "속도감: s ≥ 1.10에서 화면 가장자리 집중선 표시, 세기 (s−1.0)/0.3, FOV 최대 +5° — PlayMode 테스트로 값 확인",
-        "unity-verify.ps1 전체 통과"
-      ],
-      "status": "pending",
-      "attempts": 0,
-      "max_attempts": 3,
-      "notes": ""
-    },
-    {
-      "id": "T09",
-      "title": "[사용자] 회색 상자 플레이 확인",
-      "type": "human",
-      "depends_on": ["T08"],
-      "acceptance": [
-        "BuildScript.BuildGray로 Windows 빌드를 만들고 smoke-test-build.ps1 통과 후 사용자에게 exe 경로 안내",
-        "사용자가 플레이 후 판정 타이밍·난이도·속도감 피드백을 줌, 수정 작업은 사용자 승인 후 tasks.json에 추가"
-      ],
-      "status": "pending",
-      "attempts": 0,
-      "max_attempts": 1,
-      "notes": ""
-    },
-    {
-      "id": "T10",
-      "title": "정적 에셋 생성 (VARCO 7개)",
-      "type": "asset",
-      "skill": "varco3d-asset",
-      "depends_on": ["T09"],
-      "acceptance": [
-        "시작 전에 사용자에게 예상 포인트(이미지 약 20~50 + 3D 200, 에셋당)를 알리고 승인받음",
-        "asset_specs.json의 weapon_sword, weapon_spear, house_giwa, wall_stone, gate, cart, jars를 GLB로 생성해 Assets/Art/Models/<id>.glb에 저장",
-        "check-glb.ps1로 각 파일 삼각형 5,000개 이하, 15 MB 이하 확인",
-        "asset_specs.json의 status/triangles/file_mb/calls 기록, 에셋당 이미지 최대 3회·3D 최대 2회 준수",
-        "unity-verify.ps1 전체 통과 (GLB 임포트 오류 없음)"
-      ],
-      "status": "pending",
-      "attempts": 0,
-      "max_attempts": 3,
-      "notes": ""
-    },
-    {
-      "id": "T11",
-      "title": "캐릭터 에셋 생성 + 리깅 + VARCO 동작 (4개)",
-      "type": "asset",
-      "skill": "varco3d-asset",
-      "depends_on": ["T10"],
-      "acceptance": [
-        "시작 전에 사용자에게 예상 포인트를 알리고 승인받음",
-        "player(humanoid-fingers), enemy_sword, enemy_spear, boss(humanoid)를 T자 자세로 생성 → Rig → asset_specs의 animations별 Animate",
-        "결과를 FBX로 Assets/Art/Models/<id>/에 저장, 텍스처 연결, Unity Humanoid 아바타 valid=true (HumanoidImport 로그로 확인)",
-        "isPlus 동작이 거부되면 isPlus=false 동작으로 바꾸고 notes에 기록",
-        "unity-verify.ps1 전체 통과"
-      ],
-      "status": "pending",
-      "attempts": 0,
-      "max_attempts": 3,
-      "notes": ""
-    },
-    {
-      "id": "T12",
-      "title": "Mixamo 동작 받기 (로그인은 사용자, 다운로드는 Claude)",
-      "type": "asset",
-      "skill": "varco3d-asset",
-      "depends_on": ["T11"],
-      "acceptance": [
-        "필요 동작 목록(파쿠르 넘기·미끄러지기·벽타기·휘청임·부딪혀 튕겨남, 숙여 피하기·옆 비키기, 찌르기·칼 뺏기·발차기·윈드밀 등)을 log.md에 먼저 적음",
-        "사용자가 앱 브라우저에서 Mixamo에 로그인한 뒤, Claude가 각 동작을 Without Skin, FBX, 30fps로 받아 Assets/Art/Animations/Mixamo/에 저장",
-        "모든 클립이 Humanoid로 임포트되고 player 아바타에 리타깃됨 (임포트 로그로 확인)",
-        "unity-verify.ps1 전체 통과"
-      ],
-      "status": "pending",
-      "attempts": 0,
-      "max_attempts": 3,
-      "notes": "사용자 결정(2026-11-11): Mixamo 다운로드는 Claude가 브라우저로 진행하고 로그인만 사용자가 한다. varco3d-asset 9번의 '사용자가 받는다' 규칙보다 우선."
-    },
-    {
-      "id": "T13",
-      "title": "툰 셰이딩 + 1인칭 전신 플레이어 교체",
-      "type": "unity",
-      "skill": "unity-feature",
-      "depends_on": ["T12"],
-      "acceptance": [
-        "URP 툰 셰이더(2~3단계 명암) + 외곽선이 모든 캐릭터·에셋 머티리얼에 적용",
-        "플레이어 캡슐을 player 모델로 교체, 카메라는 머리 뼈 위치(눈높이 1.65 m) 추적, 머리 메시는 ShadowsOnly",
-        "달리기와 장애물 결과(PERFECT/NORMAL/FAIL)별 Animator 상태가 연결되고 4박자 길이에 맞게 재생 속도 조정 — PlayMode 테스트로 상태 전환 확인",
-        "unity-verify.ps1 전체 통과"
-      ],
-      "status": "pending",
-      "attempts": 0,
-      "max_attempts": 3,
-      "notes": ""
-    },
-    {
-      "id": "T14",
-      "title": "적 모델 교체 + 전투 애니메이션 연결",
-      "type": "unity",
-      "skill": "unity-feature",
-      "depends_on": ["T13"],
-      "acceptance": [
-        "적 캡슐을 enemy_sword, enemy_spear, boss 모델로 교체하고 무기를 손 뼈에 붙임",
-        "공격 종류별 Animator 상태와 0.1~0.15초 크로스페이드로 연속 공격 연결, 공격 클립의 타격 순간이 판정 목표 박자와 일치 — PlayMode 테스트",
-        "처형(발차기 떨어뜨리기, 칼 뺏기, 찌르기)에서 플레이어·적 클립이 같은 박에 시작하고 시작 위치·방향이 맞춰짐",
-        "피격, 쓰러짐, 지붕에서 떨어짐, 윈드밀에 날아감 동작 연결",
-        "unity-verify.ps1 전체 통과"
-      ],
-      "status": "pending",
-      "attempts": 0,
-      "max_attempts": 3,
-      "notes": ""
-    },
-    {
-      "id": "T15",
-      "title": "맵 모델 교체 + 분위기 + 최종 빌드",
-      "type": "unity",
-      "skill": "unity-feature",
-      "depends_on": ["T14"],
-      "acceptance": [
-        "회색 상자 건물·담·성문·소품을 VARCO 모델로 교체 (충돌은 기본 도형 유지)",
-        "조선 분위기 조명(해 질 녘 방향광), 하늘색, 안개 설정",
-        "BuildScript.BuildFinal로 Builds/Final에 exe 생성",
-        "smoke-test-build.ps1 통과",
-        "unity-verify.ps1 전체 통과"
-      ],
-      "status": "pending",
-      "attempts": 0,
-      "max_attempts": 3,
-      "notes": ""
-    },
-    {
-      "id": "T16",
-      "title": "[사용자] 최종 플레이 확인",
-      "type": "human",
-      "depends_on": ["T15"],
-      "acceptance": [
-        "사용자에게 Builds/Final exe 경로 안내",
-        "사용자가 플레이 후 연출·동작 자연스러움·난이도 피드백을 줌, 수정 작업은 사용자 승인 후 tasks.json에 추가"
-      ],
-      "status": "pending",
-      "attempts": 0,
-      "max_attempts": 1,
-      "notes": ""
-    }
-  ]
+    "_help":  "status: pending | in_progress | done | failed | needs_user | blocked. Claude는 status, attempts, notes만 바꾼다. 작업 추가/삭제/기준 변경은 사용자 승인 후. 모든 수치는 docs/GDD.md와 Assets/Scripts/Core/GameConfig.cs에서 일치해야 한다.",
+    "tasks":  [
+                  {
+                      "id":  "T01",
+                      "title":  "기본 설정 + GameConfig 수치",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+
+                                     ],
+                      "acceptance":  [
+                                         "템플릿 잔여물(Readme, TutorialInfo, SampleScene과 그 에셋) 제거",
+                                         "Assets/Scripts, Assets/Editor, Assets/Tests/EditMode, Assets/Tests/PlayMode asmdef가 컴파일됨",
+                                         "GameConfig.cs에 GDD 수치 정의: BPM 120, 기본 이동 5 m/s, 속도 배율 1.00~1.30, PERFECT +0.05, FAIL ×0.8, 판정 창 ±60/±150 ms, 이른 입력 무시 −300 ms, 원 등장 2박자, 장애물 4박자, 체력 3, 타이밍 보정 −200~+200 ms(5 ms), 점수 300/100/0, 랭크 기준 90/75/50%, FOV 70/58, 채도 −60%",
+                                         "GameConfig 값이 GDD 값과 같은지 확인하는 EditMode 테스트 통과",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "done",
+                      "attempts":  1,
+                      "max_attempts":  3,
+                      "notes":  "템플릿 잔여물 제거, GameConfig에 GDD 4.1~4.9 수치, EditMode 테스트 6개. 평가 PASS(1회차)."
+                  },
+                  {
+                      "id":  "T02",
+                      "title":  "박자 시계 + 메트로놈 + 속도 배율",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "T01"
+                                     ],
+                      "acceptance":  [
+                                         "BeatClock: AudioSettings.dspTime 기준으로 현재 박자(소수 포함)를 계산하고, 일시정지/재개 시 박자가 이어진다",
+                                         "Metronome: AudioClip.Create로 만든 클릭음을 매 박 재생, 4박마다 강세",
+                                         "SpeedController: PERFECT → min(s+0.05, 1.30), NORMAL → 그대로, FAIL → max(s×0.8, 1.00) — 경계값 포함 EditMode 테스트 통과",
+                                         "속도 배율이 음악 재생 속도와 이동 속도(5 m/s × s)에 함께 적용되고, 1박자 이동 거리가 s와 무관하게 2.5 m인지 EditMode 테스트로 확인",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "in_progress",
+                      "attempts":  1,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T03",
+                      "title":  "판정 시스템 + 판정 원 UI + 회색 화면/줌 연출",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "T02"
+                                     ],
+                      "acceptance":  [
+                                         "Judge: 정답 키 ±60 ms → PERFECT, ±150 ms → NORMAL, 다른 키/−300~−150 ms 입력/+150 ms까지 무입력 → FAIL, −300 ms보다 이른 입력은 무시 — 경계값 EditMode 테스트 통과",
+                                         "타이밍 보정 값이 목표 시점에 더해지는지 EditMode 테스트 통과",
+                                         "입력은 Input System Keyboard.current의 방향키 4개 사용 (구 Input Manager 사용 없음, grep으로 확인)",
+                                         "판정 원 UI: 목표 2박자 전 등장, 바깥 원 지름 360→120 px로 선형 축소, 가운데 화살표 아이콘, 판정 후 \"PERFECT\"/\"NORMAL\"/\"FAIL\" 문구 0.6초 표시 — PlayMode 테스트로 등장 시점·크기·문구 확인",
+                                         "판정 중 URP Volume 채도 −60%, FOV 70→58 전환, 판정 후 0.2초 동안 복귀 — PlayMode 테스트로 값 확인",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T04",
+                      "title":  "회색 상자 맵 + 경로 + 차트",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "T03"
+                                     ],
+                      "acceptance":  [
+                                         "SceneBuilder.BuildAll이 Title, Game 씬을 코드로 생성하고 Build Settings에 등록",
+                                         "Game 씬: GDD 4.9의 구간 6개를 기본 도형으로 배치 (골목, 돌담·지붕 오르기, 기와지붕 높이 4~6 m·간격 3~5 m, 마당, 궁궐 담, 성문), 경로 폭 3 m, 조명 포함",
+                                         "웨이포인트 경로 전체 길이 600~700 m, 플레이어(캡슐 + 카메라 눈높이 1.65 m)가 박자에 맞춰 경로를 자동 이동 — PlayMode 테스트로 4박자 후 이동 거리 10 m(±0.1 m) 확인",
+                                         "차트 데이터(JSON 또는 ScriptableObject): 장애물 20개, 일반 적 4명, 포위 전투 1회(5명), 무사 1명, 각 이벤트의 박자·종류·키 — EditMode 테스트로 개수와 장애물 간 최소 간격 4박자 확인",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T05",
+                      "title":  "장애물 파쿠르 + 체력",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "T04"
+                                     ],
+                      "acceptance":  [
+                                         "장애물 6종(낮은 담/수레/항아리, 지붕 오르기·건너뛰기, 처마·빨랫줄, 뛰어내리기, 옆 장애물, 벽타기)이 GDD 3장의 키로 판정됨",
+                                         "판정 결과와 관계없이 장애물 통과에 4박자가 걸림 — PlayMode 테스트로 세 결과 모두 확인",
+                                         "결과별 이동 연출 3가지가 서로 다름 (회색 상자 단계에서는 카메라 궤적·흔들림으로 표현, 이름 있는 상태로 구분)",
+                                         "FAIL 시 체력 −1, 속도 ×0.8(최소 1.00), 음악 정지·되감기 없음 — PlayMode 테스트",
+                                         "체력 0이면 게임 오버 상태로 전환 — PlayMode 테스트",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T06",
+                      "title":  "일반 적 전투",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "T05"
+                                     ],
+                      "acceptance":  [
+                                         "적 등장 시 자동 이동 정지, 전투 끝나면 다음 마디 첫 박에 다시 이동 — PlayMode 테스트",
+                                         "칼 든 포졸·창 든 포졸: 공격 2회(2박자 간격) + 마무리 1회, 공격 종류별 키(가로베기 ↓, 내려베기·찌르기 ←/→, 올려베기 ↑, 마무리 ↑)",
+                                         "방어 또는 마무리 FAIL 시 체력 −1, 속도 ×0.8, 다음 마디부터 그 적의 첫 공격부터 다시 — PlayMode 테스트",
+                                         "마무리 PERFECT: 지붕 위면 발차기 처형, 땅 위면 칼 뺏기/찌르기 처형 상태로 분기 — EditMode 또는 PlayMode 테스트",
+                                         "처형 연출 중 Time.timeScale 0.3이 0.4초(실시간) 적용되고 BeatClock은 영향받지 않음 — PlayMode 테스트",
+                                         "공격 중 무기에 TrailRenderer와 잔상 오브젝트가 생기고, 카메라가 공격 지점을 따라감",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T07",
+                      "title":  "포위 전투 + 최종 무사",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "T06"
+                                     ],
+                      "acceptance":  [
+                                         "포위 전투: 적 5명(칼 3, 창 2)이 반지름 4 m 원으로 배치",
+                                         "1단계 순차 공격 5회(1박자 간격), 2단계 동시 공격 3회(원 1개·키 1개로 판정), 3단계 반 박자 간격 화살표 4개 — 차트대로 생성되는지 PlayMode 테스트",
+                                         "3단계 4개 모두 NORMAL 이상이면 5명 모두 쓰러짐 + 슬로모션 + 카메라 360° 회전, FAIL이면 체력 −1 후 다음 마디에 3단계만 다시 — PlayMode 테스트",
+                                         "1·2단계 FAIL은 체력 −1, 전투는 이어 감",
+                                         "무사: 공격 5회(1~2박자 간격 혼합) + 마무리, 쓰러뜨리면 스테이지 클리어 상태 — PlayMode 테스트",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T08",
+                      "title":  "UI/메뉴 + 점수·랭크 + 속도감 효과",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "T07"
+                                     ],
+                      "acceptance":  [
+                                         "타이틀: \"Rhythm-Action-Game\", \"시작\", \"설정\", \"종료\" (맑은 고딕)",
+                                         "설정: \"타이밍 보정\"(−200~+200, 5 ms 단위, 표시 예 \"+15ms\"), \"음량\"(0~100, 기본 80), \"돌아가기\", PlayerPrefs 저장·불러오기 — PlayMode 테스트",
+                                         "HUD: 하트 3개, \"x1.00\" 형식 속도, 점수, \"콤보 N\"(N≥2일 때만)",
+                                         "일시정지(Esc): \"일시정지\", \"계속\", \"타이틀로\", 일시정지 중 음악과 BeatClock 정지 — PlayMode 테스트",
+                                         "결과: \"스테이지 클리어\"/\"게임 오버\", \"PERFECT n\", \"NORMAL n\", \"FAIL n\", \"최고 속도 x1.30\" 형식, \"점수 n\", \"랭크 X\", \"다시 하기\", \"타이틀로\"",
+                                         "점수(300/100/0)와 랭크(S ≥90% 그리고 FAIL 0, A ≥75%, B ≥50%, C, 게임 오버 \"-\") EditMode 테스트 통과",
+                                         "속도감: s ≥ 1.10에서 화면 가장자리 집중선 표시, 세기 (s−1.0)/0.3, FOV 최대 +5° — PlayMode 테스트로 값 확인",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T09",
+                      "title":  "[사용자] 회색 상자 플레이 확인",
+                      "type":  "human",
+                      "depends_on":  [
+                                         "T08"
+                                     ],
+                      "acceptance":  [
+                                         "BuildScript.BuildGray로 Windows 빌드를 만들고 smoke-test-build.ps1 통과 후 사용자에게 exe 경로 안내",
+                                         "사용자가 플레이 후 판정 타이밍·난이도·속도감 피드백을 줌, 수정 작업은 사용자 승인 후 tasks.json에 추가"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  1,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T10",
+                      "title":  "정적 에셋 생성 (VARCO 7개)",
+                      "type":  "asset",
+                      "skill":  "varco3d-asset",
+                      "depends_on":  [
+                                         "T09"
+                                     ],
+                      "acceptance":  [
+                                         "시작 전에 사용자에게 예상 포인트(이미지 약 20~50 + 3D 200, 에셋당)를 알리고 승인받음",
+                                         "asset_specs.json의 weapon_sword, weapon_spear, house_giwa, wall_stone, gate, cart, jars를 GLB로 생성해 Assets/Art/Models/\u003cid\u003e.glb에 저장",
+                                         "check-glb.ps1로 각 파일 삼각형 5,000개 이하, 15 MB 이하 확인",
+                                         "asset_specs.json의 status/triangles/file_mb/calls 기록, 에셋당 이미지 최대 3회·3D 최대 2회 준수",
+                                         "unity-verify.ps1 전체 통과 (GLB 임포트 오류 없음)"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T11",
+                      "title":  "캐릭터 에셋 생성 + 리깅 + VARCO 동작 (4개)",
+                      "type":  "asset",
+                      "skill":  "varco3d-asset",
+                      "depends_on":  [
+                                         "T10"
+                                     ],
+                      "acceptance":  [
+                                         "시작 전에 사용자에게 예상 포인트를 알리고 승인받음",
+                                         "player(humanoid-fingers), enemy_sword, enemy_spear, boss(humanoid)를 T자 자세로 생성 → Rig → asset_specs의 animations별 Animate",
+                                         "결과를 FBX로 Assets/Art/Models/\u003cid\u003e/에 저장, 텍스처 연결, Unity Humanoid 아바타 valid=true (HumanoidImport 로그로 확인)",
+                                         "isPlus 동작이 거부되면 isPlus=false 동작으로 바꾸고 notes에 기록",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T12",
+                      "title":  "Mixamo 동작 받기 (로그인은 사용자, 다운로드는 Claude)",
+                      "type":  "asset",
+                      "skill":  "varco3d-asset",
+                      "depends_on":  [
+                                         "T11"
+                                     ],
+                      "acceptance":  [
+                                         "필요 동작 목록(파쿠르 넘기·미끄러지기·벽타기·휘청임·부딪혀 튕겨남, 숙여 피하기·옆 비키기, 찌르기·칼 뺏기·발차기·윈드밀 등)을 log.md에 먼저 적음",
+                                         "사용자가 앱 브라우저에서 Mixamo에 로그인한 뒤, Claude가 각 동작을 Without Skin, FBX, 30fps로 받아 Assets/Art/Animations/Mixamo/에 저장",
+                                         "모든 클립이 Humanoid로 임포트되고 player 아바타에 리타깃됨 (임포트 로그로 확인)",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  "사용자 결정(2026-11-11): Mixamo 다운로드는 Claude가 브라우저로 진행하고 로그인만 사용자가 한다. varco3d-asset 9번의 \u0027사용자가 받는다\u0027 규칙보다 우선."
+                  },
+                  {
+                      "id":  "T13",
+                      "title":  "툰 셰이딩 + 1인칭 전신 플레이어 교체",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "T12"
+                                     ],
+                      "acceptance":  [
+                                         "URP 툰 셰이더(2~3단계 명암) + 외곽선이 모든 캐릭터·에셋 머티리얼에 적용",
+                                         "플레이어 캡슐을 player 모델로 교체, 카메라는 머리 뼈 위치(눈높이 1.65 m) 추적, 머리 메시는 ShadowsOnly",
+                                         "달리기와 장애물 결과(PERFECT/NORMAL/FAIL)별 Animator 상태가 연결되고 4박자 길이에 맞게 재생 속도 조정 — PlayMode 테스트로 상태 전환 확인",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T14",
+                      "title":  "적 모델 교체 + 전투 애니메이션 연결",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "T13"
+                                     ],
+                      "acceptance":  [
+                                         "적 캡슐을 enemy_sword, enemy_spear, boss 모델로 교체하고 무기를 손 뼈에 붙임",
+                                         "공격 종류별 Animator 상태와 0.1~0.15초 크로스페이드로 연속 공격 연결, 공격 클립의 타격 순간이 판정 목표 박자와 일치 — PlayMode 테스트",
+                                         "처형(발차기 떨어뜨리기, 칼 뺏기, 찌르기)에서 플레이어·적 클립이 같은 박에 시작하고 시작 위치·방향이 맞춰짐",
+                                         "피격, 쓰러짐, 지붕에서 떨어짐, 윈드밀에 날아감 동작 연결",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T15",
+                      "title":  "맵 모델 교체 + 분위기 + 최종 빌드",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "T14"
+                                     ],
+                      "acceptance":  [
+                                         "회색 상자 건물·담·성문·소품을 VARCO 모델로 교체 (충돌은 기본 도형 유지)",
+                                         "조선 분위기 조명(해 질 녘 방향광), 하늘색, 안개 설정",
+                                         "BuildScript.BuildFinal로 Builds/Final에 exe 생성",
+                                         "smoke-test-build.ps1 통과",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T16",
+                      "title":  "[사용자] 최종 플레이 확인",
+                      "type":  "human",
+                      "depends_on":  [
+                                         "T15"
+                                     ],
+                      "acceptance":  [
+                                         "사용자에게 Builds/Final exe 경로 안내",
+                                         "사용자가 플레이 후 연출·동작 자연스러움·난이도 피드백을 줌, 수정 작업은 사용자 승인 후 tasks.json에 추가"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  1,
+                      "notes":  ""
+                  }
+              ]
 }
