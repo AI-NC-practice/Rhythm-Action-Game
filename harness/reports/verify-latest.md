@@ -1,7 +1,7 @@
 ﻿# Unity verify report
-time: 2026-11-12 15:32:37
+time: 2026-11-12 15:40:24
 
-## EditMode : total=105 passed=105 failed=0 skipped=0 result=Passed
+## EditMode : total=111 passed=111 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Config_MatchGddBetaB1
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_LabelPose_PopThenRise_045s
@@ -34,6 +34,12 @@ time: 2026-11-12 15:32:37
   - [Passed] RhythmActionGame.Tests.B05_FxConfigTests.B05_AllPresets_ReleaseWithin05s_AndEnvelope
   - [Passed] RhythmActionGame.Tests.B05_FxConfigTests.B05_Presets_MatchProposalSection2
   - [Passed] RhythmActionGame.Tests.B05_FxConfigTests.B05_Rules_MatchProposalSection4
+  - [Passed] RhythmActionGame.Tests.B08_SfxSynthTests.B08_AllKinds_Synthesize_NormalizedAndFadeOut
+  - [Passed] RhythmActionGame.Tests.B08_SfxSynthTests.B08_BackingPattern_OneBar_AccentFirst
+  - [Passed] RhythmActionGame.Tests.B08_SfxSynthTests.B08_SoundsPerSituation_MatchProposalColumn
+  - [Passed] RhythmActionGame.Tests.B08_SfxSynthTests.B08_Timbre_LowIsLow_MetalIsHigh_JingRings
+  - [Passed] RhythmActionGame.Tests.B08_SfxSynthTests.B08_Wav_Header16BitMono44k
+  - [Passed] RhythmActionGame.Tests.B08_SfxSynthTests.B08_WavFiles_InAssetsAudioSfx
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_BeatAndSpeed_MatchGdd41
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_Judge_MatchGdd42
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_ObstacleAndCombat_MatchGdd44To46
@@ -108,7 +114,7 @@ time: 2026-11-12 15:32:37
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_SpeedFx_Intensity
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_Texts_MatchGdd48
 
-## PlayMode : total=76 passed=76 failed=0 skipped=0 result=Passed
+## PlayMode : total=80 passed=80 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -148,6 +154,10 @@ time: 2026-11-12 15:32:37
   - [Passed] RhythmActionGame.Tests.B07_SituationFxTests.B07_F_Surround_TurnLowWide_WindmillFovShockwave_SlowMoOnlyDesignated
   - [Passed] RhythmActionGame.Tests.B07_SituationFxTests.B07_G_Parkour_JumpLand_FailRedBorder_EventSlowMo
   - [Passed] RhythmActionGame.Tests.B07_SituationFxTests.B07_G_ParkourFail_Vignette03
+  - [Passed] RhythmActionGame.Tests.B08_SfxPlayerTests.B08_Duck_OnlyMusicVolume_DeepestWins
+  - [Passed] RhythmActionGame.Tests.B08_SfxPlayerTests.B08_GameScene_JangguBacking_ReplacesMetronome_BeatAccurate
+  - [Passed] RhythmActionGame.Tests.B08_SfxPlayerTests.B08_Pool8_SameKindMax3
+  - [Passed] RhythmActionGame.Tests.B08_SfxPlayerTests.B08_Presets_PlaySoundsAndDuck
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_ChapterStartBeats_MatchSections
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(1)
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(4)

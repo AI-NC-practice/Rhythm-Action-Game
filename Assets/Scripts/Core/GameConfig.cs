@@ -344,6 +344,37 @@ namespace RhythmActionGame
             /// <summary>적 공격 예고: 목표 박자 몇 박 전에 (휘두르기 직전, 제안서 2장 A).</summary>
             public const float AttackWarnLeadBeats = 0.5f;
 
+            // ---------- 효과음·반주 (GDD-beta B7, 제안서 2장 소리 열) ----------
+            /// <summary>효과음 AudioSource 풀 크기 (제안서 5장: 8개).</summary>
+            public const int SfxPoolSize = 8;
+            /// <summary>같은 종류 효과음 동시 재생 수 상한 (제안서 4장).</summary>
+            public const int SfxSameKindMax = 3;
+            /// <summary>음악 덕킹 (dB, 초): PERFECT 패링 −4 dB 0.15초, 피격 −8 dB 0.3초, 처형·윈드밀 −6 dB 0.5초.</summary>
+            public const float DuckParryDb = -4f;
+            public const float DuckParrySeconds = 0.15f;
+            public const float DuckHitDb = -8f;
+            public const float DuckHitSeconds = 0.3f;
+            public const float DuckExecutionDb = -6f;
+            public const float DuckExecutionSeconds = 0.5f;
+            /// <summary>반주 타격을 얼마나 미리 예약할지 (초). 메트로놈과 같음.</summary>
+            public const double BackingLookAheadSeconds = 0.1;
+            /// <summary>
+            /// 장단 반주 한 마디 (박, 소리). 덩(궁+채) − 쿵 − 덕 − 덩 − 쿵 − 덕. GDD-beta에 없음, Claude가 정함 (굿거리 느낌을 4/4로 줄임).
+            /// </summary>
+            public static readonly float[] BackingOffsets = { 0f, 1f, 1.5f, 2f, 3f, 3.5f };
+            public static readonly SfxKind[][] BackingHits =
+            {
+                new[] { SfxKind.JangguKung, SfxKind.JangguDeok },
+                new[] { SfxKind.JangguKung },
+                new[] { SfxKind.JangguDeok },
+                new[] { SfxKind.JangguKung, SfxKind.JangguDeok },
+                new[] { SfxKind.JangguKung },
+                new[] { SfxKind.JangguDeok },
+            };
+            /// <summary>반주 타격별 음량 (마디 첫 박 강세).</summary>
+            public static readonly float[] BackingVolumes = { 1f, 0.7f, 0.6f, 0.8f, 0.7f, 0.6f };
+
+
             public static readonly FxPreset[] All =
             {
                 AttackWarn, ParryPerfect, DodgePerfect, ParryPerfectFinale, DefendNormal, Hit, Execution, ExecutionKick,

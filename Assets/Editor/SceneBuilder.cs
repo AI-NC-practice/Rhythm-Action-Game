@@ -92,10 +92,17 @@ namespace RhythmActionGame.EditorTools
             music.playOnAwake = false;
             var clock = systems.AddComponent<BeatClock>();
             clock.music = music;
-            var metroGo = new GameObject("Metronome", typeof(AudioSource));
-            metroGo.transform.SetParent(systems.transform);
-            var metro = metroGo.AddComponent<Metronome>();
-            metro.clock = clock;
+            // 효과음 + 합성 장단 반주 (GDD-beta B7: 메트로놈 대신)
+            var sfxGo = new GameObject("Sfx");
+            sfxGo.transform.SetParent(systems.transform);
+            var sfx = sfxGo.AddComponent<SfxPlayer>();
+            sfx.clips = SfxSynthTool.Generate();
+            sfx.musicSources.Add(music);
+            var backingGo = new GameObject("JangguBacking");
+            backingGo.transform.SetParent(systems.transform);
+            var backing = backingGo.AddComponent<JangguBacking>();
+            backing.clock = clock;
+            backing.sfx = sfx;
             var judge = systems.AddComponent<JudgeSystem>();
             judge.clock = clock;
 
@@ -180,6 +187,7 @@ namespace RhythmActionGame.EditorTools
             vfxPool.worldCamera = cam;
             vfxPool.particleMaterial = FxParticleMat();
             presentation.vfxPool = vfxPool;
+            presentation.sfx = sfx;
             var hooks = systems.AddComponent<PresentationHooks>();   // 게임 이벤트 → 연출 (B07)
             hooks.presentation = presentation;
             hooks.director = director;
@@ -197,6 +205,7 @@ namespace RhythmActionGame.EditorTools
             boot.player = follower;
             boot.playerCamera = cam;
             boot.presentation = presentation;
+            boot.backing = backing;
 
             BuildGameExtra(boot, chart);
             EditorSceneManager.SaveScene(scene, GameScenePath);

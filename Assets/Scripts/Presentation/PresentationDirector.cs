@@ -33,6 +33,9 @@ namespace RhythmActionGame
         public ScreenFx screenFx;
         /// <summary>이펙트 풀 (B06). 없으면 건너뛴다.</summary>
         public VfxPool vfxPool;
+        /// <summary>효과음 (B08). 없으면 건너뛴다.</summary>
+        public SfxPlayer sfx;
+        readonly List<SfxKind> sfxTmp = new List<SfxKind>();
 
         readonly List<ScreenPulse> screenTmp = new List<ScreenPulse>();
         readonly List<FxLooks.Vfx> vfxTmp = new List<FxLooks.Vfx>();
@@ -84,6 +87,13 @@ namespace RhythmActionGame
             FxLooks.For(e.Preset.Name, screenTmp, vfxTmp);
             if (screenFx != null) screenFx.Add(screenTmp);
             if (vfxPool != null) foreach (var v in vfxTmp) vfxPool.Play(v.Kind, e.Position, e.Preset.Grade, v.Count);
+            if (sfx != null)
+            {
+                sfxTmp.Clear();
+                FxLooks.Sounds(e.Preset.Name, sfxTmp, out float duckDb, out float duckSec);
+                foreach (var k in sfxTmp) sfx.Play(k);
+                if (duckDb < 0f) sfx.Duck(duckDb, duckSec);
+            }
             LastPlayed = e.Preset.Name;
             Played?.Invoke(e);
             return slow;

@@ -85,5 +85,39 @@ namespace RhythmActionGame
             screen.Add(new ScreenPulse(ScreenChannel.Exposure, GameConfig.Fx.FinisherWarnExposure, seconds));
             screen.Add(new ScreenPulse(ScreenChannel.Vignette, GameConfig.Fx.FinisherWarnVignette, seconds));
         }
+        /// <summary>
+        /// 연출 이름별 효과음과 음악 덕킹 (제안서 2장 소리 열). duckDb 0이면 덕킹 없음.
+        /// </summary>
+        public static void Sounds(string preset, List<SfxKind> sfx, out float duckDb, out float duckSeconds)
+        {
+            duckDb = 0f; duckSeconds = 0f;
+            switch (preset)
+            {
+                case "AttackWarn": sfx.Add(SfxKind.Glint); sfx.Add(SfxKind.Whoosh); break;                     // A: "칭" + 바람
+                case "ParryPerfect":
+                case "ParryPerfectFinale":                                                                      // B: 높은 "챙" + 저음 "쿵", −4 dB 0.15초
+                    sfx.Add(SfxKind.MetalClang); sfx.Add(SfxKind.LowBoom);
+                    duckDb = GameConfig.Fx.DuckParryDb; duckSeconds = GameConfig.Fx.DuckParrySeconds; break;
+                case "DodgePerfect": sfx.Add(SfxKind.Whoosh); break;                                            // B 회피: 바람
+                case "DefendNormal": sfx.Add(SfxKind.DullClank); break;                                         // C: 둔한 "탕"
+                case "Hit":                                                                                     // D: 타격 + 저음 + 귀 울림, −8 dB 0.3초
+                    sfx.Add(SfxKind.BodyHit); sfx.Add(SfxKind.LowBoom); sfx.Add(SfxKind.EarRing);
+                    duckDb = GameConfig.Fx.DuckHitDb; duckSeconds = GameConfig.Fx.DuckHitSeconds; break;
+                case "Execution":
+                case "ExecutionKick":                                                                           // E: 무거운 타격 + 깊은 저음 + 잔향(징), −6 dB 0.5초
+                    sfx.Add(SfxKind.BodyHit); sfx.Add(SfxKind.LowBoom); sfx.Add(SfxKind.Jing);
+                    duckDb = GameConfig.Fx.DuckExecutionDb; duckSeconds = GameConfig.Fx.DuckExecutionSeconds; break;
+                case "SurroundTurn": case "Simultaneous": sfx.Add(SfxKind.Whoosh); break;                       // F: 칼이 지나가는 바람
+                case "SimultaneousPerfect": sfx.Add(SfxKind.Whoosh); sfx.Add(SfxKind.MetalClang); break;
+                case "WindmillArrow": sfx.Add(SfxKind.Buk); break;                                              // F3: 화살표마다 북
+                case "WindmillFinish":                                                                          // F3: 바람 상승 → 초저음 "쿵" + 넓은 잔향
+                    sfx.Add(SfxKind.Whoosh); sfx.Add(SfxKind.LowBoom); sfx.Add(SfxKind.Jing);
+                    duckDb = GameConfig.Fx.DuckExecutionDb; duckSeconds = GameConfig.Fx.DuckExecutionSeconds; break;
+                case "JumpPerfect": sfx.Add(SfxKind.Whoosh); break;                                             // G: 도약 바람
+                case "LandPerfect": case "LandNormal": sfx.Add(SfxKind.DustPuff); break;                        // G: 착지 먼지
+                case "LandFail": case "ParkourFail": sfx.Add(SfxKind.BodyHit); sfx.Add(SfxKind.DustPuff); break;
+                case "EventPerfectSlow": sfx.Add(SfxKind.Whoosh); sfx.Add(SfxKind.Buk); break;
+            }
+        }
     }
 }

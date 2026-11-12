@@ -18,6 +18,7 @@ namespace RhythmActionGame
         public ResultScreen result;
         public SpeedFx speedFx;
         public PresentationDirector presentation;
+        public JangguBacking backing;
         public bool autoStart = true;
 
         public static GameBootstrap Instance { get; private set; }
@@ -57,6 +58,7 @@ namespace RhythmActionGame
             player.ResetTo(runBeat);
             clock.ResetSpeed();
             clock.StartClock();
+            if (backing != null) backing.ResetSchedule();
             if (director != null) director.ResetStage(runBeat);
         }
     }

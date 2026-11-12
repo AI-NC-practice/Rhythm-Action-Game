@@ -92,3 +92,6 @@ PresentationHooks를 만들었다. 게임 코드를 바꾸지 않고 판정·사
 - 슬로모션 후보: 무사 마지막 패링과 포위 2단계 PERFECT는 여기서 요청하고, 사건 PERFECT는 빈도 제한을 통과했을 때만 연출한다.
 
 고친 것은 두 가지다. ① 씬이 바뀌면 Hit Stop을 풀 때 이미 지워진 적을 건드려 오류가 났다. ② 노출 합치기 규칙을 바꿨다. 밝히는 섬광이 하나라도 있으면 그 최댓값을, 없으면 가장 어두운 값을 쓴다. 그래야 처형 예고로 어두운 화면에서도 PERFECT 섬광이 보인다. 회색 상자 빌드와 smoke-test를 통과했고, -startGame으로 25초 돌렸을 때 오류가 없었다. 평가 PASS(1회차), EditMode 105/105, PlayMode 76/76. 다음 작업: B08.
+
+### 2026-11-12 B08 [beta] 합성 효과음 + 장단 반주 — done
+SfxSynth로 효과음 13종(금속 챙, 저음 쿵, 둔한 탕, 타격, 바람, 먼지, 귀 울림, 북, 징, 칼날 칭, UI, 장구 궁편·채편)을 코드로 합성했다. 에디터 도구 SfxSynthTool은 이 소리를 Assets/Audio/Sfx/Sfx_*.wav(16비트 모노)로 저장하며, SceneBuilder.BuildAll이 이 도구를 부른다. SfxPlayer는 AudioSource 8개를 쓰고 같은 종류는 동시에 3개까지만 낸다. 덕킹은 Music 그룹 음량만 줄이고(겹치면 가장 깊은 값) 재생 위치와 속도는 건드리지 않는다. AudioMixer 에셋은 코드로 만드는 공개 API가 없어 SfxPlayer가 그룹 역할을 한다. 상황별 소리는 FxLooks.Sounds에 정리했다(PERFECT 패링 챙+쿵 −4 dB, 피격 타격+쿵+귀 울림 −8 dB, 처형 타격+쿵+징 −6 dB, 윈드밀 화살표 북 등). Game 씬에서는 메트로놈 대신 JangguBacking이 마디마다 덩−쿵−덕−덩−쿵−덕(첫 박 강세)을 PlayScheduled로 예약한다. 평가 PASS(1회차), EditMode 111/111, PlayMode 80/80. 다음 작업: B09(사람 확인).

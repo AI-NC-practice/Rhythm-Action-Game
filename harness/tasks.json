@@ -351,10 +351,10 @@
                                          "합성 장단 반주가 메트로놈을 대신하고 박자 시계와 맞음(첫 박 오차 10 ms 이하) — 테스트",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "in_progress",
+                      "status":  "done",
                       "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "SfxSynth 13종 + WAV(Assets/Audio/Sfx), SfxPlayer(풀 8, 같은 종류 3, Music 그룹 덕킹), 상황별 소리, JangguBacking(덩-쿵-덕-덩-쿵-덕, PlayScheduled). AudioMixer 대신 SfxPlayer가 그룹 역할. 평가 PASS 1회차."
                   },
                   {
                       "id":  "B09",
