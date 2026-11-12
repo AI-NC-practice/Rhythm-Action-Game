@@ -1,5 +1,5 @@
 ﻿# Unity verify report
-time: 2026-11-12 16:27:04
+time: 2026-11-12 16:30:45
 
 ## EditMode : total=115 passed=115 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
@@ -118,7 +118,7 @@ time: 2026-11-12 16:27:04
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_SpeedFx_Intensity
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_Texts_MatchGdd48
 
-## PlayMode : total=86 passed=86 failed=0 skipped=0 result=Passed
+## PlayMode : total=89 passed=89 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -168,6 +168,9 @@ time: 2026-11-12 16:27:04
   - [Passed] RhythmActionGame.Tests.B11_StuckRingTests.B11_WindmillFailRetry_CancelledRingsRemoved
   - [Passed] RhythmActionGame.Tests.B12_InputTimingTests.B12_EventTime_UsedInsteadOfFrameTime
   - [Passed] RhythmActionGame.Tests.B12_InputTimingTests.B12_Ring_DrawnAheadByDisplayLatency
+  - [Passed] RhythmActionGame.Tests.B13_InputFeedbackTests.B13_EarlyPress_PulseAndTooEarlyLabel_NoJudgement
+  - [Passed] RhythmActionGame.Tests.B13_InputFeedbackTests.B13_EveryPress_ReportsOutcome
+  - [Passed] RhythmActionGame.Tests.B13_InputFeedbackTests.B13_PressWithoutRing_KeyEchoBottomCenter
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_ChapterStartBeats_MatchSections
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(1)
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(4)

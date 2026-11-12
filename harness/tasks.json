@@ -425,10 +425,10 @@
                                          "GDD-beta B8.2: 원이 없을 때 누른 키는 화면 아래 가운데에 작은 키 표시 — 테스트",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "in_progress",
+                      "status":  "done",
                       "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "JudgeSystem.InputReceived(Judged/TooEarly/NoCue), 원 눌림 펄스, 빠름 표시, 누른 키 표시. 평가 PASS 1회차."
                   },
                   {
                       "id":  "B14",
@@ -444,8 +444,8 @@
                                          "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "in_progress",
+                      "attempts":  1,
                       "max_attempts":  3,
                       "notes":  ""
                   },

@@ -20,6 +20,17 @@ namespace RhythmActionGame
         public object Tag;
     }
 
+    /// <summary>입력 하나가 어떻게 처리됐는지 (GDD-beta B8.2 입력 반응).</summary>
+    public enum InputOutcome
+    {
+        /// <summary>판정됨 (PERFECT/NORMAL/FAIL).</summary>
+        Judged,
+        /// <summary>목표 −300 ms보다 일러 무시됨.</summary>
+        TooEarly,
+        /// <summary>판정할 원이 없음.</summary>
+        NoCue,
+    }
+
     /// <summary>
     /// 판정 창을 관리한다 (GDD 4.2). Input System의 Keyboard.current 방향키로 입력을 받고,
     /// 순수 함수 JudgeRules로 판정한 뒤 BeatClock의 속도 배율에 반영한다.
@@ -38,6 +49,8 @@ namespace RhythmActionGame
         public event Action<JudgeCue, Judgement> CueJudged;
         /// <summary>판정 없이 취소되거나 모두 지워질 때 (판정 원을 지우는 데 쓴다, B11).</summary>
         public event Action<JudgeCue> CueCancelled;
+        /// <summary>방향키 입력마다 (키, 가장 이른 원 또는 null, 처리 결과). 입력 반응 표시용 (B13).</summary>
+        public event Action<ArrowKey, JudgeCue, InputOutcome> InputReceived;
 
         public IReadOnlyList<JudgeCue> Cues => cues;
 
@@ -132,10 +145,18 @@ namespace RhythmActionGame
                 if (JudgeRules.TryJudge(time, TargetTime(cue), offset, key, cue.Key, out var r))
                 {
                     Resolve(cue, r);
+                    InputReceived?.Invoke(key, cue, InputOutcome.Judged);
+                }
+                else
+                {
+                    // 무시된 입력: 너무 이름(−300 ms 전) 또는 창이 이미 지남(다음 Tick에 무입력 FAIL)
+                    bool early = JudgeRules.DeltaMs(time, TargetTime(cue), offset) < 0;
+                    InputReceived?.Invoke(key, cue.Appeared ? cue : null, early && cue.Appeared ? InputOutcome.TooEarly : InputOutcome.NoCue);
                 }
                 // 가장 이른 미판정 원 하나만 본다. 무시된 입력(너무 이름)은 뒤의 원에도 너무 이르다.
                 return;
             }
+            InputReceived?.Invoke(key, null, InputOutcome.NoCue);
         }
 
         /// <summary>원 등장과 무입력 FAIL을 처리한다. Update에서 매 프레임 호출된다.</summary>

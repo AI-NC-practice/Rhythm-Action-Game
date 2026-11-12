@@ -220,6 +220,18 @@ namespace RhythmActionGame
         /// <summary>입력 이벤트 시각을 믿는 최대 과거 (초). 이보다 오래된 시각은 잘라 쓴다. Claude가 정함.</summary>
         public const double InputMaxAgeSeconds = 0.1;
 
+        // ---------------- GDD-beta B8.2 입력 반응 (Claude가 정함) ----------------
+        /// <summary>키를 누르면 가장 이른 원이 이 배율로 커졌다 돌아옴.</summary>
+        public const float InputPulseScale = 1.15f;
+        public const float InputPulseSeconds = 0.12f;
+        /// <summary>"빠름" 표시: 원 아래 110 px, 36 pt, 0.4초.</summary>
+        public const int EarlyLabelFontSize = 36;
+        public const float EarlyLabelSeconds = 0.4f;
+        /// <summary>원이 없을 때 누른 키 표시: 화면 아래 가운데(아래에서 120 px), 48 pt, 0.3초.</summary>
+        public const int KeyEchoFontSize = 48;
+        public const float KeyEchoSeconds = 0.3f;
+        public const float KeyEchoBottomPx = 120f;
+
         // ---------------- GDD-beta B1.4 판정 화면 ----------------
         /// <summary>판정 중 노출 (URP Color Adjustments postExposure, EV).</summary>
         public const float JudgeExposure = -0.4f;

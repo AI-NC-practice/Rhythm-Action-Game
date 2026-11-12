@@ -29,6 +29,7 @@ namespace RhythmActionGame
             public Image Outer, Target, Button, Glow, Chevron;
             public Text Arrow;
             public float AppearedAt;      // 실제 시간
+            public float PulseAt = -999f; // 키를 눌러 반응한 시각 (B13)
             public bool Locked;
             public bool Clamped;          // 투영점이 안전 타원 밖이었음
             public Chain Chain;
@@ -54,6 +55,20 @@ namespace RhythmActionGame
         readonly List<Ring> rings = new List<Ring>();
         readonly List<Label> labels = new List<Label>();
         readonly List<Chain> chains = new List<Chain>();
+
+        /// <summary>잠깐 떠 있다 사라지는 글자 ("빠름", 누른 키 표시 — GDD-beta B8.2).</summary>
+        public class Floater
+        {
+            public Text Text;
+            public float ShownAt, Seconds;
+            public Vector2 BasePos;
+        }
+        readonly List<Floater> earlyLabels = new List<Floater>();
+        readonly List<Floater> keyEchoes = new List<Floater>();
+        public IReadOnlyList<Floater> EarlyLabels => earlyLabels;
+        public IReadOnlyList<Floater> KeyEchoes => keyEchoes;
+        static readonly Color EarlyColor = new Color(1f, 0.6f, 0.2f);
+        static readonly Color EchoColor = new Color(1f, 1f, 1f, 0.8f);
         RectTransform canvasRect;
 
         public IReadOnlyList<Ring> Rings => rings;
@@ -82,6 +97,7 @@ namespace RhythmActionGame
                 judge.CueAppeared += OnAppeared;
                 judge.CueJudged += OnJudged;
                 judge.CueCancelled += OnCancelled;
+                judge.InputReceived += OnInput;
             }
         }
 
@@ -91,6 +107,7 @@ namespace RhythmActionGame
             judge.CueAppeared -= OnAppeared;
             judge.CueJudged -= OnJudged;
             judge.CueCancelled -= OnCancelled;
+            judge.InputReceived -= OnInput;
         }
 
         void OnEnable() { if (judge != null) Bind(judge, clock, worldCamera); }
@@ -214,6 +231,8 @@ namespace RhythmActionGame
                 if (rings[i].Cue.Judged) { if (rings[i].Root != null) Destroy(rings[i].Root.gameObject); rings.RemoveAt(i); }
             foreach (var r in rings) UpdateRing(r);
             float now = RealTime();
+            FadeFloaters(earlyLabels, now);
+            FadeFloaters(keyEchoes, now);
             for (int i = labels.Count - 1; i >= 0; i--)
             {
                 var l = labels[i];
@@ -244,8 +263,52 @@ namespace RhythmActionGame
             return alive;
         }
 
+        /// <summary>방향키 입력 반응 (GDD-beta B8.2): 원 펄스, 너무 이르면 "빠름", 원이 없으면 누른 키를 아래에 작게.</summary>
+        void OnInput(ArrowKey key, JudgeCue cue, InputOutcome outcome)
+        {
+            EnsureLabelLayer();
+            float now = RealTime();
+            Ring ring = null;
+            if (cue != null) foreach (var r in rings) if (r.Cue == cue) ring = r;
+            if (ring != null) ring.PulseAt = now;
+            if (outcome == InputOutcome.TooEarly && ring != null)
+            {
+                var t = UiFactory.CreateText(labelLayer, "EarlyLabel", UiText.TooEarly, GameConfig.EarlyLabelFontSize, EarlyColor, new Vector2(300, 60));
+                var pos = RingLayout.LabelPosition(ring.Root.anchoredPosition);
+                t.rectTransform.anchoredPosition = pos;
+                earlyLabels.Add(new Floater { Text = t, ShownAt = now, Seconds = GameConfig.EarlyLabelSeconds, BasePos = pos });
+            }
+            else if (outcome == InputOutcome.NoCue)
+            {
+                var t = UiFactory.CreateText(labelLayer, "KeyEcho", JudgeRules.Arrow(key), GameConfig.KeyEchoFontSize, EchoColor, new Vector2(120, 80));
+                var pos = new Vector2(0f, -Size().y * 0.5f + GameConfig.KeyEchoBottomPx);
+                t.rectTransform.anchoredPosition = pos;
+                keyEchoes.Add(new Floater { Text = t, ShownAt = now, Seconds = GameConfig.KeyEchoSeconds, BasePos = pos });
+            }
+        }
+
+        void FadeFloaters(List<Floater> list, float now)
+        {
+            for (int i = list.Count - 1; i >= 0; i--)
+            {
+                var f = list[i];
+                float u = (now - f.ShownAt) / f.Seconds;
+                if (u >= 1f || f.Text == null) { if (f.Text != null) Destroy(f.Text.gameObject); list.RemoveAt(i); continue; }
+                var c = f.Text.color; c.a = 1f - u * u; f.Text.color = c;
+                f.Text.rectTransform.anchoredPosition = f.BasePos + new Vector2(0f, 12f * u);
+            }
+        }
+
+        /// <summary>키 반응 펄스 배율 (1 → 1.15 → 1, 0.12초).</summary>
+        public static float PulseScale(float age)
+        {
+            if (age < 0f || age >= GameConfig.InputPulseSeconds) return 1f;
+            return 1f + (GameConfig.InputPulseScale - 1f) * Mathf.Sin(age / GameConfig.InputPulseSeconds * Mathf.PI);
+        }
+
         void UpdateRing(Ring r)
         {
+            r.Root.localScale = Vector3.one * PulseScale(RealTime() - r.PulseAt);
             if (clock != null)
             {
                 double lead = displayLatencyMs / 1000.0 * clock.SpeedMultiplier / GameConfig.SecondsPerBeat;   // 지연 보정 (박)

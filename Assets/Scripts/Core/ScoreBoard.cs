@@ -74,6 +74,8 @@ namespace RhythmActionGame
         public const string Cleared = "스테이지 클리어";
         public const string GameOver = "게임 오버";
         public const string Retry = "다시 하기";
+        /// <summary>너무 일찍 눌러 무시된 입력 (GDD-beta B8.2).</summary>
+        public const string TooEarly = "빠름";
 
         public static string Speed(float s) => "x" + s.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture);
         public static string Combo(int n) => n >= GameConfig.ComboShowMin ? $"콤보 {n}" : "";
@@ -85,7 +87,7 @@ namespace RhythmActionGame
         public static string Rank(string r) => $"랭크 {r}";
 
         /// <summary>UI에 나오는 모든 한글·기호 (폰트 글자 검사용).</summary>
-        public const string AllGlyphs = Title + Start + Settings + Quit + TimingOffset + Volume + Back + Paused + Continue + ToTitle + Cleared + GameOver + Retry
+        public const string AllGlyphs = Title + Start + Settings + Quit + TimingOffset + Volume + Back + Paused + Continue + ToTitle + Cleared + GameOver + Retry + TooEarly
             + "콤보 최고 속도 점수 랭크 PERFECTNORMALFAIL x0123456789.+-ms SABC↑↓←→";
     }
 
