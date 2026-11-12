@@ -311,10 +311,10 @@
                                          "판정 원이 모든 효과보다 위에 그려짐 (Overlay Canvas 20) — 테스트",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "in_progress",
+                      "status":  "done",
                       "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "ScreenFx(Volume 20, 항목별 최댓값), VfxFactory(붓·먹 질감 텍스처, 파티클), VfxPool(섬광 하나·등급·0.6, 월드 풀), FxLooks(프리셋별 화면·이펙트). 평가 PASS 1회차."
                   },
                   {
                       "id":  "B07",
@@ -331,8 +331,8 @@
                                          "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과 (-startGame 포함)",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "in_progress",
+                      "attempts":  1,
                       "max_attempts":  3,
                       "notes":  ""
                   },

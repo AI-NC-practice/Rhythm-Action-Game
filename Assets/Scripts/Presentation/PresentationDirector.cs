@@ -29,6 +29,13 @@ namespace RhythmActionGame
     {
         public CameraFx cameraFx;
         public TimeFx timeFx;
+        /// <summary>화면 효과 (B06). 없으면 건너뛴다.</summary>
+        public ScreenFx screenFx;
+        /// <summary>이펙트 풀 (B06). 없으면 건너뛴다.</summary>
+        public VfxPool vfxPool;
+
+        readonly List<ScreenPulse> screenTmp = new List<ScreenPulse>();
+        readonly List<FxLooks.Vfx> vfxTmp = new List<FxLooks.Vfx>();
 
         public static PresentationDirector Instance { get; private set; }
 
@@ -40,6 +47,7 @@ namespace RhythmActionGame
             {
                 enabledFx = value;
                 if (!value && cameraFx != null) cameraFx.ClearAll();
+                if (!value && screenFx != null) screenFx.ClearAll();
                 EnabledChanged?.Invoke(value);
             }
         }
@@ -72,6 +80,10 @@ namespace RhythmActionGame
             if (!enabledFx) return slow;
             if (e.Preset.HitStop > 0 && timeFx != null && !slow) timeFx.HitStop(e.Preset.HitStop, e.Targets);
             if (cameraFx != null) cameraFx.Add(e.Preset, e.Side);
+            screenTmp.Clear(); vfxTmp.Clear();
+            FxLooks.For(e.Preset.Name, screenTmp, vfxTmp);
+            if (screenFx != null) screenFx.Add(screenTmp);
+            if (vfxPool != null) foreach (var v in vfxTmp) vfxPool.Play(v.Kind, e.Position, e.Preset.Grade, v.Count);
             LastPlayed = e.Preset.Name;
             Played?.Invoke(e);
             return slow;
@@ -94,6 +106,7 @@ namespace RhythmActionGame
         public void ResetAll()
         {
             if (cameraFx != null) cameraFx.ClearAll();
+            if (screenFx != null) screenFx.ClearAll();
             if (timeFx != null) timeFx.ResetHistory();
         }
     }

@@ -166,6 +166,20 @@ namespace RhythmActionGame.EditorTools
             presentation.cameraFx = cameraFx;
             presentation.timeFx = timeFx;
             director.presentation = presentation;
+            var screenGo = new GameObject("ScreenFx");
+            screenGo.transform.SetParent(systems.transform, false);
+            var screenFx = screenGo.AddComponent<ScreenFx>();
+            screenFx.judgeFx = fx;
+            screenFx.judge = judge;
+            presentation.screenFx = screenFx;
+            var vfxGo = new GameObject("Vfx");
+            vfxGo.transform.SetParent(systems.transform, false);
+            var flashCanvas = UiFactory.CreateCanvas("ScreenFlashCanvas", GameConfig.JudgeFxCanvasOrder);
+            var vfxPool = vfxGo.AddComponent<VfxPool>();
+            vfxPool.flashLayer = (RectTransform)flashCanvas.transform;
+            vfxPool.worldCamera = cam;
+            vfxPool.particleMaterial = FxParticleMat();
+            presentation.vfxPool = vfxPool;
 
             var boot = new GameObject("GameBootstrap").AddComponent<GameBootstrap>();
             boot.director = director;
@@ -433,6 +447,22 @@ namespace RhythmActionGame.EditorTools
         }
 
         /// <summary>회색 상자용 URP Lit 머티리얼 (에셋으로 저장해 빌드에 포함).</summary>
+        /// <summary>이펙트 파티클 머티리얼 (URP Particles/Unlit 가산, GDD-beta B5). 에셋으로 두어 빌드에 셰이더가 들어가게 한다.</summary>
+        static Material FxParticleMat()
+        {
+            string path = $"{MaterialsDir}/VfxParticle.mat";
+            var m = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (m == null)
+            {
+                Directory.CreateDirectory(MaterialsDir);
+                m = new Material(Shader.Find("Universal Render Pipeline/Particles/Unlit"));
+                AssetDatabase.CreateAsset(m, path);
+            }
+            VfxFactory.SetupAdditive(m);
+            EditorUtility.SetDirty(m);
+            return m;
+        }
+
         public static Material Mat(string name, Color color)
         {
             string path = $"{MaterialsDir}/{name}.mat";

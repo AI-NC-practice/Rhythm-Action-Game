@@ -245,6 +245,60 @@ namespace RhythmActionGame
             /// <summary>사건·전투 슬로모션 빈도 제한 (박자): 직전 슬로모션 시작 후 이 박자 안이면 거절.</summary>
             public const float SlowMoMinGapBeats = 16f;
 
+            // ---------- 화면 효과 (ScreenFx, 제안서 2장) ----------
+            /// <summary>섬광 불투명도 상한 (제안서 1.3·4장).</summary>
+            public const float FlashMaxAlpha = 0.6f;
+            /// <summary>FAIL 피격 붉은 테두리: 주홍 비네트 0.45 → 0 (0.4초).</summary>
+            public const float HitVignette = 0.45f;
+            public const float HitVignetteSeconds = 0.4f;
+            public static readonly UnityEngine.Color Vermilion = new UnityEngine.Color(0.85f, 0.22f, 0.12f);
+            /// <summary>다음 판정 원이 뜨면 붉은 테두리를 이 배율로 줄인다 (절반).</summary>
+            public const float HitVignetteOnNextRing = 0.5f;
+            /// <summary>FAIL 피격: 채도 −80 순간 (0.15초에 회복), 렌즈 왜곡 −0.2 펄스 (0.15초).</summary>
+            public const float HitSaturation = -80f;
+            public const float HitSaturationSeconds = 0.15f;
+            public const float HitLens = -0.2f;
+            public const float HitLensSeconds = 0.15f;
+            /// <summary>PERFECT 패링: 노출 +0.6 → 0 (0.1초), 색수차 0.4 → 0 (0.2초).</summary>
+            public const float ParryExposure = 0.6f;
+            public const float ParryExposureSeconds = 0.1f;
+            public const float ParryChromatic = 0.4f;
+            public const float ParryChromaticSeconds = 0.2f;
+            /// <summary>윈드밀 마무리: 색수차 0.6 → 0, 흰 플래시 0.1초.</summary>
+            public const float WindmillChromatic = 0.6f;
+            public const float WindmillChromaticSeconds = 0.3f;
+            public const float WhiteFlashSeconds = 0.1f;
+            /// <summary>흰 플래시 노출 (EV). 제안서에 없음, Claude가 정함.</summary>
+            public const float WhiteFlashExposure = 1.0f;
+            /// <summary>처형 예고: 노출 −0.6, 비네트 0.45 (제안서 2장 E).</summary>
+            public const float FinisherWarnExposure = -0.6f;
+            public const float FinisherWarnVignette = 0.45f;
+            /// <summary>Bloom 기본 세기·문턱 (HDR 불씨가 빛나게). 제안서에 없음, Claude가 정함.</summary>
+            public const float BloomBase = 0.6f;
+            public const float BloomThreshold = 1.0f;
+
+            // ---------- VFX (VfxPool, 제안서 2장) ----------
+            /// <summary>붓획 방사 섬광: 12~16획, 0.2초.</summary>
+            public const int BrushStrokes = 14;
+            public const float BrushBurstSeconds = 0.2f;
+            /// <summary>먹 획: 화면 폭 80%, 0.12초.</summary>
+            public const float InkSlashWidth = 0.8f;
+            public const float InkSlashSeconds = 0.12f;
+            /// <summary>불씨 스파크: PERFECT 30개, NORMAL 10개, 속도 6~12 m/s, 수명 0.25초.</summary>
+            public const int EmbersPerfect = 30;
+            public const int EmbersNormal = 10;
+            public const float EmberSpeedMin = 6f;
+            public const float EmberSpeedMax = 12f;
+            public const float EmberLifetime = 0.25f;
+            /// <summary>충격파 링: 반지름 0 → 6 m, 0.4초 (윈드밀).</summary>
+            public const float ShockwaveRadius = 6f;
+            public const float ShockwaveSeconds = 0.4f;
+            /// <summary>흙먼지·파편 한 번에 나오는 개수. 제안서에 없음, Claude가 정함.</summary>
+            public const int DustCount = 16;
+            public const int DebrisCount = 10;
+            /// <summary>종류별 미리 만들어 둘 개수 (재사용 풀).</summary>
+            public const int PoolSize = 4;
+
             static FxPreset P(string name, int grade, float hitStop = 0, SlowMoMode slow = SlowMoMode.None, float trauma = 0, float hz = 20,
                 float kick = 0, float side = 0, float height = 0, float pitch = 0, float roll = 0, float wobble = 0, float fov = 0,
                 float rise = 0.03f, float hold = 0.05f, float release = 0.25f) =>

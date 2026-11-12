@@ -78,3 +78,6 @@ stage1.json을 GDD-beta B3과 제안서 0.1.3의 흐름으로 다시 짰다. 판
 
 ### 2026-11-12 B05 [beta] 연출 코어 — done
 Assets/Scripts/Presentation에 PresentationDirector(진입점 Play, 연출 끄기 스위치), CameraFx(FxOffset 트랜스폼에 더하는 층), TimeFx(Hit Stop과 슬로모션 빈도 제한)를 만들었다. CameraFx는 롤 ±10°, 고개 ±35°, 흔들림 세기 합 ≤1(초당 1.5 감소), 세기²에 비례하는 Perlin 흔들림, 회전 주인 우선순위를 처리한다. 최종 FOV는 JudgeFx가 45~85°로 자른다. Hit Stop은 대상(IHitStoppable, EnemyActor 구현)만 멈추고 전역 시간은 건드리지 않으며, 겹치면 늦게 끝나는 쪽 하나만 쓴다. 사건·전투 슬로모션 후보는 직전 슬로모션 시작 후 16박 안이면 거절한다. 처형·윈드밀 슬로모션은 GDD 규칙이라 연출을 꺼도 유지한다. 슬로모션이 받아들여지면 Hit Stop은 생략한다. 상황별 수치는 GameConfig.Fx 프리셋 18개에 모았다. 개발자 모드 F1로 연출을 켜고 끄며, 씬을 넘어도 상태가 유지된다. 평가 PASS(1회차), EditMode 105/105, PlayMode 63/63. 다음 작업: B06.
+
+### 2026-11-12 B06 [beta] 화면 효과 + VFX — done
+ScreenFx를 만들었다. 전역 Volume(우선순위 20)에 Vignette, ChromaticAberration, LensDistortion, Bloom, ColorAdjustments를 두고, 판정 화면 값과 화면 효과 펄스를 항목별 최댓값 하나로 합친다(채도는 최솟값, 노출과 렌즈 왜곡은 절댓값이 큰 쪽). FAIL 피격의 붉은 테두리는 주홍 비네트 0.45 → 0(0.4초)이고, 다음 판정 원이 뜨면 절반이 된다. VfxFactory는 붓 질감 텍스처(붓획 방사, 먹 획, 먹 X, 충격파 고리)와 파티클(불씨 HDR, 흙먼지, 기왓장·한지 파편)을 코드로 만든다. VfxPool은 섬광을 동시에 하나만, 등급이 높은 쪽을, 불투명도 0.6 이하로 보여 주고, 월드 이펙트는 종류별로 4개씩 돌려 쓴다. FxLooks는 프리셋 이름별로 화면 효과와 이펙트 조합을 정한다. 파티클 머티리얼은 에셋(VfxParticle.mat)으로 두어 빌드에 셰이더가 들어가게 했다. 고친 것: 붓 질감 텍스처를 처음 쓸 때 만들면 수십 ms가 걸려 Hit Stop보다 길어졌다. 그래서 풀을 만들 때 미리 만든다. 평가 PASS(1회차), EditMode 105/105, PlayMode 69/69. 다음 작업: B07.

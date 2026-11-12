@@ -1,5 +1,5 @@
 ﻿# Unity verify report
-time: 2026-11-12 15:13:56
+time: 2026-11-12 15:21:40
 
 ## EditMode : total=105 passed=105 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
@@ -108,7 +108,7 @@ time: 2026-11-12 15:13:56
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_SpeedFx_Intensity
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_Texts_MatchGdd48
 
-## PlayMode : total=63 passed=63 failed=0 skipped=0 result=Passed
+## PlayMode : total=69 passed=69 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -135,6 +135,12 @@ time: 2026-11-12 15:13:56
   - [Passed] RhythmActionGame.Tests.B05_PresentationCoreTests.B05_Layers_ClampedPerSection4
   - [Passed] RhythmActionGame.Tests.B05_PresentationCoreTests.B05_SlowMotion_FrequencyLimit16Beats
   - [Passed] RhythmActionGame.Tests.B05_PresentationCoreTests.B05_YawOwner_Priority
+  - [Passed] RhythmActionGame.Tests.B06_ScreenAndVfxTests.B06_FailHit_RedVignetteShake_HalvedOnNextRing
+  - [Passed] RhythmActionGame.Tests.B06_ScreenAndVfxTests.B06_Flash_OneAtATime_HigherGradeWins_AlphaMax06
+  - [Passed] RhythmActionGame.Tests.B06_ScreenAndVfxTests.B06_GameScene_RingCanvasAboveEffects
+  - [Passed] RhythmActionGame.Tests.B06_ScreenAndVfxTests.B06_Presets_PlayScreenAndVfx
+  - [Passed] RhythmActionGame.Tests.B06_ScreenAndVfxTests.B06_ScreenFx_VolumeOverrides_MaxRule
+  - [Passed] RhythmActionGame.Tests.B06_ScreenAndVfxTests.B06_VfxPool_AllKinds_Pooled_Reused
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_ChapterStartBeats_MatchSections
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(1)
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(4)
