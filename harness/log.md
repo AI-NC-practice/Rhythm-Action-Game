@@ -56,3 +56,6 @@ BuildScript.BuildGray로 Builds/Gray/RhythmActionGame.exe(99 MB)를 만들고 sm
 - 회색 상자 위에서 판정 UI 개선, 템포, 카메라·Hit Stop·슬로모션·VFX·화면 효과를 먼저 한다. 애니메이션의 무게감은 모델(T10~T12)이 들어온 뒤에 한다.
 - 효과음은 무료 도구로 만든다. 도구 선택은 사용자가 정한다.
 - 순서: 제안 문서 docs/proposals/dynamic-presentation.md 작성 → 사용자 승인 → GDD-beta.md와 작업 목록에 반영 → 구현.
+
+### 2026-11-12 [beta1-1] 효과음·음악 방식 결정
+사용자가 제안서 9.2 추천안을 승인했다. 효과음은 먼저 코드 합성(SfxSynth)으로 만들고, 핵심 효과음 5~10개는 나중에 ElevenLabs로 교체한다. 음악은 Suno(국악 퓨전, 120 BPM, 보컬 없음)로 만든다. 로그인은 사용자가 하고, 생성과 다운로드는 Claude가 한다(다운로드 전 승인). 곡이 들어오기 전까지는 합성 장단 반주를 쓴다. 로컬 AI(Python 설치)는 대안으로 둔다. 제안서 7장의 충돌 항목 13개는 아직 승인 대기다.
