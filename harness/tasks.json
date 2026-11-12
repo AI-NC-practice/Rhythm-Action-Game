@@ -331,10 +331,10 @@
                                          "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과 (-startGame 포함)",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "in_progress",
+                      "status":  "done",
                       "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "PresentationHooks: 공격 예고·패링/회피/피격·처형·포위·윈드밀·착지·파쿠르 FAIL·사건 슬로모션 연결. 노출 합치기: 밝은 섬광 우선. 회색 상자 빌드 + smoke 통과. 평가 PASS 1회차."
                   },
                   {
                       "id":  "B08",
@@ -351,8 +351,8 @@
                                          "합성 장단 반주가 메트로놈을 대신하고 박자 시계와 맞음(첫 박 오차 10 ms 이하) — 테스트",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "in_progress",
+                      "attempts":  1,
                       "max_attempts":  3,
                       "notes":  ""
                   },

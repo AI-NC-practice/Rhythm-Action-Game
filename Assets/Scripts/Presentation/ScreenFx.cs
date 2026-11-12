@@ -9,7 +9,7 @@ namespace RhythmActionGame
     /// 화면 효과 (GDD-beta B5, 제안서 1.2·4장). URP 전역 Volume 하나(우선순위 20)에 Vignette, ChromaticAberration,
     /// LensDistortion, Bloom, ColorAdjustments(postExposure, saturation)를 둔다.
     /// 판정 화면(JudgeFx: 채도 −60, 노출 −0.4, 비네트 0.3)과 화면 효과 펄스들을 **항목별 최댓값 하나**로 합친다
-    /// (채도는 최솟값, 노출·렌즈 왜곡은 절댓값이 큰 쪽). 더하지 않는다.
+    /// (채도는 최솟값, 렌즈 왜곡은 절댓값이 큰 쪽, 노출은 밝히는 섬광이 있으면 그 최댓값·없으면 가장 어두운 값). 더하지 않는다.
     /// 판정 원 UI는 Screen Space Overlay라 이 효과를 받지 않는다.
     /// </summary>
     public class ScreenFx : MonoBehaviour
@@ -109,19 +109,22 @@ namespace RhythmActionGame
             float vig = judgeFx != null ? judgeFx.VignetteIntensity : 0f;
             Color vigColor = Color.black;
             float ca = 0f, ld = 0f, bl = GameConfig.Fx.BloomBase;
+            // 노출: 밝히는 섬광이 있으면 그중 최댓값, 없으면 가장 어두운 값 (판정 화면 포함)
+            float brightest = 0f, darkest = Mathf.Min(0f, exp);
             foreach (var a in pulses)
             {
                 float v = a.P.At(a.Age) * a.Scale;
                 switch (a.P.Channel)
                 {
-                    case ScreenChannel.Exposure: if (Mathf.Abs(v) > Mathf.Abs(exp)) exp = v; break;   // 노출은 절댓값이 큰 쪽 (밝게·어둡게 모두)
+                    case ScreenChannel.Exposure: if (v > 0f) brightest = Mathf.Max(brightest, v); else darkest = Mathf.Min(darkest, v); break;
                     case ScreenChannel.Saturation: sat = Mathf.Min(sat, v); break;
-                    case ScreenChannel.Vignette: if (v > vig) { vig = v; vigColor = a.P.Color; } break;
+                    case ScreenChannel.Vignette: if (v > 0f && v >= vig) { vig = v; vigColor = a.P.Color; } break;   // 같으면 색 있는 효과(붉은 테두리)가 보이게
                     case ScreenChannel.Chromatic: ca = Mathf.Max(ca, v); break;
                     case ScreenChannel.LensDistortion: if (Mathf.Abs(v) > Mathf.Abs(ld)) ld = v; break;
                     case ScreenChannel.Bloom: bl = Mathf.Max(bl, v); break;
                 }
             }
+            exp = brightest > 0f ? brightest : darkest;
             Exposure = exp; Saturation = sat; VignetteIntensity = vig; VignetteColor = vigColor; Chromatic = ca; Lens = ld; BloomIntensity = bl;
             if (color == null) return;
             color.postExposure.value = exp;

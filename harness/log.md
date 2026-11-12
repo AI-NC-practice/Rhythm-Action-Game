@@ -81,3 +81,14 @@ Assets/Scripts/Presentation에 PresentationDirector(진입점 Play, 연출 끄�
 
 ### 2026-11-12 B06 [beta] 화면 효과 + VFX — done
 ScreenFx를 만들었다. 전역 Volume(우선순위 20)에 Vignette, ChromaticAberration, LensDistortion, Bloom, ColorAdjustments를 두고, 판정 화면 값과 화면 효과 펄스를 항목별 최댓값 하나로 합친다(채도는 최솟값, 노출과 렌즈 왜곡은 절댓값이 큰 쪽). FAIL 피격의 붉은 테두리는 주홍 비네트 0.45 → 0(0.4초)이고, 다음 판정 원이 뜨면 절반이 된다. VfxFactory는 붓 질감 텍스처(붓획 방사, 먹 획, 먹 X, 충격파 고리)와 파티클(불씨 HDR, 흙먼지, 기왓장·한지 파편)을 코드로 만든다. VfxPool은 섬광을 동시에 하나만, 등급이 높은 쪽을, 불투명도 0.6 이하로 보여 주고, 월드 이펙트는 종류별로 4개씩 돌려 쓴다. FxLooks는 프리셋 이름별로 화면 효과와 이펙트 조합을 정한다. 파티클 머티리얼은 에셋(VfxParticle.mat)으로 두어 빌드에 셰이더가 들어가게 했다. 고친 것: 붓 질감 텍스처를 처음 쓸 때 만들면 수십 ms가 걸려 Hit Stop보다 길어졌다. 그래서 풀을 만들 때 미리 만든다. 평가 PASS(1회차), EditMode 105/105, PlayMode 69/69. 다음 작업: B07.
+
+### 2026-11-12 B07 [beta] 상황별 연출 연결 — done
+PresentationHooks를 만들었다. 게임 코드를 바꾸지 않고 판정·사건·적 쓰러짐 이벤트만 듣고 연출을 건다.
+- A 예고: 적 공격 0.5박 전에 AttackWarn을 걸고, 마무리 원이 뜨면 노출 −0.6과 비네트 0.45로 화면을 가라앉힌다.
+- B·C·D 전투: ↑ 받아 막기 PERFECT는 패링, 그 밖의 PERFECT는 회피다. NORMAL은 DefendNormal, FAIL은 Hit(붉은 테두리)다.
+- E 처형: 땅이면 Execution, 지붕이면 ExecutionKick(아래로 10°)이고, 밀쳐 쓰러뜨리기는 NORMAL 연출이다.
+- F 포위: 1단계 롤 3°, 2단계 FOV +6°·위로 8°, 윈드밀 화살표마다 FOV +2°, 마무리에 먹 X와 충격파 6 m를 건다.
+- G 파쿠르: 도약 PERFECT, 사건 끝 착지(결과별), FAIL은 ParkourFail(흔들림 0.5 + 붉은 테두리 0.3)이다. 기와 미끄러짐 첫 판정에는 기왓장 파편이 나온다.
+- 슬로모션 후보: 무사 마지막 패링과 포위 2단계 PERFECT는 여기서 요청하고, 사건 PERFECT는 빈도 제한을 통과했을 때만 연출한다.
+
+고친 것은 두 가지다. ① 씬이 바뀌면 Hit Stop을 풀 때 이미 지워진 적을 건드려 오류가 났다. ② 노출 합치기 규칙을 바꿨다. 밝히는 섬광이 하나라도 있으면 그 최댓값을, 없으면 가장 어두운 값을 쓴다. 그래야 처형 예고로 어두운 화면에서도 PERFECT 섬광이 보인다. 회색 상자 빌드와 smoke-test를 통과했고, -startGame으로 25초 돌렸을 때 오류가 없었다. 평가 PASS(1회차), EditMode 105/105, PlayMode 76/76. 다음 작업: B08.

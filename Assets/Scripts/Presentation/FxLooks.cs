@@ -60,6 +60,11 @@ namespace RhythmActionGame
                     vfx.Add(new Vfx(VfxKind.Shockwave));
                     vfx.Add(new Vfx(VfxKind.Dust));
                     break;
+                case "ParkourFail":
+                    // G: 흔들림 0.5 + 붉은 테두리 0.3
+                    screen.Add(new ScreenPulse(ScreenChannel.Vignette, GameConfig.Fx.ParkourFailVignette, GameConfig.Fx.HitVignetteSeconds, GameConfig.Fx.Vermilion));
+                    vfx.Add(new Vfx(VfxKind.Dust));
+                    break;
                 case "LandPerfect":
                     vfx.Add(new Vfx(VfxKind.Dust, GameConfig.Fx.DustCount / 2));
                     break;

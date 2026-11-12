@@ -180,6 +180,13 @@ namespace RhythmActionGame.EditorTools
             vfxPool.worldCamera = cam;
             vfxPool.particleMaterial = FxParticleMat();
             presentation.vfxPool = vfxPool;
+            var hooks = systems.AddComponent<PresentationHooks>();   // 게임 이벤트 → 연출 (B07)
+            hooks.presentation = presentation;
+            hooks.director = director;
+            hooks.judge = judge;
+            hooks.clock = clock;
+            hooks.player = follower;
+            hooks.vfx = vfxPool;
 
             var boot = new GameObject("GameBootstrap").AddComponent<GameBootstrap>();
             boot.director = director;

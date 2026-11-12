@@ -1,5 +1,5 @@
 ﻿# Unity verify report
-time: 2026-11-12 15:21:40
+time: 2026-11-12 15:32:37
 
 ## EditMode : total=105 passed=105 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
@@ -108,7 +108,7 @@ time: 2026-11-12 15:21:40
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_SpeedFx_Intensity
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_Texts_MatchGdd48
 
-## PlayMode : total=69 passed=69 failed=0 skipped=0 result=Passed
+## PlayMode : total=76 passed=76 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -141,6 +141,13 @@ time: 2026-11-12 15:21:40
   - [Passed] RhythmActionGame.Tests.B06_ScreenAndVfxTests.B06_Presets_PlayScreenAndVfx
   - [Passed] RhythmActionGame.Tests.B06_ScreenAndVfxTests.B06_ScreenFx_VolumeOverrides_MaxRule
   - [Passed] RhythmActionGame.Tests.B06_ScreenAndVfxTests.B06_VfxPool_AllKinds_Pooled_Reused
+  - [Passed] RhythmActionGame.Tests.B07_SituationFxTests.B07_A_B_E_Duel_WarnDodgeExecution
+  - [Passed] RhythmActionGame.Tests.B07_SituationFxTests.B07_B_E_RoofParryAndKick
+  - [Passed] RhythmActionGame.Tests.B07_SituationFxTests.B07_Boss_FinalParry_SlowMoCandidate
+  - [Passed] RhythmActionGame.Tests.B07_SituationFxTests.B07_C_D_NormalAndFail
+  - [Passed] RhythmActionGame.Tests.B07_SituationFxTests.B07_F_Surround_TurnLowWide_WindmillFovShockwave_SlowMoOnlyDesignated
+  - [Passed] RhythmActionGame.Tests.B07_SituationFxTests.B07_G_Parkour_JumpLand_FailRedBorder_EventSlowMo
+  - [Passed] RhythmActionGame.Tests.B07_SituationFxTests.B07_G_ParkourFail_Vignette03
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_ChapterStartBeats_MatchSections
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(1)
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(4)

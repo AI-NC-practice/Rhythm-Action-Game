@@ -75,6 +75,8 @@ namespace RhythmActionGame
         public event Action<ObstacleRun, int, Judgement> EventSlotJudged;
         /// <summary>PERFECT 슬로모션 후보 판정이 PERFECT일 때 (GDD-beta B4). 연출 시스템(B05)이 빈도 제한을 건다.</summary>
         public event Action<ObstacleRun> EventSlowMotionRequested;
+        /// <summary>사건 슬로모션이 받아들여져 시작됐을 때 (빈도 제한 통과).</summary>
+        public event Action<ObstacleRun> EventSlowMotionStarted;
 
         /// <summary>지금 통과 연출 상태 이름: "None", "Pending"(결과 대기), 또는 "Vault_Perfect" 같은 이름.</summary>
         public string TraversalState =>
@@ -223,7 +225,7 @@ namespace RhythmActionGame
             bool accepted;
             if (presentation != null) accepted = presentation.RequestSlowMotion(SlowMoMode.Candidate);   // 16박 빈도 제한 (B05)
             else { if (slowMotion != null) slowMotion.Trigger(); accepted = true; }
-            if (accepted) player.BeginRemap(run.EndBeat, clock.SpeedMultiplier);
+            if (accepted) { player.BeginRemap(run.EndBeat, clock.SpeedMultiplier); EventSlowMotionStarted?.Invoke(run); }
         }
 
         /// <summary>연출 시스템 (GDD-beta B5). 없으면 슬로모션을 직접 건다.</summary>

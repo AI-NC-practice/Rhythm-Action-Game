@@ -83,7 +83,8 @@ namespace RhythmActionGame
 
         void Release()
         {
-            foreach (var t in frozen) if (t != null) t.SetFrozen(false);
+            foreach (var t in frozen)
+                if (t != null && !(t is Object o && o == null)) t.SetFrozen(false);   // 씬이 바뀌어 지워진 대상은 건너뜀
             frozen.Clear();
         }
 

@@ -338,11 +338,16 @@ namespace RhythmActionGame
             public static readonly FxPreset LandFail = P("LandFail", 2, trauma: 0.5f, height: -0.2f, rise: 0.03f, hold: 0.07f, release: 0.35f);
             // 사건 PERFECT 슬로모션 후보 (기와 미끄러짐, 밧줄 넘기, 긴 도약, 닫히는 대문, 돌진 적)
             public static readonly FxPreset EventPerfectSlow = P("EventPerfectSlow", 3, slow: SlowMoMode.Candidate, trauma: 0.15f, fov: 3f, rise: 0.05f, hold: 0.35f, release: 0.4f);
+            // G. 파쿠르 FAIL (착지·충돌): 흔들림 0.5 + 붉은 테두리 0.3
+            public static readonly FxPreset ParkourFail = P("ParkourFail", 2, trauma: 0.5f, hz: 18f, height: -0.2f, rise: 0.03f, hold: 0.07f, release: 0.35f);
+            public const float ParkourFailVignette = 0.3f;
+            /// <summary>적 공격 예고: 목표 박자 몇 박 전에 (휘두르기 직전, 제안서 2장 A).</summary>
+            public const float AttackWarnLeadBeats = 0.5f;
 
             public static readonly FxPreset[] All =
             {
                 AttackWarn, ParryPerfect, DodgePerfect, ParryPerfectFinale, DefendNormal, Hit, Execution, ExecutionKick,
-                SurroundTurn, Simultaneous, SimultaneousPerfect, WindmillArrow, WindmillFinish, JumpPerfect, LandPerfect, LandNormal, LandFail, EventPerfectSlow,
+                SurroundTurn, Simultaneous, SimultaneousPerfect, WindmillArrow, WindmillFinish, JumpPerfect, LandPerfect, LandNormal, LandFail, EventPerfectSlow, ParkourFail,
             };
         }
 
