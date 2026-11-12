@@ -69,7 +69,7 @@ namespace RhythmActionGame.Tests
         [UnityTest]
         public IEnumerator T06_StopsAtEnemy_AllPerfect_DisarmOnGround_ResumesNextBar()
         {
-            yield return Load(88);   // 92: 칼 든 포졸 (땅)
+            yield return Load(89);   // beta1-1: 88 매복 사건(B20 차트)을 건너뛴다. 92 칼 포졸   // 92: 칼 든 포졸 (땅)
             yield return UntilCombat();
             var enc = dir.CurrentEncounter;
             Assert.IsFalse(boot.player.Running, "자동 이동 정지");
@@ -105,7 +105,7 @@ namespace RhythmActionGame.Tests
         public IEnumerator T06_DefenseFail_LosesHp_RetriesFromFirstAttackNextBar()
         {
             // beta1-1: GDD-beta B9.1 — 공격 FAIL은 체력 −1·속도 ×0.8 후 다음 공격으로 넘어간다 (다시 하지 않음)
-            yield return Load(88);
+            yield return Load(89);   // beta1-1: 88 매복 사건(B20 차트)을 건너뛴다. 92 칼 포졸
             yield return UntilCombat();
             for (int i = 0; i < 4; i++) boot.clock.ApplyJudgement(Judgement.Perfect);   // 1.20배
             var enc = dir.CurrentEncounter;
@@ -126,7 +126,7 @@ namespace RhythmActionGame.Tests
         public IEnumerator T06_FinisherFail_RetriesWholeEnemy()
         {
             // beta1-1: GDD-beta B9.1 — 마무리 FAIL은 체력 −1 + 엉겁결에 밀쳐 쓰러뜨리기로 끝나고 다음 마디에 다시 달린다
-            yield return Load(88);
+            yield return Load(89);   // beta1-1: 88 매복 사건(B20 차트)을 건너뛴다. 92 칼 포졸
             yield return UntilCombat();
             var enc = dir.CurrentEncounter;
             yield return Hit(0, 0.0);
@@ -171,7 +171,7 @@ namespace RhythmActionGame.Tests
         [UnityTest]
         public IEnumerator T06_Attack_TrailAfterimages_CameraFollowsWeapon()
         {
-            yield return Load(88);
+            yield return Load(89);   // beta1-1: 88 매복 사건(B20 차트)을 건너뛴다. 92 칼 포졸
             yield return UntilCombat();
             var enc = dir.CurrentEncounter;
             var actor = dir.normalEnemies[0];

@@ -58,7 +58,7 @@ namespace RhythmActionGame.Tests
         [UnityTest]
         public IEnumerator B19_Duel_AttackFailContinues_FinisherFailPushDown()
         {
-            yield return Load(88);
+            yield return Load(89);   // beta1-1: 88 매복 사건(B20 차트)을 건너뛴다. 92 칼 포졸
             yield return UntilCombat();
             var enc = dir.CurrentEncounter;
             var cues = enc.Cues.ToList();
@@ -77,7 +77,7 @@ namespace RhythmActionGame.Tests
         [UnityTest]
         public IEnumerator B19_Duel_FinisherFail_PushDown_SpeedDown_ResumesNextBar()
         {
-            yield return Load(88);
+            yield return Load(89);   // beta1-1: 88 매복 사건(B20 차트)을 건너뛴다. 92 칼 포졸
             yield return UntilCombat();
             for (int i = 0; i < 4; i++) boot.clock.ApplyJudgement(Judgement.Perfect);    // 1.20배
             var enc = dir.CurrentEncounter;

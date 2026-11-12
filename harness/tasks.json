@@ -559,10 +559,10 @@
                                          "SceneBuilder.BuildAll로 Game 씬 재생성",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "in_progress",
+                      "status":  "done",
                       "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "첫 사건 4박, 빈 구간 최대 4박(포위 뒤 제외), 전투 앞뒤 채움, 판정 91(사건 61 + 전투 30). 평가 PASS 1회차."
                   },
                   {
                       "id":  "B21",

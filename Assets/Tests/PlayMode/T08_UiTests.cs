@@ -28,7 +28,7 @@ namespace RhythmActionGame.Tests
 
         static string[] Texts(Transform root) => root.GetComponentsInChildren<Text>(true).Select(t => t.text).ToArray();
 
-        IEnumerator LoadGame(double startRunBeat = 0)
+        IEnumerator LoadGame(double startRunBeat = 0, bool emptyChart = false)
         {
             yield return SceneManager.LoadSceneAsync("Game");
             yield return null;
@@ -37,6 +37,7 @@ namespace RhythmActionGame.Tests
             boot.clock.TimeSource = () => now;
             boot.judge.readKeyboard = false;
             boot.judge.OffsetSource = () => 0f;
+            if (emptyChart) boot.director.UseChart(new ChartData { name = "t", bpm = 120, runBeats = 264, events = new ChartEvent[0] });
             boot.StartRun(startRunBeat);
             yield return null;
         }
@@ -114,7 +115,7 @@ namespace RhythmActionGame.Tests
         [UnityTest]
         public IEnumerator T08_Hud_HeartsSpeedScoreCombo()
         {
-            yield return LoadGame();
+            yield return LoadGame(emptyChart: true);   // beta1-1: B20 차트는 4박에 수레가 있어 직접 예약한 판정과 겹친다
             var hud = boot.hud;
             yield return null;
             Assert.AreEqual(3, hud.Hearts.Length);

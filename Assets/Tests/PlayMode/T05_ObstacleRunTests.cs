@@ -43,7 +43,7 @@ namespace RhythmActionGame.Tests
         /// </summary>
         IEnumerator RunCart(double? inputDelay, System.Action<double, string, Vector3> report)
         {
-            yield return Load(8);
+            yield return Load(0);   // beta1-1: B20 차트는 수레가 4박 (예전 12박). 목표 시각 2.0초는 그대로
             yield return AdvanceTo(1.96);
             Assert.AreEqual(1, boot.judge.Cues.Count, "수레 판정이 예약됨");
             Assert.AreEqual(ArrowKey.Up, boot.judge.Cues[0].Key);

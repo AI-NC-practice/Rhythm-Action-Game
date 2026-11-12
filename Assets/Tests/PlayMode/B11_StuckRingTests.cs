@@ -15,7 +15,7 @@ namespace RhythmActionGame.Tests
         StageDirector dir;
         JudgeRingView view;
 
-        IEnumerator Load(double startRunBeat)
+        IEnumerator Load(double startRunBeat, ChartData chart = null)
         {
             yield return SceneManager.LoadSceneAsync("Game");
             yield return null;
@@ -26,6 +26,7 @@ namespace RhythmActionGame.Tests
             boot.clock.TimeSource = () => now;
             boot.judge.readKeyboard = false;
             boot.judge.OffsetSource = () => 0f;
+            if (chart != null) boot.director.UseChart(chart);
             boot.StartRun(startRunBeat);
             yield return null;
         }
@@ -105,8 +106,10 @@ namespace RhythmActionGame.Tests
         [UnityTest]
         public IEnumerator B11_GameOverAndRestart_ClearRings()
         {
-            yield return Load(20);                              // 24 항아리, 28 술독 ...
-            yield return AdvanceTo(boot.clock.TimeOfBeat(8.5));     // 달리기 28.5박: 술독 원들이 떠 있음
+            // beta1-1: 차트가 바뀌어도 상관없게 시험 차트를 쓴다 (8박 술독: 9·10·11박 판정)
+            yield return Load(0, new ChartData { name = "t", bpm = 120, runBeats = 264, events = new[] {
+                new ChartEvent { runBeat = 8, type = "obstacle", kind = "rolling_jars", keys = new[] { "Left", "Right", "Left" } } } });
+            yield return AdvanceTo(boot.clock.TimeOfBeat(8.5));     // 술독 원들이 떠 있음
             Assert.Greater(view.Rings.Count, 0, "원이 떠 있음");
             dir.AllowDeathRewind = false;   // beta1-1: 게임 오버 경로 (챕터 되감기는 B19 테스트)
             dir.Health.Damage(); dir.Health.Damage(); dir.Health.Damage();
@@ -116,11 +119,11 @@ namespace RhythmActionGame.Tests
             AssertNoDeadRings("게임 오버");
 
             now = 0;
-            boot.StartRun(20);                                  // 다시 하기·챕터 이동과 같은 경로
+            boot.StartRun(0);                                   // 다시 하기·챕터 이동과 같은 경로
             yield return AdvanceTo(boot.clock.TimeOfBeat(8.5));
             var old = view.Rings.Select(r => r.Cue).ToList();
             Assert.Greater(old.Count, 0);
-            boot.StartRun(20);
+            boot.StartRun(0);
             yield return null;
             Assert.IsFalse(view.Rings.Any(r => old.Contains(r.Cue)), "다시 시작: 이전 판정의 원이 남지 않음");
             AssertNoDeadRings("다시 시작");

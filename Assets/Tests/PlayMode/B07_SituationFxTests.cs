@@ -73,7 +73,7 @@ namespace RhythmActionGame.Tests
         [UnityTest]
         public IEnumerator B07_A_B_E_Duel_WarnDodgeExecution()
         {
-            yield return Load(88);                       // 92: 칼 든 포졸 (땅)
+            yield return Load(89);   // beta1-1: 88 매복 사건(B20 차트)을 건너뛴다. 92 칼 포졸                       // 92: 칼 든 포졸 (땅)
             yield return UntilCombat();
             var enc = dir.CurrentEncounter;
             var enemy = enc.Actors[0];
@@ -106,7 +106,7 @@ namespace RhythmActionGame.Tests
         [UnityTest]
         public IEnumerator B07_C_D_NormalAndFail()
         {
-            yield return Load(88);
+            yield return Load(89);   // beta1-1: 88 매복 사건(B20 차트)을 건너뛴다. 92 칼 포졸
             yield return UntilCombat();
             var enc = dir.CurrentEncounter;
             yield return Hit(enc.Cues[0], 0.1);                 // NORMAL
