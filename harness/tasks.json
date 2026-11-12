@@ -460,17 +460,74 @@
                                          "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과 후 exe 경로 안내",
                                          "사용자가 플레이 후 남는 화살표·타이밍·입력 반응·판정 이펙트 피드백을 줌, 판정 창 조정 여부를 정함"
                                      ],
-                      "status":  "needs_user",
+                      "status":  "done",
                       "attempts":  1,
                       "max_attempts":  1,
-                      "notes":  "Builds/Gray/RhythmActionGame.exe 다시 빌드 + smoke-test 통과(타이틀 12초, -startGame 게임 씬 25초 오류 없음). 사용자 재확인 대기."
+                      "notes":  "Builds/Gray/RhythmActionGame.exe 다시 빌드 + smoke-test 통과(타이틀 12초, -startGame 게임 씬 25초 오류 없음). 사용자 재확인 대기. 피드백 받음(2026-11-12): 판정을 더 후하게(너무 어려움), 이펙트를 로스트아크 대격돌처럼 더 화려하게. B16~B18 추가."
+                  },
+                  {
+                      "id":  "B16",
+                      "title":  "[beta] 판정 창 완화",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "B15"
+                                     ],
+                      "acceptance":  [
+                                         "GDD-beta B8.4: PERFECT ±90 ms, NORMAL ±180 ms (GDD 4.2의 ±60/±150 대신), 무시 기준 −300 ms 그대로 — GameConfig와 EditMode 테스트",
+                                         "판정 규칙 경계값 테스트: ±90 ms 안 PERFECT, ±180 ms 안 NORMAL, −300~−180 ms FAIL, +180 ms 넘으면 무입력 FAIL",
+                                         "기존 테스트 중 ±60/±150 경계를 쓰던 것은 GDD-beta 값으로 바꾸고 근거 주석을 단다",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "B17",
+                      "title":  "[beta] 판정 원·판정 이펙트 화려하게",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "B16"
+                                     ],
+                      "acceptance":  [
+                                         "GDD-beta B8.5: UI 가산(Additive) 셰이더·머티리얼을 코드로 만들고 SceneBuilder가 에셋으로 연결 (빌드에 포함)",
+                                         "GDD-beta B8.5: 다가오는 원 — 가산 빛 고리가 목표에 가까울수록 밝아지고(0.4 → 1.0), 빛 점 8개가 원 둘레를 돌며, 바깥 원에도 빛이 붙음 — 테스트",
+                                         "GDD-beta B8.5: PERFECT — 방사형 번개선, 십자·X 섬광(지름 700 px 이상), 퍼지는 충격 고리(3배), 빛 입자 16개 이상이 바깥으로 흩어짐, 금빛 중심 섬광 — 결과별 구성 테스트",
+                                         "GDD-beta B8.5: NORMAL — 작은 번개선 + 빛 입자 8개 + 청록 고리, FAIL — 붉은 금이 간 원 + 어두운 연기 + 흔들림 — 테스트",
+                                         "판정 이펙트는 Canvas 10에 있고 다음 판정 원(Canvas 20)을 가리지 않으며 0.35초 안에 사라짐 (B8.3 유지) — 테스트",
+                                         "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "B18",
+                      "title":  "[사용자] beta 재확인 2",
+                      "type":  "human",
+                      "depends_on":  [
+                                         "B17"
+                                     ],
+                      "acceptance":  [
+                                         "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과 후 exe 경로 안내",
+                                         "사용자가 판정 난이도와 이펙트 화려함을 확인하고 피드백을 줌"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  1,
+                      "notes":  ""
                   },
                   {
                       "id":  "B10",
                       "title":  "[사용자+Claude] Suno 음악 생성·적용",
                       "type":  "human",
                       "depends_on":  [
-                                         "B15"
+                                         "B18"
                                      ],
                       "acceptance":  [
                                          "사용자가 인앱 브라우저에서 Suno에 로그인, Claude가 프롬프트 작성·생성 (국악 퓨전, 120 BPM, 보컬 없음, 약 2분 30초)",
