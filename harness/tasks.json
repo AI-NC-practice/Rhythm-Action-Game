@@ -517,17 +517,75 @@
                                          "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과 후 exe 경로 안내",
                                          "사용자가 판정 난이도와 이펙트 화려함을 확인하고 피드백을 줌"
                                      ],
-                      "status":  "needs_user",
+                      "status":  "done",
                       "attempts":  1,
                       "max_attempts":  1,
-                      "notes":  "Builds/Gray 다시 빌드 + smoke-test 통과(타이틀 12초, -startGame 25초 오류 없음). 사용자 재확인 대기."
+                      "notes":  "Builds/Gray 다시 빌드 + smoke-test 통과(타이틀 12초, -startGame 25초 오류 없음). 사용자 재확인 대기. 피드백 받음: 장애물 사이(특히 1챕터) 아직 김, 실패 시 재도전 대신 넘어가기/되감기 논의 → Claude 추천안(일반 실패 계속, 무사·윈드밀만 되감기, 체력 0이면 챕터 되감기) 사용자 승인. 테스트 패키지 RhythmActionGame-beta1-1-dev.zip 전달."
+                  },
+                  {
+                      "id":  "B19",
+                      "title":  "[beta] 실패 규칙 변경 + 되감기",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "B18"
+                                     ],
+                      "acceptance":  [
+                                         "GDD-beta B9.1: 일반 적 공격 FAIL은 체력 −1·속도 ×0.8 후 다음 공격으로 넘어감, 마무리 FAIL은 체력 −1 + 밀쳐 쓰러뜨리기로 끝나고 다음 마디에 달림 (재도전 없음) — PlayMode 테스트",
+                                         "GDD-beta B9.2: 윈드밀 화살표 FAIL → 체력 그대로, 곡·박자 시계를 3단계 첫 화살표 1마디 앞으로 되감고 3단계 다시 — 테스트",
+                                         "GDD-beta B9.2: 무사 공격·마무리 FAIL → 체력 그대로, 무사 첫 공격 1마디 앞으로 되감고 처음부터 다시 — 테스트",
+                                         "GDD-beta B9.3: 체력 0 → 게임 오버 대신 지금 챕터 시작으로 되감기, 체력 3, 점수 유지, 클리어 랭크 \"-\" — 테스트",
+                                         "GDD-beta B9.4: 되감기 연출 0.8초(박자 시계 멈춤, 채도 −90·노출 −0.5, 먹 줄기 되감기 이펙트, 카메라 뒤로 0.3 m, 되감기 소리), 끝나면 되감은 지점부터 시계·곡 재시작, 남은 원 없음 — 테스트",
+                                         "기존 재도전 테스트(T06, T07, B11)를 GDD-beta B9 규칙으로 바꾸고 근거 주석을 단다",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "in_progress",
+                      "attempts":  1,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "B20",
+                      "title":  "[beta] 빈 구간 채우기 (차트)",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "B19"
+                                     ],
+                      "acceptance":  [
+                                         "GDD-beta B3 보충: 첫 사건 4박, 앞 2개 사건 간격 8박 — 차트 테스트",
+                                         "1구간 36~60박 사이에 사건 간격 4박 이하 (빈 구간 없음), 전투 앞뒤 빈 4박 채움 — 차트 테스트 (사건 끝 → 다음 사건 시작 최대 간격 검사)",
+                                         "전체 판정 85~95, 장애물·사건 판정 55~65, 지붕 높이·전투 위치·슬로모션 후보 뒤 2박 규칙·챕터 시작 2박 규칙 유지 — 테스트",
+                                         "SceneBuilder.BuildAll로 Game 씬 재생성",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "B21",
+                      "title":  "[사용자] beta 재확인 3 + 테스트 패키지",
+                      "type":  "human",
+                      "depends_on":  [
+                                         "B20"
+                                     ],
+                      "acceptance":  [
+                                         "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과, 테스트 패키지 zip 다시 만들기",
+                                         "사용자가 템포·실패 규칙·되감기 연출을 확인하고 피드백을 줌"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  1,
+                      "notes":  ""
                   },
                   {
                       "id":  "B10",
                       "title":  "[사용자+Claude] Suno 음악 생성·적용",
                       "type":  "human",
                       "depends_on":  [
-                                         "B18"
+                                         "B21"
                                      ],
                       "acceptance":  [
                                          "사용자가 인앱 브라우저에서 Suno에 로그인, Claude가 프롬프트 작성·생성 (국악 퓨전, 120 BPM, 보컬 없음, 약 2분 30초)",
