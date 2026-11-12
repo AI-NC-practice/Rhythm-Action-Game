@@ -30,9 +30,19 @@ namespace RhythmActionGame
         public int section;
         public bool onRoof;
         public ChartAttack[] attacks;
+        /// <summary>사건 안 판정별 키 (GDD-beta B2.1). 없으면 key를 쓴다.</summary>
+        public string[] keys;
+        /// <summary>적 등장 방식 (GDD-beta B2.3): duel(기본) | charge | ambush | chase.</summary>
+        public string approach;
 
         public bool IsObstacle => type == StageChart.TypeObstacle;
         public bool IsEnemy => type == StageChart.TypeEnemy;
+        /// <summary>멈춰서 싸우는 일반 적 (GDD 4.5 대치).</summary>
+        public bool IsDuel => IsEnemy && (string.IsNullOrEmpty(approach) || approach == EventCatalog.Duel);
+        /// <summary>달리면서 처리하는 사건 (장애물, 새 사건, 안 멈추는 적) — GDD-beta B2.</summary>
+        public bool IsRunEvent => IsObstacle || (IsEnemy && !IsDuel);
+        /// <summary>사건 목록(EventCatalog)의 키: 장애물은 kind, 안 멈추는 적은 approach.</summary>
+        public string EventKind => IsEnemy ? approach : kind;
         public bool IsSurround => type == StageChart.TypeSurround;
         public bool IsBoss => type == StageChart.TypeBoss;
         public ArrowKey Key => StageChart.ParseKey(key);
@@ -48,7 +58,9 @@ namespace RhythmActionGame
         public ChartEvent[] events;
 
         public IEnumerable<ChartEvent> Obstacles => events.Where(e => e.IsObstacle);
-        public IEnumerable<ChartEvent> Enemies => events.Where(e => e.IsEnemy);
+        public IEnumerable<ChartEvent> Enemies => events.Where(e => e.IsDuel);
+        /// <summary>달리면서 처리하는 사건 전부 (GDD-beta B2).</summary>
+        public IEnumerable<ChartEvent> RunEvents => events.Where(e => e.IsRunEvent);
         public float PathLength => runBeats * GameConfig.MetersPerBeat;
     }
 

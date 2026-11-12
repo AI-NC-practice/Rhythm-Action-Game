@@ -48,7 +48,7 @@ namespace RhythmActionGame
             // 시작 위치보다 앞에 있던 적 수를 세어 번호를 맞춘다
             if (Chart != null)
                 for (int i = 0; i < nextEvent && i < Chart.events.Length; i++)
-                    if (Chart.events[i].IsEnemy) normalEnemyCount++;
+                    if (Chart.events[i].IsDuel) normalEnemyCount++;
             ResetCombatExtra();
         }
 
@@ -57,7 +57,7 @@ namespace RhythmActionGame
 
         partial void TryStartCombat(ChartEvent ev, ref bool handled)
         {
-            if (ev.IsEnemy)
+            if (ev.IsDuel)
             {
                 int index = normalEnemyCount++;
                 var actor = normalEnemies != null && index < normalEnemies.Length ? normalEnemies[index] : null;

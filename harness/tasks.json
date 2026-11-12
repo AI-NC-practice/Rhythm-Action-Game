@@ -226,10 +226,10 @@
                                          "대치(duel)·포위·무사 전투는 기존 테스트 그대로 통과",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "EventCatalog(기존 6종 + 새 8종 + 돌진·매복·추격), 사건 단위 진행(판정 여러 개, 체력 제한), TimeRemap 이동 시간 재배치, 판정 예약을 PathFollower.ClockBeatOfRun 기준으로(한 프레임 어긋남 수정). 평가 PASS 1회차."
                   },
                   {
                       "id":  "B03",
@@ -247,8 +247,8 @@
                                          "슬로모션 후보(GDD-beta B4의 2·3번)가 PERFECT일 때 슬로모션 요청을 냄 — 테스트",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "in_progress",
+                      "attempts":  1,
                       "max_attempts":  3,
                       "notes":  ""
                   },

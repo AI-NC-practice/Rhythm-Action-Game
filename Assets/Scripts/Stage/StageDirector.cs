@@ -33,16 +33,30 @@ namespace RhythmActionGame
         /// <summary>판정 하나가 끝날 때마다 (장애물·전투 모두). 점수·콤보 집계용.</summary>
         public event Action<Judgement> AnyJudged;
 
-        /// <summary>진행 중인 장애물 하나.</summary>
+        /// <summary>진행 중인 사건 하나 (GDD-beta B2.1). 장애물·새 사건·안 멈추는 적 모두.</summary>
         public class ObstacleRun
         {
             public ChartEvent Event;
-            public JudgeCue Cue;
+            public EventDef Def;
+            public List<EventSlot> Slots;
+            public readonly List<JudgeCue> Cues = new List<JudgeCue>();
+            public Judgement?[] Results;
+            /// <summary>첫 판정 (기존 코드·테스트 호환).</summary>
+            public JudgeCue Cue => Cues.Count > 0 ? Cues[0] : null;
+            /// <summary>GDD 4.4 기존 장애물 분류. 새 사건이면 기본값(Vault)이고 HasCategory=false.</summary>
             public ObstacleCategory Category;
+            public bool HasCategory;
             public float Side;
             public bool Started;
+            /// <summary>판정이 하나라도 끝났는지.</summary>
             public bool HasResult;
+            /// <summary>가장 최근에 끝난 판정 결과.</summary>
             public Judgement Result;
+            /// <summary>이 사건에서 잃은 체력.</summary>
+            public int HpLost;
+            public double StartBeat => Event.runBeat;
+            public double EndBeat => Event.runBeat + Def.Beats;
+            public bool AllJudged { get { foreach (var r in Results) if (!r.HasValue) return false; return true; } }
         }
 
         readonly List<ObstacleRun> pending = new List<ObstacleRun>();
@@ -50,13 +64,26 @@ namespace RhythmActionGame
         int nextEvent;
 
         public ObstacleRun Current => current;
+        /// <summary>마지막으로 끝난 사건 (테스트·연출용).</summary>
+        public ObstacleRun LastRun { get; private set; }
+        /// <summary>예약됐지만 아직 시작하지 않은 사건들.</summary>
+        public IReadOnlyList<ObstacleRun> PendingRuns => pending;
+
+        /// <summary>사건 안 판정 하나가 끝날 때 (사건, 판정 번호, 결과).</summary>
+        public event Action<ObstacleRun, int, Judgement> EventSlotJudged;
+        /// <summary>PERFECT 슬로모션 후보 판정이 PERFECT일 때 (GDD-beta B4). 연출 시스템(B05)이 빈도 제한을 건다.</summary>
+        public event Action<ObstacleRun> EventSlowMotionRequested;
 
         /// <summary>지금 통과 연출 상태 이름: "None", "Pending"(결과 대기), 또는 "Vault_Perfect" 같은 이름.</summary>
         public string TraversalState =>
-            current == null ? "None" : !current.HasResult ? "Pending" : Traversal.StateName(current.Category, current.Result);
+            current == null ? "None" : !current.HasResult ? "Pending" : RunStateName(current);
 
-        /// <summary>지금 통과 진행도 (0~1).</summary>
-        public float TraversalProgress => current == null ? 0f : Mathf.Clamp01((float)((player.RunBeat - current.Event.runBeat) / GameConfig.ObstacleBeats));
+        /// <summary>사건 상태 이름. 기존 장애물은 "Vault_Perfect", 새 사건·적은 "rope_swing_Perfect" 꼴.</summary>
+        public static string RunStateName(ObstacleRun run) =>
+            run.HasCategory ? Traversal.StateName(run.Category, run.Result) : $"{run.Def.Kind}_{run.Result}";
+
+        /// <summary>지금 통과 진행도 (0~1, 사건 길이 기준). 화면에 보이는 위치로 계산한다.</summary>
+        public float TraversalProgress => current == null ? 0f : Mathf.Clamp01((float)((player.VisualRunBeat - current.StartBeat) / current.Def.Beats));
 
         void Awake()
         {
@@ -66,6 +93,9 @@ namespace RhythmActionGame
         void OnEnable() { if (judge != null) judge.CueJudged += OnCueJudged; }
         void OnDisable() { if (judge != null) judge.CueJudged -= OnCueJudged; }
 
+        /// <summary>테스트·도구용: 다음 ResetStage부터 이 차트를 쓴다.</summary>
+        public void UseChart(ChartData chart) => Chart = chart;
+
         /// <summary>runBeat 위치부터 스테이지를 다시 시작한다.</summary>
         public void ResetStage(double runBeat)
         {
@@ -73,6 +103,7 @@ namespace RhythmActionGame
             judge.ClearAll();
             pending.Clear();
             current = null;
+            LastRun = null;
             Health.Reset();
             nextEvent = 0;
             while (nextEvent < Chart.events.Length && Chart.events[nextEvent].runBeat < runBeat) nextEvent++;
@@ -109,9 +140,9 @@ namespace RhythmActionGame
             {
                 var ev = Chart.events[nextEvent];
                 double ahead = ev.runBeat - player.RunBeat;
-                if (!ev.IsObstacle)
+                if (!ev.IsRunEvent)
                 {
-                    // 전투: 적 위치에 도착하면 시작
+                    // 멈추는 전투(대치·포위·무사): 적 위치에 도착하면 시작
                     if (ahead > 0) return;
                     bool handled = false;
                     TryStartCombat(ev, ref handled);
@@ -120,17 +151,32 @@ namespace RhythmActionGame
                     continue;
                 }
                 if (ahead > GameConfig.ApproachBeats + 1) return;
-                var run = new ObstacleRun
-                {
-                    Event = ev,
-                    Category = Traversal.Categorize(ev.kind),
-                    Side = ev.Key == ArrowKey.Left ? -1f : ev.Key == ArrowKey.Right ? 1f : 0f,
-                };
-                var point = MapLayout.PointAt((ev.runBeat + GameConfig.ObstacleBeats * 0.5f) * GameConfig.MetersPerBeat) + Vector3.up;
-                run.Cue = judge.Schedule(clock.CurrentBeat + ahead, ev.Key, point, run);
-                pending.Add(run);
+                pending.Add(CreateRun(ev));
                 nextEvent++;
             }
+        }
+
+        /// <summary>사건 하나를 만들고 판정을 모두 예약한다. 판정 목표 = 사건 시작 + 판정 박자 (달리기 박자 → 시계 박자).</summary>
+        ObstacleRun CreateRun(ChartEvent ev)
+        {
+            var def = EventCatalog.Get(ev.EventKind);
+            var run = new ObstacleRun
+            {
+                Event = ev,
+                Def = def,
+                Slots = EventCatalog.SlotsFor(ev),
+                HasCategory = def.Category.HasValue,
+                Category = def.Category ?? ObstacleCategory.Vault,
+                Side = ev.Key == ArrowKey.Left ? -1f : ev.Key == ArrowKey.Right ? 1f : 0f,
+            };
+            run.Results = new Judgement?[run.Slots.Count];
+            var point = MapLayout.PointAt((ev.runBeat + def.Beats * 0.5f) * GameConfig.MetersPerBeat) + Vector3.up;
+            foreach (var s in run.Slots)
+            {
+                double runTarget = ev.runBeat + s.Offset;
+                run.Cues.Add(judge.Schedule(player.ClockBeatOfRun(runTarget), s.Key.Value, point, run));
+            }
+            return run;
         }
 
         void OnCueJudged(JudgeCue cue, Judgement r)
@@ -138,13 +184,35 @@ namespace RhythmActionGame
             AnyJudged?.Invoke(r);
             if (cue.Tag is ObstacleRun run)
             {
+                int slot = run.Cues.IndexOf(cue);
+                if (slot >= 0) run.Results[slot] = r;
                 run.HasResult = true;
                 run.Result = r;
                 ObstacleResolved?.Invoke(run.Event, r);
-                if (r == Judgement.Fail) Health.Damage();
+                if (r == Judgement.Fail && (!run.Def.HpCapOne || run.HpLost == 0))
+                {
+                    run.HpLost++;
+                    Health.Damage();
+                }
+                EventSlotJudged?.Invoke(run, slot, r);
+                if (r == Judgement.Perfect && slot == run.Def.SlowMoSlot) RequestEventSlowMotion(run);
                 return;
             }
             OnCombatCueJudged(cue, r);
+        }
+
+        /// <summary>
+        /// 사건 PERFECT 슬로모션 (GDD-beta B4): 시간 배율 0.3을 실제 0.4초, 이동은 사건 끝까지 재배치.
+        /// 빈도 제한(16박)은 연출 시스템(B05)이 맡는다. 여기서는 기능만 제공한다.
+        /// </summary>
+        public bool AllowEventSlowMotion = true;
+
+        void RequestEventSlowMotion(ObstacleRun run)
+        {
+            EventSlowMotionRequested?.Invoke(run);
+            if (!AllowEventSlowMotion || State != StageState.Running) return;
+            if (slowMotion != null) slowMotion.Trigger();
+            player.BeginRemap(run.EndBeat, clock.SpeedMultiplier);
         }
 
         partial void OnCombatCueJudgedImpl(JudgeCue cue, Judgement r);
@@ -152,22 +220,20 @@ namespace RhythmActionGame
 
         void UpdateTraversal()
         {
-            if (current == null && pending.Count > 0 && player.RunBeat >= pending[0].Event.runBeat)
+            if (current != null && player.RunBeat >= current.EndBeat)
+            {
+                LastRun = current;
+                current = null;
+                ApplyMotion(Vector3.zero, Vector3.zero);
+            }
+            if (current == null && pending.Count > 0 && player.RunBeat >= pending[0].StartBeat)
             {
                 current = pending[0];
                 pending.RemoveAt(0);
                 current.Started = true;
             }
             if (current == null) return;
-
-            double end = current.Event.runBeat + GameConfig.ObstacleBeats;
-            if (player.RunBeat >= end)
-            {
-                current = null;
-                ApplyMotion(Vector3.zero, Vector3.zero);
-                return;
-            }
-            if (!current.HasResult) { ApplyMotion(Vector3.zero, Vector3.zero); return; }
+            if (!current.HasResult || !current.HasCategory) { ApplyMotion(Vector3.zero, Vector3.zero); return; }
             Traversal.Offset(current.Category, current.Result, current.Side, TraversalProgress, out var pos, out var euler);
             ApplyMotion(pos, euler);
         }

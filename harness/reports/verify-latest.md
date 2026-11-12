@@ -1,11 +1,17 @@
 ﻿# Unity verify report
-time: 2026-11-12 14:43:39
+time: 2026-11-12 14:51:56
 
-## EditMode : total=77 passed=77 failed=0 skipped=0 result=Passed
+## EditMode : total=83 passed=83 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Config_MatchGddBetaB1
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_LabelPose_PopThenRise_045s
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_SafeEllipse_RadiiAndClamp
+  - [Passed] RhythmActionGame.Tests.B02_EventRulesTests.B02_Enemies_ApproachKinds
+  - [Passed] RhythmActionGame.Tests.B02_EventRulesTests.B02_HpCapOne_And_SlowMoCandidates_MatchGddBeta
+  - [Passed] RhythmActionGame.Tests.B02_EventRulesTests.B02_LegacyObstacles_4Beats_OneJudgeAtStart
+  - [Passed] RhythmActionGame.Tests.B02_EventRulesTests.B02_NewEvents_MatchGddBetaB22
+  - [Passed] RhythmActionGame.Tests.B02_EventRulesTests.B02_SlotsFor_KeysFromChart
+  - [Passed] RhythmActionGame.Tests.B02_EventRulesTests.B02_TimeRemap_SlowsThenCatchesUp_ExactAtEnd
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_BeatAndSpeed_MatchGdd41
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_Judge_MatchGdd42
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_ObstacleAndCombat_MatchGdd44To46
@@ -80,7 +86,7 @@ time: 2026-11-12 14:43:39
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_SpeedFx_Intensity
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_Texts_MatchGdd48
 
-## PlayMode : total=45 passed=45 failed=0 skipped=0 result=Passed
+## PlayMode : total=50 passed=50 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -89,6 +95,11 @@ time: 2026-11-12 14:43:39
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Ring_ClampedToSafeEllipse_WithChevron
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Ring_Glow_FinisherGold
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Ring_LockedAfter0_1s
+  - [Passed] RhythmActionGame.Tests.B02_EventRunTests.B02_ChargeAmbushChase_DoNotStop
+  - [Passed] RhythmActionGame.Tests.B02_EventRunTests.B02_ChargeFail_HpMinusOne_ThenPasses
+  - [Passed] RhythmActionGame.Tests.B02_EventRunTests.B02_Fail_EachCostsSpeed_ButCappedHpForJarsAndArrows
+  - [Passed] RhythmActionGame.Tests.B02_EventRunTests.B02_RunningSlowMotion_RemapsVisual_ExactAtEventEnd
+  - [Passed] RhythmActionGame.Tests.B02_EventRunTests.B02_TileSlip_TwoJudges_Fixed6Beats_AnyResult
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_ChapterStartBeats_MatchSections
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(1)
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(4)

@@ -16,6 +16,18 @@ namespace RhythmActionGame
         public bool Running { get; set; } = true;
         public float Distance => (float)(RunBeat * GameConfig.MetersPerBeat);
 
+        /// <summary>달리는 중 슬로모션의 이동 시간 재배치 (GDD-beta B4). 없으면 null.</summary>
+        public TimeRemap? Remap { get; private set; }
+        /// <summary>화면에 보이는 위치 (달리기 박자). 재배치가 없으면 RunBeat와 같다.</summary>
+        public double VisualRunBeat => Remap.HasValue ? Remap.Value.Visual(RunBeat) : RunBeat;
+        public float VisualDistance => (float)(VisualRunBeat * GameConfig.MetersPerBeat);
+
+        /// <summary>지금 위치부터 슬로모션 재배치를 건다. endRunBeat(사건 끝)에서 보이는 위치가 논리 위치와 다시 같아진다.</summary>
+        public void BeginRemap(double endRunBeat, float speedMultiplier)
+        {
+            Remap = new TimeRemap(RunBeat, endRunBeat, speedMultiplier);
+        }
+
         double lastClockBeat;
         bool hasLast;
 
@@ -24,10 +36,21 @@ namespace RhythmActionGame
             if (clock == null) clock = BeatClock.Instance;
         }
 
+        /// <summary>
+        /// 달리기 박자 runBeat에 도착하는 시계 박자 (계속 달린다고 할 때). 마지막으로 위치를 갱신한 시계 박자를 기준으로 해서
+        /// 같은 프레임 안 갱신 순서와 무관하게 정확하다.
+        /// </summary>
+        public double ClockBeatOfRun(double runBeat)
+        {
+            double baseClock = hasLast ? lastClockBeat : (clock != null ? clock.CurrentBeat : 0);
+            return baseClock + (runBeat - RunBeat);
+        }
+
         /// <summary>경로 위치를 runBeat로 옮긴다.</summary>
         public void ResetTo(double runBeat)
         {
             RunBeat = runBeat;
+            Remap = null;
             hasLast = false;
             Place();
         }
@@ -43,12 +66,13 @@ namespace RhythmActionGame
             }
             lastClockBeat = beat;
             hasLast = true;
+            if (Remap.HasValue && RunBeat >= Remap.Value.End) Remap = null;
             Place();
         }
 
         void Place()
         {
-            var p = MapLayout.PointAt(Distance, out var fwd);
+            var p = MapLayout.PointAt(VisualDistance, out var fwd);
             transform.SetPositionAndRotation(p, Quaternion.LookRotation(fwd, Vector3.up));
         }
     }

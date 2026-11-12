@@ -75,6 +75,8 @@ namespace RhythmActionGame
         public const float SlowMotionTimeScale = 0.3f;
         /// <summary>처형·윈드밀 슬로모션 길이 (실제 초).</summary>
         public const float SlowMotionSeconds = 0.4f;
+        /// <summary>슬로모션 앞뒤 부드럽게 들어가고 나오는 시간 (실제 초, GDD-beta B4).</summary>
+        public const float SlowMotionRampSeconds = 0.08f;
 
         // ---------------- GDD 4.3 플레이어 ----------------
         /// <summary>카메라 눈높이 (m).</summary>
