@@ -16,6 +16,170 @@ namespace RhythmActionGame
 
         static Sprite brushBurst, inkSlash, inkX, ring;
 
+        static Sprite lightning, flare, dot, smoke, crack;
+        static Material uiAdditive;
+
+        /// <summary>방사형 번개선: 가운데에서 바깥으로 꺾이며 뻗는 가는 빛줄기 10개 (GDD-beta B8.5).</summary>
+        public static Sprite Lightning
+        {
+            get
+            {
+                if (lightning != null) return lightning;
+                const int s = 256;
+                var tex = NewTex(s, "Lightning");
+                var a = new float[s * s];
+                var rnd = new System.Random(7);
+                var c = new Vector2(s * 0.5f, s * 0.5f);
+                for (int b = 0; b < 10; b++)
+                {
+                    float ang = (b + (float)rnd.NextDouble() * 0.6f) / 10f * Mathf.PI * 2f;
+                    var p = c + new Vector2(Mathf.Cos(ang), Mathf.Sin(ang)) * s * 0.08f;
+                    const int segs = 6;
+                    float len = s * (0.36f + 0.1f * (float)rnd.NextDouble());
+                    for (int k = 0; k < segs; k++)
+                    {
+                        float jit = ((float)rnd.NextDouble() - 0.5f) * 0.9f;
+                        var dir = new Vector2(Mathf.Cos(ang + jit), Mathf.Sin(ang + jit));
+                        var q = p + dir * (len / segs);
+                        DrawLine(a, s, p, q, Mathf.Lerp(2.6f, 0.8f, k / (float)segs));
+                        p = q;
+                    }
+                }
+                return lightning = FromAlpha(tex, a, s);
+            }
+        }
+
+        static Sprite FromAlpha(Texture2D tex, float[] a, int s)
+        {
+            var px = new Color32[s * s];
+            for (int i = 0; i < px.Length; i++) px[i] = new Color32(255, 255, 255, (byte)(Mathf.Clamp01(a[i]) * 255));
+            tex.SetPixels32(px); tex.Apply();
+            return ToSprite(tex);
+        }
+
+        static void DrawLine(float[] a, int s, Vector2 p, Vector2 q, float w)
+        {
+            int x0 = Mathf.Max(0, (int)(Mathf.Min(p.x, q.x) - w * 3)), x1 = Mathf.Min(s - 1, (int)(Mathf.Max(p.x, q.x) + w * 3));
+            int y0 = Mathf.Max(0, (int)(Mathf.Min(p.y, q.y) - w * 3)), y1 = Mathf.Min(s - 1, (int)(Mathf.Max(p.y, q.y) + w * 3));
+            var pq = q - p;
+            for (int y = y0; y <= y1; y++)
+                for (int x = x0; x <= x1; x++)
+                {
+                    var v = new Vector2(x + 0.5f, y + 0.5f);
+                    float t = Mathf.Clamp01(Vector2.Dot(v - p, pq) / Mathf.Max(1e-4f, pq.sqrMagnitude));
+                    float d = Vector2.Distance(v, p + pq * t);
+                    float core = Mathf.Clamp01(w - d + 0.5f);                 // 밝은 심
+                    float halo = Mathf.Exp(-(d * d) / (w * w * 4f)) * 0.45f;  // 빛 번짐
+                    a[y * s + x] = Mathf.Max(a[y * s + x], Mathf.Max(core, halo));
+                }
+        }
+
+        /// <summary>십자 + X 섬광: 가늘고 긴 빛줄기 8개와 부드러운 중심 (GDD-beta B8.5).</summary>
+        public static Sprite Flare
+        {
+            get
+            {
+                if (flare != null) return flare;
+                const int s = 256;
+                var tex = NewTex(s, "Flare");
+                var a = new float[s * s];
+                float r = s * 0.5f;
+                for (int y = 0; y < s; y++)
+                    for (int x = 0; x < s; x++)
+                    {
+                        float dx = (x + 0.5f - r) / r, dy = (y + 0.5f - r) / r;
+                        float d2 = dx * dx + dy * dy;
+                        float core = Mathf.Exp(-d2 * 30f);
+                        float cross = Mathf.Exp(-Mathf.Abs(dy) * 90f) * Mathf.Clamp01(1f - Mathf.Abs(dx))
+                                    + Mathf.Exp(-Mathf.Abs(dx) * 90f) * Mathf.Clamp01(1f - Mathf.Abs(dy));
+                        float u = (dx + dy) * 0.7071f, v = (dx - dy) * 0.7071f;
+                        float xs = (Mathf.Exp(-Mathf.Abs(v) * 140f) * Mathf.Clamp01(1f - Mathf.Abs(u) * 1.25f)
+                                  + Mathf.Exp(-Mathf.Abs(u) * 140f) * Mathf.Clamp01(1f - Mathf.Abs(v) * 1.25f)) * 0.7f;
+                        a[y * s + x] = core + cross + xs;
+                    }
+                return flare = FromAlpha(tex, a, s);
+            }
+        }
+
+        /// <summary>부드러운 빛 점 (빛 입자·궤도 점).</summary>
+        public static Sprite Dot
+        {
+            get
+            {
+                if (dot != null) return dot;
+                const int s = 32;
+                var tex = NewTex(s, "Dot");
+                var a = new float[s * s];
+                float r = s * 0.5f;
+                for (int y = 0; y < s; y++)
+                    for (int x = 0; x < s; x++)
+                    {
+                        float d = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(r, r)) / r;
+                        a[y * s + x] = Mathf.Exp(-d * d * 4f) * 1.2f - 0.05f;
+                    }
+                return dot = FromAlpha(tex, a, s);
+            }
+        }
+
+        /// <summary>연기 덩어리 (노이즈로 가장자리를 불규칙하게).</summary>
+        public static Sprite Smoke
+        {
+            get
+            {
+                if (smoke != null) return smoke;
+                const int s = 128;
+                var tex = NewTex(s, "Smoke");
+                var a = new float[s * s];
+                float r = s * 0.5f;
+                for (int y = 0; y < s; y++)
+                    for (int x = 0; x < s; x++)
+                    {
+                        float d = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(r, r)) / r;
+                        float n = Mathf.PerlinNoise(x * 0.06f + 3f, y * 0.06f + 9f);
+                        a[y * s + x] = Mathf.Clamp01((1f - d) * 1.6f) * Mathf.Lerp(0.4f, 1f, n);
+                    }
+                return smoke = FromAlpha(tex, a, s);
+            }
+        }
+
+        /// <summary>금 간 원: 가운데에서 갈라지는 들쭉날쭉한 금 6줄 (FAIL).</summary>
+        public static Sprite Crack
+        {
+            get
+            {
+                if (crack != null) return crack;
+                const int s = 128;
+                var tex = NewTex(s, "Crack");
+                var a = new float[s * s];
+                var rnd = new System.Random(11);
+                var c = new Vector2(s * 0.5f, s * 0.5f);
+                for (int b = 0; b < 6; b++)
+                {
+                    float ang = (b + (float)rnd.NextDouble() * 0.5f) / 6f * Mathf.PI * 2f;
+                    var p = c;
+                    for (int k = 0; k < 4; k++)
+                    {
+                        float jit = ((float)rnd.NextDouble() - 0.5f) * 1.1f;
+                        var q = p + new Vector2(Mathf.Cos(ang + jit), Mathf.Sin(ang + jit)) * s * 0.11f;
+                        DrawLine(a, s, p, q, 1.6f);
+                        p = q;
+                    }
+                }
+                return crack = FromAlpha(tex, a, s);
+            }
+        }
+
+        /// <summary>UI 가산 머티리얼 (SceneBuilder가 에셋을 넘김, 없으면 실행 중 셰이더로 생성).</summary>
+        public static Material UiAdditive(Material asset)
+        {
+            if (asset != null) return asset;
+            if (uiAdditive != null) return uiAdditive;
+            var sh = Shader.Find("RhythmActionGame/UIAdditive");
+            if (sh == null) return null;
+            return uiAdditive = new Material(sh) { name = "UIAdditive_Runtime" };
+        }
+
+
         static Texture2D NewTex(int size, string name) =>
             new Texture2D(size, size, TextureFormat.RGBA32, false) { name = name, wrapMode = TextureWrapMode.Clamp };
 

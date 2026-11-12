@@ -20,6 +20,16 @@ namespace RhythmActionGame
         public RectTransform labelLayer;
         /// <summary>화면 표시 지연 보정 (ms, GDD-beta B8.1): 원을 이만큼 앞당겨 그려 눈에 보이는 겹침 순간이 판정 목표와 맞게 한다.</summary>
         public float displayLatencyMs = GameConfig.DisplayLatencyMs;
+        /// <summary>UI 가산 머티리얼 (GDD-beta B8.5). SceneBuilder가 에셋을 넘기고, 없으면 실행 중 셰이더로 만든다.</summary>
+        public Material additiveMaterial;
+        Material Additive => VfxFactory.UiAdditive(additiveMaterial);
+
+        Image AddImage(Transform parent, string name, Sprite s, Color c, float d, bool additive)
+        {
+            var img = UiFactory.CreateImage(parent, name, s, c, d);
+            if (additive && Additive != null) img.material = Additive;
+            return img;
+        }
 
         /// <summary>원 하나의 화면 요소.</summary>
         public class Ring
@@ -27,6 +37,10 @@ namespace RhythmActionGame
             public JudgeCue Cue;
             public RectTransform Root;
             public Image Outer, Target, Button, Glow, Chevron;
+            /// <summary>가산 빛 (B17): 목표에 가까울수록 밝아짐, 바깥 원 빛, 둘레를 도는 빛 점.</summary>
+            public Image ChargeGlow, OuterGlow;
+            public Image[] Orbit;
+            public float Charge;
             public Text Arrow;
             public float AppearedAt;      // 실제 시간
             public float PulseAt = -999f; // 키를 눌러 반응한 시각 (B13)
@@ -145,12 +159,17 @@ namespace RhythmActionGame
             root.SetParent(transform, false);
             var ring = new Ring { Cue = cue, Root = root, AppearedAt = RealTime() };
             ring.Glow = UiFactory.CreateImage(root, "Glow", UiFactory.Glow, IsFinisher(cue) ? FinisherGlowColor : GlowColor, GameConfig.RingGlowDiameterPx);
+            var glowColor = IsFinisher(cue) ? FinisherGlowColor : GlowColor;
+            ring.ChargeGlow = AddImage(root, "ChargeGlow", UiFactory.Glow, glowColor, GameConfig.RingGlowDiameterPx * 1.15f, true);
+            ring.OuterGlow = AddImage(root, "OuterGlow", UiFactory.Glow, glowColor, GameConfig.RingStartDiameterPx * 1.15f, true);
             ring.Button = UiFactory.CreateImage(root, "Button", UiFactory.Disc, ButtonColor, GameConfig.RingTargetDiameterPx);
             ring.Target = UiFactory.CreateImage(root, "TargetRing", UiFactory.Ring, TargetColor, GameConfig.RingTargetDiameterPx);
             ring.Outer = UiFactory.CreateImage(root, "OuterRing", UiFactory.Ring, OuterColor, GameConfig.RingStartDiameterPx);
             ring.Arrow = UiFactory.CreateText(root, "Arrow", JudgeRules.Arrow(cue.Key), 64, Color.white, new Vector2(120, 120));
             ring.Chevron = UiFactory.CreateImage(root, "Chevron", UiFactory.Chevron, GlowColor, GameConfig.RingChevronSizePx);
             ring.Chevron.enabled = false;
+            ring.Orbit = new Image[GameConfig.RingOrbitDots];
+            for (int i = 0; i < ring.Orbit.Length; i++) ring.Orbit[i] = AddImage(root, "Orbit" + i, VfxFactory.Dot, Color.white, 18f, true);
             AssignChain(ring);
             rings.Add(ring);
             UpdateRing(ring);
@@ -309,6 +328,9 @@ namespace RhythmActionGame
             public RectTransform Root;
             public Image Main;
             public Image[] Parts;      // PERFECT: 붓획 조각, FAIL: 갈라진 두 쪽
+            /// <summary>화려한 층 (B17).</summary>
+            public Image Lightning, Flare, Shock, Core, Crack, Smoke;
+            public List<Spark> Sparks = new List<Spark>();
             public float ShownAt, Seconds;
             public Vector2 BasePos;
         }
@@ -317,6 +339,99 @@ namespace RhythmActionGame
         public static readonly Color PerfectFxColor = new Color(1f, 0.82f, 0.25f);
         public static readonly Color NormalFxColor = new Color(0.15f, 0.85f, 0.75f);
         public static readonly Color FailFxColor = new Color(0.9f, 0.2f, 0.12f);
+
+        /// <summary>바깥으로 흩어지는 빛 입자 하나.</summary>
+        public class Spark
+        {
+            public Image Img;
+            public Vector2 Dir;
+            public float Speed;
+        }
+
+        /// <summary>
+        /// 화려한 판정 이펙트 층 (GDD-beta B8.5, 대격돌 수준의 화려함을 기준점으로).
+        /// PERFECT: 방사형 번개선 + 십자·X 섬광 + 충격 고리(3배) + 빛 입자 18 + 금빛 중심 섬광.
+        /// NORMAL: 작은 번개선 + 빛 입자 8 (+ 기존 청록 고리). FAIL: 붉은 금 + 어두운 연기 (+ 기존 흔들림·갈라짐).
+        /// </summary>
+        void AddBurst(RingFx fx)
+        {
+            var root = fx.Root;
+            float d = GameConfig.RingTargetDiameterPx;
+            int sparks = 0;
+            Color sparkColor = Color.white;
+            switch (fx.Result)
+            {
+                case Judgement.Perfect:
+                    fx.Shock = AddImage(root, "Shock", UiFactory.Ring, Color.white, d, true);
+                    fx.Lightning = AddImage(root, "Lightning", VfxFactory.Lightning, new Color(0.55f, 0.85f, 1f), GameConfig.FxLightningDiameterPx, true);
+                    fx.Lightning.rectTransform.localRotation = Quaternion.Euler(0, 0, Random.Range(0f, 360f));
+                    fx.Flare = AddImage(root, "Flare", VfxFactory.Flare, new Color(0.85f, 0.93f, 1f), GameConfig.FxFlareDiameterPx, true);
+                    fx.Flare.rectTransform.localRotation = Quaternion.Euler(0, 0, Random.Range(-12f, 12f));
+                    fx.Core = AddImage(root, "Core", UiFactory.Glow, PerfectFxColor, d * 1.4f, true);
+                    sparks = GameConfig.FxSparksPerfect;
+                    sparkColor = new Color(1f, 0.9f, 0.55f);
+                    break;
+                case Judgement.Normal:
+                    fx.Lightning = AddImage(root, "Lightning", VfxFactory.Lightning, NormalFxColor, GameConfig.FxLightningDiameterPx * 0.6f, true);
+                    fx.Lightning.rectTransform.localRotation = Quaternion.Euler(0, 0, Random.Range(0f, 360f));
+                    sparks = GameConfig.FxSparksNormal;
+                    sparkColor = NormalFxColor;
+                    break;
+                default:
+                    fx.Smoke = UiFactory.CreateImage(root, "Smoke", VfxFactory.Smoke, new Color(0.12f, 0.08f, 0.08f, 0.6f), d * 1.6f);
+                    fx.Smoke.transform.SetAsFirstSibling();
+                    fx.Crack = UiFactory.CreateImage(root, "Crack", VfxFactory.Crack, FailFxColor, d * 1.1f);
+                    break;
+            }
+            for (int i = 0; i < sparks; i++)
+            {
+                float ang = (i + Random.Range(-0.3f, 0.3f)) / sparks * Mathf.PI * 2f;
+                var img = AddImage(root, "Spark" + i, VfxFactory.Dot, sparkColor, Random.Range(10f, 22f), true);
+                fx.Sparks.Add(new Spark { Img = img, Dir = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang)), Speed = GameConfig.FxSparkSpeedPx * Random.Range(0.6f, 1.1f) });
+            }
+        }
+
+        /// <summary>화려한 층의 모양 (u: 0~1 진행도, age: 초).</summary>
+        void PoseBurst(RingFx fx, float u, float age)
+        {
+            float fade = 1f - u;
+            float ease = 1f - (1f - u) * (1f - u);
+            if (fx.Shock != null)
+            {
+                fx.Shock.rectTransform.localScale = Vector3.one * Mathf.Lerp(1f, GameConfig.FxShockScale, ease);
+                SetA(fx.Shock, 0.9f * fade);
+            }
+            if (fx.Lightning != null)
+            {
+                fx.Lightning.rectTransform.localScale = Vector3.one * Mathf.Lerp(0.5f, 1.4f, Mathf.Sqrt(u));
+                SetA(fx.Lightning, fade * fade);
+            }
+            if (fx.Flare != null)
+            {
+                // 처음에 확 퍼졌다가 가늘어지며 사라짐
+                float s = u < 0.25f ? Mathf.Lerp(0.6f, 1.15f, u / 0.25f) : Mathf.Lerp(1.15f, 0.9f, (u - 0.25f) / 0.75f);
+                fx.Flare.rectTransform.localScale = new Vector3(s, s * Mathf.Lerp(1f, 0.6f, u), 1f);
+                SetA(fx.Flare, u < 0.15f ? 1f : fade);
+            }
+            if (fx.Core != null)
+            {
+                fx.Core.rectTransform.localScale = Vector3.one * Mathf.Lerp(0.6f, 1.6f, ease);
+                SetA(fx.Core, fade);
+            }
+            if (fx.Smoke != null)
+            {
+                fx.Smoke.rectTransform.localScale = Vector3.one * Mathf.Lerp(0.8f, 1.4f, ease);
+                SetA(fx.Smoke, 0.6f * fade);
+            }
+            if (fx.Crack != null) SetA(fx.Crack, fade);
+            foreach (var sp in fx.Sparks)
+            {
+                // 감속하며 바깥으로 (거리 = v·(t − t²/2T))
+                float dist = sp.Speed * (age - age * age / (2f * fx.Seconds));
+                sp.Img.rectTransform.anchoredPosition = sp.Dir * dist;
+                SetA(sp.Img, fade);
+            }
+        }
 
         void SpawnRingFx(Vector2 pos, Judgement r)
         {
@@ -352,6 +467,7 @@ namespace RhythmActionGame
                     fx.Parts = new[] { left, right };
                     break;
             }
+            AddBurst(fx);
             ringFx.Add(fx);
             PoseRingFx(fx, fx.ShownAt);
         }
@@ -391,6 +507,7 @@ namespace RhythmActionGame
                     break;
                 }
             }
+            PoseBurst(fx, u, now - fx.ShownAt);
             return true;
         }
 
@@ -403,6 +520,37 @@ namespace RhythmActionGame
             return 1f + (GameConfig.InputPulseScale - 1f) * Mathf.Sin(age / GameConfig.InputPulseSeconds * Mathf.PI);
         }
 
+        /// <summary>
+        /// 다가오는 원의 빛 (GDD-beta B8.5): 목표에 가까울수록 가산 빛이 0.4 → 1.0으로 밝아지고,
+        /// 바깥 원에도 빛이 붙으며, 빛 점 8개가 원 둘레를 돈다.
+        /// </summary>
+        void AnimateCharge(Ring r, double untilBeats, float outerDiameter)
+        {
+            float p = Mathf.Clamp01(1f - (float)(untilBeats / GameConfig.ApproachBeats));
+            r.Charge = Mathf.Lerp(GameConfig.RingChargeMin, 1f, p);
+            float now = RealTime();
+            if (r.ChargeGlow != null)
+            {
+                var c = r.ChargeGlow.color; c.a = r.Charge; r.ChargeGlow.color = c;
+                float breathe = 1f + 0.08f * Mathf.Sin(now * Mathf.PI * 2f * 3f) * p;
+                r.ChargeGlow.rectTransform.localScale = Vector3.one * breathe;
+            }
+            if (r.OuterGlow != null)
+            {
+                r.OuterGlow.rectTransform.sizeDelta = Vector2.one * outerDiameter * 1.15f;
+                var c = r.OuterGlow.color; c.a = 0.5f * r.Charge; r.OuterGlow.color = c;
+            }
+            if (r.Orbit != null)
+            {
+                for (int i = 0; i < r.Orbit.Length; i++)
+                {
+                    float ang = (now * GameConfig.RingOrbitDegPerSec + i * 360f / r.Orbit.Length) * Mathf.Deg2Rad;
+                    r.Orbit[i].rectTransform.anchoredPosition = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang)) * GameConfig.RingOrbitRadiusPx;
+                    var c = r.Orbit[i].color; c.a = 0.35f + 0.65f * r.Charge; r.Orbit[i].color = c;
+                }
+            }
+        }
+
         void UpdateRing(Ring r)
         {
             r.Root.localScale = Vector3.one * PulseScale(RealTime() - r.PulseAt);
@@ -412,6 +560,7 @@ namespace RhythmActionGame
                 double until = r.Cue.TargetBeat - (clock.CurrentBeat + lead);
                 float d = JudgeRules.OuterRingDiameter(until);
                 r.Outer.rectTransform.sizeDelta = new Vector2(d, d);
+                AnimateCharge(r, until, d);
             }
             if (r.Locked) return;
             var radii = RingLayout.SafeRadii(Size());

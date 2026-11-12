@@ -1,5 +1,5 @@
 ﻿# Unity verify report
-time: 2026-11-12 17:00:42
+time: 2026-11-12 17:07:36
 
 ## EditMode : total=126 passed=126 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
@@ -129,7 +129,7 @@ time: 2026-11-12 17:00:42
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_SpeedFx_Intensity
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_Texts_MatchGdd48
 
-## PlayMode : total=92 passed=92 failed=0 skipped=0 result=Passed
+## PlayMode : total=97 passed=97 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -185,6 +185,11 @@ time: 2026-11-12 17:00:42
   - [Passed] RhythmActionGame.Tests.B14_RingFxTests.B14_BelowRings_GoneWithin035s
   - [Passed] RhythmActionGame.Tests.B14_RingFxTests.B14_EachResult_DistinctEffect
   - [Passed] RhythmActionGame.Tests.B14_RingFxTests.B14_GameScene_EffectsSpawnOnJudgement
+  - [Passed] RhythmActionGame.Tests.B17_FlashyFxTests.B17_ApproachRing_ChargesUp_OrbitDots_OuterGlow
+  - [Passed] RhythmActionGame.Tests.B17_FlashyFxTests.B17_BelowRings_GoneWithin035s
+  - [Passed] RhythmActionGame.Tests.B17_FlashyFxTests.B17_GameScene_AdditiveMaterialAsset
+  - [Passed] RhythmActionGame.Tests.B17_FlashyFxTests.B17_Normal_And_Fail_Distinct
+  - [Passed] RhythmActionGame.Tests.B17_FlashyFxTests.B17_Perfect_LightningFlareShockSparksCore
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_ChapterStartBeats_MatchSections
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(1)
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(4)

@@ -501,10 +501,10 @@
                                          "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "in_progress",
+                      "status":  "done",
                       "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "UI 가산 셰이더, 원 빛(0.4→1.0)·궤도 빛 점 8·바깥 원 빛, PERFECT 번개선·십자X 섬광·충격 고리·빛 입자 18·금빛 중심, NORMAL·FAIL 구성. 빌드+smoke 통과. 평가 PASS 1회차."
                   },
                   {
                       "id":  "B18",
@@ -517,10 +517,10 @@
                                          "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과 후 exe 경로 안내",
                                          "사용자가 판정 난이도와 이펙트 화려함을 확인하고 피드백을 줌"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "needs_user",
+                      "attempts":  1,
                       "max_attempts":  1,
-                      "notes":  ""
+                      "notes":  "Builds/Gray 다시 빌드 + smoke-test 통과(타이틀 12초, -startGame 25초 오류 없음). 사용자 재확인 대기."
                   },
                   {
                       "id":  "B10",

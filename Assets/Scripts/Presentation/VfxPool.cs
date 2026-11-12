@@ -56,6 +56,7 @@ namespace RhythmActionGame
             built = true;
             // 텍스처를 미리 만든다 (첫 재생 때 만들면 수십 ms 멈칫해 Hit Stop보다 길어진다)
             _ = VfxFactory.BrushBurst; _ = VfxFactory.InkSlash; _ = VfxFactory.InkX; _ = VfxFactory.ShockRing;
+            _ = VfxFactory.Lightning; _ = VfxFactory.Flare; _ = VfxFactory.Dot; _ = VfxFactory.Smoke; _ = VfxFactory.Crack;
             if (flashLayer == null)
             {
                 var c = UiFactory.CreateCanvas("ScreenFlashCanvas", GameConfig.JudgeFxCanvasOrder);

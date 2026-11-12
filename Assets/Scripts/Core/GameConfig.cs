@@ -246,6 +246,24 @@ namespace RhythmActionGame
         /// <summary>판정 원 이펙트 최대 길이 (GDD-beta B8.3).</summary>
         public const float RingFxMaxSeconds = 0.35f;
 
+        // ---------------- GDD-beta B8.5 화려한 판정 원·이펙트 (Claude가 정함) ----------------
+        /// <summary>다가오는 원의 가산 빛: 등장 때 세기 0.4 → 목표 시점 1.0.</summary>
+        public const float RingChargeMin = 0.4f;
+        /// <summary>원 둘레를 도는 빛 점 수·속도(도/초)·반지름(px).</summary>
+        public const int RingOrbitDots = 8;
+        public const float RingOrbitDegPerSec = 360f;
+        public const float RingOrbitRadiusPx = 74f;
+        /// <summary>PERFECT 십자·X 섬광 지름 (px, 700 이상).</summary>
+        public const float FxFlareDiameterPx = 760f;
+        /// <summary>방사형 번개선 지름 (px).</summary>
+        public const float FxLightningDiameterPx = 420f;
+        /// <summary>충격 고리가 퍼지는 배율.</summary>
+        public const float FxShockScale = 3f;
+        /// <summary>빛 입자 수 (PERFECT 18, NORMAL 8)와 처음 속도 (px/초).</summary>
+        public const int FxSparksPerfect = 18;
+        public const int FxSparksNormal = 8;
+        public const float FxSparkSpeedPx = 900f;
+
         // ---------------- GDD-beta B1.4 판정 화면 ----------------
         /// <summary>판정 중 노출 (URP Color Adjustments postExposure, EV).</summary>
         public const float JudgeExposure = -0.4f;

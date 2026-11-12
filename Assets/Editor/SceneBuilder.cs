@@ -146,6 +146,7 @@ namespace RhythmActionGame.EditorTools
             ringView.clock = clock;
             ringView.worldCamera = cam;
             ringView.labelLayer = (RectTransform)labelCanvas.transform;
+            ringView.additiveMaterial = UiAdditiveMat();
 
             var director = systems.AddComponent<StageDirector>();
             director.clock = clock;
@@ -463,6 +464,21 @@ namespace RhythmActionGame.EditorTools
         }
 
         /// <summary>회색 상자용 URP Lit 머티리얼 (에셋으로 저장해 빌드에 포함).</summary>
+        /// <summary>UI 가산 머티리얼 (GDD-beta B8.5). 에셋으로 두어 빌드에 셰이더가 들어가게 한다.</summary>
+        static Material UiAdditiveMat()
+        {
+            string path = $"{MaterialsDir}/UIAdditive.mat";
+            var m = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (m == null)
+            {
+                Directory.CreateDirectory(MaterialsDir);
+                m = new Material(Shader.Find("RhythmActionGame/UIAdditive"));
+                AssetDatabase.CreateAsset(m, path);
+            }
+            EditorUtility.SetDirty(m);
+            return m;
+        }
+
         /// <summary>이펙트 파티클 머티리얼 (URP Particles/Unlit 가산, GDD-beta B5). 에셋으로 두어 빌드에 셰이더가 들어가게 한다.</summary>
         static Material FxParticleMat()
         {
