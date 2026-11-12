@@ -79,6 +79,7 @@ namespace RhythmActionGame
             {
                 judge.CueAppeared += OnAppeared;
                 judge.CueJudged += OnJudged;
+                judge.CueCancelled += OnCancelled;
             }
         }
 
@@ -87,6 +88,7 @@ namespace RhythmActionGame
             if (judge == null) return;
             judge.CueAppeared -= OnAppeared;
             judge.CueJudged -= OnJudged;
+            judge.CueCancelled -= OnCancelled;
         }
 
         void OnEnable() { if (judge != null) Bind(judge, clock, worldCamera); }
@@ -169,6 +171,19 @@ namespace RhythmActionGame
             }
         }
 
+        /// <summary>판정 없이 취소된 원은 문구 없이 지운다 (B11: 전투·윈드밀 재도전, 게임 오버, 다시 시작).</summary>
+        void OnCancelled(JudgeCue cue) => RemoveRing(cue);
+
+        void RemoveRing(JudgeCue cue)
+        {
+            for (int i = rings.Count - 1; i >= 0; i--)
+            {
+                if (rings[i].Cue != cue) continue;
+                if (rings[i].Root != null) Destroy(rings[i].Root.gameObject);
+                rings.RemoveAt(i);
+            }
+        }
+
         void OnJudged(JudgeCue cue, Judgement r)
         {
             Vector2 pos = Vector2.zero;
@@ -192,6 +207,9 @@ namespace RhythmActionGame
         /// <summary>원 크기·위치와 문구 모양·수명을 갱신한다.</summary>
         public void Refresh()
         {
+            // 안전망: 어떤 경로로든 끝난 판정의 원은 남기지 않는다 (B11)
+            for (int i = rings.Count - 1; i >= 0; i--)
+                if (rings[i].Cue.Judged) { if (rings[i].Root != null) Destroy(rings[i].Root.gameObject); rings.RemoveAt(i); }
             foreach (var r in rings) UpdateRing(r);
             float now = RealTime();
             for (int i = labels.Count - 1; i >= 0; i--)

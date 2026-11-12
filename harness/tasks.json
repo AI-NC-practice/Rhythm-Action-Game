@@ -386,10 +386,10 @@
                                          "판정이 끝난(Judged) 원은 어떤 경로로든 다음 프레임까지 화면에서 사라짐 — 테스트",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "JudgeSystem.CueCancelled(취소·ClearAll) → 판정 원 지움 + Refresh 안전망. 평가 PASS 1회차."
                   },
                   {
                       "id":  "B12",
@@ -406,8 +406,8 @@
                                          "음악·반주 예약(PlayScheduled)은 실제 dspTime 기준 그대로 — 기존 B08 테스트 통과",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "in_progress",
+                      "attempts":  1,
                       "max_attempts":  3,
                       "notes":  ""
                   },

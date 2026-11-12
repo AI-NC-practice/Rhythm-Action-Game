@@ -1,5 +1,5 @@
 ﻿# Unity verify report
-time: 2026-11-12 15:40:24
+time: 2026-11-12 16:22:04
 
 ## EditMode : total=111 passed=111 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
@@ -114,7 +114,7 @@ time: 2026-11-12 15:40:24
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_SpeedFx_Intensity
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_Texts_MatchGdd48
 
-## PlayMode : total=80 passed=80 failed=0 skipped=0 result=Passed
+## PlayMode : total=84 passed=84 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -158,6 +158,10 @@ time: 2026-11-12 15:40:24
   - [Passed] RhythmActionGame.Tests.B08_SfxPlayerTests.B08_GameScene_JangguBacking_ReplacesMetronome_BeatAccurate
   - [Passed] RhythmActionGame.Tests.B08_SfxPlayerTests.B08_Pool8_SameKindMax3
   - [Passed] RhythmActionGame.Tests.B08_SfxPlayerTests.B08_Presets_PlaySoundsAndDuck
+  - [Passed] RhythmActionGame.Tests.B11_StuckRingTests.B11_AnyJudgedCue_RingGoneNextFrame
+  - [Passed] RhythmActionGame.Tests.B11_StuckRingTests.B11_DuelFailRetry_CancelledRingsRemoved
+  - [Passed] RhythmActionGame.Tests.B11_StuckRingTests.B11_GameOverAndRestart_ClearRings
+  - [Passed] RhythmActionGame.Tests.B11_StuckRingTests.B11_WindmillFailRetry_CancelledRingsRemoved
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_ChapterStartBeats_MatchSections
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(1)
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(4)

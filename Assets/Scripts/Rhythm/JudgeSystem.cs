@@ -36,6 +36,8 @@ namespace RhythmActionGame
 
         public event Action<JudgeCue> CueAppeared;
         public event Action<JudgeCue, Judgement> CueJudged;
+        /// <summary>판정 없이 취소되거나 모두 지워질 때 (판정 원을 지우는 데 쓴다, B11).</summary>
+        public event Action<JudgeCue> CueCancelled;
 
         public IReadOnlyList<JudgeCue> Cues => cues;
 
@@ -65,7 +67,17 @@ namespace RhythmActionGame
             return cue;
         }
 
-        public void ClearAll() => cues.Clear();
+        /// <summary>모든 판정을 지운다 (게임 오버, 다시 시작). 떠 있던 원도 지우도록 알린다.</summary>
+        public void ClearAll()
+        {
+            var gone = cues.ToArray();
+            cues.Clear();
+            foreach (var c in gone)
+            {
+                if (!c.Judged) { c.Judged = true; c.Cancelled = true; }
+                CueCancelled?.Invoke(c);
+            }
+        }
 
         /// <summary>판정하지 않고 취소한다 (이벤트 없음). 목록에서는 다음 Tick에 빠진다.</summary>
         public void Cancel(JudgeCue cue)
@@ -73,6 +85,7 @@ namespace RhythmActionGame
             if (cue == null || cue.Judged) return;
             cue.Judged = true;
             cue.Cancelled = true;
+            CueCancelled?.Invoke(cue);
         }
 
         void Update()
