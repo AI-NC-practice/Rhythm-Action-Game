@@ -27,3 +27,6 @@ JudgeRules(±60/±150 ms, −300 ms 무시, 보정 ms, 원 지름 360→120), Ga
 
 ### 2026-11-12 T04 회색 상자 맵 + 경로 + 차트 — done
 MapLayout(+Z/+X로 꺾이는 수평 경로 660 m, 구간 6개, 높이 키프레임, 지붕 덩어리: 기와집 4채 4.5~5.5 m·틈 4 m, 궁궐 담 5 m, 성문 6 m), 차트 JSON(Resources/Charts/stage1.json: 장애물 20, 일반 적 4, 포위 1, 무사 1, 위치는 달리기 박자), PathFollower(1박 2.5 m, 전투 중 정지), GameBootstrap, SceneBuilder(Title·Game 씬 생성, Build Settings 등록, 회색 상자 머티리얼 Assets/Art/Materials/Gray)를 만들었다. PlayMode 중에는 테스트 러너가 Build Settings에 임시 씬을 더해 씬 수 검사는 EditMode로 옮겼다. 평가 PASS(1회차), EditMode 55/55, PlayMode 8/8. 다음 작업: T05.
+
+### 2026-11-12 T05 장애물 파쿠르 + 체력 — done
+StageDirector(차트 장애물을 3박 앞에서 판정 예약, 판정 원 위치는 장애물 중심, 4박 통과 동안 결과별 카메라 연출, FAIL 시 체력 −1, 체력 0이면 GameOver), Traversal(장애물 6종 분류·키 검사·결과별 궤적, 상태 이름 예: Vault_Perfect), PlayerHealth를 만들었다. 카메라 계층은 CameraRig → Motion → PlayerCamera. 평가 PASS(1회차), EditMode 60/60, PlayMode 13/13. 평가자 참고: 4박 PlayMode 검증이 수레 한 종류에만 있음. 다음 작업: T06.

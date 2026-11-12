@@ -114,8 +114,10 @@ namespace RhythmActionGame.EditorTools
             var rig = new GameObject("CameraRig");
             rig.transform.SetParent(player.transform, false);
             rig.transform.localPosition = new Vector3(0, GameConfig.EyeHeight, 0);
+            var motion = new GameObject("Motion");   // 장애물·전투 카메라 연출 (StageDirector)
+            motion.transform.SetParent(rig.transform, false);
             var cam = CreateCamera("PlayerCamera", Vector3.zero, Quaternion.identity);
-            cam.transform.SetParent(rig.transform, false);
+            cam.transform.SetParent(motion.transform, false);
             cam.fieldOfView = GameConfig.FovDefault;
             cam.nearClipPlane = 0.05f;
             cam.farClipPlane = 600f;
@@ -133,7 +135,14 @@ namespace RhythmActionGame.EditorTools
             ringView.clock = clock;
             ringView.worldCamera = cam;
 
+            var director = systems.AddComponent<StageDirector>();
+            director.clock = clock;
+            director.judge = judge;
+            director.player = follower;
+            director.motion = motion.transform;
+
             var boot = new GameObject("GameBootstrap").AddComponent<GameBootstrap>();
+            boot.director = director;
             boot.clock = clock;
             boot.judge = judge;
             boot.ringView = ringView;

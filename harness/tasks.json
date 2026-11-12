@@ -98,10 +98,10 @@
                                          "체력 0이면 게임 오버 상태로 전환 — PlayMode 테스트",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "in_progress",
+                      "status":  "done",
                       "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "StageDirector(장애물 예약·4박 통과·체력·게임 오버), Traversal(6종×3결과 카메라 궤적), PlayerHealth. 평가 PASS(1회차)."
                   },
                   {
                       "id":  "T06",
@@ -120,8 +120,8 @@
                                          "공격 중 무기에 TrailRenderer와 잔상 오브젝트가 생기고, 카메라가 공격 지점을 따라감",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "in_progress",
+                      "attempts":  1,
                       "max_attempts":  3,
                       "notes":  ""
                   },

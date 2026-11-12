@@ -34,7 +34,7 @@ namespace RhythmActionGame.Tests
             var boot = GameBootstrap.Instance;
             Assert.IsNotNull(boot);
             var cam = boot.playerCamera;
-            Assert.AreEqual(GameConfig.EyeHeight, cam.transform.parent.localPosition.y, 1e-4f, "눈높이 1.65 m");
+            Assert.AreEqual(GameConfig.EyeHeight, cam.transform.position.y - boot.player.transform.position.y, 1e-3f, "눈높이 1.65 m");
 
             double now = 0;
             boot.clock.TimeSource = () => now;

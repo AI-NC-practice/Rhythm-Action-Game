@@ -11,6 +11,7 @@ namespace RhythmActionGame
         public JudgeFx fx;
         public PathFollower player;
         public Camera playerCamera;
+        public StageDirector director;
         public bool autoStart = true;
 
         public static GameBootstrap Instance { get; private set; }
@@ -21,6 +22,7 @@ namespace RhythmActionGame
             if (judge != null) judge.clock = clock;
             if (player != null) player.clock = clock;
             if (ringView != null) ringView.Bind(judge, clock, playerCamera);
+            if (director != null) { director.clock = clock; director.judge = judge; director.player = player; }
         }
 
         void OnDestroy()
@@ -33,11 +35,13 @@ namespace RhythmActionGame
             if (autoStart) StartRun();
         }
 
-        public void StartRun()
+        /// <summary>runBeat 위치(달리기 박자)부터 스테이지를 시작한다. 박자 시계는 0박부터.</summary>
+        public void StartRun(double runBeat = 0)
         {
-            player.ResetTo(0);
+            player.ResetTo(runBeat);
             clock.ResetSpeed();
             clock.StartClock();
+            if (director != null) director.ResetStage(runBeat);
         }
     }
 }

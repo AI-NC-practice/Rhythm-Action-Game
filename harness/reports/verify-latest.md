@@ -1,7 +1,7 @@
 ﻿# Unity verify report
-time: 2026-11-12 09:52:42
+time: 2026-11-12 09:56:59
 
-## EditMode : total=55 passed=55 failed=0 skipped=0 result=Passed
+## EditMode : total=60 passed=60 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_BeatAndSpeed_MatchGdd41
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_Judge_MatchGdd42
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_ObstacleAndCombat_MatchGdd44To46
@@ -57,8 +57,13 @@ time: 2026-11-12 09:52:42
   - [Passed] RhythmActionGame.Tests.T04_ChartAndLayoutTests.T04_Path_Length600To700_AndMatchesChart
   - [Passed] RhythmActionGame.Tests.T04_ChartAndLayoutTests.T04_Path_PointAt_ContinuousAndFollowsRoofs
   - [Passed] RhythmActionGame.Tests.T04_ChartAndLayoutTests.T04_Roofs_HeightAndGapsInGddRange
+  - [Passed] RhythmActionGame.Tests.T05_TraversalTests.T05_Health_ThreeFailsKill
+  - [Passed] RhythmActionGame.Tests.T05_TraversalTests.T05_KeysMatchGdd3
+  - [Passed] RhythmActionGame.Tests.T05_TraversalTests.T05_Offsets_StartAndEndOnPath
+  - [Passed] RhythmActionGame.Tests.T05_TraversalTests.T05_SixCategories_AndChartKeysFit
+  - [Passed] RhythmActionGame.Tests.T05_TraversalTests.T05_ThreeResults_HaveDifferentMotion
 
-## PlayMode : total=8 passed=8 failed=0 skipped=0 result=Passed
+## PlayMode : total=13 passed=13 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Font_HasJudgeGlyphs
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Fx_GrayAndZoom_EnterAndExit
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Label_ShownFor0_6Seconds
@@ -67,5 +72,10 @@ time: 2026-11-12 09:52:42
   - [Passed] RhythmActionGame.Tests.T04_GameSceneTests.T04_GameScene_HasSectionsLightAndPlaceholders
   - [Passed] RhythmActionGame.Tests.T04_GameSceneTests.T04_Player_EyeHeight_AndMoves10mIn4Beats
   - [Passed] RhythmActionGame.Tests.T04_GameSceneTests.T04_Player_StopsWhenNotRunning
+  - [Passed] RhythmActionGame.Tests.T05_ObstacleRunTests.T05_AllResults_Take4Beats_WithDifferentMotion
+  - [Passed] RhythmActionGame.Tests.T05_ObstacleRunTests.T05_CuePoint_IsAtObstacle
+  - [Passed] RhythmActionGame.Tests.T05_ObstacleRunTests.T05_Fail_LosesHpAndSpeed_MusicKeepsGoing
+  - [Passed] RhythmActionGame.Tests.T05_ObstacleRunTests.T05_Fail_SpeedNotBelowMin
+  - [Passed] RhythmActionGame.Tests.T05_ObstacleRunTests.T05_ThreeFails_GameOver
 
 OVERALL: PASS
