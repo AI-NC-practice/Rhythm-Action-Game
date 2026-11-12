@@ -39,3 +39,6 @@ StageDirector(차트 장애물을 3박 앞에서 판정 예약, 판정 원 위�
 
 ### 2026-11-12 T08 UI/메뉴 + 점수·랭크 + 속도감 효과 — done
 타이틀 메뉴(시작·설정·종료, 설정: 타이밍 보정 슬라이더 5 ms 단위·음량, PlayerPrefs), HUD(하트 3, x1.00, 점수, 콤보 2 이상), 일시정지(Esc, 박자 시계·음악 정지, timeScale 0), 결과 화면(클리어/게임 오버, 판정 수, 최고 속도, 점수, 랭크, 다시 하기·타이틀로), 집중선(코드로 만든 텍스처, 세기 (s−1)/0.3)과 FOV +5°를 만들었다. Unity는 MonoBehaviour 파일 이름이 클래스 이름과 같아야 씬에 저장되므로 UI 컴포넌트를 파일 하나에 하나씩 나눴다. 평가 PASS(1회차), EditMode 73/73, PlayMode 33/33. Esc 키와 폰트 이름은 T09 플레이로 확인. 다음 작업: T09(사람 확인).
+
+### 2026-11-12 T09 [사용자] 회색 상자 플레이 확인 — needs_user
+BuildScript.BuildGray로 Builds/Gray/RhythmActionGame.exe(99 MB)를 만들고 smoke-test-build.ps1을 통과했다. 기본 smoke-test는 타이틀만 돌기 때문에 실행 인자 -startGame(타이틀이 바로 게임 씬을 연다)을 추가해 게임 씬도 화면 없이 20초 돌려 로그에 오류가 없음을 확인했다. 사용자 플레이 피드백을 기다린다.

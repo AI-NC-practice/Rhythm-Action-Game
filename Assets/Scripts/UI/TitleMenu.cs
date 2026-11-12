@@ -24,6 +24,12 @@ namespace RhythmActionGame
 
         void Awake() => Build();
 
+        void Start()
+        {
+            // 화면 없는 빌드 검사용: 실행 인자 -startGame 이면 바로 게임 씬으로
+            if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "-startGame") >= 0) StartGame();
+        }
+
         void Build()
         {
             if (MainPanel != null) return;

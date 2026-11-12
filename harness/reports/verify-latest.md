@@ -1,5 +1,5 @@
 ﻿# Unity verify report
-time: 2026-11-12 10:10:30
+time: 2026-11-12 10:14:24
 
 ## EditMode : total=73 passed=73 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_BeatAndSpeed_MatchGdd41
