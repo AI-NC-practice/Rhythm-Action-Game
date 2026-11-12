@@ -24,7 +24,7 @@ namespace RhythmActionGame.EditorTools
             var director = boot.director;
             var clock = boot.clock;
 
-            var hudCanvas = UiFactory.CreateCanvas("HudCanvas", 5);
+            var hudCanvas = UiFactory.CreateCanvas("HudCanvas", GameConfig.HudCanvasOrder);
 
             // 집중선 (화면 전체, HUD 뒤)
             var linesGo = new GameObject("SpeedLines", typeof(RectTransform), typeof(Image));
@@ -46,7 +46,7 @@ namespace RhythmActionGame.EditorTools
             hud.clock = clock;
             hud.score = keeper;
 
-            var menuCanvas = UiFactory.CreateCanvas("MenuCanvas", 20);
+            var menuCanvas = UiFactory.CreateCanvas("MenuCanvas", GameConfig.MenuCanvasOrder);
             var pause = menuCanvas.gameObject.AddComponent<PauseMenu>();
             pause.clock = clock;
             pause.director = director;

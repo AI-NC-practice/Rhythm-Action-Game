@@ -59,7 +59,7 @@ namespace RhythmActionGame
         public const float RingTargetDiameterPx = 120f;
         /// <summary>바깥 원 시작 지름 (px, 1080p 기준).</summary>
         public const float RingStartDiameterPx = 360f;
-        /// <summary>판정 문구 표시 시간 (초).</summary>
+        /// <summary>판정 문구 표시 시간 (초, GDD 4.2 원래 값). beta1-1에서는 GDD-beta B1.2의 JudgeLabelTotalSeconds(0.45초)를 쓴다.</summary>
         public const float JudgeTextSeconds = 0.6f;
 
         /// <summary>타이밍 보정 최솟값 (ms).</summary>
@@ -159,5 +159,63 @@ namespace RhythmActionGame
         public const int StageObstacleCount = 20;
         /// <summary>스테이지 일반 적 수 (포위 전투 제외).</summary>
         public const int StageNormalEnemyCount = 4;
+
+        // =====================================================================
+        // beta1-1 (docs/GDD-beta.md). GDD-beta가 GDD보다 우선한다.
+        // =====================================================================
+
+        // ---------------- GDD-beta B1.1 그리는 순서 ----------------
+        /// <summary>판정 원 Canvas sortingOrder (맨 위).</summary>
+        public const int RingCanvasOrder = 20;
+        /// <summary>판정 문구·화면 이펙트 Canvas sortingOrder.</summary>
+        public const int JudgeFxCanvasOrder = 10;
+        /// <summary>HUD Canvas sortingOrder.</summary>
+        public const int HudCanvasOrder = 5;
+        /// <summary>일시정지·결과 메뉴 Canvas sortingOrder. GDD-beta에 없음, Claude가 정함 (메뉴는 판정 원보다 위).</summary>
+        public const int MenuCanvasOrder = 30;
+
+        // ---------------- GDD-beta B1.2 판정 문구 ----------------
+        /// <summary>판정 문구 위치: 원 위치에서 세로 오프셋 (px, 1080p 기준, 음수 = 아래).</summary>
+        public const float JudgeLabelOffsetY = -110f;
+        /// <summary>판정 문구 글자 크기 (pt).</summary>
+        public const int JudgeLabelFontSize = 44;
+        /// <summary>등장(커졌다 줄어듦) 시간 (초).</summary>
+        public const float JudgeLabelPopSeconds = 0.1f;
+        /// <summary>등장 시작 배율 (→ 1.0).</summary>
+        public const float JudgeLabelPopScale = 1.3f;
+        /// <summary>떠오르며 사라지는 시간 (초).</summary>
+        public const float JudgeLabelRiseSeconds = 0.35f;
+        /// <summary>떠오르는 거리 (px).</summary>
+        public const float JudgeLabelRisePx = 20f;
+        /// <summary>판정 문구 전체 표시 시간 (초) = 0.1 + 0.35.</summary>
+        public const float JudgeLabelTotalSeconds = JudgeLabelPopSeconds + JudgeLabelRiseSeconds;
+        /// <summary>새 판정 원이 문구 중심에서 이 거리(px) 안에 뜨면 문구를 흐리게.</summary>
+        public const float JudgeLabelDimRadiusPx = 200f;
+        /// <summary>흐리게 할 때 문구 알파 상한.</summary>
+        public const float JudgeLabelDimAlpha = 0.3f;
+
+        // ---------------- GDD-beta B1.3 판정 원 위치 ----------------
+        /// <summary>안전 타원 가로 반지름 (화면 폭 비율).</summary>
+        public const float RingSafeHalfWidthRatio = 0.22f;
+        /// <summary>안전 타원 세로 반지름 (화면 높이 비율).</summary>
+        public const float RingSafeHalfHeightRatio = 0.18f;
+        /// <summary>등장 후 위치를 고정하기까지 시간 (초).</summary>
+        public const float RingLockSeconds = 0.1f;
+        /// <summary>방향 꺾쇠 크기 (px).</summary>
+        public const float RingChevronSizePx = 40f;
+        /// <summary>연속 원 가로 간격 (px).</summary>
+        public const float RingChainSpacingPx = 160f;
+        /// <summary>이 박자 수 미만 간격으로 이어지는 원은 나란히 둔다.</summary>
+        public const float RingChainMaxGapBeats = 1f;
+        /// <summary>원 바깥 빛 테두리 알파.</summary>
+        public const float RingGlowAlpha = 0.5f;
+        /// <summary>빛 테두리 지름 (px). GDD-beta에 없음, Claude가 정함 (목표 원 120 px의 1.6배).</summary>
+        public const float RingGlowDiameterPx = 192f;
+
+        // ---------------- GDD-beta B1.4 판정 화면 ----------------
+        /// <summary>판정 중 노출 (URP Color Adjustments postExposure, EV).</summary>
+        public const float JudgeExposure = -0.4f;
+        /// <summary>판정 중 비네트 세기 (URP Vignette intensity).</summary>
+        public const float JudgeVignette = 0.3f;
     }
 }

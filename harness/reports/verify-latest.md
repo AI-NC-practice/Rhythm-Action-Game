@@ -1,7 +1,11 @@
 ﻿# Unity verify report
-time: 2026-11-12 11:28:18
+time: 2026-11-12 14:43:39
 
-## EditMode : total=73 passed=73 failed=0 skipped=0 result=Passed
+## EditMode : total=77 passed=77 failed=0 skipped=0 result=Passed
+  - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
+  - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Config_MatchGddBetaB1
+  - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_LabelPose_PopThenRise_045s
+  - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_SafeEllipse_RadiiAndClamp
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_BeatAndSpeed_MatchGdd41
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_Judge_MatchGdd42
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_ObstacleAndCombat_MatchGdd44To46
@@ -76,14 +80,22 @@ time: 2026-11-12 11:28:18
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_SpeedFx_Intensity
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_Texts_MatchGdd48
 
-## PlayMode : total=37 passed=37 failed=0 skipped=0 result=Passed
+## PlayMode : total=45 passed=45 failed=0 skipped=0 result=Passed
+  - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
+  - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
+  - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
+  - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Label_110Below_44pt_PopRise_045s_OnLabelLayer
+  - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Label_DimmedWhenNewRingNearby
+  - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Ring_ClampedToSafeEllipse_WithChevron
+  - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Ring_Glow_FinisherGold
+  - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Ring_LockedAfter0_1s
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_ChapterStartBeats_MatchSections
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(1)
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(4)
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(6)
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Font_HasJudgeGlyphs
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Fx_GrayAndZoom_EnterAndExit
-  - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Label_ShownFor0_6Seconds
+  - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Label_ShownFor0_45Seconds_GddBeta
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Labels_NormalAndFail
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Ring_AppearsTwoBeatsBefore_AndShrinks
   - [Passed] RhythmActionGame.Tests.T04_GameSceneTests.T04_GameScene_HasSectionsLightAndPlaceholders

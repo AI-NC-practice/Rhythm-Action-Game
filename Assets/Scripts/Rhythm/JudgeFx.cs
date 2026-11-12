@@ -15,6 +15,7 @@ namespace RhythmActionGame
         public Volume volume;
 
         ColorAdjustments color;
+        Vignette vignette;
         float weight;          // 0 = 평소, 1 = 판정 연출 최대
         Quaternion turnTarget = Quaternion.identity;
 
@@ -26,6 +27,10 @@ namespace RhythmActionGame
 
         public float Weight => weight;
         public float Saturation => color != null ? color.saturation.value : 0f;
+        /// <summary>판정 중 노출 (GDD-beta B1.4).</summary>
+        public float Exposure => color != null ? color.postExposure.value : 0f;
+        /// <summary>판정 중 비네트 세기 (GDD-beta B1.4).</summary>
+        public float VignetteIntensity => vignette != null ? vignette.intensity.value : 0f;
         public float Fov => cam != null ? cam.fieldOfView : 0f;
 
         void Awake() => EnsureSetup();
@@ -42,6 +47,9 @@ namespace RhythmActionGame
             if (volume.profile == null) volume.profile = ScriptableObject.CreateInstance<VolumeProfile>();
             if (!volume.profile.TryGet(out color)) color = volume.profile.Add<ColorAdjustments>(true);
             color.saturation.overrideState = true;
+            color.postExposure.overrideState = true;
+            if (!volume.profile.TryGet(out vignette)) vignette = volume.profile.Add<Vignette>(true);
+            vignette.intensity.overrideState = true;
             if (cam != null)
             {
                 var data = cam.GetUniversalAdditionalCameraData();
@@ -77,7 +85,12 @@ namespace RhythmActionGame
 
         void Apply()
         {
-            if (color != null) color.saturation.value = Mathf.Lerp(0f, GameConfig.JudgeSaturation, weight);
+            if (color != null)
+            {
+                color.saturation.value = Mathf.Lerp(0f, GameConfig.JudgeSaturation, weight);
+                color.postExposure.value = Mathf.Lerp(0f, GameConfig.JudgeExposure, weight);
+            }
+            if (vignette != null) vignette.intensity.value = Mathf.Lerp(0f, GameConfig.JudgeVignette, weight);
             if (cam != null)
             {
                 float baseFov = GameConfig.FovDefault + FovBonus;

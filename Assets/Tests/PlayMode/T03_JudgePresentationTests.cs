@@ -35,7 +35,7 @@ namespace RhythmActionGame.Tests
             camGo.transform.SetParent(rig.transform, false);
             cam = camGo.GetComponent<Camera>();
 
-            var canvas = UiFactory.CreateCanvas("JudgeCanvas", 10);
+            var canvas = UiFactory.CreateCanvas("JudgeCanvas", GameConfig.RingCanvasOrder);
             canvas.transform.SetParent(root.transform);
             view = canvas.gameObject.AddComponent<JudgeRingView>();
             view.RealTime = () => realTime;
@@ -77,8 +77,9 @@ namespace RhythmActionGame.Tests
         }
 
         [UnityTest]
-        public IEnumerator T03_Label_ShownFor0_6Seconds()
+        public IEnumerator T03_Label_ShownFor0_45Seconds_GddBeta()
         {
+            // beta1-1: GDD-beta B1.2가 GDD 4.2의 0.6초를 0.45초로 바꿨다.
             judge.Schedule(4, ArrowKey.Right);
             now = 1.0; judge.Tick();
             now = 2.03; realTime = 5f;
@@ -87,10 +88,10 @@ namespace RhythmActionGame.Tests
             Assert.AreEqual(1, view.Labels.Count);
             Assert.AreEqual("PERFECT", view.Labels[0].Text.text);
 
-            realTime = 5.59f; view.Refresh();
-            Assert.AreEqual(1, view.Labels.Count, "0.6초 전에는 보임");
-            realTime = 5.61f; view.Refresh();
-            Assert.AreEqual(0, view.Labels.Count, "0.6초 뒤 사라짐");
+            realTime = 5.44f; view.Refresh();
+            Assert.AreEqual(1, view.Labels.Count, "0.45초 전에는 보임");
+            realTime = 5.46f; view.Refresh();
+            Assert.AreEqual(0, view.Labels.Count, "0.45초 뒤 사라짐");
             yield return null;
         }
 

@@ -204,10 +204,10 @@
                                          "새 수치는 GameConfig beta 구역에만, EditMode 테스트로 GDD-beta 값과 비교",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "안전 타원·0.1초 고정·꺾쇠, 반 박 묶음 160 px, 문구 별도 Canvas(10)·원 아래 110 px·0.45초·근처 원이면 흐림, 빛 테두리(마무리 금색), 판정 화면 노출·비네트. 평가 PASS 1회차."
                   },
                   {
                       "id":  "B02",

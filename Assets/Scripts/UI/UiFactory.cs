@@ -7,7 +7,57 @@ namespace RhythmActionGame
     public static class UiFactory
     {
         static Font font;
-        static Sprite ringSprite, discSprite;
+        static Sprite ringSprite, discSprite, glowSprite, chevronSprite;
+
+        /// <summary>부드러운 빛 고리 스프라이트 (흰색, 반지름 75% 부근이 가장 밝음). 판정 원 바깥 빛 (GDD-beta B1.3).</summary>
+        public static Sprite Glow
+        {
+            get
+            {
+                if (glowSprite != null) return glowSprite;
+                const int size = 128;
+                var tex = new Texture2D(size, size, TextureFormat.RGBA32, false) { name = "Glow", wrapMode = TextureWrapMode.Clamp };
+                var px = new Color32[size * size];
+                float r = size * 0.5f;
+                for (int y = 0; y < size; y++)
+                    for (int x = 0; x < size; x++)
+                    {
+                        float d = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(r, r)) / r;
+                        float k = (d - 0.75f) / 0.16f;
+                        float a = d > 1f ? 0f : Mathf.Exp(-k * k);
+                        px[y * size + x] = new Color32(255, 255, 255, (byte)(a * 255));
+                    }
+                tex.SetPixels32(px);
+                tex.Apply();
+                glowSprite = Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
+                return glowSprite;
+            }
+        }
+
+        /// <summary>오른쪽을 가리키는 꺾쇠(▶) 스프라이트 (흰색). 방향 꺾쇠 (GDD-beta B1.3).</summary>
+        public static Sprite Chevron
+        {
+            get
+            {
+                if (chevronSprite != null) return chevronSprite;
+                const int size = 64;
+                var tex = new Texture2D(size, size, TextureFormat.RGBA32, false) { name = "Chevron", wrapMode = TextureWrapMode.Clamp };
+                var px = new Color32[size * size];
+                for (int y = 0; y < size; y++)
+                    for (int x = 0; x < size; x++)
+                    {
+                        // 왼쪽 변(x=8)에서 오른쪽 꼭짓점(x=56, 가운데)으로 좁아지는 삼각형
+                        float fx = x + 0.5f, fy = Mathf.Abs(y + 0.5f - size * 0.5f);
+                        float halfH = (56f - fx) / 48f * 26f;
+                        float a = fx < 8f || fx > 56f ? 0f : Mathf.Clamp01(halfH - fy + 0.5f);
+                        px[y * size + x] = new Color32(255, 255, 255, (byte)(a * 255));
+                    }
+                tex.SetPixels32(px);
+                tex.Apply();
+                chevronSprite = Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
+                return chevronSprite;
+            }
+        }
 
         public static Font Font
         {

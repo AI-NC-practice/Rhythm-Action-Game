@@ -129,11 +129,13 @@ namespace RhythmActionGame.EditorTools
             var fx = systems.AddComponent<JudgeFx>();
             fx.judge = judge;
             fx.cam = cam;
-            var canvas = UiFactory.CreateCanvas("JudgeCanvas", 10);
+            var labelCanvas = UiFactory.CreateCanvas("JudgeLabelCanvas", GameConfig.JudgeFxCanvasOrder);
+            var canvas = UiFactory.CreateCanvas("JudgeCanvas", GameConfig.RingCanvasOrder);
             var ringView = canvas.gameObject.AddComponent<JudgeRingView>();
             ringView.judge = judge;
             ringView.clock = clock;
             ringView.worldCamera = cam;
+            ringView.labelLayer = (RectTransform)labelCanvas.transform;
 
             var director = systems.AddComponent<StageDirector>();
             director.clock = clock;
