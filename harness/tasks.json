@@ -57,10 +57,10 @@
                                          "판정 중 URP Volume 채도 −60%, FOV 70→58 전환, 판정 후 0.2초 동안 복귀 — PlayMode 테스트로 값 확인",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "in_progress",
+                      "status":  "done",
                       "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "JudgeRules(판정 창·보정·원 지름), JudgeSystem(Keyboard.current), JudgeRingView(원·문구), JudgeFx(채도·FOV·25° 회전). 평가 PASS(1회차)."
                   },
                   {
                       "id":  "T04",
@@ -77,8 +77,8 @@
                                          "차트 데이터(JSON 또는 ScriptableObject): 장애물 20개, 일반 적 4명, 포위 전투 1회(5명), 무사 1명, 각 이벤트의 박자·종류·키 — EditMode 테스트로 개수와 장애물 간 최소 간격 4박자 확인",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "in_progress",
+                      "attempts":  1,
                       "max_attempts":  3,
                       "notes":  ""
                   },

@@ -21,3 +21,6 @@ GDD를 사용자와 함께 쓰고 확정했다(harness/gdd.lock). 작업 목록 
 
 ### 2026-11-12 T02 박자 시계 + 메트로놈 + 속도 배율 — done
 순수 로직 BeatTimeline(dspTime → 박자, 속도 변경·일시정지에도 박자 연속), SpeedRules/SpeedState(GDD 4.1 속도 규칙), ClickSynth(클릭음 파형, 4박 강세)와 MonoBehaviour BeatClock(음악 pitch = s, 이동 5×s), Metronome(PlayScheduled 예약)을 만들었다. 음 높이 보정(Pitch Shifter 1/s)은 실제 곡을 넣을 때 AudioMixer로 추가한다. 평가 PASS(1회차), EditMode 21/21. 다음 작업: T03.
+
+### 2026-11-12 T03 판정 시스템 + 판정 원 UI + 회색 화면/줌 연출 — done
+JudgeRules(±60/±150 ms, −300 ms 무시, 보정 ms, 원 지름 360→120), GameSettings(보정·음량 PlayerPrefs), JudgeSystem(Input System 방향키, 원 등장·무입력 FAIL, 속도 반영), JudgeRingView(코드 생성 원 스프라이트, 맑은 고딕 문구 0.6초), JudgeFx(URP Volume 채도 −60, FOV 70→58, 최대 25° 회전, 0.15초/0.2초)를 만들었다. 판정 원을 판정 지점에 투영하는 코드는 있으나, 실제 장애물 위치 연결은 T05/T06에서 한다. 평가 PASS(1회차), EditMode 45/45, PlayMode 5/5. 다음 작업: T04.

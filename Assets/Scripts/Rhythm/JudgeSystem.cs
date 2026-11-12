@@ -1,0 +1,135 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+namespace RhythmActionGame
+{
+    /// <summary>판정 하나 (원 하나). 목표 박자, 눌러야 할 키, 화면에 원을 띄울 월드 위치.</summary>
+    public class JudgeCue
+    {
+        public double TargetBeat;
+        public ArrowKey Key;
+        public Vector3? WorldPoint;
+        public bool Appeared;
+        public bool Judged;
+        public Judgement Result;
+        /// <summary>같은 장면의 다른 시스템(장애물, 적)이 결과를 받을 때 쓰는 꼬리표.</summary>
+        public object Tag;
+    }
+
+    /// <summary>
+    /// 판정 창을 관리한다 (GDD 4.2). Input System의 Keyboard.current 방향키로 입력을 받고,
+    /// 순수 함수 JudgeRules로 판정한 뒤 BeatClock의 속도 배율에 반영한다.
+    /// </summary>
+    public class JudgeSystem : MonoBehaviour
+    {
+        public BeatClock clock;
+        /// <summary>타이밍 보정 값 (ms). 기본은 설정값.</summary>
+        public Func<float> OffsetSource = () => GameSettings.TimingOffsetMs;
+        /// <summary>false면 키보드를 읽지 않는다 (테스트).</summary>
+        public bool readKeyboard = true;
+
+        readonly List<JudgeCue> cues = new List<JudgeCue>();
+
+        public event Action<JudgeCue> CueAppeared;
+        public event Action<JudgeCue, Judgement> CueJudged;
+
+        public IReadOnlyList<JudgeCue> Cues => cues;
+
+        /// <summary>등장했고 아직 판정되지 않은 원이 있는지 (회색 화면·줌 연출 기준).</summary>
+        public bool HasActiveCue
+        {
+            get { foreach (var c in cues) if (c.Appeared && !c.Judged) return true; return false; }
+        }
+
+        public JudgeCue FirstActiveCue
+        {
+            get { foreach (var c in cues) if (c.Appeared && !c.Judged) return c; return null; }
+        }
+
+        void Awake()
+        {
+            if (clock == null) clock = BeatClock.Instance;
+        }
+
+        /// <summary>targetBeat 박자에 key를 눌러야 하는 판정을 예약한다.</summary>
+        public JudgeCue Schedule(double targetBeat, ArrowKey key, Vector3? worldPoint = null, object tag = null)
+        {
+            var cue = new JudgeCue { TargetBeat = targetBeat, Key = key, WorldPoint = worldPoint, Tag = tag };
+            int i = cues.Count;
+            while (i > 0 && cues[i - 1].TargetBeat > targetBeat) i--;
+            cues.Insert(i, cue);
+            return cue;
+        }
+
+        public void ClearAll() => cues.Clear();
+
+        void Update()
+        {
+            if (clock == null || !clock.IsRunning || clock.IsPaused) return;
+            if (readKeyboard) ReadKeyboard();
+            Tick();
+        }
+
+        void ReadKeyboard()
+        {
+            var kb = Keyboard.current;
+            if (kb == null) return;
+            double now = clock.Now;
+            if (kb.upArrowKey.wasPressedThisFrame) Submit(ArrowKey.Up, now);
+            if (kb.downArrowKey.wasPressedThisFrame) Submit(ArrowKey.Down, now);
+            if (kb.leftArrowKey.wasPressedThisFrame) Submit(ArrowKey.Left, now);
+            if (kb.rightArrowKey.wasPressedThisFrame) Submit(ArrowKey.Right, now);
+        }
+
+        double TargetTime(JudgeCue cue) => clock.TimeOfBeat(cue.TargetBeat);
+
+        /// <summary>방향키 입력 하나를 처리한다. time은 입력 시각(dsp 초, 보통 clock.Now).</summary>
+        public void Submit(ArrowKey key, double time)
+        {
+            float offset = OffsetSource();
+            foreach (var cue in cues)
+            {
+                if (cue.Judged) continue;
+                if (JudgeRules.TryJudge(time, TargetTime(cue), offset, key, cue.Key, out var r))
+                {
+                    Resolve(cue, r);
+                }
+                // 가장 이른 미판정 원 하나만 본다. 무시된 입력(너무 이름)은 뒤의 원에도 너무 이르다.
+                return;
+            }
+        }
+
+        /// <summary>원 등장과 무입력 FAIL을 처리한다. Update에서 매 프레임 호출된다.</summary>
+        public void Tick()
+        {
+            if (clock == null || !clock.IsRunning) return;
+            double beat = clock.CurrentBeat;
+            double now = clock.Now;
+            float offset = OffsetSource();
+            for (int i = 0; i < cues.Count; i++)
+            {
+                var cue = cues[i];
+                if (cue.Judged) continue;
+                if (!cue.Appeared && beat >= cue.TargetBeat - GameConfig.ApproachBeats)
+                {
+                    cue.Appeared = true;
+                    CueAppeared?.Invoke(cue);
+                }
+                if (JudgeRules.IsMissed(now, TargetTime(cue), offset)) Resolve(cue, Judgement.Fail);
+            }
+            cues.RemoveAll(c => c.Judged);
+        }
+
+        void Resolve(JudgeCue cue, Judgement r)
+        {
+            if (cue.Judged) return;
+            if (!cue.Appeared) { cue.Appeared = true; CueAppeared?.Invoke(cue); }
+            cue.Judged = true;
+            cue.Result = r;
+            clock.ApplyJudgement(r);
+            CueJudged?.Invoke(cue, r);
+        }
+    }
+}
