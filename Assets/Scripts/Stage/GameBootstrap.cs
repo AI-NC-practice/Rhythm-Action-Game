@@ -12,6 +12,11 @@ namespace RhythmActionGame
         public PathFollower player;
         public Camera playerCamera;
         public StageDirector director;
+        public ScoreKeeper score;
+        public GameHud hud;
+        public PauseMenu pause;
+        public ResultScreen result;
+        public SpeedFx speedFx;
         public bool autoStart = true;
 
         public static GameBootstrap Instance { get; private set; }
@@ -38,6 +43,9 @@ namespace RhythmActionGame
         /// <summary>runBeat 위치(달리기 박자)부터 스테이지를 시작한다. 박자 시계는 0박부터.</summary>
         public void StartRun(double runBeat = 0)
         {
+            Time.timeScale = 1f;
+            AudioListener.volume = GameSettings.Volume / 100f;
+            if (score != null) score.Board.Reset();
             player.ResetTo(runBeat);
             clock.ResetSpeed();
             clock.StartClock();

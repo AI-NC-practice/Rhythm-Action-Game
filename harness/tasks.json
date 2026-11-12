@@ -164,10 +164,10 @@
                                          "속도감: s ≥ 1.10에서 화면 가장자리 집중선 표시, 세기 (s−1.0)/0.3, FOV 최대 +5° — PlayMode 테스트로 값 확인",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "in_progress",
+                      "status":  "done",
                       "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "TitleMenu(설정 PlayerPrefs), GameHud, ScoreKeeper/ScoreBoard(점수·랭크), PauseMenu, ResultScreen, SpeedFx(집중선·FOV). 평가 PASS(1회차). Esc 키 경로와 폰트 이름은 사람 확인 필요."
                   },
                   {
                       "id":  "T09",

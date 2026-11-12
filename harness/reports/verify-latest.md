@@ -1,7 +1,7 @@
 ﻿# Unity verify report
-time: 2026-11-12 10:05:40
+time: 2026-11-12 10:10:30
 
-## EditMode : total=68 passed=68 failed=0 skipped=0 result=Passed
+## EditMode : total=73 passed=73 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_BeatAndSpeed_MatchGdd41
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_Judge_MatchGdd42
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_ObstacleAndCombat_MatchGdd44To46
@@ -70,8 +70,13 @@ time: 2026-11-12 10:05:40
   - [Passed] RhythmActionGame.Tests.T07_PatternTests.T07_Surround_Phase1_FiveSequential_OneBeatApart
   - [Passed] RhythmActionGame.Tests.T07_PatternTests.T07_Surround_Phase2_ThreeSimultaneous_OneCueEach
   - [Passed] RhythmActionGame.Tests.T07_PatternTests.T07_Surround_Phase3_FourArrowsHalfBeatApart
+  - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_Rank_Thresholds
+  - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_Score_300_100_0_AndCombo
+  - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_Settings_SaveAndLoad
+  - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_SpeedFx_Intensity
+  - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_Texts_MatchGdd48
 
-## PlayMode : total=25 passed=25 failed=0 skipped=0 result=Passed
+## PlayMode : total=33 passed=33 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Font_HasJudgeGlyphs
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Fx_GrayAndZoom_EnterAndExit
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Label_ShownFor0_6Seconds
@@ -97,5 +102,13 @@ time: 2026-11-12 10:05:40
   - [Passed] RhythmActionGame.Tests.T07_SurroundBossTests.T07_Surround_Layout_FiveEnemiesRadius4
   - [Passed] RhythmActionGame.Tests.T07_SurroundBossTests.T07_Surround_Phase1And2Fail_LoseHp_ButContinue
   - [Passed] RhythmActionGame.Tests.T07_SurroundBossTests.T07_Windmill_Fail_RetriesOnlyPhase3NextBar
+  - [Passed] RhythmActionGame.Tests.T08_UiTests.T08_Font_HasAllUiGlyphs
+  - [Passed] RhythmActionGame.Tests.T08_UiTests.T08_Hud_HeartsSpeedScoreCombo
+  - [Passed] RhythmActionGame.Tests.T08_UiTests.T08_Pause_StopsClockAndMusic_ThenResumes
+  - [Passed] RhythmActionGame.Tests.T08_UiTests.T08_Result_Cleared_ShowsCountsAndRank
+  - [Passed] RhythmActionGame.Tests.T08_UiTests.T08_Result_GameOver_RankDash
+  - [Passed] RhythmActionGame.Tests.T08_UiTests.T08_SpeedLines_AndFovBonus
+  - [Passed] RhythmActionGame.Tests.T08_UiTests.T08_Title_StartLoadsGame
+  - [Passed] RhythmActionGame.Tests.T08_UiTests.T08_Title_Texts_AndSettingsSaved
 
 OVERALL: PASS
