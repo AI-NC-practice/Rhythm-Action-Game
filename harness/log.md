@@ -297,3 +297,6 @@ StageDirector.SurroundMotion: 포위 적 5명이 플레이어 둘레(4 m)를 초
 - **진단 도구:** 자동 연주 스크린샷에 범위 옵션(-autoplayShotsRange)을 더했다.
 
 평가 PASS(1회차), EditMode 145/145, PlayMode 136/136, BuildGray·smoke-test 통과. 다음 작업: B35(사용자 확인 + 패키지).
+
+### 2026-11-13 B35 [사용자] 동적 전투 확인 + 테스트 패키지 — needs_user
+BuildGray와 smoke-test를 통과했다. 테스트 패키지 RhythmActionGame-beta1-1-dev7.zip(38.1 MB)을 만들었고, 읽어주세요.txt에 움직이는 전투 설명과 봐 줄 점을 넣었다. 사용자 확인을 기다린다.
