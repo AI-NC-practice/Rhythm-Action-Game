@@ -88,9 +88,9 @@ namespace RhythmActionGame.Tests
                     var cc = duel.CutCams[fr.Cut];
                     if (fr.Cut != prevCut)
                     {
-                        if (fr.Cut == "D")
+                        if (fr.Cut == "D" || fr.Cut == "K" || fr.Cut == "S")   // beta1-1 B13.4: 옆차기·자리 바꾸기 컷도 바로 자름
                         {
-                            Assert.IsFalse(fr.Blending, "D 진입은 바로 자름");
+                            Assert.IsFalse(fr.Blending, $"{fr.Cut} 진입은 바로 자름");
                             Assert.AreSame(cc, fr.Active as CinemachineCamera);
                         }
                         else
@@ -101,16 +101,19 @@ namespace RhythmActionGame.Tests
                         // 바라보는 점 = 두 사람 중간점 (컷 시작 때 고정. D는 무사가 날아가기 시작하므로 크게 봐 준다)
                         var mid = (boot.player.transform.position + dir.boss.transform.position) * 0.5f;
                         var la = duel.CutLookAt;
-                        Assert.Less(new Vector2(la.x - mid.x, la.z - mid.z).magnitude, fr.Cut == "D" ? 0.5f : 0.05f, $"{fr.Cut}: 두 사람 중간점");
+                        Assert.Less(new Vector2(la.x - mid.x, la.z - mid.z).magnitude, fr.Cut == "D" ? 0.5f : fr.Cut == "K" ? 0.15f : 0.05f, $"{fr.Cut}: 두 사람 중간점");
                     }
                     var flat = cc.transform.position - duel.CutLookAt; flat.y = 0;
-                    Assert.That(flat.magnitude, Is.InRange(3.5f - 1e-3f, 5f + 1e-3f), $"{fr.Cut} 반지름 3.5~5 m");
+                    var def = GameConfig.DuelCuts.Single(x => x.name == fr.Cut);
+                    if (fr.Cut != "S" && !duel.CutTopDown)   // beta1-1 B13.4: 컷마다 반지름 (A·D·K 3.5~5 m, B 칼날 1.2 m), S는 어깨 너머
+                        Assert.That(flat.magnitude, Is.InRange(Mathf.Min(def.r0, def.r1) - 1e-3f, Mathf.Max(def.r0, def.r1) + 1e-3f), $"{fr.Cut} 반지름");
                     Assert.Greater(Vector3.Dot(cc.transform.forward, (duel.CutLookAt - cc.transform.position).normalized), 0.999f, $"{fr.Cut}: 중간점을 바라봄");
                     if (!fr.Blending && ReferenceEquals(fr.Active, cc))
                         Assert.Less(Vector3.Distance(boot.playerCamera.transform.position, cc.transform.position), 0.02f, "화면 = 3인칭 카메라");   // beta1-1 B13: 다음 프레임 Update에서 플레이어(카메라 부모)가 움직인 만큼 차이 (Brain이 LateUpdate마다 다시 맞춤)
                     minAngle[fr.Cut] = minAngle.TryGetValue(fr.Cut, out var mn) ? Mathf.Min(mn, duel.CutAngle) : duel.CutAngle;
                     maxAngle[fr.Cut] = maxAngle.TryGetValue(fr.Cut, out var mx) ? Mathf.Max(mx, duel.CutAngle) : duel.CutAngle;
                 }
+                else if (prevCut == "K" || prevCut == "S") Assert.IsFalse(fr.Blending, $"{prevCut} → 1인칭 바로 자름");
                 else if (prevCut != null && prevCut != "D")
                 {
                     Assert.IsTrue(fr.Blending, $"{prevCut} → 1인칭 블렌드");
@@ -127,9 +130,9 @@ namespace RhythmActionGame.Tests
                 Assert.IsNull(bad, $"원 등장 {t:0.00}초: {bad?.T:0.00}초에 아직 3인칭");
             }
 
-            Assert.IsTrue(seen.Contains("A") && seen.Contains("C") && seen.Contains("D"), "컷 A·C·D: " + string.Join(",", seen));
+            Assert.IsTrue(seen.Contains("A") && seen.Contains("D") && seen.Contains("K"), "컷 A·D·K (beta1-1 B13.4: C는 옆차기 다운으로): " + string.Join(",", seen));
             Assert.IsTrue(seen.Contains("B"), $"컷 B (속도 {boot.clock.SpeedMultiplier:0.00}에서도, 칼 겨루기 연장)");
-            foreach (var name in seen)
+            foreach (var name in seen.Where(n => n != "S"))
             {
                 float sweep = GameConfig.DuelCuts.Single(c => c.name == name).sweep;
                 Assert.AreEqual(sweep, maxAngle[name] - minAngle[name], sweep * 0.15f, $"{name} 도는 각도 {sweep}°");

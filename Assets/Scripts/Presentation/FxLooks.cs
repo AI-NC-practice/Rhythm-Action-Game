@@ -80,6 +80,12 @@ namespace RhythmActionGame
                 case "LandFail":
                     vfx.Add(new Vfx(VfxKind.Dust));
                     break;
+                case "KickHit":
+                    // B13.4: 붉은 테두리 잠깐 + 렌즈 왜곡 + 흙먼지
+                    screen.Add(new ScreenPulse(ScreenChannel.Vignette, 0.35f, 0.3f, GameConfig.Fx.Vermilion));
+                    screen.Add(new ScreenPulse(ScreenChannel.LensDistortion, -0.25f, 0.2f));
+                    vfx.Add(new Vfx(VfxKind.Dust));
+                    break;
                 case "BloodHit":
                     // B12.2: 주홍 비네트 0.6, 채도 −80, 렌즈 왜곡, 색수차 + 화면 핏자국
                     screen.Add(new ScreenPulse(ScreenChannel.Vignette, 0.6f, GameConfig.FailHitSeconds, GameConfig.Fx.Vermilion));
@@ -143,6 +149,7 @@ namespace RhythmActionGame
                 case "EventPerfectSlow": sfx.Add(SfxKind.Whoosh); sfx.Add(SfxKind.Buk); break;
                 case "Rewind": sfx.Add(SfxKind.TapeRewind); break;                                               // B9.4 되감기 소리
                 case "Standoff": sfx.Add(SfxKind.Glint); break;                                                  // B10.2 대치: 칼 드는 소리
+                case "KickHit": sfx.Add(SfxKind.BodyHit); sfx.Add(SfxKind.LowBoom); sfx.Add(SfxKind.DustPuff); break;          // B13.4 옆차기
                 case "BloodHit":                                                                                // B12.2: 베임 + 저음 + 귀 울림, −8 dB
                     sfx.Add(SfxKind.BodyHit); sfx.Add(SfxKind.LowBoom); sfx.Add(SfxKind.EarRing);
                     duckDb = GameConfig.Fx.DuckHitDb; duckSeconds = GameConfig.FailHitSeconds; break;

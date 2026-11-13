@@ -9,19 +9,23 @@ namespace RhythmActionGame.Tests
         [Test]
         public void B28_Config_Cuts_Radius35To5_Sweeps()
         {
+            // beta1-1: GDD-beta B13.4가 B11.5의 컷 각도를 바꿨다 — A 로우 앵글, B 칼날 클로즈업(1.2 m), C는 옆차기 다운으로, K 옆차기·S 자리 바꾸기 추가
             Assert.AreEqual(0.4f, GameConfig.DuelCutBlendSeconds, "1인칭 ↔ 3인칭 0.4초");
             Assert.AreEqual(0.4f, GameConfig.DuelCutReturnMarginSeconds, "원 0.4초 전 1인칭");
-            CollectionAssert.AreEqual(new[] { "A", "B", "C", "D" }, GameConfig.DuelCuts.Select(c => c.name));
-            foreach (var c in GameConfig.DuelCuts)
+            CollectionAssert.AreEqual(new[] { "A", "B", "D", "K", "S" }, GameConfig.DuelCuts.Select(c => c.name));
+            var A = GameConfig.DuelCuts[0]; var B = GameConfig.DuelCuts[1]; var D = GameConfig.DuelCuts[2]; var K = GameConfig.DuelCuts[3];
+            foreach (var c in new[] { A, D, K })
             {
                 Assert.That(c.r0, Is.InRange(3.5f, 5f), c.name);
                 Assert.That(c.r1, Is.InRange(3.5f, 5f), c.name);
             }
-            Assert.AreEqual(120f, GameConfig.DuelCuts[0].sweep, "A 120°");
-            Assert.AreEqual(30f, GameConfig.DuelCuts[1].sweep, "B 30°");
-            Assert.Greater(GameConfig.DuelCuts[2].r0, GameConfig.DuelCuts[2].r1, "C 넓게 시작해 다가감");
-            Assert.AreEqual(180f, GameConfig.DuelCuts[3].sweep, "D 180°");
-            Assert.Less(GameConfig.DuelCuts[3].height, GameConfig.DuelCuts.Take(3).Min(c => c.height), "D 낮은 각도");
+            Assert.Less(A.height, A.look, "A 로우 앵글: 카메라가 바라보는 점보다 낮음");
+            Assert.LessOrEqual(A.height, 0.5f);
+            Assert.AreEqual(1.2f, B.r0, 1e-5f, "B 칼날 옆 1.2 m");
+            Assert.AreEqual(B.look, B.height, 1e-5f, "B 칼 높이에서 수평으로");
+            Assert.AreEqual(180f, D.sweep, "D 180°");
+            Assert.Less(D.height, D.look, "D 낮은 각도");
+            Assert.AreEqual(0.5f, GameConfig.DuelTopDownSeconds, "D 마지막 0.5초 위에서");
         }
 
         [Test]
@@ -38,9 +42,7 @@ namespace RhythmActionGame.Tests
             Assert.AreEqual("B", BossDuel.ActiveCut(24.1, 1f, false, out _));
             Assert.AreEqual("B", BossDuel.ActiveCut(26.3, 1f, false, out _), "B 24–28 (칼 겨루기 연장, 사용자 결정)");
             Assert.IsNull(BossDuel.ActiveCut(26.4, 1f, false, out _), "28 − 1.6 = 26.4박부터 1인칭으로");
-            Assert.AreEqual("C", BossDuel.ActiveCut(54.0, 1f, false, out var pc0));
-            Assert.AreEqual(0f, pc0, 1e-6f);
-            Assert.IsNull(BossDuel.ActiveCut(56.4, 1f, false, out _));
+            Assert.IsNull(BossDuel.ActiveCut(55.0, 1f, false, out _), "beta1-1: 컷 C(54–58)는 옆차기 다운 구간(B13.4)으로 바뀜");
             Assert.IsNull(BossDuel.ActiveCut(10, 1f, false, out _), "판정 구간은 1인칭");
             Assert.IsNull(BossDuel.ActiveCut(68, 1f, false, out _));
             // 속도 1.3에서도 컷 B가 나온다: 4박(1.54초) − 돌아오는 여유 2.08박 = 1.92박

@@ -36,6 +36,9 @@ namespace RhythmActionGame
             /// <summary>지금 결투 단계 (BossDuel.PhaseExplore ~ PhaseFinish).</summary>
             public int Phase = BossDuel.PhaseExplore;
             public bool PostureBroken;
+            /// <summary>B13.4: 자리를 바꿨는지, 옆차기에 맞아 누웠는지 (+ 맞은 박자 시계 시각, 초).</summary>
+            public bool Swapped, Kicked;
+            public float KickRealTime = -999f;
             /// <summary>대치(칼 들고 다가옴)가 끝나는 박.</summary>
             public double StandoffEndBeat => IsBossDuel ? StartBeat + BossDuel.PhaseStart(BossDuel.PhaseExplore) : StartBeat;
         }

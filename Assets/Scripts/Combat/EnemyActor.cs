@@ -148,6 +148,15 @@ namespace RhythmActionGame
             if (pushRoutine == null) State = "Guard";      // 밀려나는 중이면 "Pushed" 유지
         }
 
+        /// <summary>옆차기 (GDD-beta B13.4): 칼을 내리고 몸을 기울인 자세 (회색 상자). 다음 동작이 자세를 덮어쓴다.</summary>
+        public void Kick()
+        {
+            if (Defeated) return;
+            attacking = false;
+            if (weaponPivot != null) weaponPivot.localRotation = Quaternion.Euler(20f, 0, -60f);
+            State = "Kick";
+        }
+
         /// <summary>막기 자세를 푼다.</summary>
         public void EndGuard()
         {

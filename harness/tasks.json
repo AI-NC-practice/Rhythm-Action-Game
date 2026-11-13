@@ -824,10 +824,10 @@
                                          "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "in_progress",
+                      "status":  "done",
                       "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "자리 바꾸기(A37.5, 0.5초 엇갈림, 원이 없으면 어깨 너머 컷), 옆차기 다운(A52 직후 K 컷 0.25초, 바닥 0.3 m·25° 올려다봄, 다운 판정 56←57→58↑, 59까지 일어남, 판정 45), 컷 A 로우 앵글·B 칼날 1.2 m·D 마지막 0.5초 위에서. 평가 PASS 1회차."
                   },
                   {
                       "id":  "B35",

@@ -1,5 +1,5 @@
 ﻿# Unity verify report
-time: 2026-11-13 16:47:15
+time: 2026-11-13 17:04:22
 
 ## EditMode : total=145 passed=145 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
@@ -62,7 +62,7 @@ time: 2026-11-13 16:47:15
   - [Passed] RhythmActionGame.Tests.B26_BossDuelPatternTests.B26_AttackKeys_FollowGdd45_Flurry_Alternates
   - [Passed] RhythmActionGame.Tests.B26_BossDuelPatternTests.B26_ChainSlots_Rule_And_StayInsideSafeEllipse
   - [Passed] RhythmActionGame.Tests.B26_BossDuelPatternTests.B26_Chart_Totals_115To130
-  - [Passed] RhythmActionGame.Tests.B26_BossDuelPatternTests.B26_Counts_PerPhase_Total42
+  - [Passed] RhythmActionGame.Tests.B26_BossDuelPatternTests.B26_Counts_PerPhase_Total45
   - [Passed] RhythmActionGame.Tests.B26_BossDuelPatternTests.B26_NoRingDuringCutsABC
   - [Passed] RhythmActionGame.Tests.B26_BossDuelPatternTests.B26_PhaseStarts_And_Length74
   - [Passed] RhythmActionGame.Tests.B26_BossDuelPatternTests.B26_Posture_PerfectFullAtEnd_NormalHalf
@@ -148,7 +148,7 @@ time: 2026-11-13 16:47:15
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_SpeedFx_Intensity
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_Texts_MatchGdd48
 
-## PlayMode : total=134 passed=134 failed=0 skipped=0 result=Passed
+## PlayMode : total=136 passed=136 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -246,6 +246,8 @@ time: 2026-11-13 16:47:15
   - [Passed] RhythmActionGame.Tests.B32_CombatMotionTests.B32_NormalEnemy_Charge_StepPerJudgement_Arena_Return
   - [Passed] RhythmActionGame.Tests.B32_CombatMotionTests.B32_Spear_FightDistance26
   - [Passed] RhythmActionGame.Tests.B33_SurroundMotionTests.B33_Surround_Orbit_Lunge_GangUp_Windmill
+  - [Passed] RhythmActionGame.Tests.B34_DuelEventsTests.B34_Duel_Angles_Swap_KickDown_TopDown
+  - [Passed] RhythmActionGame.Tests.B34_DuelEventsTests.B34_Swap_ShoulderCut_WhenNoRing
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_ChapterStartBeats_MatchSections
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(1)
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(4)

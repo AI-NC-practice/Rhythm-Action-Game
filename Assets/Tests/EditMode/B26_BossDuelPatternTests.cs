@@ -13,6 +13,7 @@ namespace RhythmActionGame.Tests
             "A6 A8 S10 S11 A13 A14 A15 S17 S18 A20 A21 S22 S23 " +
             "L30 " +
             "A32 A32.5 S34 S35 S37 A37.5 A39 A39.5 A40 S42 S43 S44 A46 A46.5 S48 S48.5 A50 S51 A52 " +
+            "A56 A57 A58 " +   // beta1-1: 옆차기 다운 구간 (GDD-beta B13.4)
             "A60 S61 A62 S63 A64 S65 A66 S67 " +
             "F70";   // beta1-1: 칼 겨루기 연장(B28 사용자 결정) — L28 이후 2박씩 뒤로
 
@@ -33,16 +34,17 @@ namespace RhythmActionGame.Tests
         }
 
         [Test]
-        public void B26_Counts_PerPhase_Total42()
+        public void B26_Counts_PerPhase_Total45()
         {
             var steps = BossDuel.Steps();
-            Assert.AreEqual(42, steps.Count, "B11.6: 결투 판정 42");
+            Assert.AreEqual(45, steps.Count, "B11.6 → B13.4: 결투 판정 45 (다운 구간 3 추가)");
             Assert.AreEqual(13, steps.Count(s => s.Phase == BossDuel.PhaseExplore), "1단계");
             Assert.AreEqual(1, steps.Count(s => s.Phase == BossDuel.PhaseLock), "칼 겨루기");
             Assert.AreEqual(19, steps.Count(s => s.Phase == BossDuel.PhaseClash), "2단계");
             Assert.AreEqual(8, steps.Count(s => s.Phase == BossDuel.PhaseFlurry), "3단계");
             Assert.AreEqual(1, steps.Count(s => s.Phase == BossDuel.PhaseFinish), "마무리");
-            Assert.AreEqual(41, BossDuel.PostureSteps, "마무리 전 판정 수 N");
+            Assert.AreEqual(44, BossDuel.PostureSteps, "마무리 전 판정 수 N");
+            Assert.AreEqual(3, steps.Count(s => s.Phase == BossDuel.PhaseDown), "다운 구간 (B13.4)");
         }
 
         [Test]
@@ -51,6 +53,7 @@ namespace RhythmActionGame.Tests
             Assert.AreEqual(4, BossDuel.PhaseStart(BossDuel.PhaseExplore));
             Assert.AreEqual(24, BossDuel.PhaseStart(BossDuel.PhaseLock));
             Assert.AreEqual(30, BossDuel.PhaseStart(BossDuel.PhaseClash));
+            Assert.AreEqual(54, BossDuel.PhaseStart(BossDuel.PhaseDown), "다운 구간 처음 (B13.4)");
             Assert.AreEqual(58, BossDuel.PhaseStart(BossDuel.PhaseFlurry));
             Assert.AreEqual(68, BossDuel.PhaseStart(BossDuel.PhaseFinish));
             Assert.AreEqual(74, BossDuel.LengthBeats);
@@ -73,7 +76,7 @@ namespace RhythmActionGame.Tests
                     double from = s.OffsetBeats - GameConfig.ApproachBeats, to = s.OffsetBeats + tail;
                     Assert.IsFalse(from < cut.to - 1e-9 && to > cut.from + 1e-9, $"컷 {cut.name} {cut.from}–{cut.to}에 {s.Kind} {s.OffsetBeats} 원");
                 }
-            Assert.AreEqual("A", BossDuel.CutAt(1)); Assert.AreEqual("B", BossDuel.CutAt(25)); Assert.AreEqual("B", BossDuel.CutAt(27)); Assert.AreEqual("C", BossDuel.CutAt(55));
+            Assert.AreEqual("A", BossDuel.CutAt(1)); Assert.AreEqual("B", BossDuel.CutAt(25)); Assert.AreEqual("B", BossDuel.CutAt(27)); Assert.IsNull(BossDuel.CutAt(55), "beta1-1: 컷 C는 옆차기 다운 구간(B13.4)으로 바뀜");
             Assert.AreEqual("D", BossDuel.CutAt(72)); Assert.IsNull(BossDuel.CutAt(10));
             Assert.Greater(BossDuel.Cuts.Single(c => c.name == "D").from, BossDuel.Steps().Last().OffsetBeats - 1e-9, "컷 D는 마무리 판정 뒤");
         }
@@ -140,7 +143,7 @@ namespace RhythmActionGame.Tests
         public void B26_Chart_Totals_115To130()
         {
             var c = StageChart.Load();
-            Assert.AreEqual(42, ChartCheck.CombatJudgements(c) - ChartCheck.CombatJudgements(new ChartData { events = c.events.Where(e => !e.IsBoss).ToArray() }), "무사 결투 42");
+            Assert.AreEqual(45, ChartCheck.CombatJudgements(c) - ChartCheck.CombatJudgements(new ChartData { events = c.events.Where(e => !e.IsBoss).ToArray() }), "무사 결투 45 (B13.4)");
             Assert.That(ChartCheck.TotalJudgements(c), Is.InRange(115, 130), "B11.6 스테이지 전체 115~130");
         }
     }

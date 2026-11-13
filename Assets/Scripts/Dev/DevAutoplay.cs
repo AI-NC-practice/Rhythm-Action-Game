@@ -14,6 +14,7 @@ namespace RhythmActionGame
         int missLeft = -1;
         string shotDir;
         double nextShot = 3.5;
+        double shotEnd = 9.0;
         readonly System.Collections.Generic.HashSet<JudgeCue> skipped = new System.Collections.Generic.HashSet<JudgeCue>();
 
         public static bool Requested => System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "-autoplay") >= 0;
@@ -33,11 +34,17 @@ namespace RhythmActionGame
             }
             // -autoplayShots 폴더: 무사 결투 O+3.5 ~ O+9 사이 0.25박마다 화면을 저장한다 (진단용)
             var e0 = boot.director.CurrentEncounter;
-            if (shotDir == null) { var a = System.Environment.GetCommandLineArgs(); int i = System.Array.IndexOf(a, "-autoplayShots"); shotDir = i >= 0 && i + 1 < a.Length ? a[i + 1] : ""; }
+            if (shotDir == null)
+            {
+                var a = System.Environment.GetCommandLineArgs(); int i = System.Array.IndexOf(a, "-autoplayShots"); shotDir = i >= 0 && i + 1 < a.Length ? a[i + 1] : "";
+                // -autoplayShotsRange 시작 끝 (O 기준 박, 기본 3.5 ~ 9)
+                int j = System.Array.IndexOf(a, "-autoplayShotsRange");
+                if (j >= 0 && j + 2 < a.Length && double.TryParse(a[j + 1], out double s0) && double.TryParse(a[j + 2], out double s1)) { nextShot = s0; shotEnd = s1; }
+            }
             if (shotDir.Length > 0 && e0 != null && e0.IsBossDuel)
             {
                 double rel = boot.clock.CurrentBeat - e0.StartBeat;
-                if (rel >= nextShot && rel < 9.0) { ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(shotDir, $"duel_{rel:00.00}.png")); Debug.Log($"[autoplay] 화면 저장 {rel:0.00}박"); nextShot = System.Math.Floor(rel * 4 + 1) / 4; }
+                if (rel >= nextShot && rel < shotEnd) { ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(shotDir, $"duel_{rel:00.00}.png")); Debug.Log($"[autoplay] 화면 저장 {rel:0.00}박"); nextShot = System.Math.Floor(rel * 4 + 1) / 4; }
             }
             var cue = boot.judge.FirstActiveCue;
             if (cue == null || boot.clock.CurrentBeat < cue.TargetBeat) return;

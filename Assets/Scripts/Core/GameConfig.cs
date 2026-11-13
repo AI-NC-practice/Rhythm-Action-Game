@@ -360,14 +360,31 @@ namespace RhythmActionGame
         public const float DuelCutReturnMarginSeconds = 0.4f;
         /// <summary>3인칭 카메라가 바라보는 높이 (두 사람 중간점 위, m).</summary>
         public const float DuelCutLookHeight = 1.1f;
-        /// <summary>컷별 반지름 시작·끝 (m, 3.5~5), 높이 (m), 도는 각도 (도). GDD-beta B11.5: A 120°, B 30°, C 넓게 다가감, D 180° 낮은 각도.</summary>
-        public static readonly (string name, float r0, float r1, float height, float sweep)[] DuelCuts =
+        /// <summary>
+        /// 컷별 반지름 시작·끝 (m), 카메라 높이 (m), 도는 각도 (도), 바라보는 높이 (m). GDD-beta B13.4가 B11.5를 바꿈:
+        /// A 등장 = 로우 앵글(낮은 카메라가 위를 올려다봄), B 칼 겨루기 = 맞물린 칼 옆 1.2 m 클로즈업, D 처형 = 낮은 각도 180° (+ 마지막 0.5초 위에서),
+        /// K 옆차기 = 측면 짧은 컷, S 자리 바꾸기 = 어깨 너머 (자리는 DuelCamera가 따로 정함).
+        /// </summary>
+        public static readonly (string name, float r0, float r1, float height, float sweep, float look)[] DuelCuts =
         {
-            ("A", 4.5f, 4.5f, 1.8f, 120f),
-            ("B", 3.5f, 3.5f, 1.5f, 30f),
-            ("C", 5.0f, 4.0f, 2.4f, 20f),
-            ("D", 4.0f, 4.0f, 0.5f, 180f),
+            ("A", 4.5f, 4.0f, 0.4f, 40f, 1.8f),
+            ("B", 1.2f, 1.2f, 1.45f, 20f, 1.45f),
+            ("D", 4.0f, 4.0f, 0.5f, 180f, 1.1f),
+            ("K", 3.5f, 3.5f, 1.2f, 0f, 0.9f),
+            ("S", 1.0f, 1.0f, 1.7f, 0f, 1.2f),
         };
+        /// <summary>처형 컷 D 마지막 위에서 내려다보는 시간 (초)과 높이 (m).</summary>
+        public const float DuelTopDownSeconds = 0.5f;
+        public const float DuelTopDownHeight = 7f;
+        /// <summary>옆차기 컷 K·자리 바꾸기 컷 S 길이 (실제 초, 바로 자름), 그동안 무사 히트 스톱 (초).</summary>
+        public const float DuelKickCutSeconds = 0.25f;
+        public const float DuelSwapCutSeconds = 0.6f;
+        /// <summary>자리 바꾸기 이동 시간 (초).</summary>
+        public const float DuelSwapSeconds = 0.5f;
+        /// <summary>다운: 카메라 눈높이 (바닥에서 m), 올려다보는 각도 (도), 넘어지는 시간 (초).</summary>
+        public const float DuelDownEyeHeight = 0.3f;
+        public const float DuelDownPitch = 25f;   // 35°는 무사가 화면 아래로 빠져 25°로 (B34 화면 확인)
+        public const float DuelDownFallSeconds = 0.25f;
 
 
 
@@ -510,6 +527,8 @@ namespace RhythmActionGame
             public static readonly FxPreset PostureBreak = P("PostureBreak", 3, hitStop: 0.08f, trauma: 0.4f, hz: 20f, fov: -4f, rise: 0.03f, hold: 0.1f, release: 0.4f);
             // B12.2 결투·윈드밀 FAIL: 크게 맞음 (뒤로 0.25 m, 고개 젖힘, 강한 흔들림) + 피 튐, 0.7초 뒤 되감기
             public static readonly FxPreset BloodHit = P("BloodHit", 4, hitStop: 0.1f, trauma: 0.7f, hz: 20f, kick: 0.25f, pitch: -6f, roll: 8f, rise: 0.03f, hold: 0.25f, release: 0.4f);
+            // B13.4 옆차기 다운: 판정 없이 맞음 (실패 아님) — 뒤로 크게 밀리며 고개가 젖혀지고 기움, 피는 없음
+            public static readonly FxPreset KickHit = P("KickHit", 4, hitStop: 0.12f, trauma: 0.6f, hz: 18f, kick: 0.4f, pitch: -10f, roll: -12f, rise: 0.03f, hold: 0.2f, release: 0.4f);
             /// <summary>대치 때 적이 다가오는 거리 (m, GDD-beta B10.2).</summary>
             public const float StandoffApproachMeters = 0.5f;
             /// <summary>적 공격 예고: 목표 박자 몇 박 전에 (휘두르기 직전, 제안서 2장 A).</summary>
@@ -549,7 +568,7 @@ namespace RhythmActionGame
             public static readonly FxPreset[] All =
             {
                 AttackWarn, ParryPerfect, DodgePerfect, ParryPerfectFinale, DefendNormal, Hit, Execution, ExecutionKick,
-                SurroundTurn, Simultaneous, SimultaneousPerfect, WindmillArrow, WindmillFinish, JumpPerfect, LandPerfect, LandNormal, LandFail, EventPerfectSlow, ParkourFail, Rewind, Standoff, StrikePerfect, StrikeNormal, PostureBreak, BloodHit,
+                SurroundTurn, Simultaneous, SimultaneousPerfect, WindmillArrow, WindmillFinish, JumpPerfect, LandPerfect, LandNormal, LandFail, EventPerfectSlow, ParkourFail, Rewind, Standoff, StrikePerfect, StrikeNormal, PostureBreak, BloodHit, KickHit,
             };
         }
 

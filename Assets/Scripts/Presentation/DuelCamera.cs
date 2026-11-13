@@ -37,6 +37,13 @@ namespace RhythmActionGame
         public Vector3 CutLookAt { get; private set; }
         /// <summary>3인칭 카메라가 화면에 영향을 주는 중 (컷이거나 컷과 블렌드 중). 이때 플레이어 몸을 보이게 그린다.</summary>
         public bool ThirdPerson { get; private set; }
+        /// <summary>옆차기에 맞아 누운 정도 (0 = 서 있음, 1 = 바닥 시점, B13.4).</summary>
+        public float DownAmount { get; private set; }
+        /// <summary>처형 컷 D 마지막에 위에서 내려다보는 중 (B13.4).</summary>
+        public bool CutTopDown { get; private set; }
+
+        string eventCut;
+        float eventCutAt, eventCutSeconds;
         public Mode Current { get; private set; } = Mode.Off;
         /// <summary>지금 줌 펀치 FOV (도, 0 또는 음수).</summary>
         public float PunchFov { get; private set; }
@@ -94,6 +101,7 @@ namespace RhythmActionGame
         void OnDisable()
         {
             if (judge != null && subscribed) judge.CueJudged -= OnJudged;
+            if (director != null && subscribed) { director.DuelKicked -= OnKicked; director.DuelSwapped -= OnSwapped; }
             subscribed = false;
         }
 
@@ -101,6 +109,7 @@ namespace RhythmActionGame
         {
             if (subscribed || judge == null) return;
             judge.CueJudged += OnJudged;
+            if (director != null) { director.DuelKicked += OnKicked; director.DuelSwapped += OnSwapped; }
             subscribed = true;
         }
 
@@ -128,6 +137,21 @@ namespace RhythmActionGame
             if (age < 0f || age >= d) return 0f;
             float hold = d / 3f;
             return age < hold ? GameConfig.DuelClashPunchFov : GameConfig.DuelClashPunchFov * (1f - (age - hold) / (d - hold));
+        }
+
+        /// <summary>옆차기 순간 측면 컷 K (0.25초, 바로 자름). 다음 원이 나타나기 0.4초 전까지 끝날 수 있을 때만.</summary>
+        void OnKicked(StageDirector.Encounter e) => TryEventCut(e, "K", GameConfig.DuelKickCutSeconds);
+        /// <summary>자리 바꾸기 어깨 너머 컷 S (0.6초, 바로 자름). 원이 없는 틈일 때만 (B13.4).</summary>
+        void OnSwapped(StageDirector.Encounter e) => TryEventCut(e, "S", GameConfig.DuelSwapCutSeconds);
+
+        void TryEventCut(StageDirector.Encounter e, string name, float seconds)
+        {
+            if (RingVisible(e) || director.clock == null) return;
+            double next = double.MaxValue;
+            foreach (var c in e.Cues) if (!c.Judged && !c.Cancelled) next = Math.Min(next, c.TargetBeat - GameConfig.ApproachBeats);
+            double secs = (next - director.clock.CurrentBeat) * GameConfig.SecondsPerBeat / director.clock.SpeedMultiplier;
+            if (secs < seconds + GameConfig.DuelCutReturnMarginSeconds) return;
+            eventCut = name; eventCutAt = (float)director.clock.Now; eventCutSeconds = seconds;   // 박자 시계 기준 (원 등장 시각과 같은 시계)
         }
 
         /// <summary>다음에 판정할 결투 단계 (판정·취소되지 않은 것 중 가장 이른 것).</summary>
@@ -169,6 +193,12 @@ namespace RhythmActionGame
             double rel = clock != null ? clock.CurrentBeat - e.StartBeat : 0;
             bool finished = e.Done && e.Execution != ExecutionKind.None;
             Cut = BossDuel.ActiveCut(rel, clock != null ? clock.SpeedMultiplier : 1f, finished, out float progress);
+            if (eventCut != null)
+            {
+                float age = director.clock != null ? (float)(director.clock.Now - eventCutAt) : eventCutSeconds;
+                if (age < eventCutSeconds && !RingVisible(e)) { Cut = eventCut; progress = age / eventCutSeconds; }
+                else eventCut = null;
+            }
             if (Cut != null && RingVisible(e)) Cut = null;
             if (starting) Cut = null;      // 첫 프레임은 1인칭: 이미 컷 A 구간이어도 다음 프레임에 0.4초 블렌드로 들어간다
             if (Cut == null) cutFrozenFor = null;
@@ -177,8 +207,9 @@ namespace RhythmActionGame
             if (want != desired)
             {
                 bool cutInvolved = Cut != null || IsCutCam(desired);
-                Brain.DefaultBlend = Cut == "D"
-                    ? new CinemachineBlendDefinition(CinemachineBlendDefinition.Styles.Cut, 0f)                                   // 처형: 바로 자름
+                bool hard = Cut == "D" || Cut == "K" || Cut == "S" || desired == CutCams["K"] || desired == CutCams["S"];
+                Brain.DefaultBlend = hard
+                    ? new CinemachineBlendDefinition(CinemachineBlendDefinition.Styles.Cut, 0f)                                   // 처형·옆차기·자리 바꾸기: 바로 자름
                     : new CinemachineBlendDefinition(CinemachineBlendDefinition.Styles.EaseInOut,
                         cutInvolved ? GameConfig.DuelCutBlendSeconds : GameConfig.DuelCamBlendSeconds);
                 want.Prioritize();
@@ -187,9 +218,14 @@ namespace RhythmActionGame
 
             // 1인칭 자세: 두 카메라 모두 지금 판정 회전을 따라가고, 공격 카메라는 베는 쪽으로 롤 (← 왼쪽, 그 밖 오른쪽)
             var turn = judgeFx != null ? judgeFx.Turn : Quaternion.identity;
-            GuardCam.transform.localRotation = turn;
+            DownAmount = Down(e, rel);
+            float eyeDown = GameConfig.DuelDownEyeHeight - GameConfig.EyeHeight;     // 바닥 0.3 m 높이 (머리 기준)
+            var up = Quaternion.Euler(-GameConfig.DuelDownPitch * DownAmount, 0f, 0f);  // 누우면 위를 올려다봄
+            GuardCam.transform.localPosition = new Vector3(0f, Mathf.Lerp(GameConfig.DuelGuardCamHeight, eyeDown, DownAmount), 0f);
+            GuardCam.transform.localRotation = turn * up;
             float roll = next != null && next.Key == ArrowKey.Left ? GameConfig.DuelStrikeCamRoll : -GameConfig.DuelStrikeCamRoll;
-            StrikeCam.transform.localRotation = turn * Quaternion.Euler(0f, 0f, roll);
+            StrikeCam.transform.localPosition = new Vector3(0f, Mathf.Lerp(0f, eyeDown, DownAmount), Mathf.Lerp(GameConfig.DuelStrikeCamForward, 0f, DownAmount));
+            StrikeCam.transform.localRotation = turn * up * Quaternion.Euler(0f, 0f, roll * (1f - DownAmount));
             if (Cut != null) PlaceCut(e, Cut, progress);
 
             PunchFov = Punch(RealTime() - punchAt);
@@ -218,16 +254,45 @@ namespace RhythmActionGame
         }
 
         /// <summary>
-        /// 3인칭 컷 카메라 자리: 두 사람 중간점(컷이 시작될 때 고정)을 바라보며, 옆에서 시작해 sweep만큼 돈다.
-        /// 반지름은 r0 → r1 (3.5~5 m), 높이는 컷마다 (D는 낮은 각도).
+        /// 누운 정도 (B13.4): 옆차기에 맞으면 0.25초에 바닥 시점으로 넘어지고, 58.4~59박에 일어난다.
+        /// 다운 구간으로 되감은 경우(맞은 시각 없음)는 처음부터 누워 있다.
+        /// </summary>
+        float Down(StageDirector.Encounter e, double rel)
+        {
+            if (!e.Kicked) return 0f;
+            float fall = e.KickRealTime < -100f || director.clock == null ? 1f : Mathf.Clamp01(((float)director.clock.Now - e.KickRealTime) / GameConfig.DuelDownFallSeconds);
+            float stand = rel < BossDuel.StandUpFrom ? 1f : Mathf.Clamp01((float)(1.0 - (rel - BossDuel.StandUpFrom) / (BossDuel.StandUpTo - BossDuel.StandUpFrom)));
+            float k = Mathf.Min(fall, stand);
+            return k * k * (3f - 2f * k);
+        }
+
+        /// <summary>
+        /// 3인칭 컷 카메라 자리 (B11.5 → B13.4): 두 사람 중간점(컷이 시작될 때 고정)을 바라보며 옆에서 시작해 sweep만큼 돈다.
+        /// 컷마다 반지름·높이·바라보는 높이가 다르다: A 로우 앵글(낮은 카메라가 올려다봄), B 칼날 클로즈업(1.2 m), D 낮은 각도 180°에
+        /// 마지막 0.5초 위에서 내려다보기, K 옆차기 측면. S(자리 바꾸기)는 플레이어 어깨 너머에서 적을 본다(지금 위치를 따라감).
         /// </summary>
         void PlaceCut(StageDirector.Encounter e, string name, float p)
         {
             var def = Array.Find(GameConfig.DuelCuts, c => c.name == name);
+            var a = director.player != null ? director.player.transform.position : Vector3.zero;
+            var b = e.Actors != null && e.Actors.Length > 0 && e.Actors[0] != null ? e.Actors[0].transform.position : a + Vector3.forward * 3f;
+            var cam = CutCams[name];
+            CutTopDown = false;
+            if (name == "S")
+            {
+                var f = b - a; f.y = 0f;
+                if (f.sqrMagnitude < 1e-6f) f = Vector3.forward;
+                f.Normalize();
+                var right = Vector3.Cross(Vector3.up, f);
+                CutLookAt = b + Vector3.up * def.look;
+                var sp = a - f * def.r0 + right * 0.45f + Vector3.up * def.height;
+                cam.transform.SetPositionAndRotation(sp, Quaternion.LookRotation(CutLookAt - sp, Vector3.up));
+                CutAngle = 0f;
+                SetFov(cam, GameConfig.DuelGuardCamFov);
+                return;
+            }
             if (cutFrozenFor != name)
             {
-                var a = director.player != null ? director.player.transform.position : Vector3.zero;
-                var b = e.Actors != null && e.Actors.Length > 0 && e.Actors[0] != null ? e.Actors[0].transform.position : a + Vector3.forward * 3f;
                 cutMid = (a + b) * 0.5f;
                 cutFwd = b - a; cutFwd.y = 0f;
                 if (cutFwd.sqrMagnitude < 1e-6f) cutFwd = Vector3.forward;
@@ -239,12 +304,24 @@ namespace RhythmActionGame
             float r = Mathf.Lerp(def.r0, def.r1, t);
             var side = Vector3.Cross(Vector3.up, cutFwd);                     // 두 사람을 잇는 선의 옆
             var dir = Quaternion.AngleAxis(CutAngle, Vector3.up) * side;
-            CutLookAt = cutMid + Vector3.up * GameConfig.DuelCutLookHeight;
+            CutLookAt = cutMid + Vector3.up * def.look;
             var pos = cutMid + dir * r + Vector3.up * def.height;
-            var cam = CutCams[name];
-            cam.transform.SetPositionAndRotation(pos, Quaternion.LookRotation(CutLookAt - pos, Vector3.up));
+            var rot = Quaternion.LookRotation(CutLookAt - pos, Vector3.up);
+            if (name == "D" && director.clock != null)
+            {
+                double left = (BossDuel.LengthBeats - (director.clock.CurrentBeat - e.StartBeat)) * GameConfig.SecondsPerBeat / director.clock.SpeedMultiplier;
+                if (left <= GameConfig.DuelTopDownSeconds)
+                {
+                    // 마지막 0.5초: 위에서 내려다본다 (같은 카메라의 자리를 바로 옮겨 자른 듯이)
+                    CutTopDown = true;
+                    pos = cutMid + Vector3.up * GameConfig.DuelTopDownHeight;
+                    rot = Quaternion.LookRotation(Vector3.down, cutFwd);
+                }
+            }
+            cam.transform.SetPositionAndRotation(pos, rot);
             SetFov(cam, GameConfig.DuelGuardCamFov);
         }
+
 
         void ShowBody(bool show)
         {
@@ -264,7 +341,7 @@ namespace RhythmActionGame
         {
             if (Current == Mode.Off) return;
             Current = Mode.Off;
-            Cut = null; cutFrozenFor = null; desired = null;
+            Cut = null; cutFrozenFor = null; desired = null; eventCut = null; DownAmount = 0f; CutTopDown = false;
             ThirdPerson = false;
             ShowBody(false);
             Brain.enabled = false;

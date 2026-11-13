@@ -11,8 +11,14 @@ namespace RhythmActionGame
         public const int PhaseExplore = 1;   // 1단계 탐색
         public const int PhaseLock = 2;      // 칼 겨루기
         public const int PhaseClash = 3;     // 2단계 격돌
-        public const int PhaseFlurry = 4;    // 3단계 난타
-        public const int PhaseFinish = 5;    // 마무리
+        public const int PhaseDown = 4;      // 옆차기 다운 구간 (GDD-beta B13.4)
+        public const int PhaseFlurry = 5;    // 3단계 난타
+        public const int PhaseFinish = 6;    // 마무리
+
+        /// <summary>받아치기(자리 바꾸기) 판정 박, 옆차기(다운) 직전 판정 박, 일어나는 박 (B13.4).</summary>
+        public const double SwapBeat = 37.5;
+        public const double KickAfterBeat = 52;
+        public const double StandUpFrom = 58.4, StandUpTo = 59;
 
         /// <summary>기준점 O: 도착 후 가장 가까운 박 (프레임 오차 0.05박 안에서 이미 지난 박은 그 박으로 본다).</summary>
         public static double Origin(double now) => System.Math.Ceiling(now - 0.05);
@@ -28,6 +34,7 @@ namespace RhythmActionGame
                 case PhaseExplore: return 4;
                 case PhaseLock: return 24;
                 case PhaseClash: return 30;
+                case PhaseDown: return 54;
                 case PhaseFlurry: return 58;
                 default: return 68;
             }
@@ -36,7 +43,7 @@ namespace RhythmActionGame
         /// <summary>3인칭 컷 구간 (판정 원 없음, B11.1·B11.5). D는 마무리 판정 뒤.</summary>
         public static readonly (string name, double from, double to)[] Cuts =
         {
-            ("A", 0, 4), ("B", 24, 28), ("C", 54, 58), ("D", 70, 74),
+            ("A", 0, 4), ("B", 24, 28), ("D", 70, 74),   // 컷 C(흔들림)는 B13.4 옆차기 다운으로 바뀜
         };
 
         // A: 무사 공격(막기·피하기), S: 내 공격, L: 칼 겨루기, F: 마무리
@@ -55,6 +62,8 @@ namespace RhythmActionGame
             (42, 'S', ArrowKey.Left), (43, 'S', ArrowKey.Right), (44, 'S', ArrowKey.Down),
             (46, 'A', ArrowKey.Left), (46.5, 'A', ArrowKey.Right), (48, 'S', ArrowKey.Up), (48.5, 'S', ArrowKey.Down),
             (50, 'A', ArrowKey.Down), (51, 'S', ArrowKey.Left), (52, 'A', ArrowKey.Up),
+            // 옆차기 다운 구간 (B13.4): 누운 채 ← → 구르기, ↑ 칼로 받기
+            (56, 'A', ArrowKey.Left), (57, 'A', ArrowKey.Right), (58, 'A', ArrowKey.Up),
             // 3단계 난타 (A와 S가 번갈아)
             (60, 'A', ArrowKey.Left), (61, 'S', ArrowKey.Right), (62, 'A', ArrowKey.Up), (63, 'S', ArrowKey.Down),
             (64, 'A', ArrowKey.Left), (65, 'S', ArrowKey.Right), (66, 'A', ArrowKey.Up), (67, 'S', ArrowKey.Down),
@@ -62,7 +71,7 @@ namespace RhythmActionGame
             (70, 'F', ArrowKey.Up),
         };
 
-        static int PhaseOf(double t) => t < 24 ? PhaseExplore : t <= 30 ? PhaseLock : t < 58 ? PhaseClash : t < 68 ? PhaseFlurry : PhaseFinish;
+        static int PhaseOf(double t) => t < 24 ? PhaseExplore : t <= 30 ? PhaseLock : t < 54 ? PhaseClash : t < 59 ? PhaseDown : t < 68 ? PhaseFlurry : PhaseFinish;
 
         /// <summary>무사 공격 종류 (GDD 4.5 표: ↓ 가로베기, ←/→ 내려베기, ↑ 올려베기).</summary>
         static string AttackFor(ArrowKey k) => k == ArrowKey.Down ? "horizontal" : k == ArrowKey.Up ? "upward" : "overhead";

@@ -42,6 +42,7 @@ namespace RhythmActionGame
                 director.EncounterStarted += OnEncounter;
                 director.PostureBroken += OnPostureBroken;
                 director.PlayerHit += OnPlayerHit;
+                director.DuelKicked += OnDuelKicked;
             }
         }
 
@@ -58,6 +59,7 @@ namespace RhythmActionGame
                 director.EncounterStarted -= OnEncounter;
                 director.PostureBroken -= OnPostureBroken;
                 director.PlayerHit -= OnPlayerHit;
+                director.DuelKicked -= OnDuelKicked;
             }
         }
 
@@ -73,6 +75,10 @@ namespace RhythmActionGame
             Play(GameConfig.Fx.Rewind, 1f, null, player != null ? player.transform.position : (Vector3?)null);
             if (vfx != null && presentation != null && presentation.Enabled) { vfx.Rewind.Play(); Log.Add("RewindOverlay"); }
         }
+
+        /// <summary>무사 옆차기 다운 (GDD-beta B13.4): 판정 없이 맞고 쓰러진다 (체력 그대로).</summary>
+        void OnDuelKicked(StageDirector.Encounter e) =>
+            Play(GameConfig.Fx.KickHit, -1f, null, player != null ? player.transform.position + Vector3.up : (Vector3?)null);
 
         /// <summary>결투·윈드밀 FAIL (GDD-beta B12.2): 크게 맞고 피가 튄다. 0.7초 뒤 되감기가 이어진다.</summary>
         void OnPlayerHit(RewindKind kind)

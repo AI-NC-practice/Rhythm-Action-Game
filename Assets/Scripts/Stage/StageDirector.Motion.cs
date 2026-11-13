@@ -138,6 +138,13 @@ namespace RhythmActionGame
         {
             if (SurroundMotionActive) { ApplySurroundMotion(step, r); return; }
             if (!MotionActive || motionActor == null || step.Kind == CombatStepKind.Finisher || step.Kind == CombatStepKind.Windmill) return;
+            if (encounter != null && encounter.IsBossDuel)
+            {
+                // B13.4: 받아치기 성공 → 두 사람이 엇갈려 자리를 바꾼다 (180°)
+                if (step.OffsetBeats == BossDuel.SwapBeat && r != Judgement.Fail) { SwapPositions(); return; }
+                // 다운 구간의 ↑(누운 채 칼로 받기)는 제자리
+                if (step.Phase == BossDuel.PhaseDown && step.Key == ArrowKey.Up) return;
+            }
             var f = Flat(MotionEnemy - MotionPlayer);
             if (f.sqrMagnitude < 1e-6f) f = Flat(player.transform.forward);
             f.Normalize();
@@ -155,7 +162,24 @@ namespace RhythmActionGame
             var gap = Flat(eTo - pTo);
             if (gap.magnitude < FightDistance - 0.05f) pTo = ClampArena(eTo - gap.normalized * FightDistance, MotionPlayer.y);
             moveT = 0f;
+            moveSeconds = GameConfig.CombatMoveSeconds; swapping = false;
             CircleDirection = -CircleDirection;                     // 다음 틈에는 반대로 돈다
+        }
+
+        float moveSeconds = GameConfig.CombatMoveSeconds;
+        bool swapping;
+
+        /// <summary>두 사람의 자리를 바꾼다 (B13.4, 0.5초). 플레이어는 적의 옆을 스쳐 지나간다.</summary>
+        void SwapPositions()
+        {
+            if (!MotionActive) return;
+            charging = false;
+            pFrom = MotionPlayer; eFrom = MotionEnemy;
+            pTo = new Vector3(eFrom.x, pFrom.y, eFrom.z);
+            eTo = new Vector3(pFrom.x, eFrom.y, pFrom.z);
+            moveT = 0f;
+            moveSeconds = GameConfig.DuelSwapSeconds;
+            swapping = true;
         }
 
         static float Ease(float t) => t * t * (3f - 2f * t);
@@ -177,9 +201,17 @@ namespace RhythmActionGame
             }
             else if (moveT < 1f)
             {
-                moveT = Mathf.Min(1f, moveT + dt / GameConfig.CombatMoveSeconds);
+                moveT = Mathf.Min(1f, moveT + dt / moveSeconds);
                 float k = Ease(moveT);
                 MotionPlayer = Vector3.Lerp(pFrom, pTo, k);
+                if (swapping)
+                {
+                    // 엇갈림: 플레이어는 적의 옆을 돌아 지나간다 (선 위에서 부딪치지 않게)
+                    var line = Flat(pTo - pFrom);
+                    var sideOff = Vector3.Cross(Vector3.up, line.sqrMagnitude > 1e-6f ? line.normalized : Vector3.forward) * (0.9f * Mathf.Sin(k * Mathf.PI));
+                    MotionPlayer += sideOff;
+                }
+                if (moveT >= 1f) { moveSeconds = GameConfig.CombatMoveSeconds; swapping = false; }
                 MotionEnemy = Vector3.Lerp(eFrom, eTo, k);
             }
             else if (!RingUp())
