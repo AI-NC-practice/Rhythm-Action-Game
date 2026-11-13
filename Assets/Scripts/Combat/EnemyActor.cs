@@ -40,6 +40,8 @@ namespace RhythmActionGame
         readonly List<GameObject> ghosts = new List<GameObject>();
         float nextGhostAt;
         bool attacking;
+        string lastAttack;
+        float lastAttackP;
         Vector3 homePos;
         Quaternion homeRot;
         bool homeSaved;
@@ -87,6 +89,14 @@ namespace RhythmActionGame
             State = "Standoff";
         }
 
+        /// <summary>되감기 (GDD-beta B10.3): 마지막 휘두르기 자세를 거꾸로 돌린다. u: 0(그대로) → 1(처음 자세).</summary>
+        public void RewindSwing(float u)
+        {
+            if (Defeated || weaponPivot == null || string.IsNullOrEmpty(lastAttack)) return;
+            weaponPivot.localRotation = SwingPose(lastAttack, lastAttackP * (1f - Mathf.Clamp01(u)));
+            State = "Rewinding";
+        }
+
         /// <summary>처음 자리에서 다가온 거리 (m).</summary>
         public float StandoffOffset { get { SaveHome(); var d = transform.position - homePos; d.y = 0; return d.magnitude; } }
 
@@ -96,6 +106,7 @@ namespace RhythmActionGame
             if (Defeated || Frozen) return;
             SaveHome();
             attacking = true;
+            lastAttack = attack; lastAttackP = Mathf.Clamp01(p);
             State = "Attack_" + attack;
             if (trail != null) trail.emitting = true;
             if (weaponPivot != null) weaponPivot.localRotation = SwingPose(attack, Mathf.Clamp01(p));

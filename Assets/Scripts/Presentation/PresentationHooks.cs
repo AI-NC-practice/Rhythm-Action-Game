@@ -57,11 +57,18 @@ namespace RhythmActionGame
             }
         }
 
-        /// <summary>되감기 연출 (GDD-beta B9.4): 카메라 뒤로 0.3 m, 채도 −90·노출 −0.5, 거꾸로 흐르는 먹 줄기, 되감기 소리.</summary>
         /// <summary>대치 연출 (GDD-beta B10.2): 멈춰서 싸우는 전투가 시작되면 카메라가 적 쪽으로 살짝 다가간다.</summary>
         void OnEncounter(StageDirector.Encounter e) => Play(GameConfig.Fx.Standoff);
 
-        void OnRewind(RewindKind kind) => Play(GameConfig.Fx.Rewind, 1f, null, player != null ? player.transform.position : (Vector3?)null);
+        /// <summary>
+        /// 되감기 연출 (GDD-beta B9.4, B10.3): 카메라 뒤로 0.3 m, 채도 −90·노출 −0.5, 거꾸로 흐르는 먹 줄기, 되감기 소리,
+        /// 그리고 테이프 되감기 겹화면(먹 줄기 3개, 줄무늬, ◀◀).
+        /// </summary>
+        void OnRewind(RewindKind kind)
+        {
+            Play(GameConfig.Fx.Rewind, 1f, null, player != null ? player.transform.position : (Vector3?)null);
+            if (vfx != null && presentation != null && presentation.Enabled) { vfx.Rewind.Play(); Log.Add("RewindOverlay"); }
+        }
 
         void OnReset() { warned.Clear(); lastSeenRun = null; Log.Clear(); }
 

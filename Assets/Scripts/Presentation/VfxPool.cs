@@ -46,6 +46,9 @@ namespace RhythmActionGame
         /// <summary>종류별로 미리 만든 오브젝트 수 (풀 크기 확인용).</summary>
         public int PooledCount(VfxKind k) => k == VfxKind.Shockwave ? shockPool.Count : particles.TryGetValue(k, out var l) ? l.Count : 0;
         public ParticleSystem LastParticles { get; private set; }
+        RewindOverlay rewindOverlay;
+        /// <summary>테이프 되감기 겹화면 (GDD-beta B10.3).</summary>
+        public RewindOverlay Rewind { get { Build(); return rewindOverlay; } }
         public Transform LastShockwave { get; private set; }
 
         void Awake() => Build();
@@ -56,13 +59,15 @@ namespace RhythmActionGame
             built = true;
             // 텍스처를 미리 만든다 (첫 재생 때 만들면 수십 ms 멈칫해 Hit Stop보다 길어진다)
             _ = VfxFactory.BrushBurst; _ = VfxFactory.InkSlash; _ = VfxFactory.InkX; _ = VfxFactory.ShockRing;
-            _ = VfxFactory.Lightning; _ = VfxFactory.Flare; _ = VfxFactory.Dot; _ = VfxFactory.Smoke; _ = VfxFactory.Crack;
+            _ = VfxFactory.Lightning; _ = VfxFactory.Flare; _ = VfxFactory.Dot; _ = VfxFactory.Smoke; _ = VfxFactory.Crack; _ = VfxFactory.Scanlines;
             if (flashLayer == null)
             {
                 var c = UiFactory.CreateCanvas("ScreenFlashCanvas", GameConfig.JudgeFxCanvasOrder);
                 c.transform.SetParent(transform, false);
                 flashLayer = (RectTransform)c.transform;
             }
+            rewindOverlay = gameObject.AddComponent<RewindOverlay>();
+            rewindOverlay.Build(flashLayer);
             var go = new GameObject("ScreenFlash", typeof(RectTransform), typeof(Image));
             go.transform.SetParent(flashLayer, false);
             flashImage = go.GetComponent<Image>();

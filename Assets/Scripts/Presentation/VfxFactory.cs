@@ -16,7 +16,25 @@ namespace RhythmActionGame
 
         static Sprite brushBurst, inkSlash, inkX, ring;
 
-        static Sprite lightning, flare, dot, smoke, crack;
+        static Sprite lightning, flare, dot, smoke, crack, scanlines;
+
+        /// <summary>가로 줄무늬 (되감기 겹화면, 4 px마다 어두운 줄). 타일로 깐다.</summary>
+        public static Sprite Scanlines
+        {
+            get
+            {
+                if (scanlines != null) return scanlines;
+                const int s = 8;
+                var tex = NewTex(s, "Scanlines");
+                tex.wrapMode = TextureWrapMode.Repeat;
+                var px = new Color32[s * s];
+                for (int y = 0; y < s; y++)
+                    for (int x = 0; x < s; x++)
+                        px[y * s + x] = new Color32(255, 255, 255, (byte)(y % 4 == 0 ? 255 : 0));
+                tex.SetPixels32(px); tex.Apply();
+                return scanlines = ToSprite(tex);
+            }
+        }
         static Material uiAdditive;
 
         /// <summary>방사형 번개선: 가운데에서 바깥으로 꺾이며 뻗는 가는 빛줄기 10개 (GDD-beta B8.5).</summary>

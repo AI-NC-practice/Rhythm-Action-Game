@@ -1,5 +1,5 @@
 ﻿# Unity verify report
-time: 2026-11-13 09:51:32
+time: 2026-11-13 09:57:37
 
 ## EditMode : total=130 passed=130 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
@@ -133,7 +133,7 @@ time: 2026-11-13 09:51:32
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_SpeedFx_Intensity
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_Texts_MatchGdd48
 
-## PlayMode : total=112 passed=112 failed=0 skipped=0 result=Passed
+## PlayMode : total=116 passed=116 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -209,6 +209,10 @@ time: 2026-11-13 09:51:32
   - [Passed] RhythmActionGame.Tests.B23_StandoffTests.B23_FirstRing_Within05s_OfArrival(181.0d)
   - [Passed] RhythmActionGame.Tests.B23_StandoffTests.B23_FirstRing_Within05s_OfArrival(256.0d)
   - [Passed] RhythmActionGame.Tests.B23_StandoffTests.B23_Standoff_CameraAndEnemyStepForward
+  - [Passed] RhythmActionGame.Tests.B24_RealRewindTests.B24_BossRewind_WeaponSwingReverses
+  - [Passed] RhythmActionGame.Tests.B24_RealRewindTests.B24_ChapterRewind_PlayerSlidesBackAlongPath
+  - [Passed] RhythmActionGame.Tests.B24_RealRewindTests.B24_Font_HasRewindIcon
+  - [Passed] RhythmActionGame.Tests.B24_RealRewindTests.B24_TapeOverlay_StreaksScanlinesIcon
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_ChapterStartBeats_MatchSections
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(1)
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(4)

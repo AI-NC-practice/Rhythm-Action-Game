@@ -634,10 +634,10 @@
                                          "기존 B19 되감기 테스트 통과",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "in_progress",
+                      "status":  "done",
                       "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "챕터 되감기 때 보이는 위치가 뒤로 미끄러짐, 무사·윈드밀 되감기 때 적 휘두르기가 거꾸로, 테이프 겹화면(먹 줄기 3·줄무늬·◀◀). 평가 PASS 1회차."
                   },
                   {
                       "id":  "B25",

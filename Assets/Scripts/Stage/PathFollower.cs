@@ -19,7 +19,9 @@ namespace RhythmActionGame
         /// <summary>달리는 중 슬로모션의 이동 시간 재배치 (GDD-beta B4). 없으면 null.</summary>
         public TimeRemap? Remap { get; private set; }
         /// <summary>화면에 보이는 위치 (달리기 박자). 재배치가 없으면 RunBeat와 같다.</summary>
-        public double VisualRunBeat => Remap.HasValue ? Remap.Value.Visual(RunBeat) : RunBeat;
+        public double VisualRunBeat => VisualOverride ?? (Remap.HasValue ? Remap.Value.Visual(RunBeat) : RunBeat);
+        /// <summary>되감기 동안 보이는 위치를 직접 정한다 (GDD-beta B10.3). null이면 보통대로.</summary>
+        public double? VisualOverride { get; set; }
         public float VisualDistance => (float)(VisualRunBeat * GameConfig.MetersPerBeat);
 
         /// <summary>지금 위치부터 슬로모션 재배치를 건다. endRunBeat(사건 끝)에서 보이는 위치가 논리 위치와 다시 같아진다.</summary>
@@ -51,6 +53,7 @@ namespace RhythmActionGame
         {
             RunBeat = runBeat;
             Remap = null;
+            VisualOverride = null;
             hasLast = false;
             Place();
         }
@@ -70,7 +73,8 @@ namespace RhythmActionGame
             Place();
         }
 
-        void Place()
+        /// <summary>지금 보이는 위치로 트랜스폼을 옮긴다 (되감기처럼 다른 곳에서 위치를 바꿨을 때 바로 반영).</summary>
+        public void Place()
         {
             var p = MapLayout.PointAt(VisualDistance, out var fwd);
             transform.SetPositionAndRotation(p, Quaternion.LookRotation(fwd, Vector3.up));

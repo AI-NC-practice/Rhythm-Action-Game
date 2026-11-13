@@ -36,6 +36,11 @@ namespace RhythmActionGame
 
         float rewindStartedAt;
         double rewindTargetBeat;
+        double rewindFromRun;
+        EnemyActor[] rewindActors;
+
+        /// <summary>되감기 진행도 (0~1, 실제 시간 기준).</summary>
+        public float RewindProgress => Rewinding ? Mathf.Clamp01((RewindRealTime() - rewindStartedAt) / GameConfig.RewindSeconds) : 0f;
         Action rewindResume;
 
         /// <summary>
@@ -49,6 +54,8 @@ namespace RhythmActionGame
             rewindStartedAt = RewindRealTime();
             rewindTargetBeat = targetBeat;
             rewindResume = resume;
+            rewindFromRun = player != null ? player.RunBeat : 0;
+            rewindActors = encounter != null ? encounter.Actors : null;
             judge.ClearAll();                       // 남은 원도 모두 사라짐 (B11)
             if (slowMotion != null) slowMotion.Cancel();
             clock.Pause();
@@ -57,8 +64,20 @@ namespace RhythmActionGame
 
         void UpdateRewind()
         {
-            if (!Rewinding || RewindRealTime() - rewindStartedAt < GameConfig.RewindSeconds) return;
+            if (!Rewinding) return;
+            // 실제로 거꾸로 (GDD-beta B10.3): 챕터 되감기는 보이는 위치가 뒤로, 전투 되감기는 적의 휘두르기가 거꾸로
+            float u = RewindProgress;
+            float e = u * u * (3f - 2f * u);
+            if (LastRewind == RewindKind.Chapter && player != null)
+            {
+                player.VisualOverride = rewindFromRun + (rewindTargetBeat - rewindFromRun) * e;
+                player.Place();
+            }
+            else if (rewindActors != null)
+                foreach (var a in rewindActors) if (a != null) a.RewindSwing(e);
+            if (RewindRealTime() - rewindStartedAt < GameConfig.RewindSeconds) return;
             Rewinding = false;
+            if (player != null) player.VisualOverride = null;
             var kind = LastRewind;
             if (kind == RewindKind.Chapter)
             {
