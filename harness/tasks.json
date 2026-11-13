@@ -771,11 +771,86 @@
                       "notes":  "사용자 플레이 확인(2026-11-13). 피드백: 보스 카메라 각도 단조로움, 옆차기 다운 시 바닥 시점, 자리 바꾸기 등 동적 전투, 모든 적이 제자리에서만 싸움 → 제안서 docs/proposals/dynamic-combat.md."
                   },
                   {
+                      "id":  "B32",
+                      "title":  "[beta] 전투 이동 기반: 결투 원·판정별 이동·카메라 추적·일반 적 돌진",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "B31"
+                                     ],
+                      "acceptance":  [
+                                         "GDD-beta B13.1: 일반 적·무사 전투에서 판정 결과별로 플레이어와 적이 표대로 이동(0.35초), 이동 뒤 싸움 거리(2.2/2.6 m) 유지, 결투 원 반지름 5 m 밖으로 나가지 않음 — 테스트",
+                                         "GDD-beta B13.1: 원이 없는 틈에 적이 초당 20°로 둘레를 돎, 플레이어는 적을 바라보도록 돌되 초당 240° 이하 — 테스트",
+                                         "GDD-beta B13.1: 전투가 끝나면 다시 달리기 전에 경로 위 자리·방향으로 돌아옴 — 테스트",
+                                         "GDD-beta B13.2: 일반 적은 5 m 앞에서 첫 공격 목표 박까지 싸움 거리로 돌진, 첫 원 0.5초 규칙 유지 — 테스트",
+                                         "판정 타이밍·점수·되감기 규칙 그대로, 기존 대치 테스트(B23 등)를 새 규칙에 맞게 바꾸고 근거 주석",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "in_progress",
+                      "attempts":  1,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "B33",
+                      "title":  "[beta] 포위 전투 이동: 원을 돌다 뛰어듦, 동시 공격 덮치기",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "B32"
+                                     ],
+                      "acceptance":  [
+                                         "GDD-beta B13.3: 1단계 적 5명이 둘레를 돌다 공격하는 적이 1.5 m까지 뛰어들었다 돌아감, 판정마다 플레이어 이동 — 테스트",
+                                         "GDD-beta B13.3: 2단계 동시 공격 적들이 한꺼번에 1.5 m까지 덮침, 3단계 윈드밀 그대로 — 테스트",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "B34",
+                      "title":  "[beta] 무사 결투: 자리 바꾸기, 옆차기 다운(바닥 시점), 컷 각도 다양화",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "B33"
+                                     ],
+                      "acceptance":  [
+                                         "GDD-beta B13.4: 받아치기(A37.5) 성공 시 두 사람 자리 180° 교환, 원이 없는 틈에 어깨 너머 3인칭 컷 + 슬로모션 — 테스트",
+                                         "GDD-beta B13.4: 54 옆차기 다운(판정 없음, 체력 그대로), 바닥 높이 0.3 m 1인칭, 다운 구간 판정 56←·57→·58↑, 59까지 일어남, 다운 FAIL은 54로 되감기, 결투 판정 45 — 테스트",
+                                         "GDD-beta B13.4: 컷 A 로우 앵글, B 칼날 클로즈업, D 마지막 0.5초 위에서 내려다보기, 원 0.4초 전 1인칭 규칙 유지 — 테스트",
+                                         "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "B35",
+                      "title":  "[사용자] 동적 전투 확인 + 테스트 패키지",
+                      "type":  "human",
+                      "depends_on":  [
+                                         "B34"
+                                     ],
+                      "acceptance":  [
+                                         "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과, 테스트 패키지 zip",
+                                         "사용자가 움직이며 싸우는 전투·무사 결투 각도를 확인"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  1,
+                      "notes":  ""
+                  },
+                  {
                       "id":  "B10",
                       "title":  "[사용자+Claude] Suno 음악 생성·적용",
                       "type":  "human",
                       "depends_on":  [
-                                         "B31"
+                                         "B35"
                                      ],
                       "acceptance":  [
                                          "사용자가 인앱 브라우저에서 Suno에 로그인, Claude가 프롬프트 작성·생성 (국악 퓨전, 120 BPM, 보컬 없음, 약 2분 30초)",
