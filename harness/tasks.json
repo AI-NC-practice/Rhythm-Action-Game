@@ -581,21 +581,96 @@
                       "notes":  "Builds/Gray 다시 빌드 + smoke-test 통과, 테스트 패키지 RhythmActionGame-beta1-1-dev2.zip(37.9 MB, 개발자 모드·읽어주세요 포함, 압축 풀어 -startGame 20초 오류 없음). 사용자 확인 대기. 사용자 플레이 확인(2026-11-13), 추가 수정 요청 없음."
                   },
                   {
+                      "id":  "B22",
+                      "title":  "[beta] 화살표 겹침 없애기",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "B21"
+                                     ],
+                      "acceptance":  [
+                                         "GDD-beta B10.1: 2박 미만 간격으로 이어지는 원은 가로 160 px로 나란히 (1박 간격도 겹치지 않음) — 테스트 (무사 1박 콤보, 술독, 포위 1단계 모양)",
+                                         "GDD-beta B10.1: 묶음이 아닌 새 원이 떠 있는 원과 140 px 안이면 겹치지 않게 옆으로 옮김 (안전 타원 안) — 테스트",
+                                         "GDD-beta B10.1: 가장 이른 원은 불투명도 1.0, 기다리는 원은 0.55 — 테스트",
+                                         "실제 Game 씬 차트로 달리며 동시에 떠 있는 두 원의 중심 거리가 항상 140 px 이상 — PlayMode 테스트",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "in_progress",
+                      "attempts":  1,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "B23",
+                      "title":  "[beta] 대치 공백 줄이기",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "B22"
+                                     ],
+                      "acceptance":  [
+                                         "GDD-beta B10.2: 멈추는 전투의 첫 공격 = 도착 후 가장 가까운 박 + 2박, 첫 원은 도착 0.5초 안에 등장 — 테스트 (대치·포위·무사)",
+                                         "GDD-beta B10.2: 대치 연출 — 카메라 FOV −4° 대치 프리셋, 적이 0.5 m 다가옴 — 테스트",
+                                         "전투가 끝나면 다음 마디 첫 박에 다시 달림 (기존 규칙 유지) — 기존 테스트 통과",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "B24",
+                      "title":  "[beta] 되감기를 실제로 거꾸로",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "B23"
+                                     ],
+                      "acceptance":  [
+                                         "GDD-beta B10.3: 챕터 되감기 0.8초 동안 플레이어 보이는 위치가 되감는 지점까지 뒤로 움직임(중간값이 시작·끝 사이, 끝에서 일치) — 테스트",
+                                         "GDD-beta B10.3: 무사·윈드밀 되감기 동안 적 무기 자세가 마지막 휘두르기에서 거꾸로 돌아감 — 테스트",
+                                         "GDD-beta B10.3: 테이프 되감기 겹화면 — 먹 줄기 3개 이상이 오른쪽→왼쪽으로 움직임, 가로 줄무늬, \"◀◀\" 표시, 0.8초 뒤 사라짐 — 테스트",
+                                         "기존 B19 되감기 테스트 통과",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "B25",
+                      "title":  "[사용자] beta 재확인 4 + 테스트 패키지",
+                      "type":  "human",
+                      "depends_on":  [
+                                         "B24"
+                                     ],
+                      "acceptance":  [
+                                         "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과, 테스트 패키지 zip 다시 만들기",
+                                         "사용자가 화살표 겹침·대치 공백·되감기 연출을 확인하고 피드백을 줌"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  1,
+                      "notes":  ""
+                  },
+                  {
                       "id":  "B10",
                       "title":  "[사용자+Claude] Suno 음악 생성·적용",
                       "type":  "human",
                       "depends_on":  [
-                                         "B21"
+                                         "B25"
                                      ],
                       "acceptance":  [
                                          "사용자가 인앱 브라우저에서 Suno에 로그인, Claude가 프롬프트 작성·생성 (국악 퓨전, 120 BPM, 보컬 없음, 약 2분 30초)",
                                          "다운로드 전 사용자 승인, Assets/Audio/Music/에 저장",
                                          "Claude가 박자 분석으로 첫 박 오프셋을 맞추고 반주 대신 연결, unity-verify 통과"
                                      ],
-                      "status":  "needs_user",
-                      "attempts":  1,
+                      "status":  "pending",
+                      "attempts":  0,
                       "max_attempts":  1,
-                      "notes":  "Suno 로그인(인앱 브라우저) 대기. 로그인 후 Claude가 프롬프트 입력·생성, 다운로드 전 사용자 승인."
+                      "notes":  ""
                   },
                   {
                       "id":  "T10",
