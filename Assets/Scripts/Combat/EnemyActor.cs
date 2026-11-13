@@ -66,6 +66,7 @@ namespace RhythmActionGame
             SaveHome();
             StopAllCoroutines();
             pushRoutine = null; PushOffset = 0;
+            MotionPosition = null; FacePoint = null;
             transform.SetPositionAndRotation(homePos, homeRot);
             gameObject.SetActive(true);
             Defeated = false;
@@ -84,7 +85,8 @@ namespace RhythmActionGame
             SaveHome();
             var d = playerPos - homePos; d.y = 0;
             if (d.sqrMagnitude < 1e-6f) return;
-            transform.position = homePos + d.normalized * (GameConfig.Fx.StandoffApproachMeters * Mathf.Clamp01(p));
+            if (!MotionPosition.HasValue)   // 움직이는 전투(GDD-beta B13)에서는 자리를 전투 이동이 정한다. 칼만 든다
+                transform.position = homePos + d.normalized * (GameConfig.Fx.StandoffApproachMeters * Mathf.Clamp01(p));
             if (attacking) return;                                                          // 휘두르는 중이면 자세는 공격이 정한다
             if (weaponPivot != null) weaponPivot.localRotation = Quaternion.Euler(-30f * Mathf.Clamp01(p), 0, 0);   // 칼을 든다
             State = "Standoff";
@@ -155,6 +157,25 @@ namespace RhythmActionGame
 
         Coroutine pushRoutine;
         Vector3 pushBase;
+        Vector3 pushDir;
+
+        /// <summary>
+        /// 움직이는 전투(GDD-beta B13.1)에서 전투 이동이 정한 자리. 설정되면 매 프레임 이 자리(+ 밀림)에 서고 FacePoint를 바라본다.
+        /// </summary>
+        public Vector3? MotionPosition { get; set; }
+        public Vector3? FacePoint { get; set; }
+
+        void LateUpdate()
+        {
+            if (Defeated || !MotionPosition.HasValue) return;
+            var pos = MotionPosition.Value + pushDir * PushOffset;
+            transform.position = pos;
+            if (FacePoint.HasValue)
+            {
+                var d = FacePoint.Value - pos; d.y = 0;
+                if (d.sqrMagnitude > 1e-6f) transform.rotation = Quaternion.LookRotation(d.normalized, Vector3.up);
+            }
+        }
         /// <summary>밀려난 정도 (m, 테스트용).</summary>
         public float PushOffset { get; private set; }
 
@@ -162,9 +183,10 @@ namespace RhythmActionGame
         public void Pushback(Vector3 away, float meters, float seconds)
         {
             if (Defeated) return;
-            if (pushRoutine != null) { StopCoroutine(pushRoutine); transform.position = pushBase; }
+            if (pushRoutine != null) { StopCoroutine(pushRoutine); if (!MotionPosition.HasValue) transform.position = pushBase; }
             pushBase = transform.position;
             away.y = 0;
+            pushDir = away.sqrMagnitude > 1e-6f ? away.normalized : -transform.forward;
             State = "Pushed";
             pushRoutine = StartCoroutine(PushRoutine(away.sqrMagnitude > 1e-6f ? away.normalized : -transform.forward, meters, seconds));
         }
@@ -175,11 +197,11 @@ namespace RhythmActionGame
             {
                 float k = t / seconds;
                 PushOffset = meters * (k < 0.25f ? k / 0.25f : 1f - Mathf.SmoothStep(0, 1, (k - 0.25f) / 0.75f));
-                transform.position = pushBase + dir * PushOffset;
+                if (!MotionPosition.HasValue) transform.position = pushBase + dir * PushOffset;   // 움직이는 전투에서는 LateUpdate가 놓는다
                 yield return null;
             }
             PushOffset = 0;
-            transform.position = pushBase;
+            if (!MotionPosition.HasValue) transform.position = pushBase;
             pushRoutine = null;
         }
 
@@ -192,7 +214,9 @@ namespace RhythmActionGame
             if (trail != null) trail.emitting = false;
             State = "Defeated_" + how;
             StopAllCoroutines();
-            if (pushRoutine != null) { transform.position = pushBase; pushRoutine = null; PushOffset = 0; }
+            if (MotionPosition.HasValue) { transform.position = MotionPosition.Value + pushDir * PushOffset; MotionPosition = null; FacePoint = null; }
+            else if (pushRoutine != null) transform.position = pushBase;
+            pushRoutine = null; PushOffset = 0;
             StartCoroutine(DefeatRoutine(how, awayFromPlayer.normalized));
         }
 

@@ -138,6 +138,7 @@ namespace RhythmActionGame
         void Update()
         {
             if (Chart == null || clock == null) return;
+            UpdateMotion();                                  // 움직이며 싸우는 전투 (GDD-beta B13)
             UpdateHitPending();                              // 피격 연출 뒤 되감기 (GDD-beta B12.2)
             if (Rewinding) { UpdateRewind(); return; }   // 되감기 연출 중 (GDD-beta B9.4)
             if (!clock.IsRunning) return;

@@ -365,7 +365,7 @@ namespace RhythmActionGame.EditorTools
                     }
                     continue;
                 }
-                var pos = MapLayout.PointAt(e.Distance + 3f);
+                var pos = MapLayout.PointAt(e.Distance + GameConfig.EnemySpawnMeters);   // GDD-beta B13.2: 5 m 앞에서 돌진
                 if (e.IsBoss) set.Boss = Enemy(parent, "Enemy_Boss", "boss", e.onRoof, pos, -fwd, 1.85f, new Color(0.45f, 0.08f, 0.08f));
                 else set.Normal.Add(Enemy(parent, $"Enemy_{i++:00}_{e.kind}", e.kind, e.onRoof, pos, -fwd, 1.75f, e.kind == "spear" ? EnemyColorSpear : EnemyColorSword));
             }

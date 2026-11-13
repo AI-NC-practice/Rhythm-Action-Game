@@ -57,6 +57,7 @@ namespace RhythmActionGame
             normalEnemyCount = 0;
             if (slowMotion != null) slowMotion.Cancel();
             if (normalEnemies != null) foreach (var e in normalEnemies) if (e != null) e.ResetActor();
+            ResetMotion();
             // 시작 위치보다 앞에 있던 적 수를 세어 번호를 맞춘다
             if (Chart != null)
                 for (int i = 0; i < nextEvent && i < Chart.events.Length; i++)
@@ -86,6 +87,7 @@ namespace RhythmActionGame
             EnterCombat();
             encounter = new Encounter { Event = ev, Steps = steps, Actors = actors, EnemyIndex = index, ArriveBeat = clock.CurrentBeat };
             ScheduleEncounter();
+            BeginMotion(encounter);                 // GDD-beta B13: 움직이며 싸우는 전투
             EncounterStarted?.Invoke(encounter);
         }
 
@@ -174,6 +176,7 @@ namespace RhythmActionGame
             else if (IsGuarded(step) && ActorOf(step) != null) ActorOf(step).EndGuard();
 
             OnCombatStepJudged(step, r);
+            ApplyMotion(step, r);                    // GDD-beta B13.1: 판정 하나 = 한 걸음
         }
 
         /// <summary>판정 하나의 결과를 전투 규칙에 반영한다. 포위 전투(T07)는 별도 규칙을 덧붙인다.</summary>

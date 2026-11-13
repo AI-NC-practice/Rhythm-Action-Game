@@ -107,7 +107,7 @@ namespace RhythmActionGame.Tests
                     Assert.That(flat.magnitude, Is.InRange(3.5f - 1e-3f, 5f + 1e-3f), $"{fr.Cut} 반지름 3.5~5 m");
                     Assert.Greater(Vector3.Dot(cc.transform.forward, (duel.CutLookAt - cc.transform.position).normalized), 0.999f, $"{fr.Cut}: 중간점을 바라봄");
                     if (!fr.Blending && ReferenceEquals(fr.Active, cc))
-                        Assert.Less(Vector3.Distance(boot.playerCamera.transform.position, cc.transform.position), 1e-3f, "화면 = 3인칭 카메라");
+                        Assert.Less(Vector3.Distance(boot.playerCamera.transform.position, cc.transform.position), 0.02f, "화면 = 3인칭 카메라");   // beta1-1 B13: 다음 프레임 Update에서 플레이어(카메라 부모)가 움직인 만큼 차이 (Brain이 LateUpdate마다 다시 맞춤)
                     minAngle[fr.Cut] = minAngle.TryGetValue(fr.Cut, out var mn) ? Mathf.Min(mn, duel.CutAngle) : duel.CutAngle;
                     maxAngle[fr.Cut] = maxAngle.TryGetValue(fr.Cut, out var mx) ? Mathf.Max(mx, duel.CutAngle) : duel.CutAngle;
                 }

@@ -82,8 +82,11 @@ namespace RhythmActionGame.Tests
             var enemy = enc.Actors[0];
             float d0 = Vector3.Distance(enemy.transform.position, boot.player.transform.position);
             while (boot.clock.CurrentBeat < enc.StartBeat - 0.02) { now += 0.01; yield return null; }
-            Assert.AreEqual(0.5f, enemy.StandoffOffset, 0.03f, "첫 공격 직전 0.5 m 다가옴");
-            Assert.Less(Vector3.Distance(enemy.transform.position, boot.player.transform.position), d0 - 0.3f, "플레이어 쪽으로");
+            // beta1-1: GDD-beta B13.2 — 0.5 m 대치 대신 5 m 앞에서 싸움 거리까지 돌진
+            yield return null;
+            var flat = enemy.transform.position - boot.player.transform.position; flat.y = 0;
+            Assert.AreEqual(dir.FightDistance, flat.magnitude, 0.1f, "첫 공격 직전 싸움 거리까지 돌진");
+            Assert.Less(Vector3.Distance(enemy.transform.position, boot.player.transform.position), d0 - 2f, "플레이어 쪽으로 크게 다가옴");
         }
     }
 }

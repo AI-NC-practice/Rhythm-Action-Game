@@ -22,6 +22,11 @@ namespace RhythmActionGame
         public double VisualRunBeat => VisualOverride ?? (Remap.HasValue ? Remap.Value.Visual(RunBeat) : RunBeat);
         /// <summary>되감기 동안 보이는 위치를 직접 정한다 (GDD-beta B10.3). null이면 보통대로.</summary>
         public double? VisualOverride { get; set; }
+        /// <summary>전투 중 이동 (GDD-beta B13.1): 경로 위 자리에 더하는 월드 오프셋 (m).</summary>
+        public Vector3 CombatOffset { get; set; }
+        /// <summary>전투 중 바라보는 방향 (적 쪽). null이면 경로 방향.</summary>
+        public Quaternion? CombatFacing { get; set; }
+
         public float VisualDistance => (float)(VisualRunBeat * GameConfig.MetersPerBeat);
 
         /// <summary>지금 위치부터 슬로모션 재배치를 건다. endRunBeat(사건 끝)에서 보이는 위치가 논리 위치와 다시 같아진다.</summary>
@@ -54,6 +59,8 @@ namespace RhythmActionGame
             RunBeat = runBeat;
             Remap = null;
             VisualOverride = null;
+            CombatOffset = Vector3.zero;
+            CombatFacing = null;
             hasLast = false;
             Place();
         }
@@ -77,7 +84,7 @@ namespace RhythmActionGame
         public void Place()
         {
             var p = MapLayout.PointAt(VisualDistance, out var fwd);
-            transform.SetPositionAndRotation(p, Quaternion.LookRotation(fwd, Vector3.up));
+            transform.SetPositionAndRotation(p + CombatOffset, CombatFacing ?? Quaternion.LookRotation(fwd, Vector3.up));
         }
     }
 }

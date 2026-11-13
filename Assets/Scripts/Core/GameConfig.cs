@@ -288,6 +288,29 @@ namespace RhythmActionGame
         public const float RewindSaturation = -90f;
         public const float RewindExposure = -0.5f;
 
+        // ---------------- GDD-beta B13 움직이며 싸우는 전투 ----------------
+        /// <summary>결투 원 반지름 (m, 전투를 시작한 자리 중심).</summary>
+        public const float CombatArenaRadius = 5f;
+        /// <summary>싸움 거리 (m): 칼·무사, 창.</summary>
+        public const float FightDistanceSword = 2.2f;
+        public const float FightDistanceSpear = 2.6f;
+        /// <summary>적이 서 있는 자리: 멈추는 자리에서 앞으로 (m). 여기서 싸움 거리까지 돌진한다 (B13.2).</summary>
+        public const float EnemySpawnMeters = 5f;
+        /// <summary>판정 뒤 이동 시간 (초).</summary>
+        public const float CombatMoveSeconds = 0.35f;
+        /// <summary>플레이어가 적을 바라보도록 도는 부드러움 (초)과 최대 속도 (도/초).</summary>
+        public const float CombatFaceSmoothSeconds = 0.25f;
+        public const float CombatFaceMaxDegPerSec = 240f;
+        /// <summary>원이 없는 틈에 적이 둘레를 도는 속도 (도/초).</summary>
+        public const float CombatCircleDegPerSec = 20f;
+        /// <summary>전투가 끝난 뒤 경로 위 자리로 돌아오는 시간 (초).</summary>
+        public const float CombatReturnSeconds = 0.4f;
+        /// <summary>판정별 이동 (m, B13.1 표).</summary>
+        public const float MoveParryPerfect = 0.5f, MoveParryNormal = 0.5f, MoveHitBack = 0.4f;
+        public const float MoveDodgePerfect = 1.2f, MoveDodgePerfectEnemy = 0.6f, MoveDodgeNormal = 0.5f, MoveDodgeNormalEnemy = 0.2f;
+        public const float MoveDuckForward = 0.5f, MoveDuckSide = 0.6f;
+        public const float MoveStrikePerfect = 1f, MoveStrikeNormal = 0.3f;
+
         // ---------------- GDD-beta B11 무사 결투 ----------------
         /// <summary>자세 게이지 가득 (B11.3).</summary>
         public const float PostureFull = 100f;
