@@ -857,10 +857,10 @@
                                          "다운로드 전 사용자 승인, Assets/Audio/Music/에 저장",
                                          "Claude가 박자 분석으로 첫 박 오프셋을 맞추고 반주 대신 연결, unity-verify 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "needs_user",
+                      "attempts":  1,
                       "max_attempts":  1,
-                      "notes":  ""
+                      "notes":  "Suno 로그인 완료. 무료 플랜은 곡 다운로드·상업 이용 불가(유료 Pro ₩12,000/월 연간 결제부터 월 20곡 다운로드). 유료 결제 여부 또는 다른 방법을 사용자에게 확인 중."
                   },
                   {
                       "id":  "T10",
