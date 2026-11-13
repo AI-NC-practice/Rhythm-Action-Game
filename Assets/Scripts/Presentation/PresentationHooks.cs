@@ -78,11 +78,11 @@ namespace RhythmActionGame
         void OnPlayerHit(RewindKind kind)
         {
             Vector3? front = null;
-            if (player != null) front = player.transform.position + Vector3.up * GameConfig.EyeHeight + player.transform.forward * 0.8f;
+            if (player != null) front = player.transform.position + Vector3.up * GameConfig.EyeHeight + player.transform.forward * 1.6f;
             Play(GameConfig.Fx.BloodHit, Random.value < 0.5f ? -1f : 1f, null, front);
             if (vfx != null && presentation != null && presentation.Enabled && front.HasValue)
             {
-                vfx.Play(VfxKind.Dust, front, 4, GameConfig.BloodDrops, GameConfig.BloodColor);   // 피 방울
+                vfx.Play(VfxKind.Embers, front, 4, GameConfig.BloodDrops, GameConfig.BloodDropColor);   // 피 방울 (작은 입자)
                 Log.Add("BloodDrops");
             }
         }

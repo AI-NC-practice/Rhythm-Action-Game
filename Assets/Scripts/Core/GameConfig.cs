@@ -275,9 +275,13 @@ namespace RhythmActionGame
         /// <summary>결투·윈드밀 FAIL 뒤 되감기 전에 맞는 연출(피 튐)을 보여 주는 시간 (실제 초, GDD-beta B12.2).</summary>
         public const float FailHitSeconds = 0.7f;
         /// <summary>피 색 (피격 연출).</summary>
-        public static readonly UnityEngine.Color BloodColor = new UnityEngine.Color(0.55f, 0.02f, 0.02f);
+        public static readonly UnityEngine.Color BloodColor = new UnityEngine.Color(0.42f, 0.0f, 0.02f);
+        /// <summary>피 방울 입자 색 (가산 입자라 밝은 붉은색).</summary>
+        public static readonly UnityEngine.Color BloodDropColor = new UnityEngine.Color(0.9f, 0.05f, 0.05f);
+        /// <summary>화면 핏자국 최대 불투명도 (섬광 상한 0.6과 별개, 빛이 아니라 가림막이므로).</summary>
+        public const float BloodSplatterAlpha = 0.85f;
         /// <summary>피 방울 입자 수.</summary>
-        public const int BloodDrops = 40;
+        public const int BloodDrops = 30;
         /// <summary>되감는 지점: 다시 할 첫 판정보다 이만큼 앞 (박, 1마디).</summary>
         public const double RewindLeadBeats = 4.0;
         /// <summary>되감기 화면: 채도 −90, 노출 −0.5.</summary>

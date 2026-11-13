@@ -211,8 +211,10 @@ namespace RhythmActionGame
         {
             if (flash == null) return;
             float u = Mathf.Clamp01(age / flash.Seconds);
-            float alpha = GameConfig.Fx.FlashMaxAlpha * (flash.Kind == VfxKind.BloodSplatter ? 1f - u * u : 1f - u);   // 핏자국은 오래 남았다가 사라짐
-            var c = flash.Color; c.a = Mathf.Min(alpha, GameConfig.Fx.FlashMaxAlpha);
+            bool blood = flash.Kind == VfxKind.BloodSplatter;   // 핏자국은 빛이 아니라 가림막: 더 진하게, 오래 남았다가 사라짐
+            float max = blood ? GameConfig.BloodSplatterAlpha : GameConfig.Fx.FlashMaxAlpha;
+            float alpha = max * (blood ? 1f - u * u : 1f - u);
+            var c = flash.Color; c.a = Mathf.Min(alpha, max);
             flashImage.color = c;
             if (flash.Kind == VfxKind.RewindStreak)
             {
