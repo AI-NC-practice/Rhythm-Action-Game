@@ -656,11 +656,89 @@
                       "notes":  "Builds/Gray 다시 빌드 + smoke-test 통과, 테스트 패키지 RhythmActionGame-beta1-1-dev3.zip(37.9 MB, 개발자 모드·읽어주세요 포함, 압축 풀어 -startGame 20초 오류 없음). 사용자 확인 대기. 사용자 플레이 확인(2026-11-13)."
                   },
                   {
+                      "id":  "B26",
+                      "title":  "[beta] 무사 결투: 단계 구조·내 공격·자세 게이지·단계별 되감기",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "B25"
+                                     ],
+                      "acceptance":  [
+                                         "GDD-beta B11.1: 무사 결투가 표의 판정 목표 박(O 기준)과 종류(A/S/L/F)대로 예약되고, 컷 A·B·C 구간에는 원이 나타나지 않음 — EditMode 패턴 테스트",
+                                         "GDD-beta B11.2: 내 공격 원은 주홍 빛 + 칼 아이콘, PERFECT는 충돌 연출과 무사 밀림, NORMAL은 내가 밀림 — 테스트",
+                                         "GDD-beta B11.3: 자세 게이지 PERFECT +100/N, NORMAL +50/N, 3단계 끝에 가득 + 무너짐 연출, 결투 중에만 화면 위 가운데 표시 — 테스트",
+                                         "GDD-beta B11.4: 결투 FAIL → 체력 그대로, 그 단계 처음(4/24/28/56/66)으로 되감기, 게이지 복원 — 테스트",
+                                         "모두 PERFECT로 치면 결투가 72박 안에 끝나고 클리어 — 테스트, 판정 수 39, 스테이지 전체 115~130 — 차트 테스트",
+                                         "기존 무사 테스트(T07, B07, B19, B24 등)를 새 구조에 맞게 바꾸고 근거 주석",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "in_progress",
+                      "attempts":  1,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "B27",
+                      "title":  "[beta] Cinemachine + 결투 1인칭 가상 카메라 2대",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "B26"
+                                     ],
+                      "acceptance":  [
+                                         "com.unity.cinemachine 패키지 추가, 컴파일 OK",
+                                         "GDD-beta B11.5: 무사 결투 동안에만 Cinemachine Brain 활성, 결투 밖에서는 기존 카메라 구조 그대로 — 테스트",
+                                         "막기 카메라(−0.1 m, FOV 62°)와 공격 카메라(+0.4 m, FOV 54°, 롤 6°)가 다음 판정 종류에 따라 바뀌고 0.3초 블렌드 — 테스트",
+                                         "칼이 부딪칠 때 FOV −6° 줌 펀치 0.15초, 흔들림 등 기존 연출 층이 결투 중에도 적용 — 테스트",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "B28",
+                      "title":  "[beta] 결투 3인칭 컷 A~D",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "B27"
+                                     ],
+                      "acceptance":  [
+                                         "GDD-beta B11.5: 컷 A(등장 120°), B(칼 겨루기 30°), C(흔들림 넓게), D(처형 180° 슬로모션)가 정해진 구간에 활성, 두 사람 중간점을 바라보고 반지름 3.5~5 m — 테스트",
+                                         "판정 원이 나타나기 0.4초 전에는 1인칭으로 돌아와 있음, 3인칭 동안 판정 원 없음 — 테스트",
+                                         "1인칭 ↔ 3인칭 0.4초 블렌드(D 진입만 바로), 3인칭 동안 플레이어 몸 표시 — 테스트",
+                                         "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "B29",
+                      "title":  "[사용자] 무사 결투 확인 + 테스트 패키지",
+                      "type":  "human",
+                      "depends_on":  [
+                                         "B28"
+                                     ],
+                      "acceptance":  [
+                                         "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과, 테스트 패키지 zip",
+                                         "사용자가 무사 결투의 합·카메라·길이를 확인하고 피드백을 줌"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  1,
+                      "notes":  ""
+                  },
+                  {
                       "id":  "B10",
                       "title":  "[사용자+Claude] Suno 음악 생성·적용",
                       "type":  "human",
                       "depends_on":  [
-                                         "B25"
+                                         "B29"
                                      ],
                       "acceptance":  [
                                          "사용자가 인앱 브라우저에서 Suno에 로그인, Claude가 프롬프트 작성·생성 (국악 퓨전, 120 BPM, 보컬 없음, 약 2분 30초)",
