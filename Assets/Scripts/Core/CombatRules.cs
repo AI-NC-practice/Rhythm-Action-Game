@@ -42,6 +42,12 @@ namespace RhythmActionGame
         /// <summary>전투(또는 재도전)의 첫 공격 목표 박자: 다음 마디 첫 박에 원이 나타나도록 그 2박 뒤.</summary>
         public static double FirstTargetBeat(double now) => NextBar(now) + GameConfig.ApproachBeats;
 
+        /// <summary>
+        /// 멈추는 전투의 첫 공격 목표 박자 (GDD-beta B10.2): 도착 후 가장 가까운 박 + 2박.
+        /// 첫 원은 가장 가까운 박(0.5초 안)에 나타난다. 프레임 오차(0.05박)로 이미 지난 박은 그 박으로 본다.
+        /// </summary>
+        public static double EncounterStartBeat(double now) => System.Math.Ceiling(now - 0.05) + GameConfig.ApproachBeats;
+
         /// <summary>공격 종류에 맞는 키 (GDD 4.5 표). 내려베기·찌르기는 차트의 ←/→를 그대로 쓴다.</summary>
         public static bool KeyFits(string attack, ArrowKey key)
         {

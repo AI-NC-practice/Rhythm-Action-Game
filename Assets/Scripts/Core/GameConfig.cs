@@ -407,6 +407,10 @@ namespace RhythmActionGame
             public const float ParkourFailVignette = 0.3f;
             // B9.4 되감기: 카메라가 뒤로 0.3 m 물러났다 돌아옴 (0.8초)
             public static readonly FxPreset Rewind = P("Rewind", 4, kick: 0.3f, pitch: -3f, rise: 0.2f, hold: 0.3f, release: 0.3f);
+            // B10.2 대치: 카메라가 적 쪽으로 살짝 다가감 (FOV −4°), 첫 원이 뜨는 2박(1초) 동안
+            public static readonly FxPreset Standoff = P("Standoff", 2, fov: -4f, rise: 0.2f, hold: 0.8f, release: 0.3f);
+            /// <summary>대치 때 적이 다가오는 거리 (m, GDD-beta B10.2).</summary>
+            public const float StandoffApproachMeters = 0.5f;
             /// <summary>적 공격 예고: 목표 박자 몇 박 전에 (휘두르기 직전, 제안서 2장 A).</summary>
             public const float AttackWarnLeadBeats = 0.5f;
 
@@ -444,7 +448,7 @@ namespace RhythmActionGame
             public static readonly FxPreset[] All =
             {
                 AttackWarn, ParryPerfect, DodgePerfect, ParryPerfectFinale, DefendNormal, Hit, Execution, ExecutionKick,
-                SurroundTurn, Simultaneous, SimultaneousPerfect, WindmillArrow, WindmillFinish, JumpPerfect, LandPerfect, LandNormal, LandFail, EventPerfectSlow, ParkourFail, Rewind,
+                SurroundTurn, Simultaneous, SimultaneousPerfect, WindmillArrow, WindmillFinish, JumpPerfect, LandPerfect, LandNormal, LandFail, EventPerfectSlow, ParkourFail, Rewind, Standoff,
             };
         }
 

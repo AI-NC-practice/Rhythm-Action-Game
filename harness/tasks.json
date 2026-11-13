@@ -614,10 +614,10 @@
                                          "전투가 끝나면 다음 마디 첫 박에 다시 달림 (기존 규칙 유지) — 기존 테스트 통과",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "in_progress",
+                      "status":  "done",
                       "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "첫 공격 = 도착 후 가장 가까운 박 + 2박, 대치 연출(FOV −4°, 적 0.5 m 다가옴; 포위는 5명이 원 대형이라 다가오기 제외). 평가 PASS 1회차."
                   },
                   {
                       "id":  "B24",
@@ -634,8 +634,8 @@
                                          "기존 B19 되감기 테스트 통과",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "in_progress",
+                      "attempts":  1,
                       "max_attempts":  3,
                       "notes":  ""
                   },

@@ -21,6 +21,7 @@ namespace RhythmActionGame
             public List<CombatStep> Steps;
             public int EnemyIndex;
             public double StartBeat;          // 첫 공격 목표 박자
+            public double ArriveBeat;         // 적 앞에 도착한 박자 (대치 연출 시작)
             public readonly List<JudgeCue> Cues = new List<JudgeCue>();
             public int Attempts;              // 시작 = 1, 재도전마다 +1
             public bool Done;
@@ -72,7 +73,7 @@ namespace RhythmActionGame
         public void StartEncounter(ChartEvent ev, List<CombatStep> steps, EnemyActor[] actors, int index)
         {
             EnterCombat();
-            encounter = new Encounter { Event = ev, Steps = steps, Actors = actors, EnemyIndex = index };
+            encounter = new Encounter { Event = ev, Steps = steps, Actors = actors, EnemyIndex = index, ArriveBeat = clock.CurrentBeat };
             ScheduleEncounter();
             EncounterStarted?.Invoke(encounter);
         }
@@ -82,7 +83,7 @@ namespace RhythmActionGame
             var e = encounter;
             e.Attempts++;
             e.Cues.Clear();
-            e.StartBeat = CombatRules.FirstTargetBeat(clock.CurrentBeat);
+            e.StartBeat = CombatRules.EncounterStartBeat(clock.CurrentBeat);   // GDD-beta B10.2 (GDD 4.5의 다음 마디 대신)
             foreach (var s in e.Steps)
                 e.Cues.Add(judge.Schedule(e.StartBeat + s.OffsetBeats, s.Key, AttackPoint(s), s));
         }
@@ -115,8 +116,15 @@ namespace RhythmActionGame
                 }
                 return;
             }
-            // 원이 떠 있는 공격: 적이 무기를 휘두르고, 판정 원과 카메라가 무기 끝을 따라간다
             double beat = clock.CurrentBeat;
+            // 대치 (GDD-beta B10.2): 첫 공격 전까지 적이 0.5 m 다가오며 칼을 든다 (포위 전투 제외)
+            if (!encounter.Event.IsSurround && encounter.Actors != null && beat < encounter.StartBeat)
+            {
+                double span = System.Math.Max(0.25, encounter.StartBeat - encounter.ArriveBeat);
+                float sp = Mathf.Clamp01((float)((beat - encounter.ArriveBeat) / span));
+                foreach (var a in encounter.Actors) if (a != null) a.Standoff(player.transform.position, sp);
+            }
+            // 원이 떠 있는 공격: 적이 무기를 휘두르고, 판정 원과 카메라가 무기 끝을 따라간다
             foreach (var cue in encounter.Cues)
             {
                 if (cue.Judged || !cue.Appeared || !(cue.Tag is CombatStep s) || s.Kind != CombatStepKind.Attack) continue;

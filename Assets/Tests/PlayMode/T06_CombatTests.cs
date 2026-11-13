@@ -80,7 +80,8 @@ namespace RhythmActionGame.Tests
             Assert.AreEqual(ArrowKey.Left, enc.Cues[1].Key, "내려베기 ←");
             Assert.AreEqual(ArrowKey.Up, enc.Cues[2].Key, "마무리 ↑");
             Assert.AreEqual(2.0, enc.Cues[1].TargetBeat - enc.Cues[0].TargetBeat, 1e-6, "공격 간격 2박");
-            Assert.AreEqual(0.0, (enc.Cues[0].TargetBeat - 2.0) % 4.0, 1e-6, "첫 원은 마디 첫 박에 등장");
+            // beta1-1: GDD-beta B10.2 — 첫 원은 도착 후 가장 가까운 박에 등장 (다음 마디 첫 박 대신)
+            Assert.AreEqual(CombatRules.EncounterStartBeat(enc.ArriveBeat), enc.Cues[0].TargetBeat, 1e-6, "첫 원은 도착 후 가장 가까운 박에 등장");
 
             yield return Hit(0, 0.0);
             yield return Hit(1, 0.0);

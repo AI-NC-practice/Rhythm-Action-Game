@@ -82,7 +82,7 @@ namespace RhythmActionGame.Tests
             yield return UntilCombat();
             var enc = dir.CurrentEncounter;
             Assert.AreEqual(12, enc.Cues.Count, "순차 5 + 동시 3 + 윈드밀 4");
-            Assert.AreEqual(0.0, (enc.Cues[0].TargetBeat - 2.0) % 4.0, 1e-6);
+            Assert.AreEqual(CombatRules.EncounterStartBeat(enc.ArriveBeat), enc.Cues[0].TargetBeat, 1e-6, "beta1-1: GDD-beta B10.2 — 도착 후 가장 가까운 박 + 2");
 
             var cues = enc.Cues.ToList();
             foreach (var c in cues.Where(c => PhaseOf(c) == 1)) yield return Hit(c, 0.0);

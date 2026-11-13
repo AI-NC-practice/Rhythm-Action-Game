@@ -74,6 +74,22 @@ namespace RhythmActionGame
             ghosts.Clear();
         }
 
+        /// <summary>대치 (GDD-beta B10.2): 진행도 p(0~1)만큼 플레이어 쪽으로 다가가고 칼을 든다. 처음 자리에서 최대 0.5 m.</summary>
+        public void Standoff(Vector3 playerPos, float p)
+        {
+            if (Defeated) return;
+            SaveHome();
+            var d = playerPos - homePos; d.y = 0;
+            if (d.sqrMagnitude < 1e-6f) return;
+            transform.position = homePos + d.normalized * (GameConfig.Fx.StandoffApproachMeters * Mathf.Clamp01(p));
+            if (attacking) return;                                                          // 휘두르는 중이면 자세는 공격이 정한다
+            if (weaponPivot != null) weaponPivot.localRotation = Quaternion.Euler(-30f * Mathf.Clamp01(p), 0, 0);   // 칼을 든다
+            State = "Standoff";
+        }
+
+        /// <summary>처음 자리에서 다가온 거리 (m).</summary>
+        public float StandoffOffset { get { SaveHome(); var d = transform.position - homePos; d.y = 0; return d.magnitude; } }
+
         /// <summary>공격 진행도 p(0 = 원 등장, 1 = 목표 박자)에 맞춰 무기를 휘두른다.</summary>
         public void Attack(string attack, float p)
         {
