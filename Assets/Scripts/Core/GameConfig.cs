@@ -305,6 +305,10 @@ namespace RhythmActionGame
         public const float CombatCircleDegPerSec = 20f;
         /// <summary>전투가 끝난 뒤 경로 위 자리로 돌아오는 시간 (초).</summary>
         public const float CombatReturnSeconds = 0.4f;
+        /// <summary>포위 전투 (B13.3): 적들이 둘레를 도는 속도 (도/초), 뛰어드는 거리 (플레이어에서 m), 플레이어가 움직일 수 있는 반지름 (m).</summary>
+        public const float SurroundCircleDegPerSec = 30f;
+        public const float SurroundLungeMeters = 1.5f;
+        public const float SurroundPlayerRadius = 1.2f;
         /// <summary>판정별 이동 (m, B13.1 표).</summary>
         public const float MoveParryPerfect = 0.5f, MoveParryNormal = 0.5f, MoveHitBack = 0.4f;
         public const float MoveDodgePerfect = 1.2f, MoveDodgePerfectEnemy = 0.6f, MoveDodgeNormal = 0.5f, MoveDodgeNormalEnemy = 0.2f;

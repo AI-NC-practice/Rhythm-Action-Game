@@ -5,7 +5,7 @@ namespace RhythmActionGame
 {
     /// <summary>
     /// 움직이며 싸우는 전투 (GDD-beta B13.1·B13.2). 일반 적과 무사 결투에서 판정 하나마다 플레이어와 적이 실제로 자리를 옮긴다.
-    /// 판정 타이밍·점수·되감기에는 손대지 않는 연출 층이다. 포위 전투(B13.3)는 StageDirector.Surround에서 따로 다룬다.
+    /// 판정 타이밍·점수·되감기에는 손대지 않는 연출 층이다. 포위 전투(B13.3)는 StageDirector.SurroundMotion에서 따로 다룬다.
     /// </summary>
     public partial class StageDirector
     {
@@ -50,6 +50,7 @@ namespace RhythmActionGame
             MotionActive = false;
             MotionReturning = false;
             charging = false;
+            SurroundMotionActive = false;
             moveT = 1f;
             if (player != null) { player.CombatOffset = Vector3.zero; player.CombatFacing = null; }
         }
@@ -58,7 +59,8 @@ namespace RhythmActionGame
         void BeginMotion(Encounter e)
         {
             ResetMotion();
-            if (e.Event.IsSurround || e.Actors == null || e.Actors.Length == 0 || e.Actors[0] == null || player == null) return;
+            if (e.Event.IsSurround) { BeginSurroundMotion(e); return; }   // B13.3
+            if (e.Actors == null || e.Actors.Length == 0 || e.Actors[0] == null || player == null) return;
             motionActor = e.Actors[0];
             MotionActive = true;
             MotionCenter = player.transform.position;
@@ -134,6 +136,7 @@ namespace RhythmActionGame
         /// <summary>판정 하나가 끝났을 때 (OnCombatCueJudgedImpl에서).</summary>
         void ApplyMotion(CombatStep step, Judgement r)
         {
+            if (SurroundMotionActive) { ApplySurroundMotion(step, r); return; }
             if (!MotionActive || motionActor == null || step.Kind == CombatStepKind.Finisher || step.Kind == CombatStepKind.Windmill) return;
             var f = Flat(MotionEnemy - MotionPlayer);
             if (f.sqrMagnitude < 1e-6f) f = Flat(player.transform.forward);
@@ -162,6 +165,7 @@ namespace RhythmActionGame
         {
             float dt = MotionDeltaTime();
             if (MotionReturning) { UpdateReturn(dt); return; }
+            if (SurroundMotionActive) { UpdateSurroundMotion(dt); return; }
             if (!MotionActive || motionActor == null) return;
             if (encounter == null || encounter.Done || motionActor.Defeated) { BeginReturn(); return; }
 

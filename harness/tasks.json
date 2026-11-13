@@ -804,10 +804,10 @@
                                          "GDD-beta B13.3: 2단계 동시 공격 적들이 한꺼번에 1.5 m까지 덮침, 3단계 윈드밀 그대로 — 테스트",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "포위 적 5명이 둘레를 초당 30°로 돌다 공격 적이 1.5 m까지 뛰어들고 0.35초에 복귀, 동시 공격은 한꺼번에 덮침, 플레이어는 판정마다 이동(중심 1.2 m 안), 윈드밀 중 돌기 멈춤. 평가 PASS 1회차."
                   },
                   {
                       "id":  "B34",
@@ -824,8 +824,8 @@
                                          "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "in_progress",
+                      "attempts":  1,
                       "max_attempts":  3,
                       "notes":  ""
                   },

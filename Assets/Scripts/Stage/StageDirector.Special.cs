@@ -126,7 +126,10 @@ namespace RhythmActionGame
             if (cue != null && cue.Tag is CombatStep s)
             {
                 float target = s.Phase == 1 && s.Attackers.Length == 1 ? YawTo(surroundEnemies[s.Attackers[0]]) : SurroundYaw;
-                if (Mathf.Abs(Mathf.DeltaAngle(target, yawTo)) > 0.01f) { yawFrom = SurroundYaw; yawTo = target; yawT = 0f; }
+                // 큰 전환(다른 적)은 0.2초 회전, 같은 적이 움직이는 작은 변화(B13.3 둘레 돌기)는 목표만 따라 옮긴다
+                float dd = Mathf.Abs(Mathf.DeltaAngle(target, yawTo));
+                if (dd > 5f) { yawFrom = SurroundYaw; yawTo = target; yawT = 0f; }
+                else if (dd > 0.01f) { yawTo = target; if (yawT >= 1f) SurroundYaw = target; }
                 SurroundCameraDrop = Mathf.MoveTowards(SurroundCameraDrop, s.Phase == 2 ? SimultaneousCameraDrop : 0f, dt * 4f);
             }
             if (yawT < 1f)
