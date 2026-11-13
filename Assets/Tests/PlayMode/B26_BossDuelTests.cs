@@ -119,7 +119,7 @@ namespace RhythmActionGame.Tests
             Assert.AreEqual(enc.Posture / 100f, bar.Ratio, 1e-4f, "게이지 표시");
 
             for (int i = 4; i < 13; i++) yield return Hit(cues[i], 0.0);
-            yield return Hit(cues[13], 0.0);                                 // 칼 겨루기 L28
+            yield return Hit(cues[13], 0.0);                                 // 칼 겨루기 L30
             Assert.AreEqual(CombatStepKind.Lock, Step(cues[13]).Kind);
             float atClash = enc.Posture;
             Assert.AreEqual(Units(13.5f), atClash, 1e-3f);
@@ -131,10 +131,10 @@ namespace RhythmActionGame.Tests
             Assert.AreEqual(3, dir.Health.Hp, "체력 그대로");
             Assert.AreEqual(atClash, enc.Posture, 1e-4f, "게이지는 단계 시작 값으로");
             yield return FinishRewind();
-            Assert.AreEqual(O + 28, boot.clock.CurrentBeat, 0.05, "2단계 처음 (O+28)");
+            Assert.AreEqual(O + 30, boot.clock.CurrentBeat, 0.05, "2단계 처음 (O+30)");
             var again = enc.Cues.ToList();
             Assert.AreEqual(19 + 8 + 1, again.Count, "2단계부터 다시 예약");
-            Assert.AreEqual(O + 30, again[0].TargetBeat, 1e-9, "같은 박자에");
+            Assert.AreEqual(O + 32, again[0].TargetBeat, 1e-9, "같은 박자에");
 
             for (int i = 0; i < 27; i++) yield return Hit(again[i], 0.0);  // 2단계 + 3단계
             Assert.AreEqual(GameConfig.PostureFull, enc.Posture, 1e-4f, "3단계 끝: 가득");
@@ -147,9 +147,10 @@ namespace RhythmActionGame.Tests
             yield return null;
             Assert.AreEqual(0f, bar.FlashAlpha, 1e-4f);
 
-            yield return Hit(again[27], 0.0);                                // 마무리 F68
+            yield return Hit(again[27], 0.0);                                // 마무리 F70
+            yield return AdvanceTo(boot.clock.TimeOfBeat(dir.CurrentEncounter.StartBeat + BossDuel.LengthBeats) + 0.05);   // beta1-1: GDD-beta B11.5 — 처형 컷 D가 끝난 74박에 클리어
             Assert.AreEqual(StageState.Cleared, dir.State, "클리어");
-            Assert.LessOrEqual(boot.clock.CurrentBeat, O + BossDuel.LengthBeats, "72박 안에 끝남");
+            Assert.AreEqual(O + BossDuel.LengthBeats, dir.LastEncounter.ResumeBeat, 1e-6, "74박에 끝남 (마무리 70 + 처형 컷 D)");
             yield return null;
             Assert.IsFalse(bar.Visible, "결투가 끝나면 숨김");
         }
@@ -168,7 +169,7 @@ namespace RhythmActionGame.Tests
             Assert.IsTrue(dir.Rewinding);
             Assert.AreEqual(Units(33f), enc.Posture, 1e-3f, "3단계 시작 값");
             yield return FinishRewind();
-            Assert.AreEqual(O + 56, boot.clock.CurrentBeat, 0.05, "3단계 처음 (O+56)");
+            Assert.AreEqual(O + 58, boot.clock.CurrentBeat, 0.05, "3단계 처음 (O+58)");
             var p3 = enc.Cues.ToList();
             Assert.AreEqual(9, p3.Count, "3단계 8 + 마무리");
             for (int i = 0; i < 8; i++) yield return Hit(p3[i], 0.0);
@@ -178,9 +179,10 @@ namespace RhythmActionGame.Tests
             Assert.AreEqual(3, dir.Health.Hp);
             Assert.AreEqual(GameConfig.PostureFull, enc.Posture, 1e-4f, "마무리 단계는 가득 찬 채로");
             yield return FinishRewind();
-            Assert.AreEqual(O + 66, boot.clock.CurrentBeat, 0.05, "마무리 처음 (O+66)");
+            Assert.AreEqual(O + 68, boot.clock.CurrentBeat, 0.05, "마무리 처음 (O+68)");
             Assert.AreEqual(1, enc.Cues.Count);
             yield return Hit(enc.Cues[0], 0.0);
+            yield return AdvanceTo(boot.clock.TimeOfBeat(dir.CurrentEncounter.StartBeat + BossDuel.LengthBeats) + 0.05);   // beta1-1: GDD-beta B11.5 — 처형 컷 D가 끝난 74박에 클리어
             Assert.AreEqual(StageState.Cleared, dir.State);
         }
     }

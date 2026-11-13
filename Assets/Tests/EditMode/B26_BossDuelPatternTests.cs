@@ -11,10 +11,10 @@ namespace RhythmActionGame.Tests
         // B11.1 표: 종류+목표 박 (O 기준)
         const string Table =
             "A6 A8 S10 S11 A13 A14 A15 S17 S18 A20 A21 S22 S23 " +
-            "L28 " +
-            "A30 A30.5 S32 S33 S35 A35.5 A37 A37.5 A38 S40 S41 S42 A44 A44.5 S46 S46.5 A48 S49 A50 " +
-            "A58 S59 A60 S61 A62 S63 A64 S65 " +
-            "F68";
+            "L30 " +
+            "A32 A32.5 S34 S35 S37 A37.5 A39 A39.5 A40 S42 S43 S44 A46 A46.5 S48 S48.5 A50 S51 A52 " +
+            "A60 S61 A62 S63 A64 S65 A66 S67 " +
+            "F70";   // beta1-1: 칼 겨루기 연장(B28 사용자 결정) — L28 이후 2박씩 뒤로
 
         static char Letter(CombatStep s) =>
             s.Kind == CombatStepKind.Attack ? 'A' : s.Kind == CombatStepKind.Strike ? 'S' : s.Kind == CombatStepKind.Lock ? 'L' : s.Kind == CombatStepKind.Finisher ? 'F' : '?';
@@ -46,16 +46,16 @@ namespace RhythmActionGame.Tests
         }
 
         [Test]
-        public void B26_PhaseStarts_And_Length72()
+        public void B26_PhaseStarts_And_Length74()
         {
             Assert.AreEqual(4, BossDuel.PhaseStart(BossDuel.PhaseExplore));
             Assert.AreEqual(24, BossDuel.PhaseStart(BossDuel.PhaseLock));
-            Assert.AreEqual(28, BossDuel.PhaseStart(BossDuel.PhaseClash));
-            Assert.AreEqual(56, BossDuel.PhaseStart(BossDuel.PhaseFlurry));
-            Assert.AreEqual(66, BossDuel.PhaseStart(BossDuel.PhaseFinish));
-            Assert.AreEqual(72, BossDuel.LengthBeats);
+            Assert.AreEqual(30, BossDuel.PhaseStart(BossDuel.PhaseClash));
+            Assert.AreEqual(58, BossDuel.PhaseStart(BossDuel.PhaseFlurry));
+            Assert.AreEqual(68, BossDuel.PhaseStart(BossDuel.PhaseFinish));
+            Assert.AreEqual(74, BossDuel.LengthBeats);
             var steps = BossDuel.Steps();
-            Assert.LessOrEqual(steps.Max(s => s.OffsetBeats), BossDuel.LengthBeats, "72박 안에 끝남");
+            Assert.LessOrEqual(steps.Max(s => s.OffsetBeats), BossDuel.LengthBeats, "74박 안에 끝남");
             foreach (var s in steps)
                 Assert.GreaterOrEqual(s.OffsetBeats - GameConfig.ApproachBeats, BossDuel.PhaseStart(s.Phase), $"{s.OffsetBeats}: 원은 자기 단계가 시작된 뒤 나타남 (되감으면 다시 보임)");
             Assert.AreEqual(10.0, BossDuel.Origin(9.96), 1e-9, "O: 0.05박 안에서 막 지난 박은 그 박");
@@ -73,8 +73,8 @@ namespace RhythmActionGame.Tests
                     double from = s.OffsetBeats - GameConfig.ApproachBeats, to = s.OffsetBeats + tail;
                     Assert.IsFalse(from < cut.to - 1e-9 && to > cut.from + 1e-9, $"컷 {cut.name} {cut.from}–{cut.to}에 {s.Kind} {s.OffsetBeats} 원");
                 }
-            Assert.AreEqual("A", BossDuel.CutAt(1)); Assert.AreEqual("B", BossDuel.CutAt(25)); Assert.AreEqual("C", BossDuel.CutAt(53));
-            Assert.AreEqual("D", BossDuel.CutAt(70)); Assert.IsNull(BossDuel.CutAt(10));
+            Assert.AreEqual("A", BossDuel.CutAt(1)); Assert.AreEqual("B", BossDuel.CutAt(25)); Assert.AreEqual("B", BossDuel.CutAt(27)); Assert.AreEqual("C", BossDuel.CutAt(55));
+            Assert.AreEqual("D", BossDuel.CutAt(72)); Assert.IsNull(BossDuel.CutAt(10));
             Assert.Greater(BossDuel.Cuts.Single(c => c.name == "D").from, BossDuel.Steps().Last().OffsetBeats - 1e-9, "컷 D는 마무리 판정 뒤");
         }
 
@@ -87,14 +87,14 @@ namespace RhythmActionGame.Tests
             CollectionAssert.AreEqual(new[] { ArrowKey.Left, ArrowKey.Right, ArrowKey.Up, ArrowKey.Down, ArrowKey.Left, ArrowKey.Right, ArrowKey.Up, ArrowKey.Down }, p3.Select(s => s.Key));
             for (int i = 0; i < p3.Count; i++)
             {
-                Assert.AreEqual(58 + i, p3[i].OffsetBeats, 1e-9, "1박마다");
+                Assert.AreEqual(60 + i, p3[i].OffsetBeats, 1e-9, "1박마다");
                 Assert.AreEqual(i % 2 == 0 ? CombatStepKind.Attack : CombatStepKind.Strike, p3[i].Kind, "A와 S가 번갈아");
             }
             Assert.AreEqual(ArrowKey.Up, BossDuel.Steps().Single(s => s.Kind == CombatStepKind.Lock).Key, "칼 겨루기 ↑");
             Assert.AreEqual(ArrowKey.Up, BossDuel.Steps().Last().Key, "마무리 ↑");
-            // 받아치기: S35 바로 반 박 뒤 A35.5
+            // 받아치기: S37 바로 반 박 뒤 A37.5
             var st = BossDuel.Steps();
-            int k = st.FindIndex(s => s.OffsetBeats == 35);
+            int k = st.FindIndex(s => s.OffsetBeats == 37);
             Assert.AreEqual(CombatStepKind.Strike, st[k].Kind);
             Assert.AreEqual(CombatStepKind.Attack, st[k + 1].Kind);
             Assert.AreEqual(0.5, st[k + 1].OffsetBeats - st[k].OffsetBeats, 1e-9);

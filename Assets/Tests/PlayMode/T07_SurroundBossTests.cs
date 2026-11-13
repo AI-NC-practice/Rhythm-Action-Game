@@ -204,6 +204,7 @@ namespace RhythmActionGame.Tests
             Assert.AreEqual(BossDuel.Steps().Count, enc.Cues.Count, "결투 판정 42");
             Assert.AreEqual(CombatStepKind.Finisher, ((CombatStep)enc.Cues.Last().Tag).Kind, "마지막은 마무리");
             foreach (var c in enc.Cues.ToList()) yield return Hit(c, 0.0);
+            yield return AdvanceTo(boot.clock.TimeOfBeat(dir.CurrentEncounter.StartBeat + BossDuel.LengthBeats) + 0.05);   // beta1-1: GDD-beta B11.5 — 처형 컷 D가 끝난 74박에 클리어
             Assert.AreEqual(StageState.Cleared, dir.State, "무사를 쓰러뜨리면 스테이지 클리어");
             Assert.IsTrue(dir.boss.Defeated);
         }
@@ -231,6 +232,7 @@ namespace RhythmActionGame.Tests
             Assert.AreEqual(first, enc.Cues[0].TargetBeat, 1e-6, "같은 박자에 다시");
             Assert.AreEqual(StageState.Combat, dir.State);
             foreach (var c in enc.Cues.ToList()) yield return Hit(c, 0.0);
+            yield return AdvanceTo(boot.clock.TimeOfBeat(dir.CurrentEncounter.StartBeat + BossDuel.LengthBeats) + 0.05);   // beta1-1: GDD-beta B11.5 — 처형 컷 D가 끝난 74박에 클리어
             Assert.AreEqual(StageState.Cleared, dir.State, "되감은 뒤 성공하면 클리어");
         }
     }

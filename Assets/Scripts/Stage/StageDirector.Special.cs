@@ -97,7 +97,7 @@ namespace RhythmActionGame
 
         partial void OnEncounterFinished(Encounter e)
         {
-            if (e.Event.IsBoss) Clear();
+            // 무사 결투는 처형 컷 D가 끝난 뒤(ResumeBeat = O+72) 클리어한다 (GDD-beta B11.5, UpdateCombat)
         }
 
         /// <summary>포위 전투 카메라: 공격하는 적 쪽으로 0.2초 안에 돌고, 동시 공격 때 낮게, 윈드밀 때 360° 회전.</summary>

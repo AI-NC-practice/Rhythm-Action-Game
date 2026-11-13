@@ -123,8 +123,10 @@ namespace RhythmActionGame
                 if (clock.CurrentBeat >= encounter.ResumeBeat)
                 {
                     LastEncounter = encounter;
+                    bool duel = encounter.IsBossDuel;
                     encounter = null;
-                    ExitCombat();
+                    if (duel) Clear();          // 무사 결투: 처형 컷 D(B11.5)가 끝난 72박에 클리어
+                    else ExitCombat();
                 }
                 return;
             }
@@ -224,7 +226,9 @@ namespace RhythmActionGame
         {
             encounter.Done = true;
             encounter.Execution = how;
-            encounter.ResumeBeat = CombatRules.NextBar(clock.CurrentBeat);
+            encounter.ResumeBeat = encounter.IsBossDuel
+                ? System.Math.Max(CombatRules.NextBar(clock.CurrentBeat), encounter.StartBeat + BossDuel.LengthBeats)
+                : CombatRules.NextBar(clock.CurrentBeat);
             foreach (var c in encounter.Cues) judge.Cancel(c);
             EnemyDefeated?.Invoke(encounter, how);
             OnEncounterFinished(encounter);

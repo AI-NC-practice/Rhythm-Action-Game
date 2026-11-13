@@ -1,7 +1,7 @@
 ﻿# Unity verify report
-time: 2026-11-13 11:05:01
+time: 2026-11-13 14:13:43
 
-## EditMode : total=138 passed=138 failed=0 skipped=0 result=Passed
+## EditMode : total=141 passed=141 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Config_MatchGddBetaB1
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_LabelPose_PopThenRise_045s
@@ -64,9 +64,12 @@ time: 2026-11-13 11:05:01
   - [Passed] RhythmActionGame.Tests.B26_BossDuelPatternTests.B26_Chart_Totals_115To130
   - [Passed] RhythmActionGame.Tests.B26_BossDuelPatternTests.B26_Counts_PerPhase_Total42
   - [Passed] RhythmActionGame.Tests.B26_BossDuelPatternTests.B26_NoRingDuringCutsABC
-  - [Passed] RhythmActionGame.Tests.B26_BossDuelPatternTests.B26_PhaseStarts_And_Length72
+  - [Passed] RhythmActionGame.Tests.B26_BossDuelPatternTests.B26_PhaseStarts_And_Length74
   - [Passed] RhythmActionGame.Tests.B26_BossDuelPatternTests.B26_Posture_PerfectFullAtEnd_NormalHalf
   - [Passed] RhythmActionGame.Tests.B26_BossDuelPatternTests.B26_Steps_MatchTable_KindsAndBeats
+  - [Passed] RhythmActionGame.Tests.B28_DuelCutRuleTests.B28_ActiveCut_Windows_EndBeforeRingsWithMargin
+  - [Passed] RhythmActionGame.Tests.B28_DuelCutRuleTests.B28_Config_Cuts_Radius35To5_Sweeps
+  - [Passed] RhythmActionGame.Tests.B28_DuelCutRuleTests.B28_NoCutOverlapsAnyRing_AtAnySpeed
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_BeatAndSpeed_MatchGdd41
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_Judge_MatchGdd42
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_ObstacleAndCombat_MatchGdd44To46
@@ -141,7 +144,7 @@ time: 2026-11-13 11:05:01
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_SpeedFx_Intensity
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_Texts_MatchGdd48
 
-## PlayMode : total=124 passed=124 failed=0 skipped=0 result=Passed
+## PlayMode : total=126 passed=126 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -229,6 +232,8 @@ time: 2026-11-13 11:05:01
   - [Passed] RhythmActionGame.Tests.B27_DuelCameraTests.B27_ClashPunch_And_FxLayerOnTop
   - [Passed] RhythmActionGame.Tests.B27_DuelCameraTests.B27_Config_MatchGddBetaB115
   - [Passed] RhythmActionGame.Tests.B27_DuelCameraTests.B27_GuardAndStrikeCams_SwitchByNextStep_Blend03
+  - [Passed] RhythmActionGame.Tests.B28_DuelCutTests.B28_Cuts_ABCD_Timing_Blend_Body_NoRings(False)
+  - [Passed] RhythmActionGame.Tests.B28_DuelCutTests.B28_Cuts_ABCD_Timing_Blend_Body_NoRings(True)
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_ChapterStartBeats_MatchSections
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(1)
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(4)

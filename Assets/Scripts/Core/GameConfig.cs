@@ -316,6 +316,23 @@ namespace RhythmActionGame
         public const float DuelClashPunchFov = -6f;
         public const float DuelClashPunchSeconds = 0.15f;
 
+        // ---- B11.5 결투 3인칭 컷 (B28) ----
+        /// <summary>1인칭 ↔ 3인칭 블렌드 (초, D 진입만 바로 자름).</summary>
+        public const float DuelCutBlendSeconds = 0.4f;
+        /// <summary>다음 판정 원이 나타나기 이만큼 전에는 1인칭으로 돌아와 있어야 함 (초).</summary>
+        public const float DuelCutReturnMarginSeconds = 0.4f;
+        /// <summary>3인칭 카메라가 바라보는 높이 (두 사람 중간점 위, m).</summary>
+        public const float DuelCutLookHeight = 1.1f;
+        /// <summary>컷별 반지름 시작·끝 (m, 3.5~5), 높이 (m), 도는 각도 (도). GDD-beta B11.5: A 120°, B 30°, C 넓게 다가감, D 180° 낮은 각도.</summary>
+        public static readonly (string name, float r0, float r1, float height, float sweep)[] DuelCuts =
+        {
+            ("A", 4.5f, 4.5f, 1.8f, 120f),
+            ("B", 3.5f, 3.5f, 1.5f, 30f),
+            ("C", 5.0f, 4.0f, 2.4f, 20f),
+            ("D", 4.0f, 4.0f, 0.5f, 180f),
+        };
+
+
 
         // ---------------- GDD-beta B1.4 판정 화면 ----------------
         /// <summary>판정 중 노출 (URP Color Adjustments postExposure, EV).</summary>

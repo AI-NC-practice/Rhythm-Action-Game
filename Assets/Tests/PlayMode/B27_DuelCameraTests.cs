@@ -103,6 +103,7 @@ namespace RhythmActionGame.Tests
             Assert.IsTrue(duel.GuardCam.gameObject.activeInHierarchy && duel.StrikeCam.gameObject.activeInHierarchy);
             Assert.AreEqual(duel.fxOffset, duel.GuardCam.transform.parent, "가상 카메라는 연출 층 아래");
             foreach (var c in dir.CurrentEncounter.Cues.ToList()) yield return Hit(c, 0.0);
+            yield return AdvanceTo(boot.clock.TimeOfBeat(dir.CurrentEncounter.StartBeat + BossDuel.LengthBeats) + 0.05);   // beta1-1: GDD-beta B11.5 — 처형 컷 D가 끝난 74박에 클리어
             Assert.AreEqual(StageState.Cleared, dir.State);
             yield return null;
             Assert.IsFalse(duel.Brain.enabled, "결투가 끝나면 Brain 꺼짐");
@@ -117,8 +118,7 @@ namespace RhythmActionGame.Tests
             yield return Load(256);
             yield return UntilCombat();
             var cues = dir.CurrentEncounter.Cues.ToList();
-            Assert.AreEqual(CinemachineBlendDefinition.Styles.EaseInOut, duel.Brain.DefaultBlend.Style, "Ease In-Out");
-            Assert.AreEqual(0.3f, duel.Brain.DefaultBlend.Time, 1e-5f, "0.3초 블렌드");
+            yield return AdvanceTo(boot.clock.TimeOfBeat(dir.CurrentEncounter.StartBeat + 3.5));   // beta1-1: 등장 컷 A(B28)가 끝난 1인칭 구간
             Assert.AreEqual(new Vector3(0f, -0.1f, 0f), duel.GuardCam.transform.localPosition, "막기 카메라 −0.1 m");
             Assert.AreEqual(new Vector3(0f, 0f, 0.4f), duel.StrikeCam.transform.localPosition, "공격 카메라 앞으로 0.4 m");
             yield return new WaitForSecondsRealtime(0.4f);
@@ -133,6 +133,8 @@ namespace RhythmActionGame.Tests
             Assert.AreEqual(DuelCamera.Mode.Strike, duel.Current, "다음 판정이 내 공격이면 공격 카메라");
             Assert.IsTrue(duel.Brain.IsBlending, "두 카메라 사이를 블렌드");
             Assert.AreEqual(0.3f, duel.Brain.ActiveBlend.Duration, 1e-3f);
+            Assert.AreEqual(CinemachineBlendDefinition.Styles.EaseInOut, duel.Brain.DefaultBlend.Style, "Ease In-Out");
+            Assert.AreEqual(0.3f, duel.Brain.DefaultBlend.Time, 1e-5f, "1인칭 두 카메라 사이 0.3초 (3인칭 컷과는 0.4초, B28)");
             yield return new WaitForSecondsRealtime(0.4f);
             Assert.IsFalse(duel.Brain.IsBlending, "0.3초 뒤 블렌드 끝");
             Assert.AreSame(duel.StrikeCam, duel.Brain.ActiveVirtualCamera as CinemachineCamera);
@@ -157,6 +159,7 @@ namespace RhythmActionGame.Tests
             yield return UntilCombat();
             duel.RealTime = () => real;
             var cues = dir.CurrentEncounter.Cues.ToList();
+            yield return AdvanceTo(boot.clock.TimeOfBeat(dir.CurrentEncounter.StartBeat + 3.5));   // beta1-1: 등장 컷 A(B28)가 끝난 1인칭 구간
             yield return new WaitForSecondsRealtime(0.4f);
             int p0 = duel.PunchCount;
             yield return Hit(cues[0], 0.0);

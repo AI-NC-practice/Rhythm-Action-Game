@@ -713,10 +713,10 @@
                                          "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  2,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "3인칭 컷 A~D(중간점, 반지름 3.5~5 m, A 120° B 30° C 다가감 D 180°), 0.4초 블렌드(D만 바로), 원 0.8초 전 복귀, 몸·칼 표시, 결투는 74박에 클리어. 1회차 FAIL(컷 B 2박) → 사용자 결정으로 칼 겨루기 연장(B 24–28, 이후 +2박). 평가 PASS 2회차."
                   },
                   {
                       "id":  "B29",

@@ -203,6 +203,7 @@ namespace RhythmActionGame.Tests
             Assert.AreEqual(s0, pd.timeFx.SlowMotionCount, "결투 중 슬로모션 없음");
             Assert.IsTrue(hooks.Log.Contains("PostureBreak"), "3단계 끝: 자세 무너짐");
             yield return Hit(cues[cues.Count - 1], 0.0);
+            yield return AdvanceTo(boot.clock.TimeOfBeat(dir.CurrentEncounter.StartBeat + BossDuel.LengthBeats) + 0.05);   // beta1-1: GDD-beta B11.5 — 처형 컷 D가 끝난 74박에 클리어
             Assert.AreEqual(StageState.Cleared, dir.State);
             Assert.AreEqual(s0 + 1, pd.timeFx.SlowMotionCount, "마무리 처형 슬로모션");
         }

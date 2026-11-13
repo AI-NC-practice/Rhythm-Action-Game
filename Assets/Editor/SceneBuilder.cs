@@ -119,6 +119,17 @@ namespace RhythmActionGame.EditorTools
             var bodyRenderer = body.GetComponent<MeshRenderer>();
             bodyRenderer.sharedMaterial = Mat("Player", new Color(0.9f, 0.9f, 0.85f));
             bodyRenderer.shadowCastingMode = ShadowCastingMode.ShadowsOnly; // 1인칭: 몸은 그림자만 (모델 교체는 T13)
+            // 칼 막대 (1인칭에서는 그림자만, 무사 결투 3인칭 컷에서 보임 — GDD-beta B11.5)
+            var sword = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            sword.name = "Sword";
+            Object.DestroyImmediate(sword.GetComponent<Collider>());
+            sword.transform.SetParent(player.transform, false);
+            sword.transform.localPosition = new Vector3(0.35f, 1.1f, 0.35f);
+            sword.transform.localRotation = Quaternion.Euler(-35f, 0f, 0f);
+            sword.transform.localScale = new Vector3(0.05f, 0.05f, 0.9f);
+            var swordRenderer = sword.GetComponent<MeshRenderer>();
+            swordRenderer.sharedMaterial = Mat("PlayerSword", new Color(0.75f, 0.75f, 0.78f));
+            swordRenderer.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
             var rig = new GameObject("CameraRig");
             rig.transform.SetParent(player.transform, false);
             rig.transform.localPosition = new Vector3(0, GameConfig.EyeHeight, 0);
@@ -204,6 +215,7 @@ namespace RhythmActionGame.EditorTools
             duelCam.judgeFx = fx;
             duelCam.cam = cam;
             duelCam.fxOffset = fxOffset.transform;
+            duelCam.playerBody = new Renderer[] { bodyRenderer, swordRenderer };
 
             var boot = new GameObject("GameBootstrap").AddComponent<GameBootstrap>();
             boot.director = director;
