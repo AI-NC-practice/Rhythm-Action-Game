@@ -174,6 +174,54 @@ namespace RhythmActionGame
             }
         }
 
+        static Sprite bloodSplatter;
+        /// <summary>
+        /// 피 튐 (GDD-beta B12.2): 화면 가장자리에 몰린 핏자국 덩어리와 흩어진 방울, 아래로 흘러내린 줄기. 흰색 (색은 Image.color로).
+        /// </summary>
+        public static Sprite BloodSplatter
+        {
+            get
+            {
+                if (bloodSplatter != null) return bloodSplatter;
+                const int s = 256;
+                var tex = NewTex(s, "BloodSplatter");
+                var a = new float[s * s];
+                var rng = new System.Random(7);
+                float R() => (float)rng.NextDouble();
+                void Blob(Vector2 c, float r, float rough)
+                {
+                    int x0 = Mathf.Max(0, (int)(c.x - r * 1.6f)), x1 = Mathf.Min(s - 1, (int)(c.x + r * 1.6f));
+                    int y0 = Mathf.Max(0, (int)(c.y - r * 1.6f)), y1 = Mathf.Min(s - 1, (int)(c.y + r * 1.6f));
+                    for (int y = y0; y <= y1; y++)
+                        for (int x = x0; x <= x1; x++)
+                        {
+                            var d = new Vector2(x + 0.5f, y + 0.5f) - c;
+                            float ang = Mathf.Atan2(d.y, d.x);
+                            float edge = r * (1f + rough * (Mathf.PerlinNoise(ang * 1.7f + c.x, c.y * 0.05f) - 0.5f));
+                            float v = Mathf.Clamp01((edge - d.magnitude) / 2f);
+                            int i = y * s + x;
+                            a[i] = Mathf.Max(a[i], v);
+                        }
+                }
+                // 가장자리 큰 덩어리 + 흩어진 방울 + 흘러내린 줄기
+                for (int k = 0; k < 14; k++)
+                {
+                    float ang = R() * Mathf.PI * 2f;
+                    var dir = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang));
+                    float dist = 0.62f + 0.3f * R();
+                    var c = new Vector2(s * 0.5f, s * 0.5f) + dir * (s * 0.5f * dist);
+                    float r = s * (0.05f + 0.07f * R());
+                    Blob(c, r, 0.9f);
+                    for (int j = 0; j < 6; j++)
+                        Blob(c - dir * (r * (1.2f + 2.5f * R())) + new Vector2(R() - 0.5f, R() - 0.5f) * r * 2f, r * (0.08f + 0.18f * R()), 0.4f);
+                    if (dir.y > -0.2f)   // 위·옆 덩어리는 아래로 흘러내림
+                        for (float t = 0; t < 1f; t += 0.02f)
+                            Blob(c + new Vector2(0f, -r * (0.5f + 3f * t)), r * 0.18f * (1f - t * 0.7f), 0.2f);
+                }
+                return bloodSplatter = FromAlpha(tex, a, s);
+            }
+        }
+
         /// <summary>연기 덩어리 (노이즈로 가장자리를 불규칙하게).</summary>
         public static Sprite Smoke
         {

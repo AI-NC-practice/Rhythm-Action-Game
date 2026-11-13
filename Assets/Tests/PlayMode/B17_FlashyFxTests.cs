@@ -78,7 +78,7 @@ namespace RhythmActionGame.Tests
             judge.Schedule(target, ArrowKey.Up);
             now = clock.TimeOfBeat(target) - 0.5; judge.Tick(); view.Refresh();
             now = clock.TimeOfBeat(target) + delay;
-            if (pressed) judge.Submit(ArrowKey.Up, now); else { now += 0.2; judge.Tick(); }
+            if (pressed) judge.Submit(ArrowKey.Up, now); else { now += 0.26; judge.Tick(); }   // beta1-1: NORMAL 창 0.24초(GDD-beta B12.1) 뒤 FAIL
             return view.RingEffects.Last();
         }
 

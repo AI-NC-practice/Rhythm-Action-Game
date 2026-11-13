@@ -729,17 +729,53 @@
                                          "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과, 테스트 패키지 zip",
                                          "사용자가 무사 결투의 합·카메라·길이를 확인하고 피드백을 줌"
                                      ],
-                      "status":  "needs_user",
+                      "status":  "done",
                       "attempts":  1,
                       "max_attempts":  1,
-                      "notes":  "BuildGray + smoke-test 통과, RhythmActionGame-beta1-1-dev4.zip(38.1 MB) 준비. 사용자 확인 대기."
+                      "notes":  "사용자 플레이 확인(2026-11-13). 판정 타이밍은 맞음, 피드백: NORMAL 더 후하게, 실패 시 맞는 연출 뒤 되감기 → B30. 이펙트 강화는 에셋 뒤(GDD-beta B12.3)."
+                  },
+                  {
+                      "id":  "B30",
+                      "title":  "[beta] NORMAL 판정 ±240 ms, 결투·윈드밀 실패 시 피격 연출 뒤 되감기",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "B29"
+                                     ],
+                      "acceptance":  [
+                                         "GDD-beta B12.1: PERFECT ±90 ms 그대로, NORMAL ±240 ms, −300 ms보다 이른 입력 무시 — 테스트",
+                                         "GDD-beta B12.1: 앞 원에 늦은 입력이 다음 원 창 안이면 키가 맞는 원(둘 다 같으면 더 가까운 원)으로 판정, 앞 원은 창이 지나면 FAIL — 테스트",
+                                         "GDD-beta B12.2: 무사 결투·윈드밀 FAIL → 남은 판정 즉시 지움, 0.7초 피격 연출(카메라 밀림·흔들림·붉은 테두리·핏자국·피 방울·소리) 뒤 기존 되감기, 체력 그대로 — 테스트",
+                                         "기존 판정 창·되감기 테스트를 새 값에 맞게 바꾸고 근거 주석",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "done",
+                      "attempts":  1,
+                      "max_attempts":  3,
+                      "notes":  "NORMAL ±240 ms(PERFECT ±90 그대로), 늦은 입력은 키가 맞는(같으면 가까운) 다음 원으로, 결투·윈드밀 FAIL → 판정 지움 + 0.7초 피격(BloodHit·핏자국·피 방울) 뒤 되감기. 평가 PASS 1회차."
+                  },
+                  {
+                      "id":  "B31",
+                      "title":  "[사용자] 판정·피격 연출 확인 + 테스트 패키지",
+                      "type":  "human",
+                      "depends_on":  [
+                                         "B30"
+                                     ],
+                      "acceptance":  [
+                                         "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과, 테스트 패키지 zip",
+                                         "사용자가 NORMAL 판정 난이도와 피격 연출을 확인"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  1,
+                      "notes":  ""
                   },
                   {
                       "id":  "B10",
                       "title":  "[사용자+Claude] Suno 음악 생성·적용",
                       "type":  "human",
                       "depends_on":  [
-                                         "B29"
+                                         "B31"
                                      ],
                       "acceptance":  [
                                          "사용자가 인앱 브라우저에서 Suno에 로그인, Claude가 프롬프트 작성·생성 (국악 퓨전, 120 BPM, 보컬 없음, 약 2분 30초)",

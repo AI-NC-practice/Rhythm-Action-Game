@@ -58,7 +58,7 @@ namespace RhythmActionGame
             if (built) return;
             built = true;
             // 텍스처를 미리 만든다 (첫 재생 때 만들면 수십 ms 멈칫해 Hit Stop보다 길어진다)
-            _ = VfxFactory.BrushBurst; _ = VfxFactory.InkSlash; _ = VfxFactory.InkX; _ = VfxFactory.ShockRing;
+            _ = VfxFactory.BrushBurst; _ = VfxFactory.InkSlash; _ = VfxFactory.InkX; _ = VfxFactory.ShockRing; _ = VfxFactory.BloodSplatter;
             _ = VfxFactory.Lightning; _ = VfxFactory.Flare; _ = VfxFactory.Dot; _ = VfxFactory.Smoke; _ = VfxFactory.Crack; _ = VfxFactory.Scanlines;
             if (flashLayer == null)
             {
@@ -94,7 +94,7 @@ namespace RhythmActionGame
             }
         }
 
-        static bool IsFlash(VfxKind k) => k == VfxKind.BrushBurst || k == VfxKind.InkSlash || k == VfxKind.InkX || k == VfxKind.WhiteFlash || k == VfxKind.RewindStreak;
+        static bool IsFlash(VfxKind k) => k == VfxKind.BrushBurst || k == VfxKind.InkSlash || k == VfxKind.InkX || k == VfxKind.WhiteFlash || k == VfxKind.RewindStreak || k == VfxKind.BloodSplatter;
 
         /// <summary>
         /// 이펙트 하나를 재생한다. 섬광은 등급이 낮으면 거절될 수 있다(false).
@@ -125,8 +125,10 @@ namespace RhythmActionGame
             if (flash != null && grade < flash.Grade) return false;      // 동시에 하나, 등급 높은 쪽
             float secs = kind == VfxKind.BrushBurst ? GameConfig.Fx.BrushBurstSeconds
                        : kind == VfxKind.WhiteFlash ? GameConfig.Fx.WhiteFlashSeconds
-                       : kind == VfxKind.RewindStreak ? GameConfig.RewindSeconds : GameConfig.Fx.InkSlashSeconds;
-            Color col = tint ?? (kind == VfxKind.BrushBurst ? VfxFactory.DancheongTeal : kind == VfxKind.WhiteFlash ? Color.white : VfxFactory.Ink);
+                       : kind == VfxKind.RewindStreak ? GameConfig.RewindSeconds
+                       : kind == VfxKind.BloodSplatter ? GameConfig.FailHitSeconds : GameConfig.Fx.InkSlashSeconds;
+            Color col = tint ?? (kind == VfxKind.BrushBurst ? VfxFactory.DancheongTeal : kind == VfxKind.WhiteFlash ? Color.white
+                : kind == VfxKind.BloodSplatter ? GameConfig.BloodColor : VfxFactory.Ink);
             flash = new Flash { Kind = kind, Grade = grade, Seconds = secs, Color = col };
             var rt = flashImage.rectTransform;
             float h = GameConfig.UiReferenceHeight, w = h * 16f / 9f;
@@ -153,6 +155,14 @@ namespace RhythmActionGame
                     rt.sizeDelta = new Vector2(w * 1.2f, h * 0.5f);
                     rt.anchoredPosition = new Vector2(w * 0.5f, 0f);
                     rt.localRotation = Quaternion.Euler(0, 180f, 0);
+                    break;
+                case VfxKind.BloodSplatter:
+                    // 화면 전체에 핏자국 (가장자리 위주)
+                    flashImage.sprite = VfxFactory.BloodSplatter;
+                    rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+                    rt.sizeDelta = new Vector2(w, h);
+                    rt.anchoredPosition = Vector2.zero;
+                    rt.localRotation = Quaternion.Euler(0, 0, Random.value < 0.5f ? 0f : 180f);
                     break;
                 case VfxKind.InkX:
                     flashImage.sprite = VfxFactory.InkX;
@@ -201,7 +211,7 @@ namespace RhythmActionGame
         {
             if (flash == null) return;
             float u = Mathf.Clamp01(age / flash.Seconds);
-            float alpha = GameConfig.Fx.FlashMaxAlpha * (1f - u);
+            float alpha = GameConfig.Fx.FlashMaxAlpha * (flash.Kind == VfxKind.BloodSplatter ? 1f - u * u : 1f - u);   // 핏자국은 오래 남았다가 사라짐
             var c = flash.Color; c.a = Mathf.Min(alpha, GameConfig.Fx.FlashMaxAlpha);
             flashImage.color = c;
             if (flash.Kind == VfxKind.RewindStreak)

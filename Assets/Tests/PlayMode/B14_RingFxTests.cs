@@ -76,7 +76,7 @@ namespace RhythmActionGame.Tests
 
             real = 20f;
             var f = JudgeOne(12, 0.0, pressed: false);        // 무입력 FAIL
-            now = clock.TimeOfBeat(12) + 0.2; judge.Tick();
+            now = clock.TimeOfBeat(12) + 0.26; judge.Tick();   // beta1-1: NORMAL 창 0.24초(GDD-beta B12.1) 뒤 FAIL
             f = view.RingEffects.Last();
             Assert.AreEqual(Judgement.Fail, f.Result);
             Assert.AreEqual(JudgeRingView.FailFxColor.r, f.Parts[0].color.r, 1e-4f, "FAIL 붉은색");

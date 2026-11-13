@@ -49,7 +49,7 @@ namespace RhythmActionGame.Tests
         {
             yield return AdvanceTo(boot.clock.TimeOfBeat(cue.TargetBeat) - 0.03);
             if (delay.HasValue) { now = boot.clock.TimeOfBeat(cue.TargetBeat) + delay.Value; boot.judge.Submit(cue.Key, now); yield return null; }
-            else yield return AdvanceTo(boot.clock.TimeOfBeat(cue.TargetBeat) + 0.2);
+            else yield return AdvanceTo(boot.clock.TimeOfBeat(cue.TargetBeat) + 0.26);   // beta1-1: NORMAL 창 0.24초(GDD-beta B12.1)가 지나야 무입력 FAIL
         }
 
         void AssertNoDeadRings(string why)
@@ -70,11 +70,12 @@ namespace RhythmActionGame.Tests
             yield return Load(256);
             float rt = 50f;
             dir.RewindRealTime = () => rt;
+            dir.FailHitSeconds = 0f;   // beta1-1: 피격 연출(GDD-beta B12.2)은 B30 테스트에서 따로 본다. 여기서는 바로 되감기
             yield return UntilCombat();
             var first = dir.CurrentEncounter.Cues.ToList();
             yield return AdvanceTo(boot.clock.TimeOfBeat(first[0].TargetBeat) + 0.1);    // 첫 공격 판정 창 안, 둘째 원은 이미 등장
             Assert.IsTrue(view.Rings.Any(r => r.Cue == first[1]), "둘째 원이 떠 있음");
-            yield return AdvanceTo(boot.clock.TimeOfBeat(first[0].TargetBeat) + 0.2);    // 첫 공격 무입력 FAIL → 되감기
+            yield return AdvanceTo(boot.clock.TimeOfBeat(first[0].TargetBeat) + 0.26);    // 첫 공격 무입력 FAIL → 되감기   // beta1-1: NORMAL 창 0.24초(GDD-beta B12.1)가 지나야 무입력 FAIL
             yield return null;
             Assert.IsTrue(dir.Rewinding);
             Assert.IsFalse(view.Rings.Any(r => first.Contains(r.Cue)), "지운 판정의 원이 사라짐");

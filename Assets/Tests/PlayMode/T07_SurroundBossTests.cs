@@ -27,6 +27,7 @@ namespace RhythmActionGame.Tests
             boot.judge.OffsetSource = () => 0f;
             dir.slowMotion.RealTime = () => realTime;
             dir.RewindRealTime = () => realTime;
+            dir.FailHitSeconds = 0f;   // beta1-1: 피격 연출(GDD-beta B12.2)은 B30 테스트에서 따로 본다. 여기서는 바로 되감기
             dir.SpinDeltaTime = () => 0.05f;     // 카메라 연출 1프레임 = 0.05초
             boot.StartRun(startRunBeat);
             yield return null;
@@ -55,7 +56,7 @@ namespace RhythmActionGame.Tests
                 boot.judge.Submit(cue.Key, now);
                 yield return null;
             }
-            else yield return AdvanceTo(boot.clock.TimeOfBeat(cue.TargetBeat) + 0.2, 0.01);
+            else yield return AdvanceTo(boot.clock.TimeOfBeat(cue.TargetBeat) + 0.26, 0.01);   // beta1-1: NORMAL 창 0.24초(GDD-beta B12.1)가 지나야 무입력 FAIL
         }
 
         static int PhaseOf(JudgeCue c) => ((CombatStep)c.Tag).Phase;

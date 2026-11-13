@@ -109,6 +109,7 @@ namespace RhythmActionGame
             current = null;
             LastRun = null;
             Rewinding = false;
+            HitPending = false;
             Health.Reset();
             nextEvent = 0;
             while (nextEvent < Chart.events.Length && Chart.events[nextEvent].runBeat < runBeat) nextEvent++;
@@ -137,6 +138,7 @@ namespace RhythmActionGame
         void Update()
         {
             if (Chart == null || clock == null) return;
+            UpdateHitPending();                              // 피격 연출 뒤 되감기 (GDD-beta B12.2)
             if (Rewinding) { UpdateRewind(); return; }   // 되감기 연출 중 (GDD-beta B9.4)
             if (!clock.IsRunning) return;
             if (State == StageState.GameOver || State == StageState.Cleared) return;

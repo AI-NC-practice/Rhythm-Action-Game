@@ -143,9 +143,12 @@ namespace RhythmActionGame
         {
             LastInputTime = time;
             float offset = OffsetSource();
-            foreach (var cue in cues)
+            foreach (var first in cues)
             {
-                if (cue.Judged) continue;
+                if (first.Judged) continue;
+                // GDD-beta B12.1: 판정 창이 넓어 반 박 간격 원끼리 창이 겹친다. 앞 원에 늦은 입력이 다음 원에 더 가까우면 다음 원으로 본다
+                // (앞 원은 그대로 남아 창이 지나면 무입력 FAIL).
+                var cue = CloserNext(first, time, offset, key);
                 if (JudgeRules.TryJudge(time, TargetTime(cue), offset, key, cue.Key, out var r))
                 {
                     Resolve(cue, r);
@@ -161,6 +164,29 @@ namespace RhythmActionGame
                 return;
             }
             InputReceived?.Invoke(key, null, InputOutcome.NoCue);
+        }
+
+        /// <summary>
+        /// 앞 원에 늦은 입력을 다음 원으로 볼지 (GDD-beta B12.1). 누른 키가 한쪽 원에만 맞으면 그 원, 둘 다 맞거나 둘 다 틀리면 목표에 더 가까운 원.
+        /// 다음 원은 그 판정 창 안일 때만 고른다.
+        /// </summary>
+        JudgeCue CloserNext(JudgeCue first, double time, float offset, ArrowKey key)
+        {
+            double d1 = JudgeRules.DeltaMs(time, TargetTime(first), offset);
+            if (d1 <= 0) return first;
+            JudgeCue next = null;
+            bool after = false;
+            foreach (var c in cues)
+            {
+                if (c == first) { after = true; continue; }
+                if (after && !c.Judged) { next = c; break; }
+            }
+            if (next == null) return first;
+            double d2 = System.Math.Abs(JudgeRules.DeltaMs(time, TargetTime(next), offset));
+            if (d2 > GameConfig.NormalWindowMs) return first;
+            bool m1 = first.Key == key, m2 = next.Key == key;
+            if (m1 != m2) return m2 ? next : first;
+            return d2 < d1 ? next : first;
         }
 
         /// <summary>원 등장과 무입력 FAIL을 처리한다. Update에서 매 프레임 호출된다.</summary>

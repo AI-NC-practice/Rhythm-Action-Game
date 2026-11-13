@@ -105,7 +105,7 @@ namespace RhythmActionGame.Tests
             judge.Submit(ArrowKey.Up, 2.1);            // +100 ms → NORMAL
             Assert.AreEqual("NORMAL", view.Labels[view.Labels.Count - 1].Text.text);
             now = 3.0; judge.Tick();
-            now = 4.2; judge.Tick();                   // 무입력 +200 ms → FAIL
+            now = 4.25; judge.Tick();                  // 무입력 +250 ms → FAIL (beta1-1: NORMAL 창 240 ms, GDD-beta B12.1)
             Assert.AreEqual("FAIL", view.Labels[view.Labels.Count - 1].Text.text);
             yield return null;
         }

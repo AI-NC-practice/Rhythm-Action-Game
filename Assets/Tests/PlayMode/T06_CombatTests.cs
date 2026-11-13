@@ -62,7 +62,7 @@ namespace RhythmActionGame.Tests
             }
             else
             {
-                yield return AdvanceTo(boot.clock.TimeOfBeat(cue.TargetBeat) + 0.2);
+                yield return AdvanceTo(boot.clock.TimeOfBeat(cue.TargetBeat) + 0.26);   // beta1-1: NORMAL 창 0.24초(GDD-beta B12.1)가 지나야 무입력 FAIL
             }
         }
 

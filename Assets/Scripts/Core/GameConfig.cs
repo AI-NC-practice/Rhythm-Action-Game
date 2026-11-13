@@ -35,8 +35,8 @@ namespace RhythmActionGame
         public const float ApproachBeats = 2f;
         /// <summary>PERFECT 판정 창 (± ms, 실제 시간). beta1-1: GDD-beta B8.4가 GDD 4.2의 60을 90으로 바꿨다.</summary>
         public const float PerfectWindowMs = 90f;
-        /// <summary>NORMAL 판정 창 (± ms, 실제 시간). beta1-1: GDD-beta B8.4가 GDD 4.2의 150을 180으로 바꿨다.</summary>
-        public const float NormalWindowMs = 180f;
+        /// <summary>NORMAL 판정 창 (± ms, 실제 시간). beta1-1: GDD-beta B8.4가 GDD 4.2의 150을 180으로, B12.1(사용자 요청)이 240으로 바꿨다.</summary>
+        public const float NormalWindowMs = 240f;
         /// <summary>이보다 이른 입력(목표 − ms)은 무시한다. 이 값과 NORMAL 창 사이 입력은 FAIL.</summary>
         public const float EarlyIgnoreMs = 300f;
 
@@ -272,6 +272,12 @@ namespace RhythmActionGame
         // ---------------- GDD-beta B9 실패 규칙과 되감기 ----------------
         /// <summary>되감기 연출 길이 (실제 초). 이 동안 박자 시계를 멈춘다.</summary>
         public const float RewindSeconds = 0.8f;
+        /// <summary>결투·윈드밀 FAIL 뒤 되감기 전에 맞는 연출(피 튐)을 보여 주는 시간 (실제 초, GDD-beta B12.2).</summary>
+        public const float FailHitSeconds = 0.7f;
+        /// <summary>피 색 (피격 연출).</summary>
+        public static readonly UnityEngine.Color BloodColor = new UnityEngine.Color(0.55f, 0.02f, 0.02f);
+        /// <summary>피 방울 입자 수.</summary>
+        public const int BloodDrops = 40;
         /// <summary>되감는 지점: 다시 할 첫 판정보다 이만큼 앞 (박, 1마디).</summary>
         public const double RewindLeadBeats = 4.0;
         /// <summary>되감기 화면: 채도 −90, 노출 −0.5.</summary>
@@ -471,6 +477,8 @@ namespace RhythmActionGame
             public static readonly FxPreset StrikeNormal = P("StrikeNormal", 2, hitStop: 0.03f, trauma: 0.2f, hz: 12f, kick: StrikeSelfPushMeters, height: -0.05f, rise: 0.03f, hold: 0.05f, release: 0.3f);
             // B11.3 자세 무너짐: 흔들림 + 붉은 번쩍임
             public static readonly FxPreset PostureBreak = P("PostureBreak", 3, hitStop: 0.08f, trauma: 0.4f, hz: 20f, fov: -4f, rise: 0.03f, hold: 0.1f, release: 0.4f);
+            // B12.2 결투·윈드밀 FAIL: 크게 맞음 (뒤로 0.25 m, 고개 젖힘, 강한 흔들림) + 피 튐, 0.7초 뒤 되감기
+            public static readonly FxPreset BloodHit = P("BloodHit", 4, hitStop: 0.1f, trauma: 0.7f, hz: 20f, kick: 0.25f, pitch: -6f, roll: 8f, rise: 0.03f, hold: 0.25f, release: 0.4f);
             /// <summary>대치 때 적이 다가오는 거리 (m, GDD-beta B10.2).</summary>
             public const float StandoffApproachMeters = 0.5f;
             /// <summary>적 공격 예고: 목표 박자 몇 박 전에 (휘두르기 직전, 제안서 2장 A).</summary>
@@ -510,7 +518,7 @@ namespace RhythmActionGame
             public static readonly FxPreset[] All =
             {
                 AttackWarn, ParryPerfect, DodgePerfect, ParryPerfectFinale, DefendNormal, Hit, Execution, ExecutionKick,
-                SurroundTurn, Simultaneous, SimultaneousPerfect, WindmillArrow, WindmillFinish, JumpPerfect, LandPerfect, LandNormal, LandFail, EventPerfectSlow, ParkourFail, Rewind, Standoff, StrikePerfect, StrikeNormal, PostureBreak,
+                SurroundTurn, Simultaneous, SimultaneousPerfect, WindmillArrow, WindmillFinish, JumpPerfect, LandPerfect, LandNormal, LandFail, EventPerfectSlow, ParkourFail, Rewind, Standoff, StrikePerfect, StrikeNormal, PostureBreak, BloodHit,
             };
         }
 

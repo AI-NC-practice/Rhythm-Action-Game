@@ -67,7 +67,7 @@ namespace RhythmActionGame.Tests
                 boot.judge.Submit(cue.Key, now);
                 yield return null;
             }
-            else yield return AdvanceTo(boot.clock.TimeOfBeat(cue.TargetBeat) + 0.2, 0.01);
+            else yield return AdvanceTo(boot.clock.TimeOfBeat(cue.TargetBeat) + 0.26, 0.01);   // beta1-1: NORMAL 창 0.24초(GDD-beta B12.1)가 지나야 무입력 FAIL
         }
 
         [UnityTest]

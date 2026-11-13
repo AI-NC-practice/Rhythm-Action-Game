@@ -18,7 +18,7 @@ namespace RhythmActionGame
         void OnDuelStepJudged(CombatStep step, Judgement r)
         {
             var e = encounter;
-            if (Rewinding || e == null || e.Done) return;
+            if (Rewinding || HitPending || e == null || e.Done) return;
             if (step.Phase > e.Phase) { e.Phase = step.Phase; e.PhasePosture = e.Posture; }
             if (r == Judgement.Fail) { RewindDuel(step.Phase); return; }
 
@@ -55,7 +55,7 @@ namespace RhythmActionGame
             if (phase <= BossDuel.PhaseFlurry) e.PostureBroken = false;
             if (e.Actors != null) foreach (var a in e.Actors) if (a != null && !a.Defeated) { a.EndAttack(Judgement.Fail); a.EndGuard(); }
             DuelPhaseRewound?.Invoke(phase);
-            BeginRewind(RewindKind.Boss, e.StartBeat + BossDuel.PhaseStart(phase), () =>
+            HitThenRewind(RewindKind.Boss, e.StartBeat + BossDuel.PhaseStart(phase), () =>   // B12.2: 맞는 연출 뒤 되감기
             {
                 e.Attempts++;
                 e.Cues.Clear();

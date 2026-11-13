@@ -88,7 +88,7 @@ namespace RhythmActionGame
             double first = e.StartBeat + steps.Min(s => s.OffsetBeats);
             WindmillAttempts++;
             windmillFails++;
-            BeginRewind(RewindKind.Windmill, first - GameConfig.RewindLeadBeats, () =>
+            HitThenRewind(RewindKind.Windmill, first - GameConfig.RewindLeadBeats, () =>   // B12.2: 맞는 연출 뒤 되감기
             {
                 e.Cues.RemoveAll(c => c.Tag is CombatStep s && s.Phase == 3);
                 foreach (var s in steps) e.Cues.Add(judge.Schedule(e.StartBeat + s.OffsetBeats, s.Key, null, s));

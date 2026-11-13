@@ -14,7 +14,7 @@ namespace RhythmActionGame.Tests
             JudgeRules.TryJudge(Target + offset / 1000.0 + deltaMs / 1000.0, Target, offset, pressed, expected, out r);
 
         [TestCase(0.0)]
-        // beta1-1: GDD-beta B8.4 판정 창 PERFECT ±90, NORMAL ±180 ms (GDD 4.2의 ±60/±150 대신)
+        // beta1-1: GDD-beta B8.4·B12.1 판정 창 PERFECT ±90, NORMAL ±240 ms (GDD 4.2의 ±60/±150 대신)
         [TestCase(89.9)]
         [TestCase(-89.9)]
         public void T03_WithinPerfectWindow_IsPerfect(double ms)
@@ -25,16 +25,16 @@ namespace RhythmActionGame.Tests
 
         [TestCase(90.1)]
         [TestCase(-90.1)]
-        [TestCase(179.9)]
-        [TestCase(-179.9)]
+        [TestCase(239.9)]
+        [TestCase(-239.9)]
         public void T03_WithinNormalWindow_IsNormal(double ms)
         {
             Assert.IsTrue(Judge(ms, ArrowKey.Up, out var r));
             Assert.AreEqual(Judgement.Normal, r);
         }
 
-        [TestCase(-180.1)]
-        [TestCase(-200.0)]
+        [TestCase(-240.1)]
+        [TestCase(-260.0)]
         [TestCase(-299.9)]
         public void T03_EarlyBetween150And300_IsFail(double ms)
         {
@@ -62,9 +62,9 @@ namespace RhythmActionGame.Tests
         [Test]
         public void T03_NoInputUntilPlus150_IsMissed()
         {
-            Assert.IsFalse(JudgeRules.IsMissed(Target + 0.1799, Target, 0f));
-            Assert.IsTrue(JudgeRules.IsMissed(Target + 0.1801, Target, 0f));
-            Assert.IsFalse(Judge(180.1, ArrowKey.Up, out _), "창이 지난 입력은 판정 대상이 아님(이미 FAIL)");
+            Assert.IsFalse(JudgeRules.IsMissed(Target + 0.2399, Target, 0f));
+            Assert.IsTrue(JudgeRules.IsMissed(Target + 0.2401, Target, 0f));
+            Assert.IsFalse(Judge(240.1, ArrowKey.Up, out _), "창이 지난 입력은 판정 대상이 아님(이미 FAIL)");
         }
 
         [Test]
@@ -82,7 +82,7 @@ namespace RhythmActionGame.Tests
             // 보정 −100 ms: 9.900초가 정확한 목표
             Assert.IsTrue(JudgeRules.TryJudge(9.900, Target, -100f, ArrowKey.Up, ArrowKey.Up, out var r4));
             Assert.AreEqual(Judgement.Perfect, r4);
-            Assert.IsTrue(JudgeRules.IsMissed(10.081, Target, -100f));
+            Assert.IsTrue(JudgeRules.IsMissed(10.141, Target, -100f));   // beta1-1: 9.900 + 0.240 (B12.1)
         }
 
         [Test]
@@ -161,9 +161,9 @@ namespace RhythmActionGame.Tests
             try
             {
                 var cue = judge.Schedule(4, ArrowKey.Left);
-                now = 2.179; judge.Tick();   // beta1-1: GDD-beta B8.4 +180 ms
+                now = 2.239; judge.Tick();   // beta1-1: GDD-beta B12.1 +240 ms
                 Assert.IsFalse(cue.Judged);
-                now = 2.181; judge.Tick();
+                now = 2.241; judge.Tick();
                 Assert.IsTrue(cue.Judged);
                 Assert.AreEqual(1, judged);
             }

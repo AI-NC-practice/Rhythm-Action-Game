@@ -26,6 +26,7 @@ namespace RhythmActionGame.Tests
             boot.judge.readKeyboard = false;
             boot.judge.OffsetSource = () => 0f;
             dir.RewindRealTime = () => real;
+            dir.FailHitSeconds = 0f;   // beta1-1: 피격 연출(GDD-beta B12.2)은 B30 테스트에서 따로 본다. 여기서는 바로 되감기
             dir.slowMotion.RealTime = () => real;
             boot.presentation.vfxPool.Rewind.DeltaTime = () => 0f;
             boot.StartRun(start);

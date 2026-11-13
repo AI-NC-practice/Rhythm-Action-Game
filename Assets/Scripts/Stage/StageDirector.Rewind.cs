@@ -43,6 +43,37 @@ namespace RhythmActionGame
         public float RewindProgress => Rewinding ? Mathf.Clamp01((RewindRealTime() - rewindStartedAt) / GameConfig.RewindSeconds) : 0f;
         Action rewindResume;
 
+        // ---------------- GDD-beta B12.2 피격 연출 뒤 되감기 ----------------
+        /// <summary>결투·윈드밀 FAIL 뒤 되감기 전에 맞는 연출을 보여 주는 시간 (실제 초). 0이면 바로 되감는다.</summary>
+        public float FailHitSeconds = GameConfig.FailHitSeconds;
+        /// <summary>맞는 연출 중 (판정은 모두 지워졌고, 끝나면 되감기가 시작된다).</summary>
+        public bool HitPending { get; private set; }
+        /// <summary>플레이어가 맞음 (피격 연출용).</summary>
+        public event Action<RewindKind> PlayerHit;
+
+        float hitAt;
+        RewindKind hitKind;
+        double hitTarget;
+        Action hitResume;
+
+        /// <summary>FAIL: 먼저 맞는 연출(FailHitSeconds)을 보여 준 뒤 되감는다. 남은 판정은 바로 지운다.</summary>
+        void HitThenRewind(RewindKind kind, double targetBeat, Action resume)
+        {
+            if (FailHitSeconds <= 0f) { BeginRewind(kind, targetBeat, resume); return; }
+            HitPending = true;
+            hitAt = RewindRealTime();
+            hitKind = kind; hitTarget = targetBeat; hitResume = resume;
+            judge.ClearAll();
+            PlayerHit?.Invoke(kind);
+        }
+
+        void UpdateHitPending()
+        {
+            if (!HitPending || RewindRealTime() - hitAt < FailHitSeconds) return;
+            HitPending = false;
+            BeginRewind(hitKind, hitTarget, hitResume);
+        }
+
         /// <summary>
         /// 되감기를 시작한다. targetBeat: 다시 시작할 시계 박자 (챕터 되감기는 달리기 박자). resume: 시계를 다시 돌린 뒤 할 일.
         /// </summary>

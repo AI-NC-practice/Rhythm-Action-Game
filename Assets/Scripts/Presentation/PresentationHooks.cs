@@ -41,6 +41,7 @@ namespace RhythmActionGame
                 director.RewindStarted += OnRewind;
                 director.EncounterStarted += OnEncounter;
                 director.PostureBroken += OnPostureBroken;
+                director.PlayerHit += OnPlayerHit;
             }
         }
 
@@ -56,6 +57,7 @@ namespace RhythmActionGame
                 director.RewindStarted -= OnRewind;
                 director.EncounterStarted -= OnEncounter;
                 director.PostureBroken -= OnPostureBroken;
+                director.PlayerHit -= OnPlayerHit;
             }
         }
 
@@ -70,6 +72,19 @@ namespace RhythmActionGame
         {
             Play(GameConfig.Fx.Rewind, 1f, null, player != null ? player.transform.position : (Vector3?)null);
             if (vfx != null && presentation != null && presentation.Enabled) { vfx.Rewind.Play(); Log.Add("RewindOverlay"); }
+        }
+
+        /// <summary>결투·윈드밀 FAIL (GDD-beta B12.2): 크게 맞고 피가 튄다. 0.7초 뒤 되감기가 이어진다.</summary>
+        void OnPlayerHit(RewindKind kind)
+        {
+            Vector3? front = null;
+            if (player != null) front = player.transform.position + Vector3.up * GameConfig.EyeHeight + player.transform.forward * 0.8f;
+            Play(GameConfig.Fx.BloodHit, Random.value < 0.5f ? -1f : 1f, null, front);
+            if (vfx != null && presentation != null && presentation.Enabled && front.HasValue)
+            {
+                vfx.Play(VfxKind.Dust, front, 4, GameConfig.BloodDrops, GameConfig.BloodColor);   // 피 방울
+                Log.Add("BloodDrops");
+            }
         }
 
         /// <summary>무사 자세 무너짐 (GDD-beta B11.3): 붉은 번쩍임 + 충돌음.</summary>

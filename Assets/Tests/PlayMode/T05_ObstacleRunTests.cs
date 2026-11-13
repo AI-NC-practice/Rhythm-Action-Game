@@ -102,7 +102,7 @@ namespace RhythmActionGame.Tests
             yield return AdvanceTo(target - 0.05);
             double beatBefore = boot.clock.CurrentBeat;
             float distBefore = boot.player.Distance;
-            yield return AdvanceTo(target + 0.2);          // 무입력 → FAIL
+            yield return AdvanceTo(target + 0.26);          // 무입력 → FAIL   // beta1-1: NORMAL 창 0.24초(GDD-beta B12.1)가 지나야 무입력 FAIL
             Assert.AreEqual(2, dir.Health.Hp, "체력 −1");
             Assert.AreEqual(1.04f, boot.clock.SpeedMultiplier, 1e-4f, "1.30 × 0.8");
             Assert.IsTrue(boot.clock.IsRunning && !boot.clock.IsPaused, "박자 시계(음악) 계속");

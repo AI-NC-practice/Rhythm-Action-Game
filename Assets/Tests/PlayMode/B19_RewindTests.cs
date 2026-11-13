@@ -28,6 +28,7 @@ namespace RhythmActionGame.Tests
             boot.judge.readKeyboard = false;
             boot.judge.OffsetSource = () => 0f;
             dir.RewindRealTime = () => real;
+            dir.FailHitSeconds = 0f;   // beta1-1: 피격 연출(GDD-beta B12.2)은 B30 테스트에서 따로 본다. 여기서는 바로 되감기
             dir.slowMotion.RealTime = () => real;
             if (chart != null) dir.UseChart(chart);
             boot.StartRun(startRunBeat);
@@ -52,7 +53,7 @@ namespace RhythmActionGame.Tests
         {
             yield return AdvanceTo(boot.clock.TimeOfBeat(c.TargetBeat) - 0.03);
             if (delay.HasValue) { now = boot.clock.TimeOfBeat(c.TargetBeat) + delay.Value; boot.judge.Submit(c.Key, now); yield return null; }
-            else yield return AdvanceTo(boot.clock.TimeOfBeat(c.TargetBeat) + 0.2);
+            else yield return AdvanceTo(boot.clock.TimeOfBeat(c.TargetBeat) + 0.26);   // beta1-1: NORMAL 창 0.24초(GDD-beta B12.1)가 지나야 무입력 FAIL
         }
 
         [UnityTest]
