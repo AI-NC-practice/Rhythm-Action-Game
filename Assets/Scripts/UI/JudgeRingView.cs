@@ -197,6 +197,9 @@ namespace RhythmActionGame
             for (int i = 0; i < ring.Orbit.Length; i++) ring.Orbit[i] = AddImage(root, "Orbit" + i, VfxFactory.Dot, Color.white, 18f, true);
             if (IsStrike(cue))
             {
+                // 어두운 원 위에 칼 아이콘 (주홍 빛 위에서도 보이게)
+                var back = UiFactory.CreateImage(root, "StrikeIconBack", UiFactory.Disc, new Color(0.08f, 0.05f, 0.05f, 0.85f), GameConfig.StrikeIconPx * 1.15f);
+                back.rectTransform.anchoredPosition = GameConfig.StrikeIconOffsetPx;
                 ring.StrikeIcon = UiFactory.CreateImage(root, "StrikeIcon", VfxFactory.SwordIcon, GameConfig.StrikeRingColor, GameConfig.StrikeIconPx);
                 ring.StrikeIcon.rectTransform.anchoredPosition = GameConfig.StrikeIconOffsetPx;
             }

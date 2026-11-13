@@ -292,8 +292,8 @@ namespace RhythmActionGame
         /// <summary>내 공격 원 빛과 칼 아이콘 색 (주홍, B11.2). 막기 원은 지금처럼 청록 (JudgeRingView.GlowColor).</summary>
         public static readonly UnityEngine.Color StrikeRingColor = new UnityEngine.Color(1f, 0.38f, 0.12f);
         /// <summary>칼 아이콘 크기 (px)와 원 중심에서의 위치 (오른쪽 위).</summary>
-        public const float StrikeIconPx = 44f;
-        public static readonly UnityEngine.Vector2 StrikeIconOffsetPx = new UnityEngine.Vector2(52f, 52f);
+        public const float StrikeIconPx = 52f;
+        public static readonly UnityEngine.Vector2 StrikeIconOffsetPx = new UnityEngine.Vector2(58f, 58f);
         /// <summary>내 공격 PERFECT에 무사가 밀리는 거리 (m), NORMAL에 내가 밀리는 거리 (m, 카메라 뒤로). Claude가 정함.</summary>
         public const float StrikeBossPushMeters = 0.35f;
         public const float StrikeSelfPushMeters = 0.15f;

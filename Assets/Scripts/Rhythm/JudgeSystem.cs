@@ -136,8 +136,12 @@ namespace RhythmActionGame
         double TargetTime(JudgeCue cue) => clock.TimeOfBeat(cue.TargetBeat);
 
         /// <summary>방향키 입력 하나를 처리한다. time은 입력 시각(dsp 초, 보통 clock.Now).</summary>
+        /// <summary>마지막 입력 시각 (시계 초, 진단 기록용).</summary>
+        public double LastInputTime { get; private set; } = double.NaN;
+
         public void Submit(ArrowKey key, double time)
         {
+            LastInputTime = time;
             float offset = OffsetSource();
             foreach (var cue in cues)
             {

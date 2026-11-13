@@ -25,6 +25,12 @@ namespace RhythmActionGame
             var go = new GameObject("DevMode");
             DontDestroyOnLoad(go);
             Instance = go.AddComponent<DevMode>();
+            // 진단용 실행 인자: -autoplay (자동 연주), -devChapter N (그 챕터에서 바로 시작)
+            go.AddComponent<DevJudgeLog>();
+            if (DevAutoplay.Requested) go.AddComponent<DevAutoplay>();
+            var args = System.Environment.GetCommandLineArgs();
+            int i = System.Array.IndexOf(args, "-devChapter");
+            if (i >= 0 && i + 1 < args.Length && int.TryParse(args[i + 1], out int ch)) JumpTo(ch);
         }
 
         void Awake()

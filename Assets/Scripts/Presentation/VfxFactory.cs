@@ -163,11 +163,11 @@ namespace RhythmActionGame
                         float alpha = 0f;
                         if (u > -0.3f && u < 0.92f)                                  // 칼날: 끝으로 갈수록 가늘어짐
                         {
-                            float w = Mathf.Lerp(0.09f, 0.015f, (u + 0.3f) / 1.22f);
+                            float w = Mathf.Lerp(0.16f, 0.04f, (u + 0.3f) / 1.22f);
                             alpha = Mathf.Clamp01((w - v) * s * 0.5f);
                         }
-                        if (u > -0.42f && u <= -0.3f) alpha = Mathf.Max(alpha, Mathf.Clamp01((0.24f - v) * s * 0.5f));   // 코등이
-                        if (u > -0.9f && u <= -0.42f) alpha = Mathf.Max(alpha, Mathf.Clamp01((0.06f - v) * s * 0.5f));   // 손잡이
+                        if (u > -0.42f && u <= -0.3f) alpha = Mathf.Max(alpha, Mathf.Clamp01((0.32f - v) * s * 0.5f));   // 코등이
+                        if (u > -0.9f && u <= -0.42f) alpha = Mathf.Max(alpha, Mathf.Clamp01((0.1f - v) * s * 0.5f));   // 손잡이
                         a[y * s + x] = alpha;
                     }
                 return swordIcon = FromAlpha(tex, a, s);
