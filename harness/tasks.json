@@ -765,10 +765,10 @@
                                          "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과, 테스트 패키지 zip",
                                          "사용자가 NORMAL 판정 난이도와 피격 연출을 확인"
                                      ],
-                      "status":  "needs_user",
+                      "status":  "done",
                       "attempts":  1,
                       "max_attempts":  1,
-                      "notes":  "BuildGray + smoke-test 통과, RhythmActionGame-beta1-1-dev6.zip(38.1 MB) 준비. 사용자 확인 대기."
+                      "notes":  "사용자 플레이 확인(2026-11-13). 피드백: 보스 카메라 각도 단조로움, 옆차기 다운 시 바닥 시점, 자리 바꾸기 등 동적 전투, 모든 적이 제자리에서만 싸움 → 제안서 docs/proposals/dynamic-combat.md."
                   },
                   {
                       "id":  "B10",
