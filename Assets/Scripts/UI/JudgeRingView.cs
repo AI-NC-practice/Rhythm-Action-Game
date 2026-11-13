@@ -45,6 +45,8 @@ namespace RhythmActionGame
             public float AppearedAt;      // 실제 시간
             public float PulseAt = -999f; // 키를 눌러 반응한 시각 (B13)
             public bool Locked;
+            /// <summary>다음에 누를 원은 선명, 기다리는 원은 흐리게 (GDD-beta B10.1).</summary>
+            public CanvasGroup Group;
             public bool Clamped;          // 투영점이 안전 타원 밖이었음
             public Chain Chain;
             public int ChainIndex;
@@ -158,6 +160,8 @@ namespace RhythmActionGame
             var root = new GameObject("Ring", typeof(RectTransform)).GetComponent<RectTransform>();
             root.SetParent(transform, false);
             var ring = new Ring { Cue = cue, Root = root, AppearedAt = RealTime() };
+            ring.Group = root.gameObject.AddComponent<CanvasGroup>();
+            ring.Group.blocksRaycasts = false;
             ring.Glow = UiFactory.CreateImage(root, "Glow", UiFactory.Glow, IsFinisher(cue) ? FinisherGlowColor : GlowColor, GameConfig.RingGlowDiameterPx);
             var glowColor = IsFinisher(cue) ? FinisherGlowColor : GlowColor;
             ring.ChargeGlow = AddImage(root, "ChargeGlow", UiFactory.Glow, glowColor, GameConfig.RingGlowDiameterPx * 1.15f, true);
@@ -258,6 +262,10 @@ namespace RhythmActionGame
             for (int i = rings.Count - 1; i >= 0; i--)
                 if (rings[i].Cue.Judged) { KillRing(rings[i]); rings.RemoveAt(i); }
             foreach (var r in rings) UpdateRing(r);
+            // 다음에 누를 원(가장 이른 원)은 선명, 기다리는 원은 흐리게 (GDD-beta B10.1)
+            Ring next = null;
+            foreach (var r in rings) if (!r.Cue.Judged && (next == null || r.Cue.TargetBeat < next.Cue.TargetBeat)) next = r;
+            foreach (var r in rings) if (r.Group != null) r.Group.alpha = r == next ? GameConfig.RingNextAlpha : GameConfig.RingWaitingAlpha;
             float now = RealTime();
             FadeFloaters(earlyLabels, now);
             for (int i = ringFx.Count - 1; i >= 0; i--)
@@ -583,6 +591,7 @@ namespace RhythmActionGame
             else
             {
                 pos = SafePosition(r.Cue, radii, out clamped, out var outward);
+                pos = AvoidOverlap(r, pos, radii);
                 r.Clamped = clamped;
                 if (clamped)
                 {
@@ -600,6 +609,29 @@ namespace RhythmActionGame
                 if (RealTime() - r.AppearedAt >= GameConfig.RingLockSeconds) r.Locked = true;
             }
             r.Root.anchoredPosition = pos;
+        }
+
+        /// <summary>
+        /// 이미 떠 있는 다른 원과 140 px 안이면 겹치지 않을 때까지 가로 160 px씩 옮긴다 (GDD-beta B10.1).
+        /// 오른쪽 먼저, 안전 타원 가로 범위 안에서만. 둘 곳이 없으면 그대로.
+        /// </summary>
+        Vector2 AvoidOverlap(Ring r, Vector2 pos, Vector2 radii)
+        {
+            for (int k = 0; k < 7; k++)
+            {
+                int step = (k + 1) / 2 * (k % 2 == 1 ? 1 : -1);          // 0, +1, −1, +2, −2, ...
+                var cand = new Vector2(pos.x + step * GameConfig.RingChainSpacingPx, pos.y);
+                if (Mathf.Abs(cand.x) > radii.x + 0.5f) continue;
+                bool free = true;
+                foreach (var o in rings)
+                {
+                    if (o == r) break;                                     // 먼저 뜬 원만 피한다 (나중 원이 비켜 감)
+                    if ((r.Chain != null && o.Chain == r.Chain) || o.Root == null) continue;
+                    if (Vector2.Distance(o.Root.anchoredPosition, cand) < GameConfig.RingOverlapMinPx) { free = false; break; }
+                }
+                if (free) return cand;
+            }
+            return pos;
         }
 
         /// <summary>판정 지점을 화면에 투영해 안전 타원 안으로 끌어온다. 없으면 화면 가운데.</summary>

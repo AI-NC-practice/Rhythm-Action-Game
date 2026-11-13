@@ -30,7 +30,7 @@ namespace RhythmActionGame.Tests
             Assert.AreEqual(0.1f, GameConfig.RingLockSeconds, Eps);
             Assert.AreEqual(40f, GameConfig.RingChevronSizePx, Eps);
             Assert.AreEqual(160f, GameConfig.RingChainSpacingPx, Eps);
-            Assert.AreEqual(1f, GameConfig.RingChainMaxGapBeats, Eps);
+            Assert.AreEqual(2f, GameConfig.RingChainMaxGapBeats, Eps);   // beta1-1: GDD-beta B10.1 (B1.3의 1박을 2박으로)
             Assert.AreEqual(0.5f, GameConfig.RingGlowAlpha, Eps);
             Assert.AreEqual(-0.4f, GameConfig.JudgeExposure, Eps);
             Assert.AreEqual(0.3f, GameConfig.JudgeVignette, Eps);

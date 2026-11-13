@@ -207,8 +207,13 @@ namespace RhythmActionGame
         public const float RingChevronSizePx = 40f;
         /// <summary>연속 원 가로 간격 (px).</summary>
         public const float RingChainSpacingPx = 160f;
-        /// <summary>이 박자 수 미만 간격으로 이어지는 원은 나란히 둔다.</summary>
-        public const float RingChainMaxGapBeats = 1f;
+        /// <summary>이 박자 수 미만 간격으로 이어지는 원은 나란히 둔다. beta1-1: GDD-beta B10.1이 1을 2(원이 떠 있는 2박)로 바꿨다.</summary>
+        public const float RingChainMaxGapBeats = 2f;
+        /// <summary>새 원이 떠 있는 원과 이 거리(px) 안이면 겹치지 않게 옆으로 옮긴다 (GDD-beta B10.1).</summary>
+        public const float RingOverlapMinPx = 140f;
+        /// <summary>다음에 눌러야 할 원 / 기다리는 원의 불투명도 (GDD-beta B10.1).</summary>
+        public const float RingNextAlpha = 1f;
+        public const float RingWaitingAlpha = 0.55f;
         /// <summary>원 바깥 빛 테두리 알파.</summary>
         public const float RingGlowAlpha = 0.5f;
         /// <summary>빛 테두리 지름 (px). GDD-beta에 없음, Claude가 정함 (목표 원 120 px의 1.6배).</summary>

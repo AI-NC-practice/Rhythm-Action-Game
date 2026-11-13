@@ -191,12 +191,12 @@ namespace RhythmActionGame.Tests
         public IEnumerator B01_Chain_SubBeatRings_SideBySide160px()
         {
             var center = cam.transform.position + cam.transform.forward * 10f;
-            // 반 박 간격 4개 (윈드밀·화살 세례 모양) + 1박 간격 1개(묶음 아님)
+            // 반 박 간격 4개 (윈드밀·화살 세례 모양) + 2박 간격 1개(묶음 아님). beta1-1: GDD-beta B10.1은 2박 미만을 묶는다
             judge.Schedule(8.0, ArrowKey.Left, center);
             judge.Schedule(8.5, ArrowKey.Up, center);
             judge.Schedule(9.0, ArrowKey.Right, center);
             judge.Schedule(9.5, ArrowKey.Down, center);
-            judge.Schedule(10.5, ArrowKey.Up, center);
+            judge.Schedule(11.5, ArrowKey.Up, center);
             Appear(3.0); realTime = 0.2f; view.Refresh();   // 6박: 첫 원 등장, 고정
             Appear(3.25); Appear(3.5); Appear(3.75);        // 6.5, 7, 7.5박: 나머지 등장
             Assert.AreEqual(4, view.Rings.Count);
@@ -210,10 +210,10 @@ namespace RhythmActionGame.Tests
             foreach (var r in view.Rings) Assert.LessOrEqual(Mathf.Abs(r.Root.anchoredPosition.x), Radii.x + 0.01f);
             Assert.AreEqual(0f, (view.Rings[0].Root.anchoredPosition.x + view.Rings[3].Root.anchoredPosition.x) * 0.5f, 0.01f, "묶음 가운데가 원래 자리");
 
-            // 9.5 → 10.5는 1박 간격이라 묶음이 아님: 단독 자리(가운데)
-            Appear(4.25);                                   // 8.5박: 10.5박 원 등장
+            // 9.5 → 11.5는 2박 간격이라 묶음이 아님: 단독 자리(가운데)
+            Appear(4.75);                                   // 9.5박: 11.5박 원 등장
             var lone = view.Rings[view.Rings.Count - 1];
-            Assert.AreEqual(10.5, lone.Cue.TargetBeat, 1e-9);
+            Assert.AreEqual(11.5, lone.Cue.TargetBeat, 1e-9);
             Assert.IsNull(lone.Chain);
             Assert.AreEqual(0f, lone.Root.anchoredPosition.x, 0.01f);
             yield return null;

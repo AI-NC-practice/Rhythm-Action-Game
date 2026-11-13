@@ -1,5 +1,5 @@
 ﻿# Unity verify report
-time: 2026-11-12 17:53:33
+time: 2026-11-13 09:45:53
 
 ## EditMode : total=130 passed=130 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
@@ -133,7 +133,7 @@ time: 2026-11-12 17:53:33
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_SpeedFx_Intensity
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_Texts_MatchGdd48
 
-## PlayMode : total=103 passed=103 failed=0 skipped=0 result=Passed
+## PlayMode : total=107 passed=107 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -200,6 +200,10 @@ time: 2026-11-12 17:53:33
   - [Passed] RhythmActionGame.Tests.B19_RewindTests.B19_HpZero_RewindsToChapterStart_KeepsScore_RankDash
   - [Passed] RhythmActionGame.Tests.B19_RewindTests.B19_RewindPresentation_PausedClock_FxSoundStreak
   - [Passed] RhythmActionGame.Tests.B19_RewindTests.B19_Windmill_Fail_RewindsToFirstArrowMinusOneBar_NoHpLoss
+  - [Passed] RhythmActionGame.Tests.B22_RingOverlapTests.B22_GameScene_StageChart_NeverOverlap
+  - [Passed] RhythmActionGame.Tests.B22_RingOverlapTests.B22_NextRingOpaque_WaitingDimmed
+  - [Passed] RhythmActionGame.Tests.B22_RingOverlapTests.B22_NonChainNewRing_ShiftsAwayFromVisibleRing
+  - [Passed] RhythmActionGame.Tests.B22_RingOverlapTests.B22_OneBeatCombo_SideBySide_NoOverlap
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_ChapterStartBeats_MatchSections
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(1)
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(4)

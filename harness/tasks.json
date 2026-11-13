@@ -595,10 +595,10 @@
                                          "실제 Game 씬 차트로 달리며 동시에 떠 있는 두 원의 중심 거리가 항상 140 px 이상 — PlayMode 테스트",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "in_progress",
+                      "status":  "done",
                       "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "묶음 기준 2박 미만, 떠 있는 원과 140 px 안이면 160 px씩 비켜 놓기, 다음 원 1.0·기다리는 원 0.55. 평가 PASS 1회차."
                   },
                   {
                       "id":  "B23",
@@ -614,8 +614,8 @@
                                          "전투가 끝나면 다음 마디 첫 박에 다시 달림 (기존 규칙 유지) — 기존 테스트 통과",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "in_progress",
+                      "attempts":  1,
                       "max_attempts":  3,
                       "notes":  ""
                   },
