@@ -197,6 +197,14 @@ namespace RhythmActionGame.EditorTools
             hooks.player = follower;
             hooks.vfx = vfxPool;
 
+            // 무사 결투 1인칭 가상 카메라 (GDD-beta B11.5, Cinemachine)
+            var duelCam = systems.AddComponent<DuelCamera>();
+            duelCam.director = director;
+            duelCam.judge = judge;
+            duelCam.judgeFx = fx;
+            duelCam.cam = cam;
+            duelCam.fxOffset = fxOffset.transform;
+
             var boot = new GameObject("GameBootstrap").AddComponent<GameBootstrap>();
             boot.director = director;
             boot.clock = clock;

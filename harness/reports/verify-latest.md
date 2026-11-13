@@ -1,5 +1,5 @@
 ﻿# Unity verify report
-time: 2026-11-13 10:57:12
+time: 2026-11-13 11:05:01
 
 ## EditMode : total=138 passed=138 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
@@ -141,7 +141,7 @@ time: 2026-11-13 10:57:12
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_SpeedFx_Intensity
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_Texts_MatchGdd48
 
-## PlayMode : total=120 passed=120 failed=0 skipped=0 result=Passed
+## PlayMode : total=124 passed=124 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -225,6 +225,10 @@ time: 2026-11-13 10:57:12
   - [Passed] RhythmActionGame.Tests.B26_BossDuelTests.B26_Duel_Strike_Posture_PhaseRewind_Clear
   - [Passed] RhythmActionGame.Tests.B26_DuelRingViewTests.B26_LongChain_ReusesSlots_InsideSafeEllipse
   - [Passed] RhythmActionGame.Tests.B26_DuelRingViewTests.B26_StrikeRing_VermilionGlow_SwordIcon
+  - [Passed] RhythmActionGame.Tests.B27_DuelCameraTests.B27_Brain_OnlyDuringDuel
+  - [Passed] RhythmActionGame.Tests.B27_DuelCameraTests.B27_ClashPunch_And_FxLayerOnTop
+  - [Passed] RhythmActionGame.Tests.B27_DuelCameraTests.B27_Config_MatchGddBetaB115
+  - [Passed] RhythmActionGame.Tests.B27_DuelCameraTests.B27_GuardAndStrikeCams_SwitchByNextStep_Blend03
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_ChapterStartBeats_MatchSections
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(1)
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(4)

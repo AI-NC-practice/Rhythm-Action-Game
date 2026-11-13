@@ -28,6 +28,15 @@ namespace RhythmActionGame
         /// <summary>연출 층의 FOV 합 (CameraFx, GDD-beta B5). 최종 FOV는 45~85°로 자른다.</summary>
         public float FxFov;
 
+        /// <summary>
+        /// 다른 카메라 장치(무사 결투의 Cinemachine, GDD-beta B11.5)가 카메라를 맡는 중이면 true.
+        /// 이때는 카메라 FOV·회전을 쓰지 않고 Turn과 FxFov만 계산해 둔다. 화면 효과(채도·노출·비네트)는 그대로.
+        /// </summary>
+        public bool CameraOverride;
+
+        /// <summary>지금 판정 회전 (카메라 부모 기준, 판정 연출 세기만큼).</summary>
+        public Quaternion Turn => Quaternion.Slerp(Quaternion.identity, turnTarget, weight);
+
         public float Weight => weight;
         public float Saturation => color != null ? color.saturation.value : 0f;
         /// <summary>판정 중 노출 (GDD-beta B1.4).</summary>
@@ -94,11 +103,11 @@ namespace RhythmActionGame
                 color.postExposure.value = Mathf.Lerp(0f, GameConfig.JudgeExposure, weight);
             }
             if (vignette != null) vignette.intensity.value = Mathf.Lerp(0f, GameConfig.JudgeVignette, weight);
-            if (cam != null)
+            if (cam != null && !CameraOverride)
             {
                 float baseFov = GameConfig.FovDefault + FovBonus;
                 cam.fieldOfView = Mathf.Clamp(Mathf.Lerp(baseFov, GameConfig.FovZoom, weight) + FxFov, GameConfig.Fx.FovMin, GameConfig.Fx.FovMax);
-                cam.transform.localRotation = Quaternion.Slerp(Quaternion.identity, turnTarget, weight);
+                cam.transform.localRotation = Turn;
             }
         }
     }

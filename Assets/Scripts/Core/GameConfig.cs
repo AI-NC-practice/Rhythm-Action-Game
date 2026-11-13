@@ -302,6 +302,21 @@ namespace RhythmActionGame
         /// <summary>긴 묶음 자리 돌려쓰기 최대 수 (B11.6).</summary>
         public const int ChainSlotsMax = 5;
 
+        // ---- B11.5 결투 1인칭 가상 카메라 (B27) ----
+        /// <summary>막기 카메라: 머리 기준 높이 (m), FOV (도).</summary>
+        public const float DuelGuardCamHeight = -0.1f;
+        public const float DuelGuardCamFov = 62f;
+        /// <summary>공격 카메라: 앞으로 (m), FOV (도), 베는 쪽 롤 (도).</summary>
+        public const float DuelStrikeCamForward = 0.4f;
+        public const float DuelStrikeCamFov = 54f;
+        public const float DuelStrikeCamRoll = 6f;
+        /// <summary>두 카메라 사이 블렌드 (초, Ease In-Out).</summary>
+        public const float DuelCamBlendSeconds = 0.3f;
+        /// <summary>칼이 부딪칠 때 FOV 줌 펀치 (도)와 길이 (초).</summary>
+        public const float DuelClashPunchFov = -6f;
+        public const float DuelClashPunchSeconds = 0.15f;
+
+
         // ---------------- GDD-beta B1.4 판정 화면 ----------------
         /// <summary>판정 중 노출 (URP Color Adjustments postExposure, EV).</summary>
         public const float JudgeExposure = -0.4f;

@@ -693,10 +693,10 @@
                                          "칼이 부딪칠 때 FOV −6° 줌 펀치 0.15초, 흔들림 등 기존 연출 층이 결투 중에도 적용 — 테스트",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "Cinemachine 3.1.7. DuelCamera: 결투 동안만 Brain(ManualUpdate, 시간 배율 무시), 연출 층 아래 막기·공격 가상 카메라 2대, 다음 판정 종류로 전환 0.3초 EaseInOut, 칼 부딪침 FOV −6° 0.15초. JudgeFx.CameraOverride. 평가 PASS 1회차."
                   },
                   {
                       "id":  "B28",
