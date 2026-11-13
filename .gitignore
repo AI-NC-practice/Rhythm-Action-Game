@@ -72,4 +72,4 @@ __pycache__/
 *.pyc
 
 # 압축을 푼 테스트 패키지 폴더 (beta1-1에서 실수로 한 번 커밋됨)
-/RhythmActionGame-*-dev/
+/RhythmActionGame-*-dev*/
