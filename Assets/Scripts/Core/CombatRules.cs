@@ -8,6 +8,8 @@ namespace RhythmActionGame
         Attack,     // 적 공격 방어 (가로베기·내려베기·찌르기·올려베기)
         Finisher,   // 마무리 (↑)
         Windmill,   // 포위 전투 3단계 화살표 (T07)
+        Strike,     // 내 공격 (무사 결투, GDD-beta B11.2)
+        Lock,       // 칼 겨루기 밀어내기 (무사 결투, GDD-beta B11.1)
     }
 
     /// <summary>마무리 결과 연출 (GDD 4.5 표).</summary>

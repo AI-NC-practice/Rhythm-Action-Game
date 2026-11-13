@@ -187,22 +187,24 @@ namespace RhythmActionGame.Tests
         }
 
         [UnityTest]
-        public IEnumerator B07_Boss_FinalParry_SlowMoCandidate()
+        public IEnumerator B07_Boss_Duel_StrikeClash_SlowMoOnlyOnExecution()
         {
+            // beta1-1: GDD-beta B11 — 무사 결투는 42판정. 내 공격 PERFECT는 충돌 연출(StrikePerfect),
+            // 3단계 난타 중에는 슬로모션을 걸지 않고(예전 "마지막 패링 슬로모션" 대신) 마무리 처형만 슬로모션
             yield return Load(256);
             yield return UntilCombat();
             var enc = dir.CurrentEncounter;
             int s0 = pd.timeFx.SlowMotionCount;
             var cues = enc.Cues.ToList();
-            for (int i = 0; i < 4; i++) yield return Hit(cues[i], 0.0);
-            Assert.AreEqual(s0, pd.timeFx.SlowMotionCount, "앞 4번 PERFECT는 슬로모션 없음");
-            yield return Hit(cues[4], 0.0);
-            Assert.AreEqual("ParryPerfectFinale", LastFx(), "무사 마지막 공격");
-            Assert.AreEqual(s0 + 1, pd.timeFx.SlowMotionCount, "마지막 패링 슬로모션");
-            dir.slowMotion.Cancel(); Time.timeScale = 1f;
-            yield return Hit(cues[5], 0.0);
+            Assert.AreEqual(CombatStepKind.Strike, ((CombatStep)cues[2].Tag).Kind);
+            for (int i = 0; i < 3; i++) yield return Hit(cues[i], 0.0);
+            Assert.AreEqual("StrikePerfect", LastFx(), "내 공격 PERFECT: 칼끼리 충돌");
+            for (int i = 3; i < cues.Count - 1; i++) { yield return Hit(cues[i], 0.0); dir.slowMotion.Cancel(); Time.timeScale = 1f; }
+            Assert.AreEqual(s0, pd.timeFx.SlowMotionCount, "결투 중 슬로모션 없음");
+            Assert.IsTrue(hooks.Log.Contains("PostureBreak"), "3단계 끝: 자세 무너짐");
+            yield return Hit(cues[cues.Count - 1], 0.0);
             Assert.AreEqual(StageState.Cleared, dir.State);
-            Assert.AreEqual(s0 + 2, pd.timeFx.SlowMotionCount, "마무리 처형 슬로모션");
+            Assert.AreEqual(s0 + 1, pd.timeFx.SlowMotionCount, "마무리 처형 슬로모션");
         }
 
         /// <summary>예고(AttackWarn·FinisherWarn)를 뺀 마지막 연출.</summary>

@@ -11,7 +11,7 @@ namespace RhythmActionGame
     /// - F 포위: 1단계 회전 롤, 2단계 낮게·넓게, 윈드밀 화살표마다 FOV, 마무리
     /// - G 파쿠르: 도약 PERFECT, 사건이 끝날 때 착지(결과별), FAIL은 흔들림 + 붉은 테두리 0.3
     /// 슬로모션: 처형·윈드밀은 StageDirector가 이미 걸므로 여기서는 카메라·화면·이펙트만 건다.
-    /// 사건 PERFECT는 StageDirector가 빈도 제한을 통과했을 때만 EventPerfectSlow, 전투 후보(무사 마지막 패링, 포위 2단계)는 여기서 요청한다.
+    /// 사건 PERFECT는 StageDirector가 빈도 제한을 통과했을 때만 EventPerfectSlow, 전투 후보(포위 2단계. 무사 결투는 GDD-beta B11로 바뀌어 마무리 처형만 슬로모션)는 여기서 요청한다.
     /// </summary>
     public class PresentationHooks : MonoBehaviour
     {
@@ -40,6 +40,7 @@ namespace RhythmActionGame
                 director.StageReset += OnReset;
                 director.RewindStarted += OnRewind;
                 director.EncounterStarted += OnEncounter;
+                director.PostureBroken += OnPostureBroken;
             }
         }
 
@@ -54,6 +55,7 @@ namespace RhythmActionGame
                 director.StageReset -= OnReset;
                 director.RewindStarted -= OnRewind;
                 director.EncounterStarted -= OnEncounter;
+                director.PostureBroken -= OnPostureBroken;
             }
         }
 
@@ -70,6 +72,10 @@ namespace RhythmActionGame
             if (vfx != null && presentation != null && presentation.Enabled) { vfx.Rewind.Play(); Log.Add("RewindOverlay"); }
         }
 
+        /// <summary>무사 자세 무너짐 (GDD-beta B11.3): 붉은 번쩍임 + 충돌음.</summary>
+        void OnPostureBroken(StageDirector.Encounter e) =>
+            Play(GameConfig.Fx.PostureBreak, 1f, null, e.Actors != null && e.Actors.Length > 0 && e.Actors[0] != null ? e.Actors[0].transform.position + Vector3.up * 1.2f : (Vector3?)null);
+
         void OnReset() { warned.Clear(); lastSeenRun = null; Log.Clear(); }
 
         static FxPreset NoSlow(FxPreset p) { p.SlowMo = SlowMoMode.None; return p; }
@@ -80,6 +86,8 @@ namespace RhythmActionGame
             presentation.Play(p, side, targets, pos);
             Log.Add(p.Name);
         }
+
+        bool InSurround => director != null && director.CurrentEncounter != null && director.CurrentEncounter.Event.IsSurround;
 
         static float SideOf(ArrowKey k) => k == ArrowKey.Left ? -1f : k == ArrowKey.Right ? 1f : 1f;
 
@@ -115,6 +123,7 @@ namespace RhythmActionGame
                 presentation.screenFx.Add(tmp);
                 Log.Add("FinisherWarn");
             }
+            if (!InSurround) return;                                     // Phase는 포위 전투 단계 (무사 결투의 Phase는 결투 단계, B11)
             if (s.Phase == 1) Play(GameConfig.Fx.SurroundTurn, SideOf(s.Key));
             else if (s.Phase == 2) Play(GameConfig.Fx.Simultaneous);
         }
@@ -176,21 +185,17 @@ namespace RhythmActionGame
                 return;
             }
             float side = SideOf(s.Key);
+            if (s.Kind == CombatStepKind.Strike || s.Kind == CombatStepKind.Lock)
+            {
+                // 내 공격·칼 겨루기 (GDD-beta B11.2): PERFECT 칼끼리 충돌 + 무사 밀림, NORMAL 내가 밀림. FAIL(헛침)은 되감기가 대신한다
+                if (r != Judgement.Fail) Play(r == Judgement.Perfect ? GameConfig.Fx.StrikePerfect : GameConfig.Fx.StrikeNormal, side, Attackers(s), pos);
+                return;
+            }
             if (r == Judgement.Fail) { Play(GameConfig.Fx.Hit, side, Attackers(s), pos); return; }
             if (r == Judgement.Normal) { Play(GameConfig.Fx.DefendNormal, side, Attackers(s), pos); return; }
             // PERFECT
-            if (s.Phase == 2) { Play(GameConfig.Fx.SimultaneousPerfect, 1f, Attackers(s), pos); return; }      // 슬로모션 후보
-            if (IsBossFinalAttack(s)) { Play(GameConfig.Fx.ParryPerfectFinale, side, Attackers(s), pos); return; } // 슬로모션 후보
+            if (s.Phase == 2 && InSurround) { Play(GameConfig.Fx.SimultaneousPerfect, 1f, Attackers(s), pos); return; }      // 슬로모션 후보
             Play(s.Key == ArrowKey.Up ? GameConfig.Fx.ParryPerfect : GameConfig.Fx.DodgePerfect, side, Attackers(s), pos);
-        }
-
-        bool IsBossFinalAttack(CombatStep s)
-        {
-            var enc = director != null ? director.CurrentEncounter : null;
-            if (enc == null || !enc.Event.IsBoss) return false;
-            CombatStep lastAttack = null;
-            foreach (var st in enc.Steps) if (st.Kind == CombatStepKind.Attack) lastAttack = st;
-            return ReferenceEquals(lastAttack, s);
         }
 
         // ---------------- E 처형, F 윈드밀 마무리 ----------------

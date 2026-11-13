@@ -65,6 +65,7 @@ namespace RhythmActionGame
         {
             SaveHome();
             StopAllCoroutines();
+            pushRoutine = null; PushOffset = 0;
             transform.SetPositionAndRotation(homePos, homeRot);
             gameObject.SetActive(true);
             Defeated = false;
@@ -137,6 +138,51 @@ namespace RhythmActionGame
             if (!Defeated) State = playerResult == Judgement.Fail ? "Attack_Landed" : playerResult == Judgement.Perfect ? "Attack_Evaded" : "Attack_Grazed";
         }
 
+        /// <summary>내 공격을 막으려고 칼을 가로로 든다 (무사 결투, GDD-beta B11.2). p: 원 등장 0 → 목표 1.</summary>
+        public void Guard(float p)
+        {
+            if (Defeated || Frozen || attacking) return;
+            if (weaponPivot != null) weaponPivot.localRotation = Quaternion.Euler(-60f * Mathf.Clamp01(p / 0.7f), 0, 70f * Mathf.Clamp01(p / 0.7f));
+            if (pushRoutine == null) State = "Guard";      // 밀려나는 중이면 "Pushed" 유지
+        }
+
+        /// <summary>막기 자세를 푼다.</summary>
+        public void EndGuard()
+        {
+            if (Defeated || attacking) return;
+            if (weaponPivot != null) weaponPivot.localRotation = Quaternion.identity;
+        }
+
+        Coroutine pushRoutine;
+        Vector3 pushBase;
+        /// <summary>밀려난 정도 (m, 테스트용).</summary>
+        public float PushOffset { get; private set; }
+
+        /// <summary>내 공격 PERFECT에 뒤로 밀린다 (B11.2): 빠르게 meters만큼 밀렸다가 seconds 동안 돌아온다.</summary>
+        public void Pushback(Vector3 away, float meters, float seconds)
+        {
+            if (Defeated) return;
+            if (pushRoutine != null) { StopCoroutine(pushRoutine); transform.position = pushBase; }
+            pushBase = transform.position;
+            away.y = 0;
+            State = "Pushed";
+            pushRoutine = StartCoroutine(PushRoutine(away.sqrMagnitude > 1e-6f ? away.normalized : -transform.forward, meters, seconds));
+        }
+
+        IEnumerator PushRoutine(Vector3 dir, float meters, float seconds)
+        {
+            for (float t = 0; t < seconds; t += Frozen ? 0f : Time.deltaTime)
+            {
+                float k = t / seconds;
+                PushOffset = meters * (k < 0.25f ? k / 0.25f : 1f - Mathf.SmoothStep(0, 1, (k - 0.25f) / 0.75f));
+                transform.position = pushBase + dir * PushOffset;
+                yield return null;
+            }
+            PushOffset = 0;
+            transform.position = pushBase;
+            pushRoutine = null;
+        }
+
         /// <summary>쓰러진다. 결과별 동작 (회색 상자: 이동·회전).</summary>
         public void Defeat(ExecutionKind how, Vector3 awayFromPlayer)
         {
@@ -146,6 +192,7 @@ namespace RhythmActionGame
             if (trail != null) trail.emitting = false;
             State = "Defeated_" + how;
             StopAllCoroutines();
+            if (pushRoutine != null) { transform.position = pushBase; pushRoutine = null; PushOffset = 0; }
             StartCoroutine(DefeatRoutine(how, awayFromPlayer.normalized));
         }
 

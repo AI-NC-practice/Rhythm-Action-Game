@@ -37,6 +37,20 @@ namespace RhythmActionGame
         }
 
         /// <summary>
+        /// 긴 묶음에서 돌려 쓰는 자리 수 (GDD-beta B11.6): min(원 수, 2박 ÷ 최소 간격 + 1, 5).
+        /// 원은 목표 2박 전에 나타나므로 동시에 보이는 원은 이 수를 넘지 않는다.
+        /// </summary>
+        public static int ChainSlots(System.Collections.Generic.IList<double> targets)
+        {
+            int n = targets.Count;
+            if (n <= 1) return n;
+            double minGap = double.MaxValue;
+            for (int i = 1; i < n; i++) minGap = System.Math.Min(minGap, targets[i] - targets[i - 1]);
+            int visible = minGap <= 1e-6 ? n : (int)System.Math.Floor(GameConfig.ApproachBeats / minGap + 1e-6) + 1;
+            return System.Math.Min(n, System.Math.Min(visible, GameConfig.ChainSlotsMax));
+        }
+
+        /// <summary>
         /// 연속 원 묶음(count개)의 index번째 자리. 묶음 가운데를 anchor에 두고 가로 160 px 간격, 먼저 올 원이 왼쪽.
         /// 묶음 전체가 타원 가로 범위를 넘지 않게 가운데를 옮긴다.
         /// </summary>

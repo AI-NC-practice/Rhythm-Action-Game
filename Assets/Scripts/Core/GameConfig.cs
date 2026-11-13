@@ -278,6 +278,30 @@ namespace RhythmActionGame
         public const float RewindSaturation = -90f;
         public const float RewindExposure = -0.5f;
 
+        // ---------------- GDD-beta B11 무사 결투 ----------------
+        /// <summary>자세 게이지 가득 (B11.3).</summary>
+        public const float PostureFull = 100f;
+        /// <summary>NORMAL이 PERFECT에 비해 채우는 비율 (+50/N ÷ +100/N).</summary>
+        public const float PostureNormalShare = 0.5f;
+        /// <summary>자세 게이지 크기 (px, 화면 위 가운데), 위쪽 여백 (px). GDD-beta에 없음, Claude가 정함.</summary>
+        public const float PostureBarWidthPx = 520f;
+        public const float PostureBarHeightPx = 16f;
+        public const float PostureBarTopPx = 70f;
+        /// <summary>"자세 무너짐" 붉은 번쩍임 길이 (초). GDD-beta에 없음, Claude가 정함.</summary>
+        public const float PostureBreakFlashSeconds = 0.6f;
+        /// <summary>내 공격 원 빛과 칼 아이콘 색 (주홍, B11.2). 막기 원은 지금처럼 청록 (JudgeRingView.GlowColor).</summary>
+        public static readonly UnityEngine.Color StrikeRingColor = new UnityEngine.Color(1f, 0.38f, 0.12f);
+        /// <summary>칼 아이콘 크기 (px)와 원 중심에서의 위치 (오른쪽 위).</summary>
+        public const float StrikeIconPx = 44f;
+        public static readonly UnityEngine.Vector2 StrikeIconOffsetPx = new UnityEngine.Vector2(52f, 52f);
+        /// <summary>내 공격 PERFECT에 무사가 밀리는 거리 (m), NORMAL에 내가 밀리는 거리 (m, 카메라 뒤로). Claude가 정함.</summary>
+        public const float StrikeBossPushMeters = 0.35f;
+        public const float StrikeSelfPushMeters = 0.15f;
+        /// <summary>밀림이 돌아오는 시간 (초).</summary>
+        public const float StrikePushSeconds = 0.35f;
+        /// <summary>긴 묶음 자리 돌려쓰기 최대 수 (B11.6).</summary>
+        public const int ChainSlotsMax = 5;
+
         // ---------------- GDD-beta B1.4 판정 화면 ----------------
         /// <summary>판정 중 노출 (URP Color Adjustments postExposure, EV).</summary>
         public const float JudgeExposure = -0.4f;
@@ -409,6 +433,12 @@ namespace RhythmActionGame
             public static readonly FxPreset Rewind = P("Rewind", 4, kick: 0.3f, pitch: -3f, rise: 0.2f, hold: 0.3f, release: 0.3f);
             // B10.2 대치: 카메라가 적 쪽으로 살짝 다가감 (FOV −4°), 첫 원이 뜨는 2박(1초) 동안
             public static readonly FxPreset Standoff = P("Standoff", 2, fov: -4f, rise: 0.2f, hold: 0.8f, release: 0.3f);
+            // B11.2 내 공격 PERFECT: 칼끼리 맞부딪쳐 무사가 밀림 (패링과 같은 충돌 연출)
+            public static readonly FxPreset StrikePerfect = P("StrikePerfect", 3, hitStop: 0.07f, trauma: 0.35f, hz: 25f, kick: -0.05f, pitch: -1.5f, fov: -3f, rise: 0.02f, hold: 0.05f, release: 0.25f);
+            // B11.2 내 공격 NORMAL: 부딪쳤지만 내가 밀림 (뒤로 StrikeSelfPushMeters)
+            public static readonly FxPreset StrikeNormal = P("StrikeNormal", 2, hitStop: 0.03f, trauma: 0.2f, hz: 12f, kick: StrikeSelfPushMeters, height: -0.05f, rise: 0.03f, hold: 0.05f, release: 0.3f);
+            // B11.3 자세 무너짐: 흔들림 + 붉은 번쩍임
+            public static readonly FxPreset PostureBreak = P("PostureBreak", 3, hitStop: 0.08f, trauma: 0.4f, hz: 20f, fov: -4f, rise: 0.03f, hold: 0.1f, release: 0.4f);
             /// <summary>대치 때 적이 다가오는 거리 (m, GDD-beta B10.2).</summary>
             public const float StandoffApproachMeters = 0.5f;
             /// <summary>적 공격 예고: 목표 박자 몇 박 전에 (휘두르기 직전, 제안서 2장 A).</summary>
@@ -448,7 +478,7 @@ namespace RhythmActionGame
             public static readonly FxPreset[] All =
             {
                 AttackWarn, ParryPerfect, DodgePerfect, ParryPerfectFinale, DefendNormal, Hit, Execution, ExecutionKick,
-                SurroundTurn, Simultaneous, SimultaneousPerfect, WindmillArrow, WindmillFinish, JumpPerfect, LandPerfect, LandNormal, LandFail, EventPerfectSlow, ParkourFail, Rewind, Standoff,
+                SurroundTurn, Simultaneous, SimultaneousPerfect, WindmillArrow, WindmillFinish, JumpPerfect, LandPerfect, LandNormal, LandFail, EventPerfectSlow, ParkourFail, Rewind, Standoff, StrikePerfect, StrikeNormal, PostureBreak,
             };
         }
 

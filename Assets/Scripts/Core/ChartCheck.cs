@@ -36,7 +36,7 @@ namespace RhythmActionGame
             {
                 if (e.IsDuel) n += CombatRules.NormalEnemySteps(e).Count;
                 else if (e.IsSurround) n += CombatPatterns.SurroundSteps().Count;
-                else if (e.IsBoss) n += CombatPatterns.BossSteps(e).Count;
+                else if (e.IsBoss) n += BossDuel.Steps().Count;   // 무사 결투 (GDD-beta B11.6)
             }
             return n;
         }

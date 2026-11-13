@@ -139,6 +139,41 @@ namespace RhythmActionGame
             }
         }
 
+        static Sprite swordIcon;
+        /// <summary>
+        /// 내 공격 원의 칼 아이콘 (GDD-beta B11.2): 왼쪽 아래 → 오른쪽 위로 기운 칼 (칼날·코등이·손잡이), 흰색 (색은 Image.color로).
+        /// </summary>
+        public static Sprite SwordIcon
+        {
+            get
+            {
+                if (swordIcon != null) return swordIcon;
+                const int s = 64;
+                var tex = NewTex(s, "SwordIcon");
+                var a = new float[s * s];
+                var dir = new Vector2(1f, 1f).normalized;
+                var nrm = new Vector2(-dir.y, dir.x);
+                var c = new Vector2(s * 0.5f, s * 0.5f);
+                for (int y = 0; y < s; y++)
+                    for (int x = 0; x < s; x++)
+                    {
+                        var p = new Vector2(x + 0.5f, y + 0.5f) - c;
+                        float u = Vector2.Dot(p, dir) / (s * 0.5f);    // 칼 방향 −1(손잡이 끝) ~ 1(칼끝)
+                        float v = Mathf.Abs(Vector2.Dot(p, nrm)) / (s * 0.5f);
+                        float alpha = 0f;
+                        if (u > -0.3f && u < 0.92f)                                  // 칼날: 끝으로 갈수록 가늘어짐
+                        {
+                            float w = Mathf.Lerp(0.09f, 0.015f, (u + 0.3f) / 1.22f);
+                            alpha = Mathf.Clamp01((w - v) * s * 0.5f);
+                        }
+                        if (u > -0.42f && u <= -0.3f) alpha = Mathf.Max(alpha, Mathf.Clamp01((0.24f - v) * s * 0.5f));   // 코등이
+                        if (u > -0.9f && u <= -0.42f) alpha = Mathf.Max(alpha, Mathf.Clamp01((0.06f - v) * s * 0.5f));   // 손잡이
+                        a[y * s + x] = alpha;
+                    }
+                return swordIcon = FromAlpha(tex, a, s);
+            }
+        }
+
         /// <summary>연기 덩어리 (노이즈로 가장자리를 불규칙하게).</summary>
         public static Sprite Smoke
         {

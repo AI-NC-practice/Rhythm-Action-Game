@@ -56,9 +56,13 @@ namespace RhythmActionGame.Tests
             }
             Assert.Greater(arrivedAt, 0, "전투 시작");
             Assert.Greater(appearedAt, 0, "첫 원 등장");
-            Assert.LessOrEqual(appearedAt - arrivedAt, 0.5 + 0.02, $"{start}: 도착 후 0.5초 안에 첫 원 (공백 {appearedAt - arrivedAt:0.000}초)");
             var enc = dir.CurrentEncounter;
-            Assert.AreEqual(enc.StartBeat - GameConfig.ApproachBeats, System.Math.Round(enc.StartBeat - GameConfig.ApproachBeats), 1e-9, "첫 원은 박 위에서 등장");
+            // beta1-1: GDD-beta B11.1 — 무사 결투는 O(도착 후 가장 가까운 박) 뒤 등장 컷 4박이 지나야 첫 원이 뜬다
+            double cut = enc.IsBossDuel ? BossDuel.PhaseStart(BossDuel.PhaseExplore) * GameConfig.SecondsPerBeat / boot.clock.SpeedMultiplier : 0;
+            Assert.LessOrEqual(appearedAt - arrivedAt, 0.5 + cut + 0.02, $"{start}: 도착 후 0.5초(+등장 컷) 안에 첫 원 (공백 {appearedAt - arrivedAt:0.000}초)");
+            if (enc.IsBossDuel) Assert.GreaterOrEqual(appearedAt - arrivedAt, cut - 0.02, "등장 컷 동안에는 원 없음");
+            double appearBeat = enc.IsBossDuel ? enc.StartBeat + BossDuel.PhaseStart(BossDuel.PhaseExplore) : enc.StartBeat - GameConfig.ApproachBeats;
+            Assert.AreEqual(appearBeat, System.Math.Round(appearBeat), 1e-9, "첫 원은 박 위에서 등장");
         }
 
         [UnityTest]

@@ -27,6 +27,17 @@ namespace RhythmActionGame
             public bool Done;
             public double ResumeBeat;
             public ExecutionKind Execution;
+            // ---- 무사 결투 (GDD-beta B11). 결투에서 StartBeat는 기준점 O(도착 후 가장 가까운 박)다 ----
+            public bool IsBossDuel => Event != null && Event.IsBoss;
+            /// <summary>무사 자세 게이지 (0~GameConfig.PostureFull, B11.3).</summary>
+            public float Posture;
+            /// <summary>지금 단계를 시작할 때의 자세 게이지 (FAIL이면 이 값으로 돌아감, B11.4).</summary>
+            public float PhasePosture;
+            /// <summary>지금 결투 단계 (BossDuel.PhaseExplore ~ PhaseFinish).</summary>
+            public int Phase = BossDuel.PhaseExplore;
+            public bool PostureBroken;
+            /// <summary>대치(칼 들고 다가옴)가 끝나는 박.</summary>
+            public double StandoffEndBeat => IsBossDuel ? StartBeat + BossDuel.PhaseStart(BossDuel.PhaseExplore) : StartBeat;
         }
 
         Encounter encounter;
@@ -83,7 +94,8 @@ namespace RhythmActionGame
             var e = encounter;
             e.Attempts++;
             e.Cues.Clear();
-            e.StartBeat = CombatRules.EncounterStartBeat(clock.CurrentBeat);   // GDD-beta B10.2 (GDD 4.5의 다음 마디 대신)
+            // GDD-beta B10.2 (GDD 4.5의 다음 마디 대신). 무사 결투는 기준점 O = 도착 후 가장 가까운 박 (B11.1)
+            e.StartBeat = e.IsBossDuel ? BossDuel.Origin(clock.CurrentBeat) : CombatRules.EncounterStartBeat(clock.CurrentBeat);
             foreach (var s in e.Steps)
                 e.Cues.Add(judge.Schedule(e.StartBeat + s.OffsetBeats, s.Key, AttackPoint(s), s));
         }
@@ -118,16 +130,25 @@ namespace RhythmActionGame
             }
             double beat = clock.CurrentBeat;
             // 대치 (GDD-beta B10.2): 첫 공격 전까지 적이 0.5 m 다가오며 칼을 든다 (포위 전투 제외)
-            if (!encounter.Event.IsSurround && encounter.Actors != null && beat < encounter.StartBeat)
+            if (!encounter.Event.IsSurround && encounter.Actors != null && beat < encounter.StandoffEndBeat)
             {
-                double span = System.Math.Max(0.25, encounter.StartBeat - encounter.ArriveBeat);
+                double span = System.Math.Max(0.25, encounter.StandoffEndBeat - encounter.ArriveBeat);
                 float sp = Mathf.Clamp01((float)((beat - encounter.ArriveBeat) / span));
                 foreach (var a in encounter.Actors) if (a != null) a.Standoff(player.transform.position, sp);
             }
             // 원이 떠 있는 공격: 적이 무기를 휘두르고, 판정 원과 카메라가 무기 끝을 따라간다
             foreach (var cue in encounter.Cues)
             {
-                if (cue.Judged || !cue.Appeared || !(cue.Tag is CombatStep s) || s.Kind != CombatStepKind.Attack) continue;
+                if (cue.Judged || !cue.Appeared || !(cue.Tag is CombatStep s)) continue;
+                if (IsGuarded(s))
+                {
+                    // 내 공격·칼 겨루기 (B11.2): 무사가 칼을 들어 막고, 원은 무사의 가슴을 따라간다
+                    float gp = (float)(1.0 - (cue.TargetBeat - beat) / GameConfig.ApproachBeats);
+                    var g = ActorOf(s);
+                    if (g != null) { g.Guard(gp); cue.WorldPoint = g.transform.position + Vector3.up * 0.4f; }
+                    continue;
+                }
+                if (s.Kind != CombatStepKind.Attack) continue;
                 float p = (float)(1.0 - (cue.TargetBeat - beat) / GameConfig.ApproachBeats);
                 foreach (var idx in s.Attackers)
                     if (encounter.Actors != null && idx < encounter.Actors.Length && encounter.Actors[idx] != null)
@@ -143,9 +164,12 @@ namespace RhythmActionGame
             if (!encounter.Cues.Contains(cue)) return;
 
             if (step.Kind == CombatStepKind.Attack)
+            {
                 foreach (var idx in step.Attackers)
                     if (encounter.Actors != null && idx < encounter.Actors.Length && encounter.Actors[idx] != null)
                         encounter.Actors[idx].EndAttack(r);
+            }
+            else if (IsGuarded(step) && ActorOf(step) != null) ActorOf(step).EndGuard();
 
             OnCombatStepJudged(step, r);
         }
@@ -159,8 +183,6 @@ namespace RhythmActionGame
 
             if (r == Judgement.Fail)
             {
-                // GDD-beta B9.2: 무사는 체력을 깎지 않고 첫 공격 1마디 앞으로 되감는다
-                if (encounter.Event.IsBoss) { RewindBoss(); return; }
                 // GDD-beta B9.1: 일반 적은 체력 −1 후 다음 공격으로 (다시 하지 않음). 마무리 FAIL은 밀쳐 쓰러뜨리기로 끝
                 Health.Damage();
                 if (Health.IsDead || Rewinding || encounter == null) return;
@@ -181,19 +203,6 @@ namespace RhythmActionGame
         }
 
         partial void OnSpecialStepJudged(CombatStep step, Judgement r, ref bool handled);
-
-        /// <summary>무사 FAIL (GDD-beta B9.2): 첫 공격 1마디 앞으로 되감고, 같은 박자에 공격을 처음부터 다시 예약한다.</summary>
-        void RewindBoss()
-        {
-            var e = encounter;
-            if (e.Actors != null) foreach (var a in e.Actors) if (a != null && !a.Defeated) a.EndAttack(Judgement.Fail);
-            BeginRewind(RewindKind.Boss, e.StartBeat - GameConfig.RewindLeadBeats, () =>
-            {
-                e.Attempts++;
-                e.Cues.Clear();
-                foreach (var s in e.Steps) e.Cues.Add(judge.Schedule(e.StartBeat + s.OffsetBeats, s.Key, AttackPoint(s), s));
-            });
-        }
 
         /// <summary>남은 판정을 취소하고 다음 마디부터 첫 공격부터 다시.</summary>
         public void RetryEncounter()

@@ -47,7 +47,7 @@ namespace RhythmActionGame
             }
             else if (ev.IsBoss)
             {
-                StartEncounter(ev, CombatPatterns.BossSteps(ev), new[] { boss }, 0);
+                StartEncounter(ev, BossDuel.Steps(), new[] { boss }, 0);   // 무사 결투 (GDD-beta B11)
                 handled = true;
             }
         }
@@ -56,6 +56,7 @@ namespace RhythmActionGame
 
         partial void OnSpecialStepJudged(CombatStep step, Judgement r, ref bool handled)
         {
+            if (encounter != null && encounter.IsBossDuel) { handled = true; OnDuelStepJudged(step, r); return; }
             if (!IsSurround) return;
             handled = true;
             if (step.Phase == 1 || step.Phase == 2)

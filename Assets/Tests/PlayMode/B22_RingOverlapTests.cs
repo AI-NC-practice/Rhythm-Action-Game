@@ -128,6 +128,7 @@ namespace RhythmActionGame.Tests
                 boot.StartRun(start);
                 yield return null;
                 float minDist = float.MaxValue;
+                string where = "";
                 int maxShown = 0;
                 for (int f = 0; f < 1600; f++)                 // 16초
                 {
@@ -139,11 +140,14 @@ namespace RhythmActionGame.Tests
                     maxShown = Mathf.Max(maxShown, rings.Count);
                     for (int i = 0; i < rings.Count; i++)
                         for (int j = i + 1; j < rings.Count; j++)
-                            minDist = Mathf.Min(minDist, Vector2.Distance(rings[i].Root.anchoredPosition, rings[j].Root.anchoredPosition));
+                        {
+                            float d = Vector2.Distance(rings[i].Root.anchoredPosition, rings[j].Root.anchoredPosition);
+                            if (d < minDist) { minDist = d; where = $"{rings[i].Cue.TargetBeat:0.##}{rings[i].Root.anchoredPosition} 묶음{rings[i].ChainIndex}/{rings[i].Chain?.Slots} ↔ {rings[j].Cue.TargetBeat:0.##}{rings[j].Root.anchoredPosition} 묶음{rings[j].ChainIndex}/{rings[j].Chain?.Slots}, 지금 {boot.clock.CurrentBeat:0.##}"; }
+                        }
                     if (boot.director.State == StageState.Cleared) break;
                 }
                 Assert.GreaterOrEqual(maxShown, 2, $"{start}박부터: 원이 동시에 여러 개 뜨는 구간");
-                Assert.GreaterOrEqual(minDist, 140f, $"{start}박부터: 동시에 떠 있는 원 중심 거리 140 px 이상");
+                Assert.GreaterOrEqual(minDist, 140f, $"{start}박부터: 동시에 떠 있는 원 중심 거리 140 px 이상 ({where})");
                 boot.director.slowMotion.Cancel();
                 Time.timeScale = 1f;
             }

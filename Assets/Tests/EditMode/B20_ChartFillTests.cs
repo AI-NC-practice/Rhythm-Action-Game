@@ -50,7 +50,7 @@ namespace RhythmActionGame.Tests
         public void B20_Totals_And_KeptRules()
         {
             var c = C;
-            Assert.That(ChartCheck.TotalJudgements(c), Is.InRange(85, 95), "전체 판정 85~95");
+            Assert.That(ChartCheck.TotalJudgements(c), Is.InRange(115, 130), "전체 판정 115~130 (beta1-1: GDD-beta B11.6, 무사 결투 42)");
             Assert.That(ChartCheck.RunTargets(c).Count, Is.InRange(55, 65), "장애물·사건 판정 55~65");
             // 전투 위치 그대로
             CollectionAssert.AreEqual(new[] { 92, 128, 152, 240 }, c.events.Where(e => e.IsDuel).Select(e => e.runBeat).ToArray());

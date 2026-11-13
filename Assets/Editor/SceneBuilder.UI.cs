@@ -46,6 +46,10 @@ namespace RhythmActionGame.EditorTools
             hud.clock = clock;
             hud.score = keeper;
 
+            // 무사 자세 게이지 (GDD-beta B11.3)
+            var posture = hudCanvas.gameObject.AddComponent<PostureBar>();
+            posture.director = director;
+
             var menuCanvas = UiFactory.CreateCanvas("MenuCanvas", GameConfig.MenuCanvasOrder);
             var pause = menuCanvas.gameObject.AddComponent<PauseMenu>();
             pause.clock = clock;

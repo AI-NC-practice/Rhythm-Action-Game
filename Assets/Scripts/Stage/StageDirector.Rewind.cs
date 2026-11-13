@@ -7,7 +7,7 @@ namespace RhythmActionGame
     public enum RewindKind
     {
         Windmill,   // 윈드밀 FAIL → 3단계 첫 화살표 1마디 앞
-        Boss,       // 무사 FAIL → 첫 공격 1마디 앞
+        Boss,       // 무사 결투 FAIL → 그 단계 처음 (GDD-beta B11.4)
         Chapter,    // 체력 0 → 지금 챕터 시작 지점
     }
 

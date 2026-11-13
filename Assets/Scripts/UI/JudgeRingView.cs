@@ -40,6 +40,8 @@ namespace RhythmActionGame
             /// <summary>가산 빛 (B17): 목표에 가까울수록 밝아짐, 바깥 원 빛, 둘레를 도는 빛 점.</summary>
             public Image ChargeGlow, OuterGlow;
             public Image[] Orbit;
+            /// <summary>내 공격 원의 칼 아이콘 (GDD-beta B11.2), 그 밖에는 null.</summary>
+            public Image StrikeIcon;
             public float Charge;
             public Text Arrow;
             public float AppearedAt;      // 실제 시간
@@ -57,6 +59,11 @@ namespace RhythmActionGame
         {
             public List<JudgeCue> Members = new List<JudgeCue>();
             public Vector2 Anchor;
+            /// <summary>돌려 쓰는 자리 수 (GDD-beta B11.6). index번째 원은 index % Slots 자리에 선다.</summary>
+            public int Slots = 1;
+            public int SlotOf(int index) => Slots > 0 ? index % Slots : index;
+            /// <summary>뒤 원이 자리를 잡으면 묶음 기준점을 고정한다 (첫 원이 움직여 자리가 어긋나지 않게).</summary>
+            public bool Fixed;
         }
 
         /// <summary>판정 문구 하나.</summary>
@@ -103,6 +110,8 @@ namespace RhythmActionGame
         public static readonly Color GlowColor = new Color(0.15f, 0.85f, 0.75f, GameConfig.RingGlowAlpha);
         /// <summary>마무리 원 금색 빛.</summary>
         public static readonly Color FinisherGlowColor = new Color(1f, 0.78f, 0.2f, GameConfig.RingGlowAlpha);
+        /// <summary>내 공격 원 빛 (주홍, GDD-beta B11.2).</summary>
+        public static readonly Color StrikeColor = new Color(GameConfig.StrikeRingColor.r, GameConfig.StrikeRingColor.g, GameConfig.StrikeRingColor.b, GameConfig.RingGlowAlpha);
 
         public void Bind(JudgeSystem j, BeatClock c, Camera cam)
         {
@@ -151,6 +160,18 @@ namespace RhythmActionGame
             return s;
         }
 
+        /// <summary>내 공격(칼 겨루기 포함) 원인지 (GDD-beta B11.2).</summary>
+        public static bool IsStrike(JudgeCue cue) =>
+            cue.Tag is CombatStep s && (s.Kind == CombatStepKind.Strike || s.Kind == CombatStepKind.Lock);
+
+        /// <summary>원 빛 색: 마무리 금색, 내 공격 주홍, 그 밖(막기·피하기·사건) 청록.</summary>
+        public static Color RingGlowColor(JudgeCue cue)
+        {
+            if (IsFinisher(cue)) return FinisherGlowColor;
+            if (IsStrike(cue)) return StrikeColor;
+            return GlowColor;
+        }
+
         /// <summary>마무리(처형·윈드밀) 원인지.</summary>
         public static bool IsFinisher(JudgeCue cue) =>
             cue.Tag is CombatStep s && (s.Kind == CombatStepKind.Finisher || s.Attack == "windmill");
@@ -162,8 +183,8 @@ namespace RhythmActionGame
             var ring = new Ring { Cue = cue, Root = root, AppearedAt = RealTime() };
             ring.Group = root.gameObject.AddComponent<CanvasGroup>();
             ring.Group.blocksRaycasts = false;
-            ring.Glow = UiFactory.CreateImage(root, "Glow", UiFactory.Glow, IsFinisher(cue) ? FinisherGlowColor : GlowColor, GameConfig.RingGlowDiameterPx);
-            var glowColor = IsFinisher(cue) ? FinisherGlowColor : GlowColor;
+            var glowColor = RingGlowColor(cue);
+            ring.Glow = UiFactory.CreateImage(root, "Glow", UiFactory.Glow, glowColor, GameConfig.RingGlowDiameterPx);
             ring.ChargeGlow = AddImage(root, "ChargeGlow", UiFactory.Glow, glowColor, GameConfig.RingGlowDiameterPx * 1.15f, true);
             ring.OuterGlow = AddImage(root, "OuterGlow", UiFactory.Glow, glowColor, GameConfig.RingStartDiameterPx * 1.15f, true);
             ring.Button = UiFactory.CreateImage(root, "Button", UiFactory.Disc, ButtonColor, GameConfig.RingTargetDiameterPx);
@@ -174,6 +195,11 @@ namespace RhythmActionGame
             ring.Chevron.enabled = false;
             ring.Orbit = new Image[GameConfig.RingOrbitDots];
             for (int i = 0; i < ring.Orbit.Length; i++) ring.Orbit[i] = AddImage(root, "Orbit" + i, VfxFactory.Dot, Color.white, 18f, true);
+            if (IsStrike(cue))
+            {
+                ring.StrikeIcon = UiFactory.CreateImage(root, "StrikeIcon", VfxFactory.SwordIcon, GameConfig.StrikeRingColor, GameConfig.StrikeIconPx);
+                ring.StrikeIcon.rectTransform.anchoredPosition = GameConfig.StrikeIconOffsetPx;
+            }
             AssignChain(ring);
             rings.Add(ring);
             UpdateRing(ring);
@@ -208,6 +234,9 @@ namespace RhythmActionGame
             }
             if (chain.Members.Count > 1)
             {
+                var targets = new List<double>();
+                foreach (var m in chain.Members) targets.Add(m.TargetBeat);
+                chain.Slots = RingLayout.ChainSlots(targets);
                 chains.Add(chain);
                 ring.Chain = chain; ring.ChainIndex = 0;
             }
@@ -582,9 +611,16 @@ namespace RhythmActionGame
             var radii = RingLayout.SafeRadii(Size());
             Vector2 pos;
             bool clamped;
-            if (r.Chain != null && r.ChainIndex > 0)
+            if (r.Chain != null && r.ChainIndex == 0 && r.Chain.Fixed)
             {
-                pos = RingLayout.ChainSlot(r.Chain.Anchor, r.ChainIndex, r.Chain.Members.Count, radii);
+                pos = RingLayout.ChainSlot(r.Chain.Anchor, 0, r.Chain.Slots, radii);   // 뒤 원이 이미 자리를 잡음: 첫 원도 그 기준점에 고정
+                clamped = false;
+                r.Locked = true;
+            }
+            else if (r.Chain != null && r.ChainIndex > 0)
+            {
+                pos = RingLayout.ChainSlot(r.Chain.Anchor, r.Chain.SlotOf(r.ChainIndex), r.Chain.Slots, radii);
+                r.Chain.Fixed = true;
                 clamped = false;
                 r.Locked = true;                                  // 묶음의 자리는 첫 원이 정한다
             }
@@ -604,7 +640,7 @@ namespace RhythmActionGame
                 if (r.Chain != null)
                 {
                     r.Chain.Anchor = pos;
-                    pos = RingLayout.ChainSlot(pos, 0, r.Chain.Members.Count, radii);
+                    pos = RingLayout.ChainSlot(pos, 0, r.Chain.Slots, radii);
                 }
                 if (RealTime() - r.AppearedAt >= GameConfig.RingLockSeconds) r.Locked = true;
             }
@@ -623,11 +659,17 @@ namespace RhythmActionGame
                 var cand = new Vector2(pos.x + step * GameConfig.RingChainSpacingPx, pos.y);
                 if (Mathf.Abs(cand.x) > radii.x + 0.5f) continue;
                 bool free = true;
-                foreach (var o in rings)
+                // 묶음 첫 원이면 묶음이 쓸 자리 전부를 검사한다 (GDD-beta B11.6: 자리를 돌려 쓰므로 Slots개)
+                int slots = r.Chain != null ? r.Chain.Slots : 1;
+                for (int j = 0; j < slots && free; j++)
                 {
-                    if (o == r) break;                                     // 먼저 뜬 원만 피한다 (나중 원이 비켜 감)
-                    if ((r.Chain != null && o.Chain == r.Chain) || o.Root == null) continue;
-                    if (Vector2.Distance(o.Root.anchoredPosition, cand) < GameConfig.RingOverlapMinPx) { free = false; break; }
+                    var at = r.Chain != null ? RingLayout.ChainSlot(cand, j, slots, radii) : cand;
+                    foreach (var o in rings)
+                    {
+                        if (o == r) break;                                     // 먼저 뜬 원만 피한다 (나중 원이 비켜 감)
+                        if ((r.Chain != null && o.Chain == r.Chain) || o.Root == null) continue;
+                        if (Vector2.Distance(o.Root.anchoredPosition, at) < GameConfig.RingOverlapMinPx) { free = false; break; }
+                    }
                 }
                 if (free) return cand;
             }

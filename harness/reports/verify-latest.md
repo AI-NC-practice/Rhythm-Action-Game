@@ -1,7 +1,7 @@
 ﻿# Unity verify report
-time: 2026-11-13 09:57:37
+time: 2026-11-13 10:57:12
 
-## EditMode : total=130 passed=130 failed=0 skipped=0 result=Passed
+## EditMode : total=138 passed=138 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Config_MatchGddBetaB1
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_LabelPose_PopThenRise_045s
@@ -59,6 +59,14 @@ time: 2026-11-13 09:57:37
   - [Passed] RhythmActionGame.Tests.B20_ChartFillTests.B20_FirstEventAt4_PracticeGap8
   - [Passed] RhythmActionGame.Tests.B20_ChartFillTests.B20_NoEmptyStretches_MaxGap4Beats
   - [Passed] RhythmActionGame.Tests.B20_ChartFillTests.B20_Totals_And_KeptRules
+  - [Passed] RhythmActionGame.Tests.B26_BossDuelPatternTests.B26_AttackKeys_FollowGdd45_Flurry_Alternates
+  - [Passed] RhythmActionGame.Tests.B26_BossDuelPatternTests.B26_ChainSlots_Rule_And_StayInsideSafeEllipse
+  - [Passed] RhythmActionGame.Tests.B26_BossDuelPatternTests.B26_Chart_Totals_115To130
+  - [Passed] RhythmActionGame.Tests.B26_BossDuelPatternTests.B26_Counts_PerPhase_Total42
+  - [Passed] RhythmActionGame.Tests.B26_BossDuelPatternTests.B26_NoRingDuringCutsABC
+  - [Passed] RhythmActionGame.Tests.B26_BossDuelPatternTests.B26_PhaseStarts_And_Length72
+  - [Passed] RhythmActionGame.Tests.B26_BossDuelPatternTests.B26_Posture_PerfectFullAtEnd_NormalHalf
+  - [Passed] RhythmActionGame.Tests.B26_BossDuelPatternTests.B26_Steps_MatchTable_KindsAndBeats
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_BeatAndSpeed_MatchGdd41
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_Judge_MatchGdd42
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_ObstacleAndCombat_MatchGdd44To46
@@ -133,7 +141,7 @@ time: 2026-11-13 09:57:37
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_SpeedFx_Intensity
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_Texts_MatchGdd48
 
-## PlayMode : total=116 passed=116 failed=0 skipped=0 result=Passed
+## PlayMode : total=120 passed=120 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -168,7 +176,7 @@ time: 2026-11-13 09:57:37
   - [Passed] RhythmActionGame.Tests.B06_ScreenAndVfxTests.B06_VfxPool_AllKinds_Pooled_Reused
   - [Passed] RhythmActionGame.Tests.B07_SituationFxTests.B07_A_B_E_Duel_WarnDodgeExecution
   - [Passed] RhythmActionGame.Tests.B07_SituationFxTests.B07_B_E_RoofParryAndKick
-  - [Passed] RhythmActionGame.Tests.B07_SituationFxTests.B07_Boss_FinalParry_SlowMoCandidate
+  - [Passed] RhythmActionGame.Tests.B07_SituationFxTests.B07_Boss_Duel_StrikeClash_SlowMoOnlyOnExecution
   - [Passed] RhythmActionGame.Tests.B07_SituationFxTests.B07_C_D_NormalAndFail
   - [Passed] RhythmActionGame.Tests.B07_SituationFxTests.B07_F_Surround_TurnLowWide_WindmillFovShockwave_SlowMoOnlyDesignated
   - [Passed] RhythmActionGame.Tests.B07_SituationFxTests.B07_G_Parkour_JumpLand_FailRedBorder_EventSlowMo
@@ -213,6 +221,10 @@ time: 2026-11-13 09:57:37
   - [Passed] RhythmActionGame.Tests.B24_RealRewindTests.B24_ChapterRewind_PlayerSlidesBackAlongPath
   - [Passed] RhythmActionGame.Tests.B24_RealRewindTests.B24_Font_HasRewindIcon
   - [Passed] RhythmActionGame.Tests.B24_RealRewindTests.B24_TapeOverlay_StreaksScanlinesIcon
+  - [Passed] RhythmActionGame.Tests.B26_BossDuelTests.B26_Duel_FlurryAndFinisherFail_RewindToPhaseStart
+  - [Passed] RhythmActionGame.Tests.B26_BossDuelTests.B26_Duel_Strike_Posture_PhaseRewind_Clear
+  - [Passed] RhythmActionGame.Tests.B26_DuelRingViewTests.B26_LongChain_ReusesSlots_InsideSafeEllipse
+  - [Passed] RhythmActionGame.Tests.B26_DuelRingViewTests.B26_StrikeRing_VermilionGlow_SwordIcon
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_ChapterStartBeats_MatchSections
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(1)
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(4)

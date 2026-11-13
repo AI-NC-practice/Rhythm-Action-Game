@@ -174,7 +174,8 @@ namespace RhythmActionGame.Tests
             Assert.IsTrue(dir.Rewinding, "0.8초 전에는 계속");
             real += 0.02f; yield return null;
             Assert.IsFalse(dir.Rewinding, "0.8초 뒤 다시 진행");
-            Assert.AreEqual(cues[0].TargetBeat - GameConfig.RewindLeadBeats, boot.clock.CurrentBeat, 0.05, "되감은 지점부터");
+            // beta1-1: GDD-beta B11.4 — 무사 결투는 그 단계 처음(1단계 = O+4)으로 되감는다
+            Assert.AreEqual(dir.CurrentEncounter.StartBeat + BossDuel.PhaseStart(BossDuel.PhaseExplore), boot.clock.CurrentBeat, 0.05, "되감은 지점부터");
             Assert.IsTrue(boot.clock.IsRunning && !boot.clock.IsPaused);
         }
 

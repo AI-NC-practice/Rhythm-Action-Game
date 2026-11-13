@@ -196,11 +196,13 @@ namespace RhythmActionGame.Tests
         [UnityTest]
         public IEnumerator T07_Boss_FiveAttacks_ThenFinisher_StageClear()
         {
+            // beta1-1: GDD-beta B11 — 무사는 72박 결투(판정 42, 마지막이 마무리)로 바뀌었다. 모두 성공하면 클리어
             yield return Load(256);
             yield return UntilCombat();
             var enc = dir.CurrentEncounter;
             Assert.IsTrue(enc.Event.IsBoss);
-            Assert.AreEqual(6, enc.Cues.Count, "공격 5 + 마무리");
+            Assert.AreEqual(BossDuel.Steps().Count, enc.Cues.Count, "결투 판정 42");
+            Assert.AreEqual(CombatStepKind.Finisher, ((CombatStep)enc.Cues.Last().Tag).Kind, "마지막은 마무리");
             foreach (var c in enc.Cues.ToList()) yield return Hit(c, 0.0);
             Assert.AreEqual(StageState.Cleared, dir.State, "무사를 쓰러뜨리면 스테이지 클리어");
             Assert.IsTrue(dir.boss.Defeated);
@@ -209,7 +211,7 @@ namespace RhythmActionGame.Tests
         [UnityTest]
         public IEnumerator T07_Boss_Fail_RetriesFromFirstAttack()
         {
-            // beta1-1: GDD-beta B9.2 — 무사 FAIL은 체력을 깎지 않고 첫 공격 1마디 앞으로 되감아 처음부터 다시
+            // beta1-1: GDD-beta B11.4 — 무사 FAIL은 체력을 깎지 않고 그 단계 처음(1단계 = O+4)으로 되감아 같은 박자에 다시
             yield return Load(256);
             yield return UntilCombat();
             var enc = dir.CurrentEncounter;
@@ -223,9 +225,9 @@ namespace RhythmActionGame.Tests
             Assert.AreEqual(RewindKind.Boss, dir.LastRewind);
             realTime += GameConfig.RewindSeconds + 0.01f;
             yield return null;
-            Assert.AreEqual(first - 4.0, boot.clock.CurrentBeat, 0.05, "첫 공격 1마디 앞");
+            Assert.AreEqual(enc.StartBeat + 4.0, boot.clock.CurrentBeat, 0.05, "1단계 처음 (O+4)");
             Assert.AreEqual(2, enc.Attempts);
-            Assert.AreEqual(6, enc.Cues.Count(c => !c.Judged), "공격 5 + 마무리 다시");
+            Assert.AreEqual(BossDuel.Steps().Count, enc.Cues.Count(c => !c.Judged), "1단계부터 모두 다시");
             Assert.AreEqual(first, enc.Cues[0].TargetBeat, 1e-6, "같은 박자에 다시");
             Assert.AreEqual(StageState.Combat, dir.State);
             foreach (var c in enc.Cues.ToList()) yield return Hit(c, 0.0);

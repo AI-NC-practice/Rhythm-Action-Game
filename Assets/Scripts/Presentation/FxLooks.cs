@@ -20,6 +20,7 @@ namespace RhythmActionGame
         {
             switch (preset)
             {
+                case "StrikePerfect":
                 case "ParryPerfect":
                 case "ParryPerfectFinale":
                     // B: 노출 +0.6 → 0 (0.1초), 색수차 0.4 → 0 (0.2초), 붓획 방사 섬광 + 불씨 30
@@ -28,6 +29,7 @@ namespace RhythmActionGame
                     vfx.Add(new Vfx(VfxKind.BrushBurst));
                     vfx.Add(new Vfx(VfxKind.Embers, GameConfig.Fx.EmbersPerfect));
                     break;
+                case "StrikeNormal":
                 case "DefendNormal":
                     // C: 스파크 10, 섬광 없음
                     vfx.Add(new Vfx(VfxKind.Embers, GameConfig.Fx.EmbersNormal));
@@ -78,6 +80,12 @@ namespace RhythmActionGame
                 case "LandFail":
                     vfx.Add(new Vfx(VfxKind.Dust));
                     break;
+                case "PostureBreak":
+                    // B11.3: 주홍 비네트 + 노출 번쩍 + 붓획 섬광
+                    screen.Add(new ScreenPulse(ScreenChannel.Vignette, GameConfig.Fx.HitVignette, GameConfig.PostureBreakFlashSeconds, GameConfig.Fx.Vermilion));
+                    screen.Add(new ScreenPulse(ScreenChannel.Exposure, GameConfig.Fx.ParryExposure, GameConfig.Fx.ParryExposureSeconds));
+                    vfx.Add(new Vfx(VfxKind.BrushBurst));
+                    break;
                 case "EventPerfectSlow":
                     vfx.Add(new Vfx(VfxKind.BrushBurst));
                     vfx.Add(new Vfx(VfxKind.HanjiDebris));
@@ -100,11 +108,13 @@ namespace RhythmActionGame
             switch (preset)
             {
                 case "AttackWarn": sfx.Add(SfxKind.Glint); sfx.Add(SfxKind.Whoosh); break;                     // A: "칭" + 바람
+                case "StrikePerfect":
                 case "ParryPerfect":
                 case "ParryPerfectFinale":                                                                      // B: 높은 "챙" + 저음 "쿵", −4 dB 0.15초
                     sfx.Add(SfxKind.MetalClang); sfx.Add(SfxKind.LowBoom);
                     duckDb = GameConfig.Fx.DuckParryDb; duckSeconds = GameConfig.Fx.DuckParrySeconds; break;
                 case "DodgePerfect": sfx.Add(SfxKind.Whoosh); break;                                            // B 회피: 바람
+                case "StrikeNormal":
                 case "DefendNormal": sfx.Add(SfxKind.DullClank); break;                                         // C: 둔한 "탕"
                 case "Hit":                                                                                     // D: 타격 + 저음 + 귀 울림, −8 dB 0.3초
                     sfx.Add(SfxKind.BodyHit); sfx.Add(SfxKind.LowBoom); sfx.Add(SfxKind.EarRing);
@@ -125,6 +135,7 @@ namespace RhythmActionGame
                 case "EventPerfectSlow": sfx.Add(SfxKind.Whoosh); sfx.Add(SfxKind.Buk); break;
                 case "Rewind": sfx.Add(SfxKind.TapeRewind); break;                                               // B9.4 되감기 소리
                 case "Standoff": sfx.Add(SfxKind.Glint); break;                                                  // B10.2 대치: 칼 드는 소리
+                case "PostureBreak": sfx.Add(SfxKind.MetalClang); sfx.Add(SfxKind.Jing); break;                  // B11.3 자세 무너짐
             }
         }
     }

@@ -80,6 +80,8 @@ namespace RhythmActionGame
         public const string Retry = "다시 하기";
         /// <summary>너무 일찍 눌러 무시된 입력 (GDD-beta B8.2).</summary>
         public const string TooEarly = "빠름";
+        /// <summary>무사 자세 게이지 제목 (GDD-beta B11.3).</summary>
+        public const string PostureTitle = "무사 자세";
 
         public static string Speed(float s) => "x" + s.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture);
         public static string Combo(int n) => n >= GameConfig.ComboShowMin ? $"콤보 {n}" : "";
