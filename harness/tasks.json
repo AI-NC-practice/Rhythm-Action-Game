@@ -729,10 +729,10 @@
                                          "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과, 테스트 패키지 zip",
                                          "사용자가 무사 결투의 합·카메라·길이를 확인하고 피드백을 줌"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "needs_user",
+                      "attempts":  1,
                       "max_attempts":  1,
-                      "notes":  ""
+                      "notes":  "BuildGray + smoke-test 통과, RhythmActionGame-beta1-1-dev4.zip(38.1 MB) 준비. 사용자 확인 대기."
                   },
                   {
                       "id":  "B10",
