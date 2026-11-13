@@ -300,3 +300,6 @@ StageDirector.SurroundMotion: 포위 적 5명이 플레이어 둘레(4 m)를 초
 
 ### 2026-11-13 B35 [사용자] 동적 전투 확인 + 테스트 패키지 — needs_user
 BuildGray와 smoke-test를 통과했다. 테스트 패키지 RhythmActionGame-beta1-1-dev7.zip(38.1 MB)을 만들었고, 읽어주세요.txt에 움직이는 전투 설명과 봐 줄 점을 넣었다. 사용자 확인을 기다린다.
+
+### 2026-11-13 B35 [사용자] 동적 전투 확인 — done
+사용자가 테스트 패키지 7을 플레이했다고 확인했다(추가 피드백 없음). 다음 작업은 B10(Suno 음악)이다.
