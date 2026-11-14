@@ -846,6 +846,26 @@
                       "notes":  "사용자 플레이 확인(2026-11-13), 추가 피드백 없음."
                   },
                   {
+                      "id":  "B36",
+                      "title":  "[beta] 히트사운드: 누르는 순간 장구 소리 (GDD-beta B14)",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "B35"
+                                     ],
+                      "acceptance":  [
+                                         "GDD-beta B14: 방향키 입력마다 바로 히트사운드 — PERFECT 덩(궁+채), NORMAL 딱(채), FAIL 턱, 원 없음·너무 이름 틱(작게), 음량은 GameConfig.HitSound — 테스트",
+                                         "히트사운드는 효과음 풀과 별도 AudioSource 4개를 돌려 쓰고, 판정 효과음을 끊지 않음 — 테스트",
+                                         "새 소리 4종을 SfxSynth로 합성해 Assets/Audio/Sfx에 WAV로 둠, 음색 차이(PERFECT에 저음 포함, 틱은 짧음) — 테스트",
+                                         "DSP 버퍼 512 샘플 (ProjectSettings AudioManager)",
+                                         "Game 씬에 연결(SceneBuilder), unity-verify 통과"
+                                     ],
+                      "status":  "done",
+                      "attempts":  1,
+                      "max_attempts":  3,
+                      "notes":  "사용자 요청(2026-11-14): 박자가 탁 나올 때 클릭이 나오는 연출. docs/proposals/rhythm-feel.md 중 히트사운드부터."
+                  },
+                  {
                       "id":  "B10",
                       "title":  "[사용자+Claude] Suno 음악 생성·적용",
                       "type":  "human",

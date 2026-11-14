@@ -19,6 +19,7 @@ namespace RhythmActionGame
         public SpeedFx speedFx;
         public PresentationDirector presentation;
         public JangguBacking backing;
+        public HitSoundPlayer hitSound;
         public bool autoStart = true;
 
         public static GameBootstrap Instance { get; private set; }

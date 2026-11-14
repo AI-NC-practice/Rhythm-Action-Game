@@ -26,6 +26,7 @@ namespace RhythmActionGame.EditorTools
             Directory.CreateDirectory(ScenesDir);
             Directory.CreateDirectory(MaterialsDir);
             MusicTool.ApplyImportSettings();
+            AudioProjectSettings.Apply();
             BuildTitle();
             BuildGame();
             EditorBuildSettings.scenes = new[]
@@ -116,6 +117,12 @@ namespace RhythmActionGame.EditorTools
             backing.enabled = music.clip == null || GameConfig.Music.KeepJangguBacking;
             var judge = systems.AddComponent<JudgeSystem>();
             judge.clock = clock;
+            // 히트사운드 (GDD-beta B14): 누르는 순간 장구 소리
+            var hitGo = new GameObject("HitSound");
+            hitGo.transform.SetParent(systems.transform);
+            var hitSound = hitGo.AddComponent<HitSoundPlayer>();
+            hitSound.judge = judge;
+            hitSound.sfx = sfx;
 
             // 플레이어
             var player = new GameObject("Player");
@@ -238,6 +245,7 @@ namespace RhythmActionGame.EditorTools
             boot.playerCamera = cam;
             boot.presentation = presentation;
             boot.backing = backing;
+            boot.hitSound = hitSound;
 
             BuildGameExtra(boot, chart);
             EditorSceneManager.SaveScene(scene, GameScenePath);

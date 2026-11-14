@@ -20,6 +20,10 @@ namespace RhythmActionGame
         JangguKung,   // 장구 궁편 (낮은 소리) — 반주
         JangguDeok,   // 장구 채편 (높은 소리) — 반주
         TapeRewind,   // 되감기 (GDD-beta B9.4)
+        HitPerfect,   // 히트사운드 "덩" — 궁편 + 채편 (GDD-beta B14)
+        HitNormal,    // 히트사운드 "딱" — 채편
+        HitFail,      // 히트사운드 "턱" — 둔한 소리
+        HitEmpty,     // 히트사운드 "틱" — 원 없는 입력 (아주 작게)
     }
 
     /// <summary>
@@ -50,6 +54,10 @@ namespace RhythmActionGame
                 case SfxKind.JangguKung: return 0.3f;
                 case SfxKind.JangguDeok: return 0.1f;
                 case SfxKind.TapeRewind: return 0.8f;
+                case SfxKind.HitPerfect: return 0.3f;
+                case SfxKind.HitNormal: return 0.12f;
+                case SfxKind.HitFail: return 0.12f;
+                case SfxKind.HitEmpty: return 0.03f;
                 default: return 0.2f;
             }
         }
@@ -152,6 +160,38 @@ namespace RhythmActionGame
                         v = ((float)Math.Sin(phase) * 0.5f + lp * 2f) * flutter * Mathf.Min(1f, t / 0.03f) * (u < 0.92f ? 1f : (1f - u) / 0.08f);
                         break;
                     }
+                    case SfxKind.HitPerfect:
+                    {
+                        // 덩: 궁편(피치가 떨어지는 저음) + 채편(맑은 "딱", 고역 노이즈 + 배음)
+                        float f = 85f + 40f * Mathf.Exp(-t / 0.03f);
+                        phase += 2.0 * Math.PI * f / SampleRate;
+                        float x = Noise();
+                        hpOut = 0.9f * (hpOut + x - hpPrev);
+                        hpPrev = x;
+                        v = 1.0f * Mathf.Exp(-t / 0.11f) * (float)Math.Sin(phase)
+                            + 0.9f * hpOut * Mathf.Exp(-t / 0.012f)
+                            + Partials(t, 1150f, new[] { 1f, 2.27f }, new[] { 0.035f, 0.02f }, new[] { 0.6f, 0.3f });
+                        break;
+                    }
+                    case SfxKind.HitNormal:
+                    {
+                        // 딱: 채편만, 덕보다 조금 더 맑고 짧게
+                        float x = Noise();
+                        hpOut = 0.9f * (hpOut + x - hpPrev);
+                        hpPrev = x;
+                        v = hpOut * Mathf.Exp(-t / 0.01f) + Partials(t, 950f, new[] { 1f, 2.27f }, new[] { 0.03f, 0.018f }, new[] { 0.6f, 0.25f });
+                        break;
+                    }
+                    case SfxKind.HitFail:
+                    {
+                        // 턱: 저역 통과 노이즈 + 낮은 사인, 울림 없이 짧게
+                        lp += 0.1f * (Noise() - lp);
+                        v = lp * Mathf.Exp(-t / 0.025f) * 3f + 0.7f * Mathf.Exp(-t / 0.04f) * Mathf.Sin(2f * Mathf.PI * 220f * t);
+                        break;
+                    }
+                    case SfxKind.HitEmpty:
+                        v = Mathf.Exp(-t / 0.004f) * Mathf.Sin(2f * Mathf.PI * 2000f * t);
+                        break;
                     case SfxKind.JangguDeok:
                     {
                         float x = Noise();

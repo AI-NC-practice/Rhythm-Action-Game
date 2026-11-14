@@ -572,6 +572,21 @@ namespace RhythmActionGame
             };
         }
 
+        // ---------------- GDD-beta B14 히트사운드 ----------------
+        /// <summary>방향키를 누르는 순간 나는 장구 소리 (GDD-beta B14).</summary>
+        public static class HitSound
+        {
+            /// <summary>입력 결과별 음량: PERFECT 덩, NORMAL 딱, FAIL 턱, 원 없음·너무 이름 틱.</summary>
+            public const float PerfectVolume = 1.0f;
+            public const float NormalVolume = 0.7f;
+            public const float FailVolume = 0.5f;
+            public const float EmptyVolume = 0.2f;
+            /// <summary>히트사운드 전용 AudioSource 수 (효과음 풀과 별도).</summary>
+            public const int Voices = 4;
+            /// <summary>오디오 DSP 버퍼 (샘플). 1024 → 512로 줄여 출력 지연을 약 21 ms → 11 ms(48 kHz)로.</summary>
+            public const int DspBufferSize = 512;
+        }
+
         // ---------------- B10 배경 음악 (GDD 1장 사운드: 국악 퓨전, BPM 고정, 보컬 없음) ----------------
         /// <summary>
         /// 배경 음악. 공유마당 "국악 BGM #197"(주식회사 아이티앤, CC BY)을 harness/scripts/music/make-loop.py로

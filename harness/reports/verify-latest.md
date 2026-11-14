@@ -1,7 +1,7 @@
 ﻿# Unity verify report
-time: 2026-11-14 17:18:06
+time: 2026-11-14 17:55:44
 
-## EditMode : total=149 passed=149 failed=0 skipped=0 result=Passed
+## EditMode : total=152 passed=152 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Config_MatchGddBetaB1
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_LabelPose_PopThenRise_045s
@@ -78,6 +78,9 @@ time: 2026-11-14 17:18:06
   - [Passed] RhythmActionGame.Tests.B32_StepMotionTests.B32_Dodge_LeftRight
   - [Passed] RhythmActionGame.Tests.B32_StepMotionTests.B32_Duck_And_Strike
   - [Passed] RhythmActionGame.Tests.B32_StepMotionTests.B32_Parry_Up
+  - [Passed] RhythmActionGame.Tests.B36_HitSoundTests.B36_DspBuffer512
+  - [Passed] RhythmActionGame.Tests.B36_HitSoundTests.B36_Rules_ResultToSoundAndVolume_MatchGddBetaB14
+  - [Passed] RhythmActionGame.Tests.B36_HitSoundTests.B36_Synth_FourSounds_Timbre_And_WavFiles
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_BeatAndSpeed_MatchGdd41
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_Judge_MatchGdd42
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_ObstacleAndCombat_MatchGdd44To46
@@ -152,7 +155,7 @@ time: 2026-11-14 17:18:06
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_SpeedFx_Intensity
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_Texts_MatchGdd48
 
-## PlayMode : total=138 passed=138 failed=0 skipped=0 result=Passed
+## PlayMode : total=139 passed=139 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -254,6 +257,7 @@ time: 2026-11-14 17:18:06
   - [Passed] RhythmActionGame.Tests.B33_SurroundMotionTests.B33_Surround_Orbit_Lunge_GangUp_Windmill
   - [Passed] RhythmActionGame.Tests.B34_DuelEventsTests.B34_Duel_Angles_Swap_KickDown_TopDown
   - [Passed] RhythmActionGame.Tests.B34_DuelEventsTests.B34_Swap_ShoulderCut_WhenNoRing
+  - [Passed] RhythmActionGame.Tests.B36_HitSoundPlayTests.B36_GameScene_EveryInput_PlaysHitSound_SeparateFromSfxPool
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_ChapterStartBeats_MatchSections
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(1)
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(4)
