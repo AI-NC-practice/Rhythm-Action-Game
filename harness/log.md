@@ -321,3 +321,6 @@ BuildGray와 smoke-test를 통과했다. 테스트 패키지 RhythmActionGame-be
 
 ### 2026-11-14 B36 [beta] 히트사운드 — done
 사용자가 제안서(docs/proposals/rhythm-feel.md) 중 "히트사운드 먼저"를 골랐다. GDD-beta B14로 적고 작업 B36을 만들었다. 방향키를 누르는 순간 JudgeSystem.InputReceived를 받아 장구 소리를 낸다: PERFECT "덩"(궁편+채편, 1.0), NORMAL "딱"(채편, 0.7), FAIL "턱"(0.5), 원 없음·너무 이름 "틱"(0.2). 소리 4종은 SfxSynth로 합성(Assets/Audio/Sfx/Sfx_Hit*.wav), 재생은 HitSoundPlayer가 자기 AudioSource 4개를 돌려 써서 판정 효과음을 끊지 않는다. 지연을 줄이려고 DSP 버퍼를 1024 → 512로 했다(AudioProjectSettings가 BuildAll에서 코드로 적용; ProjectSettings 파일의 m_DSPBufferSize만 고치면 Unity가 m_RequestedDSPBufferSize로 덮어써서 둘 다 정함). unity-verify EditMode 152/152, PlayMode 139/139, evaluator PASS. 소리 느낌은 사용자가 테스트 빌드로 확인한다. 다음: 사용자 청취 확인, 그다음 곡 선택(B10).
+
+### 2026-11-14 B36 피드백 — 히트사운드가 노래와 따로 놂, 속도 올라가면 노래가 기괴함
+사용자가 테스트 빌드를 해 보고: 맞출 때 나는 소리가 하나의 박자처럼 느껴지면 좋겠다(지금은 따로 놂), 박 쪼개기 좋음, 속도가 빨라지면 노래가 기괴해진다고 했다. 원인과 해결을 docs/proposals/rhythm-feel.md 6장에 적었다. 핵심: GDD 4.1의 음 높이 보정(Pitch Shifter 1/s)이 구현되지 않아 s = 1.30에서 약 4.5반음 올라감 → GDD대로 보정 추가. PERFECT마다 즉시 바뀌는 속도는 다음 마디 첫 박에 적용(GDD-beta 변경 필요). 히트사운드는 이른 PERFECT 입력을 목표 박 시각에 예약(퀀타이즈)하고, 곡을 정한 뒤 곡의 드럼 위치로 차트·음색을 맞춘다. 사용자 승인을 기다린다.
