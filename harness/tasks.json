@@ -860,7 +860,7 @@
                       "status":  "needs_user",
                       "attempts":  1,
                       "max_attempts":  1,
-                      "notes":  "사용자 결정: Suno 대신 무료 국악 음원(공유마당, CC BY). 후보: LSMBG0704_사물놀이(1:30, 약 125 BPM), 국악 BGM #197(1:07, 약 128 BPM) 등. 사용자 선택·다운로드 승인 대기."
+                      "notes":  "사용자 결정(2026-11-13): Suno 대신 무료 국악 음원(공유마당, CC BY). 2026-11-14 사용자가 미리듣기를 듣고 국악 BGM #197(주식회사 아이티앤)을 골랐다. 분석: 펄스 186.07/분, 3펄스마다 강세(12/8 느낌). 재생 속도 0.967배로 3펄스 = 게임 2박에 맞추고 첫 강박을 0초에 둔 64초(128박) 루프 Assets/Audio/Music/gugak_bgm197_loop120.wav (harness/scripts/music/make-loop.py). BeatClock.music으로 재생, 합성 장단 반주는 끔. 출처: 타이틀 화면 + docs/CREDITS.md. acceptance 1번(Suno 로그인·생성)은 이 결정으로 대체됨."
                   },
                   {
                       "id":  "T10",

@@ -94,7 +94,7 @@ namespace RhythmActionGame
 
         /// <summary>UI에 나오는 모든 한글·기호 (폰트 글자 검사용).</summary>
         public const string AllGlyphs = Title + Start + Settings + Quit + TimingOffset + Volume + Back + Paused + Continue + ToTitle + Cleared + GameOver + Retry + TooEarly
-            + "콤보 최고 속도 점수 랭크 PERFECTNORMALFAIL x0123456789.+-ms SABC↑↓←→";
+            + GameConfig.Music.Credit + "콤보 최고 속도 점수 랭크 PERFECTNORMALFAIL x0123456789.+-ms SABC↑↓←→";
     }
 
     /// <summary>속도감 효과 (GDD 4.3). s ≥ 1.10이면 집중선, 세기 (s − 1.0) / 0.3, FOV 최대 +5°.</summary>

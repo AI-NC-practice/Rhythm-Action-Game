@@ -35,6 +35,9 @@ namespace RhythmActionGame.Tests
             dir.FailHitSeconds = 0f;   // beta1-1: 피격 연출(GDD-beta B12.2)은 B30 테스트에서 따로 본다. 여기서는 바로 되감기
             dir.slowMotion.RealTime = () => real;
             bar.RealTime = () => real;
+            // Hit Stop(TimeFx)은 실제 시간 + 가짜 시계로 흐른다. 실제 시간만 쓰면 빠른 PC에서 가짜 시계가 몇 박 가는 동안
+            // 멈춤이 안 풀려 무사가 막기를 못 하고, 가짜 시계만 쓰면 WaitForSecondsRealtime 동안 멈춤이 안 풀린다.
+            pd.timeFx.RealTime = () => Time.realtimeSinceStartup + (float)now;
             boot.StartRun(start);
             yield return null;
         }

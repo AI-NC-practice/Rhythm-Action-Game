@@ -66,11 +66,28 @@ namespace RhythmActionGame
         {
             timeline.Start(Now, startBeat);
             timeline.SetSpeed(Speed.Speed, Now);
-            if (music != null && music.clip != null)
-            {
-                music.time = (float)(startBeat * GameConfig.SecondsPerBeat) % music.clip.length;
-                music.Play();
-            }
+            PlayMusicAt(startBeat);
+        }
+
+        /// <summary>음악을 beat 박자 위치부터 재생한다. Play()가 재생 위치를 처음으로 돌리므로 위치는 Play() 뒤에 정한다.</summary>
+        void PlayMusicAt(double beat)
+        {
+            if (music == null || music.clip == null) return;
+            music.Play();
+            music.time = MusicTimeAt(beat, music.clip.length);
+        }
+
+        /// <summary>
+        /// beat 박자에 해당하는 음악 파일 안 재생 위치 (초, B10). 곡은 첫 박(GameConfig.Music.FirstBeatSeconds)부터
+        /// 120 BPM 격자에 맞춰져 있고 clipLength마다 반복된다.
+        /// </summary>
+        public static float MusicTimeAt(double beat, float clipLength)
+        {
+            if (clipLength <= 0f) return 0f;
+            double loop = clipLength - GameConfig.Music.FirstBeatSeconds;
+            double t = beat * GameConfig.SecondsPerBeat;
+            t = ((t % loop) + loop) % loop;
+            return (float)(GameConfig.Music.FirstBeatSeconds + t);
         }
 
         public void Pause()
@@ -92,11 +109,7 @@ namespace RhythmActionGame
         {
             timeline.Start(Now, beat);
             timeline.SetSpeed(Speed.Speed, Now);
-            if (music != null && music.clip != null)
-            {
-                music.time = (float)(beat * GameConfig.SecondsPerBeat) % music.clip.length;
-                music.Play();
-            }
+            PlayMusicAt(beat);
             Restarted?.Invoke(beat);
         }
 

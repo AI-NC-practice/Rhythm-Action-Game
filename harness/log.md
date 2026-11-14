@@ -309,3 +309,10 @@ BuildGray와 smoke-test를 통과했다. 테스트 패키지 RhythmActionGame-be
 
 ### 2026-11-13 인계 문서
 퇴근 전 정리로 docs/HANDOFF.md를 썼다. 집에서 시작하는 법, B10 음악 후보(공유마당 CC BY)와 승인 뒤 할 일, 남은 작업 T10~T16, 미뤄 둔 제안, 개발자 도구, 규칙을 정리했다.
+
+### 2026-11-14 B10 음악 — 공유마당 두 곡 받음, 분석 결과로 사용자 확인 대기 (needs_user)
+사용자가 사물놀이 두 곡을 골랐다. 공유마당에서 이용범위 동의 후 받았다(설문은 개인 정보라 응답하지 않고 닫음). Assets/Audio/Music/samulnori_lsmbg0704.mp3(LSMBG0704_사물놀이, 한국저작권위원회, CC BY), gugak_bgm197.mp3(국악 BGM #197, 주식회사 아이티앤, CC BY). 분석(Windows Media Foundation으로 wav 디코드 + numpy): BGM #197은 펄스 186.07/분으로 기계처럼 일정(±15 ms)하고 3펄스마다 강세가 뚜렷해 12/8(자진모리 느낌)로 보인다(점4분 박 약 62). LSMBG0704도 펄스 약 188.5지만 사람이 연주해 빠르기가 흔들린다(고정 박자 격자에서 ±100 ms). 인계 문서의 125/128 BPM 추정은 3펄스=2박으로 읽은 값이다. 게임은 4/4 120 BPM(반 박 입력 포함)이라 3펄스=2박으로 맞추면(180펄스/분, 3~5% 느리게) 2박과 4박이 펄스 사이에 떨어진다. 귀로 판단하도록 120 BPM 딸깍 소리를 얹은 미리듣기 2개를 Builds/MusicPreview/에 만들었다(저장소에 안 올림). 추가로 이 PC에는 Unity 6000.3.17f1만 있어 6000.4.0f1 설치 전에는 배치 검증을 못 한다. Assets/Editor/MusicTool.cs(가져오기 설정·PCM 덤프)를 추가했다(아직 미검증).
+### 2026-11-14 B10 음악 — 국악 BGM #197 연결, 평가 PASS, 사용자 청취 대기 (needs_user)
+사용자가 120 BPM 딸깍 미리듣기를 듣고 #197을 골랐다. harness/scripts/music/make-loop.py로 재생 속도 0.967배(펄스 186.07 → 180/분, 3펄스 = 게임 2박), 첫 강박 0초, 64초(128박) 루프 WAV를 만들었다(끝 30 ms를 처음에 교차 페이드). 강박은 1초 주기로 겹쳐 보면 −5 ms(평균의 2.65배)에 있다. 다만 곡 안의 다른 펄스는 고르지 않아(약 0/360/615 ms) 게임 홀수 박에는 북소리가 없다. GameConfig.Music에 값을 두고, SceneBuilder가 BeatClock.music에 연결하고(loop, 음량 0.8) 합성 장단 반주는 끈다(KeepJangguBacking=false). BeatClock은 MusicTimeAt(박 → 곡 위치)을 쓰고 Play() 뒤에 위치를 정한다(Play가 위치를 처음으로 돌려서 되감기 위치가 0이 되던 문제). 출처는 타이틀 화면 아래와 docs/CREDITS.md에 적었다. 원본 mp3는 harness/music-src/로 옮기고 LSMBG0704는 지웠다. 집 PC에서 빠른 프레임 때문에 실패하던 B26 결투 테스트는 Hit Stop 시계를 실제 시간 + 가짜 시계로 바꿔 고쳤다(게임 코드는 그대로). unity-verify EditMode 149/149, PlayMode 138/138. evaluator PASS(기술 부분). 남은 것: 사용자가 게임에서 듣고 확인.
+
+**제안:** GDD 4.1은 속도 배율 s일 때 음 높이를 AudioMixer Pitch Shifter 1/s로 보정하라고 하지만 아직 없다(지금은 s = 1.30이면 음이 약 4.5반음 올라감). AudioMixer 에셋을 코드로 만들기 어려워 미뤘다. 넣을지는 사용자가 정한다.

@@ -572,5 +572,25 @@ namespace RhythmActionGame
             };
         }
 
+        // ---------------- B10 배경 음악 (GDD 1장 사운드: 국악 퓨전, BPM 고정, 보컬 없음) ----------------
+        /// <summary>
+        /// 배경 음악. 공유마당 "국악 BGM #197"(주식회사 아이티앤, CC BY)을 harness/scripts/music/make-loop.py로
+        /// 재생 속도 0.967배(펄스 186.07 → 180/분, 3펄스 = 2박)로 늦춰 첫 강박을 0초에 둔 64초(128박) 루프.
+        /// </summary>
+        public static class Music
+        {
+            /// <summary>음악 파일 (Assets 기준 경로).</summary>
+            public const string ClipPath = "Assets/Audio/Music/gugak_bgm197_loop120.wav";
+            /// <summary>루프 길이 (박). 음악 시각 = (박 × 0.5초) mod 64초.</summary>
+            public const int LoopBeats = 128;
+            /// <summary>음악 첫 박의 파일 안 시각 (초). 루프 파일은 첫 강박에서 시작한다.</summary>
+            public const float FirstBeatSeconds = 0f;
+            /// <summary>음악 기준 음량. GDD에 없음, Claude가 정함.</summary>
+            public const float Volume = 0.8f;
+            /// <summary>곡이 있으면 합성 장단 반주(GDD-beta B7)는 끈다. GDD에 없음, Claude가 정함 (곡이 3박 느낌이라 4박 반주와 겹치면 어지러움).</summary>
+            public const bool KeepJangguBacking = false;
+            /// <summary>게임 안 출처 표기 (CC BY).</summary>
+            public const string Credit = "음악: 국악 BGM #197 — 주식회사 아이티앤, 공유마당(한국저작권위원회), CC BY";
+        }
     }
 }
