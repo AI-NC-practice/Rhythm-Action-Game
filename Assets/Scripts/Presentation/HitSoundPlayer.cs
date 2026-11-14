@@ -20,6 +20,8 @@ namespace RhythmActionGame
         public SfxKind LastKind { get; private set; }
         public float LastVolume { get; private set; }
         public AudioSource LastSource { get; private set; }
+        /// <summary>마지막 히트사운드를 몇 초 뒤에 울리도록 예약했는지 (0 = 바로, B15.3).</summary>
+        public double LastDelay { get; private set; }
         public AudioSource[] Sources { get { EnsureInit(); return sources; } }
 
         void Awake() => EnsureInit();
@@ -56,12 +58,16 @@ namespace RhythmActionGame
 
         void OnInput(ArrowKey key, JudgeCue cue, InputOutcome outcome)
         {
-            float volume = HitSoundRules.Pick(outcome, cue != null ? cue.Result : Judgement.Fail, out var kind);
-            Play(kind, volume);
+            var result = cue != null ? cue.Result : Judgement.Fail;
+            float volume = HitSoundRules.Pick(outcome, result, out var kind);
+            // 박 맞춤 (GDD-beta B15.3): 이른 PERFECT는 목표 박 시각에 울린다
+            var clock = judge != null ? judge.clock : null;
+            double until = cue != null && clock != null ? clock.TimeOfBeat(cue.TargetBeat) - clock.Now : double.NaN;
+            Play(kind, volume, HitSoundRules.SnapDelay(outcome, result, until));
         }
 
-        /// <summary>히트사운드 하나를 바로 낸다 (돌려 쓰는 AudioSource 중 다음 것).</summary>
-        public void Play(SfxKind kind, float volume)
+        /// <summary>히트사운드 하나를 낸다 (돌려 쓰는 AudioSource 중 다음 것). delay초 뒤로 예약할 수 있다(dsp 시각 기준).</summary>
+        public void Play(SfxKind kind, float volume, double delay = 0)
         {
             EnsureInit();
             var src = sources[next];
@@ -69,8 +75,10 @@ namespace RhythmActionGame
             src.Stop();
             src.clip = sfx != null ? sfx.Clip(kind) : SfxSynth.CreateClip(kind);
             src.volume = volume * (sfx != null ? sfx.sfxGroupVolume : 1f);
-            src.Play();
+            if (delay > 0) src.PlayScheduled(AudioSettings.dspTime + delay);
+            else src.Play();
             PlayedCount++;
+            LastDelay = delay > 0 ? delay : 0;
             LastKind = kind;
             LastVolume = volume;
             LastSource = src;

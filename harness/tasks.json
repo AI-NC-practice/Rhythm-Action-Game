@@ -897,8 +897,8 @@
                                          "GDD-beta B15.3: 이른 PERFECT 입력의 히트사운드는 목표 박 시각에 예약(기다림 ≤ 90 ms), 그 밖은 즉시 — 테스트",
                                          "unity-verify 통과"
                                      ],
-                      "status":  "in_progress",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  1,
                       "max_attempts":  3,
                       "notes":  ""
                   },
@@ -913,7 +913,7 @@
                                          "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과",
                                          "사용자가 플레이해 히트사운드가 박자처럼 느껴지는지, 빨라져도 노래가 자연스러운지 확인"
                                      ],
-                      "status":  "pending",
+                      "status":  "in_progress",
                       "attempts":  0,
                       "max_attempts":  1,
                       "notes":  ""

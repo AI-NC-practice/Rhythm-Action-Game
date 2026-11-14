@@ -18,5 +18,16 @@ namespace RhythmActionGame
             kind = SfxKind.HitEmpty;
             return GameConfig.HitSound.EmptyVolume;
         }
+
+        /// <summary>
+        /// 히트사운드를 몇 초 뒤에 울릴지 (GDD-beta B15.3 박 맞춤). PERFECT이고 목표 박이 아직 오지 않았으면
+        /// 목표 박까지 기다린다(최대 SnapMaxWaitSeconds). 그 밖(늦은 PERFECT, NORMAL, FAIL, 원 없음)은 0 = 바로.
+        /// </summary>
+        public static double SnapDelay(InputOutcome outcome, Judgement result, double secondsUntilTarget)
+        {
+            if (outcome != InputOutcome.Judged || result != Judgement.Perfect) return 0;
+            if (double.IsNaN(secondsUntilTarget) || secondsUntilTarget <= 0) return 0;
+            return System.Math.Min(secondsUntilTarget, GameConfig.HitSound.SnapMaxWaitSeconds);
+        }
     }
 }
