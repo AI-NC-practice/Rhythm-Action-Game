@@ -330,3 +330,6 @@ BuildGray와 smoke-test를 통과했다. 테스트 패키지 RhythmActionGame-be
 
 ### 2026-11-14 B38 [beta] 히트사운드 박 맞춤 — done
 GDD-beta B15.3. 이른 PERFECT 입력의 히트사운드를 목표 박 시각까지 기다려(최대 90 ms = PERFECT 창) PlayScheduled로 울린다. 늦은 PERFECT·NORMAL·FAIL·원 없는 입력은 바로 울린다. 규칙은 HitSoundRules.SnapDelay(순수 함수). unity-verify EditMode 156/156, PlayMode 141/141, evaluator PASS. 다음: B39 테스트 빌드로 사용자 확인.
+
+### 2026-11-14 B39 [사용자] 박자감 확인 — needs_user
+BuildGray와 smoke-test를 통과했다(Builds/Gray/RhythmActionGame.exe). 사용자가 히트사운드 박 맞춤, 빨라질 때 음 높이 보정, 마디 단위 속도 변경을 플레이로 확인하기를 기다린다. 그다음은 곡 선택(B10).
