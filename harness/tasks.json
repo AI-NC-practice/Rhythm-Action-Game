@@ -913,10 +913,10 @@
                                          "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과",
                                          "사용자가 플레이해 히트사운드가 박자처럼 느껴지는지, 빨라져도 노래가 자연스러운지 확인"
                                      ],
-                      "status":  "needs_user",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  1,
                       "max_attempts":  1,
-                      "notes":  "BuildGray + smoke-test 통과(2026-11-14). 사용자 플레이 확인 대기."
+                      "notes":  "BuildGray + smoke-test 통과(2026-11-14). 사용자 확인(2026-11-14): 괜찮음. 적 쓰러뜨릴 때 소리는 B40에서."
                   },
                   {
                       "id":  "B10",
