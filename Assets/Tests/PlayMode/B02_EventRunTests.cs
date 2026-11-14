@@ -108,9 +108,10 @@ namespace RhythmActionGame.Tests
                 new ChartEvent { runBeat = 8, type = "obstacle", kind = "rolling_jars", keys = new[] { "Left", "Right", "Left" } },
                 new ChartEvent { runBeat = 12, type = "obstacle", kind = "arrow_volley", keys = new[] { "Left", "Right", "Left", "Right" } }));
             for (int i = 0; i < 6; i++) boot.clock.ApplyJudgement(Judgement.Perfect);   // 1.30
+            boot.clock.ApplyPendingSpeedNow();   // GDD-beta B15.2: 속도는 다음 마디 첫 박에 들어오므로 바로 적용
             while (boot.clock.CurrentBeat < 11.5) { now += 0.01; yield return null; }
             Assert.AreEqual(2, dir.Health.Hp, "술독 FAIL 3번 → 체력 −1만");
-            Assert.AreEqual(1.0f, boot.clock.SpeedMultiplier, 1e-4f, "속도 ×0.8은 판정마다 (1.30→1.04→1.00)");
+            Assert.AreEqual(1.0f, boot.clock.TargetSpeed, 1e-4f, "속도 ×0.8은 판정마다 (1.30→1.04→1.00)");
             while (boot.clock.CurrentBeat < 15.5) { now += 0.01; yield return null; }
             Assert.AreEqual(1, dir.Health.Hp, "화살 FAIL 4번 → 체력 −1만");
             Assert.AreEqual(StageState.Running, dir.State);

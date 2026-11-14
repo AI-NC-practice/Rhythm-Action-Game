@@ -63,7 +63,7 @@ namespace RhythmActionGame
             if (Hearts == null) return;
             int hp = director != null ? director.Health.Hp : GameConfig.MaxHp;
             for (int i = 0; i < Hearts.Length; i++) Hearts[i].color = i < hp ? HeartFull : HeartEmpty;
-            SpeedText.text = UiText.Speed(clock != null ? clock.SpeedMultiplier : GameConfig.SpeedStart);
+            SpeedText.text = UiText.Speed(clock != null ? clock.TargetSpeed : GameConfig.SpeedStart);   // 판정 즉시 새 값 (GDD-beta B15.2)
             var b = score != null ? score.Board : null;
             ScoreText.text = (b != null ? b.Score : 0).ToString();
             string combo = UiText.Combo(b != null ? b.Combo : 0);

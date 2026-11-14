@@ -866,6 +866,59 @@
                       "notes":  "사용자 요청(2026-11-14): 박자가 탁 나올 때 클릭이 나오는 연출. docs/proposals/rhythm-feel.md 중 히트사운드부터."
                   },
                   {
+                      "id":  "B37",
+                      "title":  "[beta] 음 높이 보정 + 마디 단위 속도 변경 (GDD-beta B15.1, B15.2)",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "B36"
+                                     ],
+                      "acceptance":  [
+                                         "GDD-beta B15.1: 음악 피치 시프터가 음 높이를 1/s로 되돌림 — 440 Hz 사인에 s=1.30을 걸면 출력이 약 338 Hz(±3%), 음량 유지 — 테스트",
+                                         "GDD-beta B15.1: s=1.00이면 소리를 바꾸지 않고 일정한 지연(22 ms)만 둠, 음악 재생 위치를 그 지연만큼 앞당김 — 테스트",
+                                         "GDD-beta B15.2: PERFECT·FAIL로 바뀐 속도는 다음 마디 첫 박에 적용(박자 시계·이동·음악 pitch), HUD는 즉시 새 값 — 테스트",
+                                         "GDD-beta B15.2: 마디 경계에서 박자가 끊기지 않음(경계 박 = 정확히 4의 배수), 되감기는 바로 새 속도 — 테스트",
+                                         "Game 씬에 연결(SceneBuilder), 기존 테스트는 새 규칙에 맞춰 고침, unity-verify 통과"
+                                     ],
+                      "status":  "done",
+                      "attempts":  1,
+                      "max_attempts":  3,
+                      "notes":  "사용자 승인(2026-11-14): 제안서 6.4 순서대로. 속도가 빨라지면 노래가 기괴해지는 문제."
+                  },
+                  {
+                      "id":  "B38",
+                      "title":  "[beta] 히트사운드 박 맞춤 (GDD-beta B15.3)",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "B37"
+                                     ],
+                      "acceptance":  [
+                                         "GDD-beta B15.3: 이른 PERFECT 입력의 히트사운드는 목표 박 시각에 예약(기다림 ≤ 90 ms), 그 밖은 즉시 — 테스트",
+                                         "unity-verify 통과"
+                                     ],
+                      "status":  "in_progress",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "B39",
+                      "title":  "[사용자] 박자감 확인 (히트사운드·음 높이 보정·마디 속도) + 테스트 빌드",
+                      "type":  "human",
+                      "depends_on":  [
+                                         "B38"
+                                     ],
+                      "acceptance":  [
+                                         "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과",
+                                         "사용자가 플레이해 히트사운드가 박자처럼 느껴지는지, 빨라져도 노래가 자연스러운지 확인"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  1,
+                      "notes":  ""
+                  },
+                  {
                       "id":  "B10",
                       "title":  "[사용자+Claude] Suno 음악 생성·적용",
                       "type":  "human",

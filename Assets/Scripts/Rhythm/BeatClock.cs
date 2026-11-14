@@ -7,10 +7,13 @@ namespace RhythmActionGame
     /// 게임의 박자 시계 (GDD 4.1). AudioSettings.dspTime 기준으로 BeatTimeline을 돌리고,
     /// 속도 배율을 음악 재생 속도(AudioSource.pitch)와 이동 속도에 함께 적용한다.
     /// </summary>
+    [DefaultExecutionOrder(-1000)]   // 마디 첫 박 속도 변경(B15.2)을 다른 스크립트가 박자를 읽기 전에 적용
     public class BeatClock : MonoBehaviour
     {
         [Tooltip("음악을 재생하는 AudioSource. 없으면 음악 없이 박자만 센다(메트로놈 단계).")]
         public AudioSource music;
+        [Tooltip("음악 음 높이 보정 (GDD-beta B15.1). 음악 AudioSource와 같은 GameObject.")]
+        public MusicPitchCorrector pitchCorrector;
 
         static SmoothClock smooth;
         /// <summary>부드러운 오디오 시계 (GDD-beta B8.1): dspTime을 실제 시간으로 보간. 모든 BeatClock이 함께 쓴다.</summary>
@@ -40,15 +43,43 @@ namespace RhythmActionGame
 
         public double Now => TimeSource();
         public double CurrentBeat => timeline.BeatAt(Now);
-        public float SpeedMultiplier => Speed.Speed;
+        /// <summary>지금 실제로 적용 중인 속도 배율 (박자 시계·이동·음악). 판정으로 바뀐 값은 다음 마디 첫 박에 들어온다 (GDD-beta B15.2).</summary>
+        public float SpeedMultiplier => timeline.Speed;
+        /// <summary>판정으로 정해진 속도 배율 (HUD가 바로 보여 준다). 다음 마디 첫 박에 SpeedMultiplier가 된다.</summary>
+        public float TargetSpeed => Speed.Speed;
+        /// <summary>목표 속도를 적용할 마디 첫 박 (없으면 NaN).</summary>
+        public double PendingSpeedBeat { get; private set; } = double.NaN;
         public bool IsRunning => timeline.IsRunning;
         public bool IsPaused => timeline.IsPaused;
 
         /// <summary>현재 달리기 속도 (m/s) = 5 × s.</summary>
-        public float MoveSpeed => SpeedRules.MoveSpeed(Speed.Speed);
+        public float MoveSpeed => SpeedRules.MoveSpeed(SpeedMultiplier);
 
-        /// <summary>속도 배율이 바뀌면 호출된다 (새 배율).</summary>
+        /// <summary>실제 속도 배율이 바뀌면 호출된다 (새 배율). 판정 뒤 다음 마디 첫 박에 온다.</summary>
         public event Action<float> SpeedChanged;
+        /// <summary>판정으로 목표 속도 배율이 바뀌면 바로 호출된다 (HUD 예고용).</summary>
+        public event Action<float> TargetSpeedChanged;
+
+        void Update() => TickSpeed();
+
+        /// <summary>목표 속도를 적용할 마디 첫 박이 지났으면 그 박 시각부터 새 속도로 바꾼다 (GDD-beta B15.2). Update에서 부른다.</summary>
+        public void TickSpeed()
+        {
+            if (double.IsNaN(PendingSpeedBeat) || !IsRunning || IsPaused) return;
+            double now = Now;
+            if (timeline.BeatAt(now) + 1e-9 < PendingSpeedBeat) return;
+            double at = timeline.TimeOfBeat(PendingSpeedBeat, now);   // 마디 첫 박이 온 시각 (지금 또는 조금 전)
+            PendingSpeedBeat = double.NaN;
+            SetApplied(Speed.Speed, at);
+        }
+
+        void SetApplied(float s, double at)
+        {
+            bool changed = !Mathf.Approximately(timeline.Speed, s);
+            timeline.SetSpeed(s, at);
+            ApplyPitch();
+            if (changed) SpeedChanged?.Invoke(s);
+        }
 
         void Awake()
         {
@@ -65,7 +96,8 @@ namespace RhythmActionGame
         public void StartClock(double startBeat = 0)
         {
             timeline.Start(Now, startBeat);
-            timeline.SetSpeed(Speed.Speed, Now);
+            PendingSpeedBeat = double.NaN;
+            SetApplied(Speed.Speed, Now);
             PlayMusicAt(startBeat);
         }
 
@@ -74,7 +106,14 @@ namespace RhythmActionGame
         {
             if (music == null || music.clip == null) return;
             music.Play();
-            music.time = MusicTimeAt(beat, music.clip.length);
+            // 음 높이 보정이 음악을 LatencySeconds만큼 늦추므로 재생 위치를 그만큼 앞당긴다 (GDD-beta B15.1)
+            double lead = 0;
+            if (pitchCorrector != null)
+            {
+                pitchCorrector.Clear();
+                lead = MusicPitchCorrector.LatencySeconds * SpeedMultiplier / GameConfig.SecondsPerBeat;
+            }
+            music.time = MusicTimeAt(beat + lead, music.clip.length);
         }
 
         /// <summary>
@@ -108,7 +147,8 @@ namespace RhythmActionGame
         public void RestartAt(double beat)
         {
             timeline.Start(Now, beat);
-            timeline.SetSpeed(Speed.Speed, Now);
+            PendingSpeedBeat = double.NaN;   // 되감기는 그 순간의 속도 배율로 바로 시작 (B15.2)
+            SetApplied(Speed.Speed, Now);
             PlayMusicAt(beat);
             Restarted?.Invoke(beat);
         }
@@ -122,35 +162,43 @@ namespace RhythmActionGame
             if (music != null) music.Stop();
         }
 
-        /// <summary>판정 결과를 속도 배율에 반영한다 (GDD 4.1 표).</summary>
+        /// <summary>
+        /// 판정 결과를 속도 배율에 반영한다 (GDD 4.1 표). 목표 값은 바로 바뀌고(HUD), 실제 적용은 다음 마디 첫 박 (GDD-beta B15.2).
+        /// </summary>
         public void ApplyJudgement(Judgement judgement)
         {
             float before = Speed.Speed;
             Speed.Apply(judgement);
-            if (!Mathf.Approximately(before, Speed.Speed)) OnSpeedChanged(Speed.Speed);
+            if (Mathf.Approximately(before, Speed.Speed)) return;
+            if (double.IsNaN(PendingSpeedBeat)) PendingSpeedBeat = SpeedTiming.NextBarBeat(CurrentBeat);
+            TargetSpeedChanged?.Invoke(Speed.Speed);
         }
 
-        /// <summary>속도 배율을 시작값(1.00)으로 되돌린다 (다시 하기).</summary>
+        /// <summary>기다리는 목표 속도를 지금 바로 적용한다 (테스트·개발자 도구용).</summary>
+        public void ApplyPendingSpeedNow()
+        {
+            PendingSpeedBeat = double.NaN;
+            SetApplied(Speed.Speed, Now);
+        }
+
+        /// <summary>속도 배율을 시작값(1.00)으로 되돌린다 (다시 하기). 바로 적용한다.</summary>
         public void ResetSpeed()
         {
             Speed.Reset();
-            OnSpeedChanged(Speed.Speed);
+            PendingSpeedBeat = double.NaN;
+            SetApplied(Speed.Speed, Now);
+            TargetSpeedChanged?.Invoke(Speed.Speed);
         }
 
         /// <summary>beat 박자가 오는 dsp 시각.</summary>
         public double TimeOfBeat(double beat) => timeline.TimeOfBeat(beat, Now);
 
-        void OnSpeedChanged(float s)
-        {
-            timeline.SetSpeed(s, Now);
-            ApplyPitch();
-            SpeedChanged?.Invoke(s);
-        }
-
         void ApplyPitch()
         {
-            // 음악 재생 속도 = s. 음 높이 보정(Pitch Shifter 1/s)은 실제 곡을 넣을 때 AudioMixer로 추가한다.
-            if (music != null) music.pitch = Speed.Speed;
+            // 음악 재생 속도 = s, 음 높이는 1/s로 되돌린다 (GDD 4.1, GDD-beta B15.1)
+            float s = SpeedMultiplier;
+            if (music != null) music.pitch = s;
+            if (pitchCorrector != null) pitchCorrector.SetSpeed(s);
         }
     }
 }

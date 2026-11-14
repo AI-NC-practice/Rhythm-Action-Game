@@ -109,11 +109,12 @@ namespace RhythmActionGame.Tests
             yield return Load(89);   // beta1-1: 88 매복 사건(B20 차트)을 건너뛴다. 92 칼 포졸
             yield return UntilCombat();
             for (int i = 0; i < 4; i++) boot.clock.ApplyJudgement(Judgement.Perfect);   // 1.20배
+            boot.clock.ApplyPendingSpeedNow();   // GDD-beta B15.2: 속도는 다음 마디 첫 박에 들어오므로 바로 적용
             var enc = dir.CurrentEncounter;
             var first = enc.Cues.ToList();
             yield return Hit(0, null);                       // 무입력 → FAIL
             Assert.AreEqual(2, dir.Health.Hp, "체력 −1");
-            Assert.AreEqual(1.0f, boot.clock.SpeedMultiplier, 1e-4f, "1.2 × 0.8 = 0.96 → 1.00");
+            Assert.AreEqual(1.0f, boot.clock.TargetSpeed, 1e-4f, "1.2 × 0.8 = 0.96 → 1.00");
             Assert.AreEqual(1, enc.Attempts, "다시 하지 않음");
             Assert.IsFalse(first[1].Cancelled, "다음 공격 그대로");
             Assert.IsFalse(first[2].Cancelled, "마무리 그대로");

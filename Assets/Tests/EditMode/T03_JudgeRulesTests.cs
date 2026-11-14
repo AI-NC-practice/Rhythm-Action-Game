@@ -146,7 +146,7 @@ namespace RhythmActionGame.Tests
                 now = 2.0; judge.Submit(ArrowKey.Up, now);
                 Assert.IsTrue(cue.Judged);
                 Assert.AreEqual(Judgement.Perfect, cue.Result);
-                Assert.AreEqual(1.05f, clock.SpeedMultiplier, 1e-4f);
+                Assert.AreEqual(1.05f, clock.TargetSpeed, 1e-4f);   // 실제 적용은 다음 마디 첫 박 (GDD-beta B15.2)
             }
             finally { Object.DestroyImmediate(go); }
         }

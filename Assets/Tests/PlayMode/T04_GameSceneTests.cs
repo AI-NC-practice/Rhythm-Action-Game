@@ -54,6 +54,7 @@ namespace RhythmActionGame.Tests
 
             // 속도 배율이 1.3이어도 4박에 10 m
             for (int i = 0; i < 6; i++) boot.clock.ApplyJudgement(Judgement.Perfect);
+            boot.clock.ApplyPendingSpeedNow();   // GDD-beta B15.2: 속도는 다음 마디 첫 박에 들어오므로 바로 적용
             Assert.AreEqual(1.3f, boot.clock.SpeedMultiplier, 1e-4f);
             var p0 = boot.player.Distance;
             now += 4 * GameConfig.SecondsPerBeat / 1.3;

@@ -185,11 +185,15 @@ namespace RhythmActionGame.Tests
                 // Awake는 EditMode AddComponent에서 호출되지 않을 수 있으므로 기본 상태를 직접 확인
                 clock.ApplyJudgement(Judgement.Perfect);
                 clock.ApplyJudgement(Judgement.Perfect);
+                Assert.AreEqual(1.10f, clock.TargetSpeed, Eps);
+                Assert.AreEqual(1.00f, clock.SpeedMultiplier, Eps, "GDD-beta B15.2: 다음 마디 첫 박까지 기다림");
+                clock.ApplyPendingSpeedNow();
                 Assert.AreEqual(1.10f, clock.SpeedMultiplier, Eps);
                 Assert.AreEqual(1.10f, music.pitch, Eps, "음악 재생 속도 = s");
                 Assert.AreEqual(5.5f, clock.MoveSpeed, Eps, "이동 속도 = 5 × s");
 
                 clock.ApplyJudgement(Judgement.Fail);
+                clock.ApplyPendingSpeedNow();
                 Assert.AreEqual(1.00f, clock.SpeedMultiplier, Eps);
                 Assert.AreEqual(1.00f, music.pitch, Eps);
                 Assert.AreEqual(5.0f, clock.MoveSpeed, Eps);

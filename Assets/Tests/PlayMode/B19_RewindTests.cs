@@ -81,14 +81,15 @@ namespace RhythmActionGame.Tests
             yield return Load(89);   // beta1-1: 88 매복 사건(B20 차트)을 건너뛴다. 92 칼 포졸
             yield return UntilCombat();
             for (int i = 0; i < 4; i++) boot.clock.ApplyJudgement(Judgement.Perfect);    // 1.20배
+            boot.clock.ApplyPendingSpeedNow();   // GDD-beta B15.2: 속도는 다음 마디 첫 박에 들어오므로 바로 적용
             var enc = dir.CurrentEncounter;
             var cues = enc.Cues.ToList();
             yield return Hit(cues[0], 0.0);                        // 1.25
             yield return Hit(cues[1], 0.0);                        // 1.30
-            Assert.AreEqual(1.30f, boot.clock.SpeedMultiplier, 1e-4f);
+            Assert.AreEqual(1.30f, boot.clock.TargetSpeed, 1e-4f);
             yield return Hit(cues[2], null);                       // 마무리 FAIL
             Assert.AreEqual(2, dir.Health.Hp, "체력 −1");
-            Assert.AreEqual(1.04f, boot.clock.SpeedMultiplier, 1e-4f, "속도 ×0.8 (1.30 → 1.04)");
+            Assert.AreEqual(1.04f, boot.clock.TargetSpeed, 1e-4f, "속도 ×0.8 (1.30 → 1.04)");
             Assert.IsFalse(dir.Rewinding, "일반 적은 되감지 않음");
             Assert.IsTrue(enc.Done, "재도전 없이 끝");
             Assert.AreEqual(ExecutionKind.PushDown, enc.Execution, "엉겁결에 밀쳐 쓰러뜨리기");

@@ -27,6 +27,17 @@ namespace RhythmActionGame
         public static float DistanceForBeats(float beats, float speed) => MoveSpeed(speed) * SecondsPerBeat(speed) * beats;
     }
 
+    /// <summary>속도 적용 시점 (GDD-beta B15.2).</summary>
+    public static class SpeedTiming
+    {
+        /// <summary>beat 뒤에 오는 다음 마디 첫 박 (beat가 마디 첫 박이면 그다음 마디).</summary>
+        public static double NextBarBeat(double beat)
+        {
+            double bar = GameConfig.BeatsPerBar;
+            return (System.Math.Floor(beat / bar + 1e-9) + 1) * bar;
+        }
+    }
+
     /// <summary>현재 속도 배율과 최고 속도를 기억하는 상태.</summary>
     public class SpeedState
     {

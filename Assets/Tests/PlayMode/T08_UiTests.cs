@@ -226,10 +226,12 @@ namespace RhythmActionGame.Tests
             Assert.AreEqual(70f, boot.playerCamera.fieldOfView, 0.01f);
 
             boot.clock.ApplyJudgement(Judgement.Perfect);          // 1.05
+            boot.clock.ApplyPendingSpeedNow();   // GDD-beta B15.2: 속도는 다음 마디 첫 박에 들어오므로 바로 적용
             yield return null; yield return null;
             Assert.AreEqual(0f, boot.speedFx.Intensity, 1e-5f, "1.10 미만");
 
             for (int i = 0; i < 2; i++) boot.clock.ApplyJudgement(Judgement.Perfect);   // 1.15
+            boot.clock.ApplyPendingSpeedNow();   // GDD-beta B15.2: 속도는 다음 마디 첫 박에 들어오므로 바로 적용
             yield return null; yield return null;
             Assert.AreEqual(0.5f, boot.speedFx.Intensity, 1e-3f);
             Assert.IsTrue(boot.speedFx.lines.enabled, "집중선 표시");
@@ -238,6 +240,7 @@ namespace RhythmActionGame.Tests
             Assert.AreEqual(72.5f, boot.playerCamera.fieldOfView, 0.05f, "FOV +2.5°");
 
             for (int i = 0; i < 3; i++) boot.clock.ApplyJudgement(Judgement.Perfect);   // 1.30
+            boot.clock.ApplyPendingSpeedNow();   // GDD-beta B15.2: 속도는 다음 마디 첫 박에 들어오므로 바로 적용
             yield return null; yield return null;
             Assert.AreEqual(1f, boot.speedFx.Intensity, 1e-3f);
             Assert.AreEqual(75f, boot.playerCamera.fieldOfView, 0.05f, "FOV 최대 +5°");

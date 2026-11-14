@@ -100,8 +100,11 @@ namespace RhythmActionGame.EditorTools
             music.clip = MusicTool.LoadClip();
             music.loop = true;
             music.volume = GameConfig.Music.Volume;
+            // 음 높이 보정 (GDD-beta B15.1): 음악 AudioSource 바로 뒤에 붙어 OnAudioFilterRead로 1/s
+            var pitchCorrector = systems.AddComponent<MusicPitchCorrector>();
             var clock = systems.AddComponent<BeatClock>();
             clock.music = music;
+            clock.pitchCorrector = pitchCorrector;
             // 효과음 + 합성 장단 반주 (GDD-beta B7: 메트로놈 대신)
             var sfxGo = new GameObject("Sfx");
             sfxGo.transform.SetParent(systems.transform);

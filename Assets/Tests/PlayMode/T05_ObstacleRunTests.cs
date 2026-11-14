@@ -97,6 +97,7 @@ namespace RhythmActionGame.Tests
         {
             yield return Load(8);
             for (int i = 0; i < 6; i++) boot.clock.ApplyJudgement(Judgement.Perfect);
+            boot.clock.ApplyPendingSpeedNow();   // GDD-beta B15.2: 속도는 다음 마디 첫 박에 들어오므로 바로 적용
             Assert.AreEqual(1.30f, boot.clock.SpeedMultiplier, 1e-4f);
             double target = boot.clock.TimeOfBeat(4);
             yield return AdvanceTo(target - 0.05);
@@ -104,7 +105,7 @@ namespace RhythmActionGame.Tests
             float distBefore = boot.player.Distance;
             yield return AdvanceTo(target + 0.26);          // 무입력 → FAIL   // beta1-1: NORMAL 창 0.24초(GDD-beta B12.1)가 지나야 무입력 FAIL
             Assert.AreEqual(2, dir.Health.Hp, "체력 −1");
-            Assert.AreEqual(1.04f, boot.clock.SpeedMultiplier, 1e-4f, "1.30 × 0.8");
+            Assert.AreEqual(1.04f, boot.clock.TargetSpeed, 1e-4f, "1.30 × 0.8");
             Assert.IsTrue(boot.clock.IsRunning && !boot.clock.IsPaused, "박자 시계(음악) 계속");
             Assert.Greater(boot.clock.CurrentBeat, beatBefore, "되감지 않음");
             Assert.Greater(boot.player.Distance, distBefore, "위치도 되감지 않음");
@@ -117,7 +118,7 @@ namespace RhythmActionGame.Tests
             yield return Load(8);
             yield return AdvanceTo(2.3);
             Assert.AreEqual(2, dir.Health.Hp);
-            Assert.AreEqual(1.00f, boot.clock.SpeedMultiplier, 1e-4f, "1.00 아래로 내려가지 않음");
+            Assert.AreEqual(1.00f, boot.clock.TargetSpeed, 1e-4f, "1.00 아래로 내려가지 않음");
         }
 
         [UnityTest]

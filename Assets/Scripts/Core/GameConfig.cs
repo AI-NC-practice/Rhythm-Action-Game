@@ -604,6 +604,9 @@ namespace RhythmActionGame
             public const float Volume = 0.8f;
             /// <summary>곡이 있으면 합성 장단 반주(GDD-beta B7)는 끈다. GDD에 없음, Claude가 정함 (곡이 3박 느낌이라 4박 반주와 겹치면 어지러움).</summary>
             public const bool KeepJangguBacking = false;
+            /// <summary>음 높이 보정 피치 시프터의 창 길이와 최소 지연 (초, GDD-beta B15.1). 평균 지연 = 최소 + 창/2 = 22 ms.</summary>
+            public const float PitchShiftWindowSeconds = 0.04f;
+            public const float PitchShiftMinDelaySeconds = 0.002f;
             /// <summary>게임 안 출처 표기 (CC BY).</summary>
             public const string Credit = "음악: 국악 BGM #197 — 주식회사 아이티앤, 공유마당(한국저작권위원회), CC BY";
         }

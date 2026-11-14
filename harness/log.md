@@ -324,3 +324,6 @@ BuildGray와 smoke-test를 통과했다. 테스트 패키지 RhythmActionGame-be
 
 ### 2026-11-14 B36 피드백 — 히트사운드가 노래와 따로 놂, 속도 올라가면 노래가 기괴함
 사용자가 테스트 빌드를 해 보고: 맞출 때 나는 소리가 하나의 박자처럼 느껴지면 좋겠다(지금은 따로 놂), 박 쪼개기 좋음, 속도가 빨라지면 노래가 기괴해진다고 했다. 원인과 해결을 docs/proposals/rhythm-feel.md 6장에 적었다. 핵심: GDD 4.1의 음 높이 보정(Pitch Shifter 1/s)이 구현되지 않아 s = 1.30에서 약 4.5반음 올라감 → GDD대로 보정 추가. PERFECT마다 즉시 바뀌는 속도는 다음 마디 첫 박에 적용(GDD-beta 변경 필요). 히트사운드는 이른 PERFECT 입력을 목표 박 시각에 예약(퀀타이즈)하고, 곡을 정한 뒤 곡의 드럼 위치로 차트·음색을 맞춘다. 사용자 승인을 기다린다.
+
+### 2026-11-14 B37 [beta] 음 높이 보정 + 마디 단위 속도 — done
+사용자가 제안서 6.4 순서대로 진행을 승인했다. GDD-beta B15를 쓰고 작업 B37~B39를 만들었다. GDD 4.1의 음 높이 보정(1/s)을 AudioMixer 대신 음악 AudioSource의 OnAudioFilterRead 피치 시프터(PitchShifter: 지연선 두 탭 + sin² 창 40 ms)로 구현했다. 440 Hz × 1/1.30 → 약 336 Hz, 속도 1.00에서는 소리를 바꾸지 않고 22 ms 지연만 두며 음악 재생 위치를 그만큼 앞당긴다. 속도는 판정 즉시 목표 값(HUD)만 바뀌고 실제 박자 시계·이동·음악은 다음 마디 첫 박에 바뀐다(BeatClock.TickSpeed, 실행 순서 −1000). 되감기·다시 시작은 바로 적용. 기존 테스트 8개(T02, T03, B02, B19, T04, T05, T06, T08)는 기대값은 그대로 두고 TargetSpeed를 보거나 ApplyPendingSpeedNow 뒤 확인하도록 고쳤다. unity-verify EditMode 155/155, PlayMode 140/140, evaluator PASS. 다음: B38 히트사운드 박 맞춤.
