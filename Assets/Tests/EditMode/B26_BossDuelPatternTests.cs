@@ -144,7 +144,7 @@ namespace RhythmActionGame.Tests
         {
             var c = StageChart.Load();
             Assert.AreEqual(45, ChartCheck.CombatJudgements(c) - ChartCheck.CombatJudgements(new ChartData { events = c.events.Where(e => !e.IsBoss).ToArray() }), "무사 결투 45 (B13.4)");
-            Assert.That(ChartCheck.TotalJudgements(c), Is.InRange(360, 440), "B11.6 스테이지 전체 115~130");
+            Assert.That(ChartCheck.TotalJudgements(c), Is.InRange(330, 440), "B11.6 스테이지 전체 115~130");
         }
     }
 }

@@ -8,8 +8,6 @@ namespace RhythmActionGame
     {
         public double RunBeat;
         public ArrowKey Key;
-        /// <summary>스테이지 안 순서 (장단 줄의 칸 = Index mod RowSlots).</summary>
-        public int Index;
     }
 
     /// <summary>
@@ -35,15 +33,15 @@ namespace RhythmActionGame
                 foreach (var cell in table[((barInSec % table.Length) + table.Length) % table.Length].Split(' '))
                 {
                     double r = bs + double.Parse(cell.Substring(0, cell.Length - 1), System.Globalization.CultureInfo.InvariantCulture);
-                    var key = cell[cell.Length - 1] == 'L' ? ArrowKey.Left : ArrowKey.Right;
+                    var key = cell[cell.Length - 1] == 'L' ? ArrowKey.Kung : ArrowKey.Deok;   // L = Q 궁편, R = W 채편 (B18.5)
                     var s2 = MapLayout.SectionOf((int)System.Math.Floor(r));
                     if (r < s2.StartBeat + GameConfig.Jangdan.ChapterLeadBeats) continue;
                     if (r >= boss - GameConfig.Jangdan.CombatClearBeats) continue;
-                    if (events.Any(e => System.Math.Abs(e - r) < GameConfig.Jangdan.MinGapBeats - 1e-9)) continue;
+                    if (events.Any(e => System.Math.Abs(e - r) < GameConfig.Jangdan.EventClearBeats - 1e-9)) continue;   // 사건 판정과 1박 (B18.5)
                     if (stops.Any(e => r > e - GameConfig.Jangdan.CombatClearBeats - 1e-9 && r < e + GameConfig.Jangdan.CombatClearBeats - 1e-9)) continue;
                     if (slow.Any(e => r > e - 1e-9 && r < e + GameConfig.Jangdan.SlowMoClearBeats + 1e-9)) continue;
                     if (notes.Count > 0 && r - notes[notes.Count - 1].RunBeat < GameConfig.Jangdan.MinGapBeats - 1e-9) continue;
-                    notes.Add(new RhythmNote { RunBeat = r, Key = key, Index = notes.Count });
+                    notes.Add(new RhythmNote { RunBeat = r, Key = key });
                 }
             }
             return notes;

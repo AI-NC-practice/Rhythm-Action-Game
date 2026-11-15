@@ -1,658 +1,602 @@
 {
  "judges": [
   {
-   "beat": 2.03,
-   "key": "Left",
+   "beat": 2.02,
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 1
   },
   {
-   "beat": 3.03,
-   "key": "Right",
+   "beat": 3.02,
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 1
   },
   {
-   "beat": 4.03,
+   "beat": 4.02,
    "key": "Up",
    "result": "Perfect",
    "state": "Running",
    "chapter": 1
   },
   {
-   "beat": 5.03,
-   "key": "Right",
+   "beat": 5.02,
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 1
   },
   {
-   "beat": 6.03,
-   "key": "Left",
+   "beat": 6.02,
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 1
   },
   {
-   "beat": 7.03,
-   "key": "Right",
+   "beat": 7.02,
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 1
   },
   {
-   "beat": 8.03,
-   "key": "Left",
+   "beat": 8.02,
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 1
   },
   {
-   "beat": 10.03,
-   "key": "Left",
+   "beat": 10.02,
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 1
   },
   {
-   "beat": 10.53,
-   "key": "Right",
+   "beat": 10.52,
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 1
   },
   {
-   "beat": 11.03,
-   "key": "Right",
+   "beat": 11.02,
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 1
   },
   {
-   "beat": 12.03,
+   "beat": 12.02,
    "key": "Down",
    "result": "Perfect",
    "state": "Running",
    "chapter": 1
   },
   {
-   "beat": 13.03,
-   "key": "Right",
+   "beat": 13.02,
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 1
   },
   {
-   "beat": 14.03,
+   "beat": 14.02,
+   "key": "Kung",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 15.02,
+   "key": "Deok",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 16.02,
    "key": "Left",
    "result": "Perfect",
    "state": "Running",
    "chapter": 1
   },
   {
-   "beat": 15.03,
-   "key": "Right",
+   "beat": 18.02,
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 1
   },
   {
-   "beat": 16.03,
+   "beat": 19.02,
+   "key": "Deok",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 20.02,
+   "key": "Kung",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 21.02,
    "key": "Left",
    "result": "Perfect",
    "state": "Running",
    "chapter": 1
   },
   {
-   "beat": 18.03,
-   "key": "Left",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 1
-  },
-  {
-   "beat": 19.03,
+   "beat": 21.52,
    "key": "Right",
    "result": "Perfect",
    "state": "Running",
    "chapter": 1
   },
   {
-   "beat": 20.03,
+   "beat": 22.52,
    "key": "Left",
    "result": "Perfect",
    "state": "Running",
    "chapter": 1
   },
   {
-   "beat": 21.03,
-   "key": "Left",
+   "beat": 24.02,
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 1
   },
   {
-   "beat": 21.53,
+   "beat": 26.02,
    "key": "Right",
    "result": "Perfect",
    "state": "Running",
    "chapter": 1
   },
   {
-   "beat": 22.03,
-   "key": "Left",
+   "beat": 27.02,
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 1
   },
   {
-   "beat": 22.53,
-   "key": "Left",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 1
-  },
-  {
-   "beat": 23.03,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 1
-  },
-  {
-   "beat": 24.03,
-   "key": "Left",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 1
-  },
-  {
-   "beat": 26.03,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 1
-  },
-  {
-   "beat": 26.53,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 1
-  },
-  {
-   "beat": 27.03,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 1
-  },
-  {
-   "beat": 28.03,
+   "beat": 28.02,
    "key": "Up",
    "result": "Perfect",
    "state": "Running",
    "chapter": 1
   },
   {
-   "beat": 29.03,
-   "key": "Right",
+   "beat": 29.02,
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 1
   },
   {
-   "beat": 30.03,
+   "beat": 30.02,
+   "key": "Kung",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 31.02,
+   "key": "Deok",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 32.02,
    "key": "Left",
    "result": "Perfect",
    "state": "Running",
    "chapter": 1
   },
   {
-   "beat": 31.03,
+   "beat": 34.02,
+   "key": "Kung",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 35.02,
+   "key": "Deok",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 36.02,
+   "key": "Kung",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 37.02,
+   "key": "Deok",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 38.02,
    "key": "Right",
    "result": "Perfect",
    "state": "Running",
    "chapter": 1
   },
   {
-   "beat": 32.03,
+   "beat": 39.02,
+   "key": "Deok",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 40.02,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 42.02,
+   "key": "Kung",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 42.52,
+   "key": "Deok",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 43.02,
+   "key": "Deok",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 44.02,
+   "key": "Kung",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 45.02,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 45.52,
    "key": "Left",
    "result": "Perfect",
    "state": "Running",
    "chapter": 1
   },
   {
-   "beat": 34.03,
+   "beat": 46.52,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 48.02,
+   "key": "Kung",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 50.02,
    "key": "Left",
    "result": "Perfect",
    "state": "Running",
    "chapter": 1
   },
   {
-   "beat": 35.03,
+   "beat": 50.52,
    "key": "Right",
    "result": "Perfect",
    "state": "Running",
    "chapter": 1
   },
   {
-   "beat": 36.03,
-   "key": "Left",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 1
-  },
-  {
-   "beat": 37.03,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 1
-  },
-  {
-   "beat": 38.03,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 1
-  },
-  {
-   "beat": 39.03,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 1
-  },
-  {
-   "beat": 40.03,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 1
-  },
-  {
-   "beat": 42.03,
-   "key": "Left",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 1
-  },
-  {
-   "beat": 42.53,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 1
-  },
-  {
-   "beat": 43.03,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 1
-  },
-  {
-   "beat": 44.03,
-   "key": "Left",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 1
-  },
-  {
-   "beat": 45.03,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 1
-  },
-  {
-   "beat": 45.53,
-   "key": "Left",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 1
-  },
-  {
-   "beat": 46.03,
-   "key": "Left",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 1
-  },
-  {
-   "beat": 46.53,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 1
-  },
-  {
-   "beat": 47.03,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 1
-  },
-  {
-   "beat": 48.03,
-   "key": "Left",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 1
-  },
-  {
-   "beat": 50.03,
-   "key": "Left",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 1
-  },
-  {
-   "beat": 50.53,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 1
-  },
-  {
-   "beat": 51.03,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 1
-  },
-  {
-   "beat": 52.03,
+   "beat": 52.02,
    "key": "Up",
    "result": "Perfect",
    "state": "Running",
    "chapter": 1
   },
   {
-   "beat": 53.03,
-   "key": "Right",
+   "beat": 53.02,
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 1
   },
   {
-   "beat": 54.03,
-   "key": "Left",
+   "beat": 54.02,
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 1
   },
   {
-   "beat": 55.03,
-   "key": "Right",
+   "beat": 55.02,
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 1
   },
   {
-   "beat": 58.03,
-   "key": "Left",
+   "beat": 58.02,
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
-   "beat": 59.03,
+   "beat": 59.02,
+   "key": "Deok",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 2
+  },
+  {
+   "beat": 60.02,
    "key": "Right",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
-   "beat": 60.03,
-   "key": "Right",
+   "beat": 61.02,
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
-   "beat": 61.03,
-   "key": "Right",
+   "beat": 61.52,
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
-   "beat": 61.53,
-   "key": "Right",
+   "beat": 62.02,
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
-   "beat": 62.03,
-   "key": "Left",
+   "beat": 63.02,
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
-   "beat": 63.03,
-   "key": "Right",
+   "beat": 64.02,
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
-   "beat": 64.03,
-   "key": "Left",
+   "beat": 65.02,
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
-   "beat": 65.03,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 2
-  },
-  {
-   "beat": 66.03,
+   "beat": 66.02,
    "key": "Up",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
-   "beat": 66.53,
-   "key": "Right",
+   "beat": 67.02,
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
-   "beat": 67.03,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 2
-  },
-  {
-   "beat": 68.03,
+   "beat": 68.02,
    "key": "Left",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
-   "beat": 68.53,
-   "key": "Right",
+   "beat": 69.02,
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
-   "beat": 69.03,
-   "key": "Right",
+   "beat": 70.02,
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
-   "beat": 70.03,
-   "key": "Left",
+   "beat": 71.02,
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
-   "beat": 71.03,
-   "key": "Right",
+   "beat": 72.02,
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
-   "beat": 72.03,
-   "key": "Left",
+   "beat": 73.02,
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
-   "beat": 73.03,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 2
-  },
-  {
-   "beat": 74.03,
+   "beat": 74.02,
    "key": "Up",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
-   "beat": 76.03,
+   "beat": 76.02,
    "key": "Up",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
-   "beat": 77.03,
-   "key": "Right",
+   "beat": 77.02,
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
-   "beat": 77.53,
-   "key": "Right",
+   "beat": 77.52,
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
-   "beat": 78.03,
-   "key": "Left",
+   "beat": 78.02,
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
-   "beat": 79.03,
-   "key": "Right",
+   "beat": 79.02,
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
-   "beat": 80.03,
+   "beat": 80.02,
    "key": "Down",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
-   "beat": 81.03,
-   "key": "Right",
+   "beat": 81.02,
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
-   "beat": 82.03,
+   "beat": 82.02,
+   "key": "Kung",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 2
+  },
+  {
+   "beat": 82.52,
+   "key": "Deok",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 2
+  },
+  {
+   "beat": 83.02,
+   "key": "Deok",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 2
+  },
+  {
+   "beat": 84.02,
+   "key": "Kung",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 2
+  },
+  {
+   "beat": 84.52,
+   "key": "Deok",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 2
+  },
+  {
+   "beat": 85.02,
+   "key": "Deok",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 2
+  },
+  {
+   "beat": 86.02,
    "key": "Left",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
-   "beat": 82.53,
-   "key": "Right",
+   "beat": 87.02,
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
-   "beat": 83.03,
-   "key": "Right",
+   "beat": 88.02,
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
-   "beat": 84.03,
-   "key": "Left",
+   "beat": 89.02,
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
-   "beat": 84.53,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 2
-  },
-  {
-   "beat": 85.03,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 2
-  },
-  {
-   "beat": 86.03,
-   "key": "Left",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 2
-  },
-  {
-   "beat": 87.03,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 2
-  },
-  {
-   "beat": 88.03,
-   "key": "Left",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 2
-  },
-  {
-   "beat": 89.03,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 2
-  },
-  {
-   "beat": 90.03,
+   "beat": 90.02,
    "key": "Left",
    "result": "Perfect",
    "state": "Running",
@@ -695,14 +639,14 @@
   },
   {
    "beat": 102.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
    "beat": 103.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
@@ -716,28 +660,28 @@
   },
   {
    "beat": 105.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
    "beat": 106.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
    "beat": 106.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
    "beat": 107.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
@@ -750,43 +694,36 @@
    "chapter": 2
   },
   {
-   "beat": 108.5,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 2
-  },
-  {
    "beat": 109.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
    "beat": 110.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
    "beat": 111.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
    "beat": 112.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
   },
   {
    "beat": 113.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
@@ -794,13 +731,6 @@
   {
    "beat": 114.0,
    "key": "Down",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 2
-  },
-  {
-   "beat": 115.0,
-   "key": "Right",
    "result": "Perfect",
    "state": "Running",
    "chapter": 2
@@ -814,21 +744,21 @@
   },
   {
    "beat": 118.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 118.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 119.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
@@ -842,63 +772,56 @@
   },
   {
    "beat": 121.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 121.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 122.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 123.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 123.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 124.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 124.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 125.0,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 3
-  },
-  {
-   "beat": 125.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
@@ -912,7 +835,7 @@
   },
   {
    "beat": 127.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
@@ -926,56 +849,56 @@
   },
   {
    "beat": 129.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 130.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 130.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 131.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 131.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 132.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 132.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 133.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
@@ -1024,49 +947,42 @@
   },
   {
    "beat": 150.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 151.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 151.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 152.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 152.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 153.0,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 3
-  },
-  {
-   "beat": 153.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
@@ -1086,13 +1002,6 @@
    "chapter": 3
   },
   {
-   "beat": 155.0,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 3
-  },
-  {
    "beat": 156.0,
    "key": "Down",
    "result": "Perfect",
@@ -1101,77 +1010,77 @@
   },
   {
    "beat": 157.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 158.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 158.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 159.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 159.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 160.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 160.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 161.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 162.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 162.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 163.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
@@ -1192,42 +1101,35 @@
   },
   {
    "beat": 167.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 167.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 168.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 168.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 169.0,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 3
-  },
-  {
-   "beat": 169.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
@@ -1276,49 +1178,49 @@
   },
   {
    "beat": 182.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 182.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 183.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 183.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 184.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 184.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 185.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
@@ -1331,36 +1233,22 @@
    "chapter": 3
   },
   {
-   "beat": 186.5,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 3
-  },
-  {
    "beat": 187.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 188.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 189.0,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 3
-  },
-  {
-   "beat": 189.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
@@ -1374,14 +1262,7 @@
   },
   {
    "beat": 191.0,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 3
-  },
-  {
-   "beat": 191.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
@@ -1394,36 +1275,29 @@
    "chapter": 3
   },
   {
-   "beat": 192.5,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 3
-  },
-  {
    "beat": 193.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 193.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 194.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 195.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
@@ -1437,35 +1311,28 @@
   },
   {
    "beat": 197.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 198.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 198.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 199.0,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 3
-  },
-  {
-   "beat": 199.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
@@ -1478,50 +1345,43 @@
    "chapter": 3
   },
   {
-   "beat": 200.5,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 3
-  },
-  {
    "beat": 201.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 202.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 202.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 203.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 3
   },
   {
    "beat": 206.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 4
   },
   {
    "beat": 207.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 4
@@ -1535,7 +1395,7 @@
   },
   {
    "beat": 209.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 4
@@ -1626,91 +1486,84 @@
   },
   {
    "beat": 230.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 4
   },
   {
    "beat": 231.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 4
   },
   {
    "beat": 232.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 4
   },
   {
    "beat": 233.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 4
   },
   {
    "beat": 234.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 4
   },
   {
    "beat": 235.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 4
   },
   {
    "beat": 236.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 4
   },
   {
    "beat": 237.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 4
   },
   {
    "beat": 238.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 4
   },
   {
    "beat": 239.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 4
   },
   {
    "beat": 242.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 242.5,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 5
-  },
-  {
-   "beat": 243.0,
-   "key": "Left",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
@@ -1744,29 +1597,15 @@
    "chapter": 5
   },
   {
-   "beat": 245.5,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 5
-  },
-  {
    "beat": 246.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 247.0,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 5
-  },
-  {
-   "beat": 247.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
@@ -1787,28 +1626,28 @@
   },
   {
    "beat": 251.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 251.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 252.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 253.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
@@ -1821,71 +1660,64 @@
    "chapter": 5
   },
   {
-   "beat": 254.5,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 5
-  },
-  {
    "beat": 255.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 255.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 256.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 256.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 257.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 257.5,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 258.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 258.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 259.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
@@ -1899,56 +1731,49 @@
   },
   {
    "beat": 261.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 261.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 262.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 263.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 263.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 264.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 264.5,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 5
-  },
-  {
-   "beat": 265.5,
-   "key": "Left",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
@@ -1969,63 +1794,56 @@
   },
   {
    "beat": 269.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 270.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 270.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 271.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 271.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 272.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 272.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 273.0,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 5
-  },
-  {
-   "beat": 273.5,
-   "key": "Left",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
@@ -2038,15 +1856,8 @@
    "chapter": 5
   },
   {
-   "beat": 274.5,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 5
-  },
-  {
    "beat": 275.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
@@ -2060,56 +1871,49 @@
   },
   {
    "beat": 277.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 277.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 278.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 279.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 279.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 280.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 280.5,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 5
-  },
-  {
-   "beat": 281.5,
-   "key": "Left",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
@@ -2158,56 +1962,49 @@
   },
   {
    "beat": 298.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 298.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 299.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 299.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 300.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 300.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 301.0,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 5
-  },
-  {
-   "beat": 301.5,
-   "key": "Left",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
@@ -2220,15 +2017,8 @@
    "chapter": 5
   },
   {
-   "beat": 302.5,
-   "key": "Right",
-   "result": "Perfect",
-   "state": "Running",
-   "chapter": 5
-  },
-  {
    "beat": 303.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
@@ -2242,35 +2032,35 @@
   },
   {
    "beat": 305.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 305.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 306.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 307.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
   },
   {
    "beat": 307.5,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 5
@@ -2284,21 +2074,21 @@
   },
   {
    "beat": 311.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 6
   },
   {
    "beat": 312.0,
-   "key": "Left",
+   "key": "Kung",
    "result": "Perfect",
    "state": "Running",
    "chapter": 6
   },
   {
    "beat": 313.0,
-   "key": "Right",
+   "key": "Deok",
    "result": "Perfect",
    "state": "Running",
    "chapter": 6

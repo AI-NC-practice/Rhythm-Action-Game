@@ -603,8 +603,8 @@ namespace RhythmActionGame
 
         // ---------------- GDD-beta B18.2 달리기 장단 노드 ----------------
         /// <summary>
-        /// 달리기 장단 노드: ← = 궁편(왼손 "덩"), → = 채편(오른손 "덕"). 챕터(1~6)마다 4마디 장단 표를 돌려 쓴다.
-        /// 표 한 칸 = "마디 안 박위치+손" (L = ←, R = →). 뒤 챕터일수록 반 박이 많다. GDD에 없음, 사용자 결정(약 3배)에 맞춰 Claude가 정함.
+        /// 달리기 장단 노드: Q = 궁편("덩"), W = 채편("덕") (GDD-beta B18.5). 챕터(1~6)마다 4마디 장단 표를 돌려 쓴다.
+        /// 표 한 칸 = "마디 안 박위치+손" (L = Q 궁편, R = W 채편). 뒤 챕터일수록 반 박이 많다. GDD에 없음, 사용자 결정(약 3배)에 맞춰 Claude가 정함.
         /// </summary>
         public static class Jangdan
         {
@@ -617,26 +617,28 @@ namespace RhythmActionGame
                 new[] { "0L 0.5R 1R 1.5L 2R 2.5R 3L", "0L 1R 1.5R 2L 3R 3.5R", "0L 0.5R 1.5L 2R 3L 3.5R", "0L 1R 2L 2.5R 3R 3.5R" },
                 new[] { "0L 1R 2L 3R", "0L 1R 2L 3R", "0L 1R 2L 3R", "0L 1R 2L 3R" },
             };
-            /// <summary>사건 판정·다른 노드와의 최소 간격 (박).</summary>
+            /// <summary>장단 노드끼리의 최소 간격 (박).</summary>
             public const double MinGapBeats = 0.5;
+            /// <summary>사건·전투 판정과의 최소 간격 (박, GDD-beta B18.5: 장애물과 장구가 거의 같은 박에 나오지 않게).</summary>
+            public const double EventClearBeats = 1.0;
             /// <summary>멈추는 전투(대치·포위·무사) 자리 앞뒤로 비우는 박.</summary>
             public const double CombatClearBeats = 2;
             /// <summary>챕터 시작 뒤 비우는 박 (첫 판정은 챕터 시작 + 2박 이후, B04).</summary>
             public const double ChapterLeadBeats = 2;
             /// <summary>슬로모션 후보 판정 뒤 비우는 박 (B04).</summary>
             public const double SlowMoClearBeats = 2;
-            /// <summary>장단 노드를 몇 박 앞까지 예약하는지 (다음 멈추는 전투 앞까지만).</summary>
+            /// <summary>장단 노드를 몇 박 앞까지 예약하는지 (레인에 미리 보이게, 다음 멈추는 전투 앞까지만).</summary>
             public const double ScheduleAheadBeats = 5;
-            /// <summary>
-            /// 장단 줄 (1080p 기준 px, 화면 가운데 기준): 장단 노드의 판정 원은 화면 위쪽 한 줄(RowYPx)에 왼쪽부터 차례로 뜬다.
-            /// RowSlots칸을 노드 순서대로 돌려 쓰므로(동시에 떠 있는 원은 최대 5개) 서로 겹치지 않는다. 사건·전투 원은 EventMaxYPx 아래로만.
-            /// </summary>
-            public const float RowYPx = 300f;
-            public const int RowSlots = 6;
-            public const float RowSpacingPx = 160f;
-            public const float EventMaxYPx = 120f;
-            public static readonly UnityEngine.Color KungColor = new UnityEngine.Color(0.25f, 0.55f, 0.95f, 1f);   // ← 궁편
-            public static readonly UnityEngine.Color DeokColor = new UnityEngine.Color(0.95f, 0.3f, 0.25f, 1f);    // → 채편
+            /// <summary>장구 레인 (1080p 기준 px): 화면 아래 가로 레인, 노드가 1박에 LanePxPerBeat씩 왼쪽 판정 표시로 흘러옴.</summary>
+            public const float LaneWidthPx = 1100f;
+            public const float LaneHeightPx = 96f;
+            public const float LaneBottomPx = 40f;
+            public const float HitMarkerInsetPx = 110f;
+            public const float LanePxPerBeat = 220f;
+            public const double LaneLookAheadBeats = 4;
+            public const float NoteSizePx = 70f;
+            public static readonly UnityEngine.Color KungColor = new UnityEngine.Color(0.25f, 0.55f, 0.95f, 1f);   // Q 궁편
+            public static readonly UnityEngine.Color DeokColor = new UnityEngine.Color(0.95f, 0.3f, 0.25f, 1f);    // W 채편
         }
 
         // ---------------- B10 배경 음악 (GDD 1장 사운드: 국악 퓨전, BPM 고정, 보컬 없음) ----------------

@@ -129,6 +129,8 @@ namespace RhythmActionGame
             if (kb.downArrowKey.wasPressedThisFrame) SubmitRealtime(ArrowKey.Down, pressed);
             if (kb.leftArrowKey.wasPressedThisFrame) SubmitRealtime(ArrowKey.Left, pressed);
             if (kb.rightArrowKey.wasPressedThisFrame) SubmitRealtime(ArrowKey.Right, pressed);
+            if (kb.qKey.wasPressedThisFrame) SubmitRealtime(ArrowKey.Kung, pressed);   // 장구 궁편 (GDD-beta B18.5)
+            if (kb.wKey.wasPressedThisFrame) SubmitRealtime(ArrowKey.Deok, pressed);   // 장구 채편
         }
 
         /// <summary>
@@ -157,6 +159,7 @@ namespace RhythmActionGame
             foreach (var first in cues)
             {
                 if (first.Judged) continue;
+                if (!JudgeRules.SameLane(key, first.Key)) continue;   // 장구 키는 장단 노드만, 방향키는 사건·전투만 (B18.5)
                 // GDD-beta B12.1: 판정 창이 넓어 반 박 간격 원끼리 창이 겹친다. 앞 원에 늦은 입력이 다음 원에 더 가까우면 다음 원으로 본다
                 // (앞 원은 그대로 남아 창이 지나면 무입력 FAIL).
                 var cue = CloserNext(first, time, offset, key);
@@ -190,7 +193,7 @@ namespace RhythmActionGame
             foreach (var c in cues)
             {
                 if (c == first) { after = true; continue; }
-                if (after && !c.Judged) { next = c; break; }
+                if (after && !c.Judged && JudgeRules.SameLane(c.Key, first.Key)) { next = c; break; }
             }
             if (next == null) return first;
             double d2 = System.Math.Abs(JudgeRules.DeltaMs(time, TargetTime(next), offset));

@@ -7,6 +7,10 @@ namespace RhythmActionGame
         Down,
         Left,
         Right,
+        /// <summary>장구 궁편 "덩" (Q 키, GDD-beta B18.5). 달리기 장단 노드 전용.</summary>
+        Kung,
+        /// <summary>장구 채편 "덕" (W 키, GDD-beta B18.5). 달리기 장단 노드 전용.</summary>
+        Deok,
     }
 
     /// <summary>판정 규칙 (GDD 4.2). 시간은 모두 초, 판정 창은 실제 시간(ms)이라 속도 배율과 무관하다.</summary>
@@ -52,6 +56,12 @@ namespace RhythmActionGame
 
         /// <summary>화살표 글자.</summary>
         public static string Arrow(ArrowKey k) =>
-            k == ArrowKey.Up ? "↑" : k == ArrowKey.Down ? "↓" : k == ArrowKey.Left ? "←" : "→";
+            k == ArrowKey.Up ? "↑" : k == ArrowKey.Down ? "↓" : k == ArrowKey.Left ? "←" : k == ArrowKey.Right ? "→" : k == ArrowKey.Kung ? "Q" : "W";
+
+        /// <summary>장구 키(Q·W)인지 (GDD-beta B18.5).</summary>
+        public static bool IsDrum(ArrowKey k) => k == ArrowKey.Kung || k == ArrowKey.Deok;
+
+        /// <summary>같은 판정 줄인지: 장구 키는 장단 노드만, 방향키는 사건·전투 노드만 판정한다 (B18.5).</summary>
+        public static bool SameLane(ArrowKey a, ArrowKey b) => IsDrum(a) == IsDrum(b);
     }
 }

@@ -13,7 +13,7 @@ namespace RhythmActionGame.Tests
         {
             var c = C;
             int total = ChartCheck.TotalJudgements(c);
-            Assert.That(total, Is.InRange(360, 440), $"전체 판정 수 {total} (beta1-1: GDD-beta B11.6 115~130, 무사 결투 42)");
+            Assert.That(total, Is.InRange(330, 440), $"전체 판정 수 {total} (beta1-1: GDD-beta B11.6 115~130, 무사 결투 42)");
             Assert.AreEqual(1, c.events.Count(e => e.IsSurround), "포위 전투 1회");
             Assert.AreEqual(1, c.events.Count(e => e.IsBoss), "무사 1명");
             Assert.AreEqual(GameConfig.SurroundEnemyCount, 5, "포위 5명");

@@ -22,7 +22,7 @@ namespace RhythmActionGame.Tests
             Assert.GreaterOrEqual(half, 8, "반 박 판정이 곳곳에 있음 (화살 포함)");
             for (int i = 1; i < targets.Count; i++)
                 Assert.GreaterOrEqual(targets[i].RunBeat - targets[i - 1].RunBeat, 0.5 - 1e-9, $"판정 간격 0.5박 이상 ({targets[i].RunBeat})");
-            Assert.That(ChartCheck.TotalJudgements(c), Is.InRange(360, 440), "판정 수는 그대로");
+            Assert.That(ChartCheck.TotalJudgements(c), Is.InRange(330, 440), "판정 수는 그대로");
             Assert.AreEqual(4, EventCatalog.Get("rolling_jars").Beats, "사건 길이 그대로");
             Assert.AreEqual(4, EventCatalog.Get(EventCatalog.Ambush).Beats);
             Assert.AreEqual(6, EventCatalog.Get("tile_slip").Beats);
