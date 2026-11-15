@@ -76,7 +76,7 @@ namespace RhythmActionGame.Tests
                 Assert.IsNotNull(run);
                 Assert.AreEqual(2, run.Cues.Count, "판정 2개");
                 Assert.AreEqual(10.0, run.Cues[0].TargetBeat, 1e-6, "↓ @2");
-                Assert.AreEqual(12.0, run.Cues[1].TargetBeat, 1e-6, "↑ @4");
+                Assert.AreEqual(11.5, run.Cues[1].TargetBeat, 1e-6, "↑ @3.5 (GDD-beta B16.1 엇박)");
                 Assert.AreEqual(ArrowKey.Down, run.Cues[0].Key);
                 Assert.AreEqual(ArrowKey.Up, run.Cues[1].Key);
 

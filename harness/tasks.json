@@ -936,6 +936,61 @@
                       "notes":  "사용자 결정(2026-11-13): Suno 대신 무료 국악 음원. #197은 2026-11-14 사용자가 거절(전우치 OST 같은 곡 원함). 사용자 선택(2026-11-14 \"무료 데모 먼저\"): 공유마당 국악기 음원(태평소독주 시그널음악 6개·꽹과리 CC BY, 장구 공공누리 1유형)을 잘라 코드로 만든 드럼·베이스·현악과 함께 악보대로 조립(harness/scripts/music/song_kit.py, make-song.py). 데모 2(심장박동·빌드업·펌핑)를 사용자가 좋다고 함. 추임새는 무료 음원을 못 찾아 자리만 비워 둠(나중에). 2026-11-15 전체 곡 96마디(384박, 오토플레이로 잰 스테이지 길이) → mp3(Assets/Audio/Music/stage1_song.mp3, 첫 박 25 ms) → BeatClock 연결, 384박마다 반복, 50 ms 넘게 어긋나면 다시 맞춤. acceptance 1번(Suno 로그인·생성)은 이 결정으로 대체됨. 사용자 청취 확인 대기."
                   },
                   {
+                      "id":  "B41",
+                      "title":  "[beta] 차트 박 쪼개기 (GDD-beta B16.1)",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "B10"
+                                     ],
+                      "acceptance":  [
+                                         "GDD-beta B16.1: 술독 +1·+1.5·+2.5, 매복 +2·+2.5, 기와 미끄러짐 +2·+3.5 — 테스트",
+                                         "GDD-beta B16.1: 창 든 포졸 전투 공격 0·1.5 → 마무리 3.5 (GameConfig.SpearAttackIntervalBeats), 칼은 0·2·4 그대로 — 테스트",
+                                         "판정 수·사건 위치·전투 위치는 그대로, 판정 간격 0.5박 이상 유지, 동작 연출이 바뀐 판정 시각을 따름 — 테스트",
+                                         "unity-verify 통과"
+                                     ],
+                      "status":  "done",
+                      "attempts":  1,
+                      "max_attempts":  3,
+                      "notes":  "사용자 요청(2026-11-15): 차트를 곡에 맞추기, 박 쪼개기."
+                  },
+                  {
+                      "id":  "B42",
+                      "title":  "[beta] 곡을 차트에 맞춰 다시 만들기 + 챕터 되감기 곡 위치 (GDD-beta B16.2, B16.3)",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "B41"
+                                     ],
+                      "acceptance":  [
+                                         "모두 PERFECT일 때의 판정 타임라인(시계 박자·키·종류)을 뽑아 harness/에 저장 — 개발 빌드 오토플레이 로그 또는 시뮬레이션",
+                                         "GDD-beta B16.2: 곡의 판정 박마다 장구·꽹과리 강세가 있음 (곡 분석으로 판정 박의 소리 시작이 주변보다 셈) — 테스트",
+                                         "GDD-beta B16.2: 곡 구간 세기가 달리기·전투·포위·무사 결투를 따름",
+                                         "GDD-beta B16.3: 챕터 되감기·챕터 이동 때 곡이 그 챕터의 곡 위치부터 재생 (MusicBeatOffset, 값은 GameConfig) — 테스트",
+                                         "unity-verify 통과, 타이틀 출처 글자 크기 줄임"
+                                     ],
+                      "status":  "in_progress",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "B43",
+                      "title":  "[사용자] 곡·차트 맞춤 확인 + 테스트 빌드",
+                      "type":  "human",
+                      "depends_on":  [
+                                         "B42"
+                                     ],
+                      "acceptance":  [
+                                         "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과",
+                                         "사용자가 플레이해 노드가 곡의 타격처럼 느껴지는지, 반 박 패턴과 챕터 되감기 곡 위치를 확인"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  1,
+                      "notes":  ""
+                  },
+                  {
                       "id":  "T10",
                       "title":  "정적 에셋 생성 (VARCO 7개)",
                       "type":  "asset",

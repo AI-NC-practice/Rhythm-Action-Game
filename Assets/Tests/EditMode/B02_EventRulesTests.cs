@@ -32,9 +32,9 @@ namespace RhythmActionGame.Tests
         [Test]
         public void B02_NewEvents_MatchGddBetaB22()
         {
-            AssertSlots("tile_slip", 6, 2, 4);
+            AssertSlots("tile_slip", 6, 2, 3.5);   // GDD-beta B16.1: 엇박에 버팀
             AssertSlots("rope_swing", 4, 2);
-            AssertSlots("rolling_jars", 4, 1, 2, 3);
+            AssertSlots("rolling_jars", 4, 1, 1.5, 2.5);   // GDD-beta B16.1: 쿵-따닥
             AssertSlots("awning_bounce", 4, 2);
             AssertSlots("closing_gate", 4, 2);
             AssertSlots("arrow_volley", 4, 1.5, 2, 2.5, 3);
@@ -67,7 +67,7 @@ namespace RhythmActionGame.Tests
         {
             AssertSlots(EventCatalog.Charge, 4, 2);
             Assert.AreEqual(ArrowKey.Up, EventCatalog.Get(EventCatalog.Charge).Slots[0].Key);
-            AssertSlots(EventCatalog.Ambush, 4, 2, 3);
+            AssertSlots(EventCatalog.Ambush, 4, 2, 2.5);   // GDD-beta B16.1: 따닥
             AssertSlots(EventCatalog.Chase, 4, 2);
             foreach (var k in new[] { EventCatalog.Charge, EventCatalog.Ambush, EventCatalog.Chase }) Assert.IsTrue(EventCatalog.Get(k).IsEnemy);
 

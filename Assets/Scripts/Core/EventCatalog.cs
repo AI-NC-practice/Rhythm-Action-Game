@@ -52,9 +52,11 @@ namespace RhythmActionGame
                 Add(Legacy(k));
 
             // GDD-beta B2.2 새 사건 8종
-            Add(new EventDef { Kind = "tile_slip", Beats = 6, Slots = new[] { new EventSlot(2, ArrowKey.Down), new EventSlot(4, ArrowKey.Up) }, SlowMoSlot = 1 });
+            // GDD-beta B16.1: 미끄러짐 ↓ 뒤 엇박(+3.5)에 버팀 ↑
+            Add(new EventDef { Kind = "tile_slip", Beats = 6, Slots = new[] { new EventSlot(2, ArrowKey.Down), new EventSlot(3.5, ArrowKey.Up) }, SlowMoSlot = 1 });
             Add(new EventDef { Kind = "rope_swing", Beats = 4, Slots = new[] { new EventSlot(2, ArrowKey.Up) }, SlowMoSlot = 0 });
-            Add(new EventDef { Kind = "rolling_jars", Beats = 4, Slots = new[] { new EventSlot(1), new EventSlot(2), new EventSlot(3) }, HpCapOne = true });
+            // GDD-beta B16.1: 쿵-따닥 당김 (+1, +1.5, +2.5)
+            Add(new EventDef { Kind = "rolling_jars", Beats = 4, Slots = new[] { new EventSlot(1), new EventSlot(1.5), new EventSlot(2.5) }, HpCapOne = true });
             Add(new EventDef { Kind = "awning_bounce", Beats = 4, Slots = new[] { new EventSlot(2, ArrowKey.Up) } });
             Add(new EventDef { Kind = "closing_gate", Beats = 4, Slots = new[] { new EventSlot(2, ArrowKey.Down) }, SlowMoSlot = 0 });
             Add(new EventDef { Kind = "arrow_volley", Beats = 4, Slots = new[] { new EventSlot(1.5), new EventSlot(2), new EventSlot(2.5), new EventSlot(3) }, HpCapOne = true });
@@ -63,7 +65,7 @@ namespace RhythmActionGame
 
             // GDD-beta B2.3 안 멈추는 적 (kind = 등장 방식)
             Add(new EventDef { Kind = Charge, Beats = 4, Slots = new[] { new EventSlot(2, ArrowKey.Up) }, SlowMoSlot = 0, IsEnemy = true });
-            Add(new EventDef { Kind = Ambush, Beats = 4, Slots = new[] { new EventSlot(2), new EventSlot(3) }, IsEnemy = true });
+            Add(new EventDef { Kind = Ambush, Beats = 4, Slots = new[] { new EventSlot(2), new EventSlot(2.5) }, IsEnemy = true });   // GDD-beta B16.1: 따닥
             Add(new EventDef { Kind = Chase, Beats = 4, Slots = new[] { new EventSlot(2) }, IsEnemy = true });
             return d;
         }

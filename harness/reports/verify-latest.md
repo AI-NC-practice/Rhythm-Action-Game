@@ -1,7 +1,7 @@
 ﻿# Unity verify report
-time: 2026-11-15 19:03:55
+time: 2026-11-15 19:23:12
 
-## EditMode : total=156 passed=156 failed=0 skipped=0 result=Passed
+## EditMode : total=158 passed=158 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Config_MatchGddBetaB1
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_LabelPose_PopThenRise_045s
@@ -85,6 +85,8 @@ time: 2026-11-15 19:03:55
   - [Passed] RhythmActionGame.Tests.B37_PitchAndSpeedTests.B37_PitchShifter_Speed100_OnlyConstantDelay22ms
   - [Passed] RhythmActionGame.Tests.B37_PitchAndSpeedTests.B37_PitchShifter_SpeedX130_BringsPitchBackTo1Over130
   - [Passed] RhythmActionGame.Tests.B38_HitSnapTests.B38_SnapDelay_EarlyPerfectWaitsForBeat_OthersImmediate
+  - [Passed] RhythmActionGame.Tests.B41_ChartSplitTests.B41_RunEvents_HaveHalfBeatJudgements_GapAtLeastHalfBeat
+  - [Passed] RhythmActionGame.Tests.B41_ChartSplitTests.B41_SpearDuel_FastDoubleThrust_SwordUnchanged
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_BeatAndSpeed_MatchGdd41
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_Judge_MatchGdd42
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_ObstacleAndCombat_MatchGdd44To46

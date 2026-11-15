@@ -101,6 +101,8 @@ namespace RhythmActionGame
         public const int NormalEnemyAttacks = 2;
         /// <summary>일반 적의 공격 간격 (박자).</summary>
         public const int NormalEnemyAttackIntervalBeats = 2;
+        /// <summary>창 든 포졸의 공격 간격 (박, GDD-beta B16.1): 빠르게 두 번 찌르고 1.5 + 2박 뒤 마무리 → 0, 1.5, 3.5.</summary>
+        public const float SpearAttackIntervalBeats = 1.5f;
         /// <summary>무사의 공격 수 (마무리 제외).</summary>
         public const int BossAttacks = 5;
         /// <summary>무사 공격 간격 최솟값 (박자).</summary>

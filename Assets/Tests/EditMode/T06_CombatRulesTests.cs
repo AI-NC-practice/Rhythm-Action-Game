@@ -25,9 +25,11 @@ namespace RhythmActionGame.Tests
                 Assert.AreEqual(CombatStepKind.Attack, steps[0].Kind);
                 Assert.AreEqual(CombatStepKind.Attack, steps[1].Kind);
                 Assert.AreEqual(CombatStepKind.Finisher, steps[2].Kind);
+                // 칼: 0, 2, 4 / 창: 빠르게 두 번 찌르고 0, 1.5, 3.5 (GDD-beta B16.1)
+                bool spear = ev.kind == "spear";
                 Assert.AreEqual(0.0, steps[0].OffsetBeats);
-                Assert.AreEqual(2.0, steps[1].OffsetBeats);
-                Assert.AreEqual(4.0, steps[2].OffsetBeats);
+                Assert.AreEqual(spear ? 1.5 : 2.0, steps[1].OffsetBeats, ev.kind);
+                Assert.AreEqual(spear ? 3.5 : 4.0, steps[2].OffsetBeats, ev.kind);
                 Assert.AreEqual(ArrowKey.Up, steps[2].Key, "마무리 ↑");
             }
         }
