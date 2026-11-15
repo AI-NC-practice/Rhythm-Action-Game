@@ -4,8 +4,8 @@
   판정 타임라인(parse-timeline.py)을 따라 구간을 짠다:
     달리기 = 기본 박(A, 챕터마다 베이스 바꿈), 일반 전투 = 절정(B), 포위·무사 결투 = 더 센 절정,
     전투 직전 1~2마디 = 빌드업(심장박동·롤·쓸어 올리기), 전투 시작 = 터짐(크래시·큰북·징).
-- 판정 박마다 장구·꽹과리 강세: 정박은 장구 "덩" + 꽹과리 열린 소리, 반 박은 장구 "덕" + 꽹과리.
-  노드가 곡의 타격이 되고 히트사운드(B14)가 그 위에 겹친다.
+- 판정 박에는 곡이 장구를 치지 않고(GDD-beta B17.1) 작은 꽹과리 "준비" 소리만 남긴다.
+  그 박의 장구는 플레이어의 히트사운드(실제 장구 녹음, make-hitsounds.py)가 채운다. 놓치면 그 박이 빈다.
 - 끝: 클리어 뒤 엇박 강타 → 징 → 심장박동으로 잦아들어 처음으로 이어짐.
 악기·조각은 song_kit.py.
 
@@ -25,6 +25,7 @@ cleared = next((s['beat'] for s in tl['states'] if s['state'] == 'Cleared'), tl[
 END_BAR = int(math.ceil(cleared / 4.0))          # 클리어가 오는 마디부터 마무리
 BARS = END_BAR + 3                                # 강타 1 + 징 1 + 잦아듦 1
 k.init(BARS, jg)
+k.reserve([j['beat'] for j in judges])          # 판정 박의 장구는 비운다 (B17.1)
 B = k.bar_start
 
 def combat_at(bar):
@@ -98,15 +99,10 @@ for bar in range(1, END_BAR):
     k.groove(bar, riff='A2' if ch in (2, 5) else 'A')
     if (bar - run_since) % 8 == 0: try_tps(bar, TPS_ORDER)
 
-# 판정 강세: 판정 박마다 장구·꽹과리 (노드 = 곡의 타격)
+# 판정 박: 작은 꽹과리 "준비" 소리만 (장구는 플레이어가 친다, B17.1)
 for j in judges:
     b = j['beat']
-    if abs(b - round(b)) < 1e-6:
-        k.hit('janggu', k.DEONG[int(b) % len(k.DEONG)], b, 1.15, pan=-0.1, label=f'판정 강세 {j["key"]}')
-        k.hit('kkw', k.KKW_OPEN, b, 0.35, pan=0.3)
-    else:
-        k.hit('janggu', k.DEOK[int(b * 2) % len(k.DEOK)], b, 1.0, pan=0.1, label=f'판정 강세(반 박) {j["key"]}')
-        k.hit('kkw', k.KKW[int(b * 2) % len(k.KKW)], b, 0.55, pan=0.35)
+    k.hit('kkw', k.KKW[int(b * 2) % len(k.KKW)], b, 0.22, pan=0.35, label=f'판정 준비 {j["key"]}')
 
 # 마무리: 엇박 강타 → 징 + 태평소 긴 음 → 심장박동으로 잦아들어 처음으로
 k.stabs(END_BAR); k.chuimsae('하', B(END_BAR) + 3.0)
@@ -117,5 +113,7 @@ k.put_tps('046', END_BAR + 1, 6, 8)
 for b in (0, 2): k.heartbeat(B(END_BAR + 2) + b, 0.6)
 
 sec = k.render(out_path, loop_beats=BARS * 4)
+import shutil
+shutil.copyfile(out_path + '.score.txt', os.path.join(os.path.dirname(tl_path), 'stage1_song.score.txt'))   # 테스트가 읽는 악보
 print('wrote', out_path, f'{sec:.1f}s, {BARS} bars ({BARS * 4} beats), end bar {END_BAR},', len(judges), 'judge accents,',
       len([1 for _, l in k.score if '추임새 자리' in l]), 'chuimsae slots empty')

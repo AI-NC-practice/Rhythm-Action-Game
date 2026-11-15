@@ -49,7 +49,7 @@ namespace RhythmActionGame.Tests
             Assert.AreEqual(Judgement.Perfect, c1.Result);
             Assert.AreEqual(SfxKind.HitPerfect, hit.LastKind, "PERFECT = 덩");
             Assert.AreEqual(1.0f, hit.LastVolume, 1e-6f);
-            Assert.AreEqual(hit.LastSource.clip, sfx.Clip(SfxKind.HitPerfect), "합성 WAV 클립");
+            Assert.AreEqual(hit.ClipFor(SfxKind.HitPerfect), hit.LastSource.clip, "PERFECT 클립 (B17.1: 실제 녹음, 없으면 합성)");
             var perfectSrc = hit.LastSource;
 
             // NORMAL → "딱" (목표보다 0.15초 늦게)

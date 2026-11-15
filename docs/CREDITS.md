@@ -13,5 +13,8 @@
 - 게임 안 표기: 타이틀 화면 아래 "음악 재료(공유마당): 한국저작권위원회 「태평소독주 시그널음악」「국악기_꽹과리」 CC BY · (재)전주정보문화산업진흥원 「전통악기 장구」 공공누리 1유형".
 - 각 재료의 저작자·원문 링크는 `harness/music-src/demo/*.txt`(공유마당이 함께 주는 표기 파일)에 있다.
 
+## 히트사운드 (`Assets/Audio/Hit/`)
+- 곡과 같은 재료(위 표의 장구·꽹과리 녹음)에서 잘라 만들었다 (`harness/scripts/music/make-hitsounds.py`). 출처는 위 표와 같다.
+
 ## 효과음
-- 모두 코드로 합성했다 (`Assets/Editor/SfxSynthTool.cs`, 히트사운드 포함). 외부 음원 없음.
+- 그 밖의 효과음은 코드로 합성했다 (`Assets/Editor/SfxSynthTool.cs`). 외부 음원 없음.

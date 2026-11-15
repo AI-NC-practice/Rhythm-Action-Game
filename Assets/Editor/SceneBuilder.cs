@@ -126,6 +126,7 @@ namespace RhythmActionGame.EditorTools
             var hitSound = hitGo.AddComponent<HitSoundPlayer>();
             hitSound.judge = judge;
             hitSound.sfx = sfx;
+            hitSound.recorded = MusicTool.LoadHitClips();   // 실제 장구 히트사운드 (GDD-beta B17.1)
 
             // 플레이어
             var player = new GameObject("Player");

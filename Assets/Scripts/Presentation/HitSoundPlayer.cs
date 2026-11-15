@@ -10,6 +10,8 @@ namespace RhythmActionGame
     {
         public JudgeSystem judge;
         public SfxPlayer sfx;
+        /// <summary>실제 녹음 히트사운드 (GDD-beta B17.1): [0] PERFECT, [1] NORMAL, [2] FAIL, [3] 원 없음. 비어 있으면 합성음.</summary>
+        public AudioClip[] recorded = new AudioClip[4];
 
         AudioSource[] sources;
         int next;
@@ -66,6 +68,14 @@ namespace RhythmActionGame
             Play(kind, volume, HitSoundRules.SnapDelay(outcome, result, until));
         }
 
+        /// <summary>소리 종류에 맞는 클립: 실제 녹음이 있으면 그것, 없으면 합성음.</summary>
+        public AudioClip ClipFor(SfxKind kind)
+        {
+            int i = kind == SfxKind.HitPerfect ? 0 : kind == SfxKind.HitNormal ? 1 : kind == SfxKind.HitFail ? 2 : kind == SfxKind.HitEmpty ? 3 : -1;
+            if (i >= 0 && recorded != null && i < recorded.Length && recorded[i] != null) return recorded[i];
+            return sfx != null ? sfx.Clip(kind) : SfxSynth.CreateClip(kind);
+        }
+
         /// <summary>히트사운드 하나를 낸다 (돌려 쓰는 AudioSource 중 다음 것). delay초 뒤로 예약할 수 있다(dsp 시각 기준).</summary>
         public void Play(SfxKind kind, float volume, double delay = 0)
         {
@@ -73,8 +83,9 @@ namespace RhythmActionGame
             var src = sources[next];
             next = (next + 1) % sources.Length;
             src.Stop();
-            src.clip = sfx != null ? sfx.Clip(kind) : SfxSynth.CreateClip(kind);
+            src.clip = ClipFor(kind);
             src.volume = volume * (sfx != null ? sfx.sfxGroupVolume : 1f);
+            if (sfx != null) sfx.Duck(GameConfig.HitSound.DuckDb, GameConfig.HitSound.DuckSeconds);   // 음악을 잠깐 눌러 튀어나오게 (B17.1)
             if (delay > 0) src.PlayScheduled(AudioSettings.dspTime + delay);
             else src.Play();
             PlayedCount++;

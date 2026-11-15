@@ -585,6 +585,11 @@ namespace RhythmActionGame
             public const float EmptyVolume = 0.2f;
             /// <summary>히트사운드 전용 AudioSource 수 (효과음 풀과 별도).</summary>
             public const int Voices = 4;
+            /// <summary>실제 장구·꽹과리 녹음으로 만든 히트사운드 폴더 (GDD-beta B17.1, make-hitsounds.py). 파일 이름 Hit_Perfect/Normal/Fail/Empty.wav.</summary>
+            public const string RecordedDir = "Assets/Audio/Hit";
+            /// <summary>누르는 순간 음악을 줄이는 양과 길이 (GDD-beta B17.1): 히트사운드가 튀어나오게.</summary>
+            public const float DuckDb = -3f;
+            public const float DuckSeconds = 0.08f;
             /// <summary>이른 PERFECT 입력의 히트사운드를 목표 박까지 기다려 울리는 최대 시간 (초, GDD-beta B15.3) = PERFECT 창.</summary>
             public const float SnapMaxWaitSeconds = PerfectWindowMs / 1000f;
             /// <summary>오디오 DSP 버퍼 (샘플). 1024 → 512로 줄여 출력 지연을 약 21 ms → 11 ms(48 kHz)로.</summary>

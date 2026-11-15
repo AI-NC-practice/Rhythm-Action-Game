@@ -30,6 +30,31 @@ namespace RhythmActionGame.EditorTools
             Debug.Log($"[MusicTool] import settings: {GameConfig.Music.ClipPath}");
         }
 
+        static readonly string[] HitNames = { "Hit_Perfect", "Hit_Normal", "Hit_Fail", "Hit_Empty" };
+
+        /// <summary>실제 녹음 히트사운드 4개 (없는 것은 null). 지연 없이 울리도록 PCM으로 풀어 둔다.</summary>
+        public static AudioClip[] LoadHitClips()
+        {
+            var clips = new AudioClip[HitNames.Length];
+            for (int i = 0; i < HitNames.Length; i++)
+            {
+                string path = $"{GameConfig.HitSound.RecordedDir}/{HitNames[i]}.wav";
+                var imp = AssetImporter.GetAtPath(path) as AudioImporter;
+                if (imp == null) continue;
+                var s = imp.defaultSampleSettings;
+                if (s.loadType != AudioClipLoadType.DecompressOnLoad || s.compressionFormat != AudioCompressionFormat.PCM)
+                {
+                    s.loadType = AudioClipLoadType.DecompressOnLoad;
+                    s.compressionFormat = AudioCompressionFormat.PCM;
+                    s.preloadAudioData = true;
+                    imp.defaultSampleSettings = s;
+                    imp.SaveAndReimport();
+                }
+                clips[i] = AssetDatabase.LoadAssetAtPath<AudioClip>(path);
+            }
+            return clips;
+        }
+
         /// <summary>음악 클립 (없으면 null).</summary>
         public static AudioClip LoadClip() => AssetDatabase.LoadAssetAtPath<AudioClip>(GameConfig.Music.ClipPath);
     }

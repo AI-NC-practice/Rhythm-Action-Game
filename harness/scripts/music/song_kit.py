@@ -40,7 +40,14 @@ def put(bus, sample, beat, gain=1.0, pan=0.0):
     mix[bus][a:a + n, 1] += s[:n, 1] * gain * r * 1.414
 
 
+# 판정 박 (GDD-beta B17.1): 곡은 이 박에 장구를 치지 않는다 — 플레이어의 히트사운드가 그 장구 소리가 된다
+reserved = set()
+def reserve(beats):
+    for b in beats: reserved.add(round(b * 8))
+
 def hit(bus, sample, beat, gain=1.0, pan=0.0, label=None):
+    if bus == 'janggu' and round(beat * 8) in reserved and abs(beat * 8 - round(beat * 8)) < 0.2:
+        return
     put(bus, sample, beat, gain, pan)
     if label: score.append((beat, label))
 
@@ -151,7 +158,7 @@ def init(bars, janggu_wav):
     BARS = bars
     TOTAL = int((bars * 4 * BEAT + 2.5) * SR)
     mix = {k: np.zeros((TOTAL, 2)) for k in BUSES}
-    score = []; kicks = []
+    score = []; kicks = []; reserved.clear()
     KICK, SNARE, HAT, HATO, JING = kick(), snare(), hat(), hat(True), jing()
     CRASH, CLAP, BIG = crash(), clap(), big_drum()
     kkw = load(os.path.join(SRC, '국악기_꽹과리10.wav'))

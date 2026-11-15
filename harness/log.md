@@ -381,3 +381,6 @@ BuildGray와 smoke-test를 통과했다(Builds/Gray/RhythmActionGame.exe). 사�
 
 ### 2026-11-15 B43 피드백 — 리듬감 부족, 제안서 2
 사용자 의견: 노드 소리·전투 소리가 맛이 없다, 슬로우 기능이 원래 있지 않았나, 곡이 멈추고 패턴을 입력하는 부분이 있으면 멋있겠다, 리듬감이 많이 부족하다. 슬로모션 확인: DevAutoplay에 슬로모션 로그를 넣고 오토플레이를 돌리니 모두 PERFECT 한 판에 13번 걸렸다(기능은 정상). 0.4초로 짧고 음악이 그대로라 체감이 안 되는 것으로 보인다. docs/proposals/rhythm-feel-2.md에 진단과 해결(노드 소리를 실제 장구·꽹과리로 + 곡에서 그 박 비우기 + 순간 덕킹, 전투 소리 실제 녹음, 슬로모션 때 음악 먹먹하게, 멈춤 패턴 "합" 주고받기, 박 펄스·예고음)과 순서를 적었다. 사용자 결정 대기.
+
+### 2026-11-15 B44 [beta] 노드 소리를 곡의 한 타로 — evaluator PASS, 테스트 빌드로 사용자 확인 대기
+사용자가 제안서 2를 "순서대로" 승인했다. GDD-beta B17과 작업 B44~B49를 만들고 B43을 피드백과 함께 닫았다. B44: harness/scripts/music/make-hitsounds.py로 곡과 같은 장구·꽹과리 녹음에서 히트사운드 4개를 만들었다(Assets/Audio/Hit: PERFECT 덩+채편+꽹과리, NORMAL 덕, FAIL 낮고 둔한 덩, 원 없음 작은 덕, 소리 시작 2~8 ms). HitSoundPlayer.recorded(SceneBuilder가 PCM으로 연결)를 쓰고 없으면 합성음. 누를 때 Music 그룹 −3 dB 0.08초 덕킹. 곡: song_kit에 판정 박 예약(reserve)을 넣어 판정 박의 장구를 빼고 작은 꽹과리 "준비" 소리만 둠(B16.2 장구 강세를 바꿈), 다시 렌더·mp3. 곡 악보를 harness/music/stage1_song.score.txt로 남겨 테스트가 확인. B42 음향 강세 테스트를 악보 확인 테스트로 바꾸고, B36 클립 확인을 ClipFor로, B44 EditMode·PlayMode 테스트 추가. unity-verify EditMode 162/162, PlayMode 143/143.

@@ -985,10 +985,114 @@
                                          "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과",
                                          "사용자가 플레이해 노드가 곡의 타격처럼 느껴지는지, 반 박 패턴과 챕터 되감기 곡 위치를 확인"
                                      ],
+                      "status":  "done",
+                      "attempts":  1,
+                      "max_attempts":  1,
+                      "notes":  "BuildGray + smoke-test 통과(2026-11-15). 사용자 확인(2026-11-15): 플레이함. 노드·전투 소리가 맛이 없고 리듬감이 부족하다는 피드백 → 제안서 2(docs/proposals/rhythm-feel-2.md), 작업 B44~B49."
+                  },
+                  {
+                      "id":  "B44",
+                      "title":  "[beta] 노드 소리를 곡의 한 타로: 실제 장구 히트사운드 + 곡에서 판정 박 장구 비우기 + 순간 덕킹 (GDD-beta B17.1)",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "B43"
+                                     ],
+                      "acceptance":  [
+                                         "GDD-beta B17.1: 히트사운드 4종을 곡과 같은 실제 장구·꽹과리 녹음에서 만듦(Assets/Audio/Hit), Game 씬 HitSoundPlayer가 그 클립을 씀 — 테스트",
+                                         "GDD-beta B17.1: 곡은 판정 박에 장구를 치지 않고 꽹과리 준비 소리만 (곡 악보 파일로 확인) — 테스트",
+                                         "GDD-beta B17.1: 입력 순간 Music 그룹 −3 dB 0.08초 덕킹 — 테스트",
+                                         "unity-verify 통과, 테스트 빌드로 사용자 확인"
+                                     ],
                       "status":  "needs_user",
+                      "attempts":  1,
+                      "max_attempts":  3,
+                      "notes":  "사용자 승인(2026-11-15): 제안서 2 순서대로. 노드 소리가 맛이 없다는 피드백."
+                  },
+                  {
+                      "id":  "B45",
+                      "title":  "[beta] 박 펄스 + 예고음 + 발걸음·카메라 박 맞춤 (GDD-beta B17.2)",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "B44"
+                                     ],
+                      "acceptance":  [
+                                         "GDD-beta B17.2 각 항목 — 테스트",
+                                         "unity-verify 통과, 테스트 빌드로 사용자 확인"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "B46",
+                      "title":  "[beta] 멈춤 패턴 \"합\" 주고받기 (GDD-beta B17.3)",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "B45"
+                                     ],
+                      "acceptance":  [
+                                         "GDD-beta B17.3: call_response 사건(부르기 1마디 → 받기 1마디), 챕터마다 한 번, 곡이 그 자리에서 멈췄다 다시 터짐 — 테스트",
+                                         "unity-verify 통과, 테스트 빌드로 사용자 확인"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "B47",
+                      "title":  "[beta] 슬로모션 체감: 음악 먹먹하게 + 심장박동 (GDD-beta B17.4)",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "B46"
+                                     ],
+                      "acceptance":  [
+                                         "GDD-beta B17.4 — 테스트",
+                                         "unity-verify 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "B48",
+                      "title":  "[beta] 전투 소리 실제 녹음 + 박에 맞춘 쉭·챙 (GDD-beta B17.5)",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "B47"
+                                     ],
+                      "acceptance":  [
+                                         "무료 재료 목록을 사용자가 승인한 뒤 받기, 출처 docs/CREDITS.md",
+                                         "GDD-beta B17.5: 판정 반 박 전 쉭, 판정 박 챙/퍽 — 테스트",
+                                         "unity-verify 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "B49",
+                      "title":  "[사용자] 리듬감 2 최종 확인 + 테스트 빌드",
+                      "type":  "human",
+                      "depends_on":  [
+                                         "B48"
+                                     ],
+                      "acceptance":  [
+                                         "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과",
+                                         "사용자가 플레이해 리듬감이 살아났는지 확인"
+                                     ],
+                      "status":  "pending",
                       "attempts":  0,
                       "max_attempts":  1,
-                      "notes":  "BuildGray + smoke-test 통과(2026-11-15). 사용자 플레이 확인 대기."
+                      "notes":  ""
                   },
                   {
                       "id":  "T10",

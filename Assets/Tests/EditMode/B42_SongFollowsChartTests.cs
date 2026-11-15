@@ -41,46 +41,23 @@ namespace RhythmActionGame.Tests
             Assert.AreEqual(chart.Enemies.Count(), t.combats.Count(c => c.kind == "normal"), "일반 전투 수");
         }
 
-        /// <summary>곡의 판정 박마다 강세: 판정 박의 소리 시작 세기가 판정 없는 16분 엇박보다 1.3배 이상 (첫 박 위치 보정).</summary>
+        /// <summary>
+        /// 곡의 판정 박 (GDD-beta B17.1이 B16.2를 바꿈): 판정 박에는 곡이 장구를 치지 않고 꽹과리 "준비" 소리만 둔다.
+        /// 그 박의 장구는 플레이어의 히트사운드가 채운다. 곡 악보(make-song.py가 남기는 stage1_song.score.txt)로 확인한다.
+        /// </summary>
         [Test]
-        public void B42_Song_AccentOnEveryJudgeBeat()
+        public void B42_Song_JudgeBeats_ReadySoundOnly_NoJanggu()
         {
             var t = Load();
-            var clip = AssetDatabase.LoadAssetAtPath<AudioClip>(GameConfig.Music.ClipPath);
-            Assert.IsTrue(clip.LoadAudioData());
-            var data = new float[clip.samples * clip.channels];
-            Assert.IsTrue(clip.GetData(data, 0));
-            int rate = clip.frequency, ch = clip.channels;
-            int hop = System.Math.Max(1, rate / 1000);
-            int frames = clip.samples / hop;
-            var e = new double[frames];
-            float prev = 0;
-            for (int f = 0; f < frames; f++)
-            {
-                double s = 0;
-                for (int i = f * hop; i < (f + 1) * hop; i++)
-                {
-                    float m = 0; for (int c = 0; c < ch; c++) m += data[i * ch + c]; m /= ch;
-                    float hp = m - prev; prev = m; s += hp * hp;
-                }
-                e[f] = System.Math.Log(1e-9 + s);
-            }
-            double At(double songBeat)
-            {
-                double sec = GameConfig.Music.FirstBeatSeconds + songBeat * GameConfig.SecondsPerBeat;
-                int c0 = (int)(sec * rate / hop);
-                double best = 0;
-                for (int f = c0 - 8; f <= c0 + 8; f++) if (f >= 5 && f < frames) best = System.Math.Max(best, e[f] - e[f - 5]);
-                return best;
-            }
-            var judgeQ = new System.Collections.Generic.HashSet<int>(t.judges.Select(j => (int)System.Math.Round(j.beat * 4)));
-            double judge = t.judges.Average(j => At(j.beat));
-            double half = t.judges.Where(j => j.beat % 1.0 != 0).Average(j => At(j.beat));
-            var offQ = Enumerable.Range(8, (int)(t.end * 4) - 8).Where(q => q % 2 == 1 && !judgeQ.Contains(q)).ToList();
-            double off = offQ.Average(q => At(q / 4.0));
-            Debug.Log($"[B42] 소리 시작 세기: 판정 박 {judge:F2}, 반 박 판정 {half:F2}, 판정 없는 16분 엇박 {off:F2} (비 {judge / off:F2})");
-            Assert.Greater(judge, off * 1.3, "판정 박마다 장구·꽹과리 강세");
-            Assert.Greater(half, off * 1.2, "반 박 판정에도 강세 (장구 덕 + 꽹과리)");
+            string scorePath = Path.Combine(Directory.GetCurrentDirectory(), "harness/music/stage1_song.score.txt");
+            Assert.IsTrue(File.Exists(scorePath), "곡 악보 파일");
+            var lines = File.ReadAllLines(scorePath).Where(l => l.Length > 0 && l[0] != '#').Select(l => l.Split('	')).ToList();
+            var judgeQ = new System.Collections.Generic.HashSet<int>(t.judges.Select(j => (int)System.Math.Round(j.beat * 8)));
+            int ready = lines.Count(l => l[1].StartsWith("판정 준비") && judgeQ.Contains((int)System.Math.Round(double.Parse(l[0], System.Globalization.CultureInfo.InvariantCulture) * 8)));
+            Assert.AreEqual(t.judges.Length, ready, "판정 박마다 꽹과리 준비 소리");
+            var jangguOnJudge = lines.Where(l => l[1].StartsWith("장구") && judgeQ.Contains((int)System.Math.Round(double.Parse(l[0], System.Globalization.CultureInfo.InvariantCulture) * 8))).ToList();
+            Assert.IsEmpty(jangguOnJudge, "판정 박에는 곡의 장구가 없음 (플레이어가 친다)");
+            Assert.Greater(lines.Count(l => l[1].StartsWith("장구")), 300, "판정 박이 아닌 곳에는 장구가 그대로 있음");
         }
 
         [Test]
