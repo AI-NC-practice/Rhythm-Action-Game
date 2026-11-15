@@ -1,5 +1,5 @@
 ﻿# Unity verify report
-time: 2026-11-14 18:22:23
+time: 2026-11-15 19:03:55
 
 ## EditMode : total=156 passed=156 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
@@ -40,10 +40,10 @@ time: 2026-11-14 18:22:23
   - [Passed] RhythmActionGame.Tests.B08_SfxSynthTests.B08_Timbre_LowIsLow_MetalIsHigh_JingRings
   - [Passed] RhythmActionGame.Tests.B08_SfxSynthTests.B08_Wav_Header16BitMono44k
   - [Passed] RhythmActionGame.Tests.B08_SfxSynthTests.B08_WavFiles_InAssetsAudioSfx
-  - [Passed] RhythmActionGame.Tests.B10_MusicTests.B10_Clip_InAssetsAudioMusic_LoopIs128Beats
-  - [Passed] RhythmActionGame.Tests.B10_MusicTests.B10_Credit_CcBy_Attribution
-  - [Passed] RhythmActionGame.Tests.B10_MusicTests.B10_Downbeat_OnEvenGameBeats_FromTimeZero
-  - [Passed] RhythmActionGame.Tests.B10_MusicTests.B10_MusicTimeAt_BeatTimesHalfSecond_WrapsEvery128Beats
+  - [Passed] RhythmActionGame.Tests.B10_MusicTests.B10_Clip_InAssetsAudioMusic_384Beats_ImportSettings
+  - [Passed] RhythmActionGame.Tests.B10_MusicTests.B10_Credit_Attribution_AuthorsAndLicenses
+  - [Passed] RhythmActionGame.Tests.B10_MusicTests.B10_Downbeat_OnEveryGameBeat_AtFirstBeatSeconds
+  - [Passed] RhythmActionGame.Tests.B10_MusicTests.B10_MusicTimeAt_FirstBeatPlusHalfSecondPerBeat_WrapsEvery384Beats
   - [Passed] RhythmActionGame.Tests.B12_SmoothClockTests.B12_Config_JudgeWindowsUnchanged_LatencyDefaults
   - [Passed] RhythmActionGame.Tests.B12_SmoothClockTests.B12_FromRealtime_MapsInputEventTime_NotInFuture
   - [Passed] RhythmActionGame.Tests.B12_SmoothClockTests.B12_Smooth_AdvancesEveryFrame_WithinOneBuffer_NeverBackwards

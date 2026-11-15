@@ -933,7 +933,7 @@
                       "status":  "needs_user",
                       "attempts":  1,
                       "max_attempts":  1,
-                      "notes":  "사용자 결정(2026-11-13): Suno 대신 무료 국악 음원(공유마당, CC BY). 2026-11-14 사용자가 미리듣기를 듣고 국악 BGM #197(주식회사 아이티앤)을 골랐다. 분석: 펄스 186.07/분, 3펄스마다 강세(12/8 느낌). 재생 속도 0.967배로 3펄스 = 게임 2박에 맞추고 첫 강박을 0초에 둔 64초(128박) 루프 Assets/Audio/Music/gugak_bgm197_loop120.wav (harness/scripts/music/make-loop.py). BeatClock.music으로 재생, 합성 장단 반주는 끔. 출처: 타이틀 화면 + docs/CREDITS.md. acceptance 1번(Suno 로그인·생성)은 이 결정으로 대체됨. 2026-11-14 테스트 빌드 피드백: #197 거절(전우치 OST 같은 곡 원함) → docs/proposals/rhythm-feel.md로 곡 후보·박자감 연출·반 박 차트 제안, 사용자 결정 대기."
+                      "notes":  "사용자 결정(2026-11-13): Suno 대신 무료 국악 음원. #197은 2026-11-14 사용자가 거절(전우치 OST 같은 곡 원함). 사용자 선택(2026-11-14 \"무료 데모 먼저\"): 공유마당 국악기 음원(태평소독주 시그널음악 6개·꽹과리 CC BY, 장구 공공누리 1유형)을 잘라 코드로 만든 드럼·베이스·현악과 함께 악보대로 조립(harness/scripts/music/song_kit.py, make-song.py). 데모 2(심장박동·빌드업·펌핑)를 사용자가 좋다고 함. 추임새는 무료 음원을 못 찾아 자리만 비워 둠(나중에). 2026-11-15 전체 곡 96마디(384박, 오토플레이로 잰 스테이지 길이) → mp3(Assets/Audio/Music/stage1_song.mp3, 첫 박 25 ms) → BeatClock 연결, 384박마다 반복, 50 ms 넘게 어긋나면 다시 맞춤. acceptance 1번(Suno 로그인·생성)은 이 결정으로 대체됨. 사용자 청취 확인 대기."
                   },
                   {
                       "id":  "T10",

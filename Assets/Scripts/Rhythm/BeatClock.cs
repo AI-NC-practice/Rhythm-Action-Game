@@ -60,7 +60,46 @@ namespace RhythmActionGame
         /// <summary>판정으로 목표 속도 배율이 바뀌면 바로 호출된다 (HUD 예고용).</summary>
         public event Action<float> TargetSpeedChanged;
 
-        void Update() => TickSpeed();
+        void Update()
+        {
+            TickSpeed();
+            TickMusicSync();
+        }
+
+        /// <summary>음악 위치를 다시 맞춘 횟수 (테스트·진단용).</summary>
+        public int MusicResyncCount { get; private set; }
+
+        /// <summary>지금 박자에서 음악이 있어야 할 파일 안 위치 (초). 음 높이 보정 지연만큼 앞당긴다 (B15.1).</summary>
+        public float ExpectedMusicTime()
+        {
+            if (music == null || music.clip == null) return 0f;
+            return MusicTimeAt(CurrentBeat + MusicLeadBeats(), music.clip.length);
+        }
+
+        double MusicLeadBeats() =>
+            pitchCorrector != null ? MusicPitchCorrector.LatencySeconds * SpeedMultiplier / GameConfig.SecondsPerBeat : 0;
+
+        /// <summary>
+        /// 음악이 박자 시계와 ResyncThresholdSeconds 넘게 어긋나면 재생 위치를 다시 맞춘다 (B10).
+        /// 곡 끝에서 처음으로 넘어갈 때(mp3 꼬리만큼 늦어짐)와 오래 재생해 쌓인 오차를 바로잡는다. Update에서 부른다.
+        /// </summary>
+        public void TickMusicSync()
+        {
+            if (music == null || music.clip == null || !IsRunning || IsPaused || !music.isPlaying) return;
+            float want = ExpectedMusicTime();
+            if (!NeedsResync(music.time, want)) return;
+            music.time = want;
+            MusicResyncCount++;
+        }
+
+        /// <summary>음악 위치 have가 want에서 ResyncThresholdSeconds 넘게 어긋났는지. 반복 경계를 넘는 차이는 짧은 쪽으로 잰다 (순수 함수).</summary>
+        public static bool NeedsResync(float have, float want)
+        {
+            float loop = GameConfig.Music.LoopBeats * GameConfig.SecondsPerBeat;
+            float diff = have - want;
+            diff -= loop * Mathf.Round(diff / loop);
+            return Mathf.Abs(diff) > GameConfig.Music.ResyncThresholdSeconds;
+        }
 
         /// <summary>목표 속도를 적용할 마디 첫 박이 지났으면 그 박 시각부터 새 속도로 바꾼다 (GDD-beta B15.2). Update에서 부른다.</summary>
         public void TickSpeed()
@@ -107,23 +146,18 @@ namespace RhythmActionGame
             if (music == null || music.clip == null) return;
             music.Play();
             // 음 높이 보정이 음악을 LatencySeconds만큼 늦추므로 재생 위치를 그만큼 앞당긴다 (GDD-beta B15.1)
-            double lead = 0;
-            if (pitchCorrector != null)
-            {
-                pitchCorrector.Clear();
-                lead = MusicPitchCorrector.LatencySeconds * SpeedMultiplier / GameConfig.SecondsPerBeat;
-            }
-            music.time = MusicTimeAt(beat + lead, music.clip.length);
+            if (pitchCorrector != null) pitchCorrector.Clear();
+            music.time = MusicTimeAt(beat + MusicLeadBeats(), music.clip.length);
         }
 
         /// <summary>
         /// beat 박자에 해당하는 음악 파일 안 재생 위치 (초, B10). 곡은 첫 박(GameConfig.Music.FirstBeatSeconds)부터
-        /// 120 BPM 격자에 맞춰져 있고 clipLength마다 반복된다.
+        /// 120 BPM 격자에 맞춰져 있고 LoopBeats(384박)마다 반복된다. 클립이 그보다 짧으면 클립 길이로 반복한다.
         /// </summary>
         public static float MusicTimeAt(double beat, float clipLength)
         {
             if (clipLength <= 0f) return 0f;
-            double loop = clipLength - GameConfig.Music.FirstBeatSeconds;
+            double loop = System.Math.Min(GameConfig.Music.LoopBeats * GameConfig.SecondsPerBeat, clipLength - GameConfig.Music.FirstBeatSeconds);
             double t = beat * GameConfig.SecondsPerBeat;
             t = ((t % loop) + loop) % loop;
             return (float)(GameConfig.Music.FirstBeatSeconds + t);

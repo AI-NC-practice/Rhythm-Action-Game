@@ -591,26 +591,32 @@ namespace RhythmActionGame
 
         // ---------------- B10 배경 음악 (GDD 1장 사운드: 국악 퓨전, BPM 고정, 보컬 없음) ----------------
         /// <summary>
-        /// 배경 음악. 공유마당 "국악 BGM #197"(주식회사 아이티앤, CC BY)을 harness/scripts/music/make-loop.py로
-        /// 재생 속도 0.967배(펄스 186.07 → 180/분, 3펄스 = 2박)로 늦춰 첫 강박을 0초에 둔 64초(128박) 루프.
+        /// 배경 음악 "스테이지 1" — 퓨전 국악 액션, 120 BPM, 96마디(384박, 3분 12초). harness/scripts/music/make-song.py로
+        /// 공유마당 국악기 음원(태평소·꽹과리·장구)과 코드로 만든 드럼·베이스·현악을 악보대로 조립했다(docs/CREDITS.md).
+        /// 저장소 용량 때문에 mp3로 넣었고(wav-to-mp3.ps1), mp3 변환이 앞에 둔 지연만큼 첫 박이 뒤로 밀려 있다.
         /// </summary>
         public static class Music
         {
             /// <summary>음악 파일 (Assets 기준 경로).</summary>
-            public const string ClipPath = "Assets/Audio/Music/gugak_bgm197_loop120.wav";
-            /// <summary>루프 길이 (박). 음악 시각 = (박 × 0.5초) mod 64초.</summary>
-            public const int LoopBeats = 128;
-            /// <summary>음악 첫 박의 파일 안 시각 (초). 루프 파일은 첫 강박에서 시작한다.</summary>
-            public const float FirstBeatSeconds = 0f;
-            /// <summary>음악 기준 음량. GDD에 없음, Claude가 정함.</summary>
-            public const float Volume = 0.8f;
-            /// <summary>곡이 있으면 합성 장단 반주(GDD-beta B7)는 끈다. GDD에 없음, Claude가 정함 (곡이 3박 느낌이라 4박 반주와 겹치면 어지러움).</summary>
+            public const string ClipPath = "Assets/Audio/Music/stage1_song.mp3";
+            /// <summary>곡 길이 (박). 음악 시각 = 첫 박 + (박 × 0.5초) mod 192초. 스테이지가 더 길어지면 처음으로 이어진다.</summary>
+            public const int LoopBeats = 384;
+            /// <summary>
+            /// 음악 첫 박의 파일 안 시각 (초) = mp3 인코더 지연이 Unity가 가져온 클립에 남긴 만큼(25 ms).
+            /// 테스트 B10_Downbeat가 실제 가져온 클립에서 잰다 (Windows 디코더로는 14 ms였지만 Unity 디코더는 25 ms).
+            /// </summary>
+            public const float FirstBeatSeconds = 0.025f;
+            /// <summary>음악이 박자 시계와 이만큼(초) 넘게 어긋나면 재생 위치를 다시 맞춘다 (반복 이음매, mp3 꼬리 등). GDD에 없음, Claude가 정함.</summary>
+            public const float ResyncThresholdSeconds = 0.05f;
+            /// <summary>음악 기준 음량. GDD에 없음, Claude가 정함 (곡이 크게 만들어져 히트사운드·효과음이 묻히지 않게 낮춤).</summary>
+            public const float Volume = 0.6f;
+            /// <summary>곡이 있으면 합성 장단 반주(GDD-beta B7)는 끈다. GDD에 없음, Claude가 정함 (곡에 장구가 이미 있음).</summary>
             public const bool KeepJangguBacking = false;
             /// <summary>음 높이 보정 피치 시프터의 창 길이와 최소 지연 (초, GDD-beta B15.1). 평균 지연 = 최소 + 창/2 = 22 ms.</summary>
             public const float PitchShiftWindowSeconds = 0.04f;
             public const float PitchShiftMinDelaySeconds = 0.002f;
-            /// <summary>게임 안 출처 표기 (CC BY).</summary>
-            public const string Credit = "음악: 국악 BGM #197 — 주식회사 아이티앤, 공유마당(한국저작권위원회), CC BY";
+            /// <summary>게임 안 출처 표기 (CC BY·공공누리 1유형).</summary>
+            public const string Credit = "음악 재료(공유마당): 한국저작권위원회 「태평소독주 시그널음악」「국악기_꽹과리」 CC BY · (재)전주정보문화산업진흥원 「전통악기 장구」 공공누리 1유형";
         }
     }
 }
