@@ -12,6 +12,7 @@ namespace RhythmActionGame
     {
         GameBootstrap hooked;
         int lastSection = -1;
+        bool wasSlow;
         int missLeft = -1;
         string shotDir;
         double nextShot = 3.5;
@@ -47,6 +48,10 @@ namespace RhythmActionGame
                 double rel = boot.clock.CurrentBeat - e0.StartBeat;
                 if (rel >= nextShot && rel < shotEnd) { ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(shotDir, $"duel_{rel:00.00}.png")); Debug.Log($"[autoplay] 화면 저장 {rel:0.00}박"); nextShot = System.Math.Floor(rel * 4 + 1) / 4; }
             }
+            // 슬로모션이 걸리면 남긴다 (진단용)
+            bool slow = Time.timeScale < 0.99f;
+            if (slow && !wasSlow) Debug.Log($"[autoplay] 슬로모션 시작 {boot.clock.CurrentBeat:0.00}박 (timeScale {Time.timeScale:0.00})");
+            wasSlow = slow;
             // 챕터(구간)가 바뀌면 달리기 박자와 시계 박자를 남긴다 (곡 위치를 챕터에 맞추는 데 씀, B10)
             if (boot.player != null)
             {
