@@ -61,7 +61,10 @@ namespace RhythmActionGame
         void OnInput(ArrowKey key, JudgeCue cue, InputOutcome outcome)
         {
             var result = cue != null ? cue.Result : Judgement.Fail;
-            float volume = HitSoundRules.Pick(outcome, result, out var kind);
+            SfxKind kind;
+            float volume = outcome == InputOutcome.Judged && cue != null && cue.Tag is RhythmNote
+                ? HitSoundRules.PickRhythm(result, cue.Key, out kind)        // 장단 노드: 손에 따라 덩/덕 (B18.2)
+                : HitSoundRules.Pick(outcome, result, out kind);
             // 박 맞춤 (GDD-beta B15.3): 이른 PERFECT는 목표 박 시각에 울린다
             var clock = judge != null ? judge.clock : null;
             double until = cue != null && clock != null ? clock.TimeOfBeat(cue.TargetBeat) - clock.Now : double.NaN;

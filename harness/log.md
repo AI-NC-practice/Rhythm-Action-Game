@@ -384,3 +384,12 @@ BuildGray와 smoke-test를 통과했다(Builds/Gray/RhythmActionGame.exe). 사�
 
 ### 2026-11-15 B44 [beta] 노드 소리를 곡의 한 타로 — evaluator PASS, 테스트 빌드로 사용자 확인 대기
 사용자가 제안서 2를 "순서대로" 승인했다. GDD-beta B17과 작업 B44~B49를 만들고 B43을 피드백과 함께 닫았다. B44: harness/scripts/music/make-hitsounds.py로 곡과 같은 장구·꽹과리 녹음에서 히트사운드 4개를 만들었다(Assets/Audio/Hit: PERFECT 덩+채편+꽹과리, NORMAL 덕, FAIL 낮고 둔한 덩, 원 없음 작은 덕, 소리 시작 2~8 ms). HitSoundPlayer.recorded(SceneBuilder가 PCM으로 연결)를 쓰고 없으면 합성음. 누를 때 Music 그룹 −3 dB 0.08초 덕킹. 곡: song_kit에 판정 박 예약(reserve)을 넣어 판정 박의 장구를 빼고 작은 꽹과리 "준비" 소리만 둠(B16.2 장구 강세를 바꿈), 다시 렌더·mp3. 곡 악보를 harness/music/stage1_song.score.txt로 남겨 테스트가 확인. B42 음향 강세 테스트를 악보 확인 테스트로 바꾸고, B36 클립 확인을 ClipFor로, B44 EditMode·PlayMode 테스트 추가. unity-verify EditMode 162/162, PlayMode 143/143.
+
+### 2026-11-15 B50 [beta] 손이 바쁜 리듬게임 — evaluator PASS, 테스트 빌드로 사용자 확인 대기
+사용자 피드백(B44 빌드): 장구 소리가 작고 노드가 적다, 손이 더 바빠야 한다. 사용자 선택: 달리기 장단 노드 + 전투 노드 둘 다, 약 3배. GDD-beta B18과 작업 B50을 만들었다(B44는 피드백과 함께 닫음).
+- 소리: 히트사운드를 포화로 단단하게(첫 0.1초 평균 약 −7 dBFS), 음악 0.6 → 0.45, 덕킹 −3 → −4.5 dB.
+- 장단 노드: RhythmNotes(챕터 장단 표 GameConfig.Jangdan, ← 궁편 / → 채편)가 236개를 만든다. 사건 판정 0.5박 안, 멈추는 전투 앞뒤 2박, 슬로모션 후보 뒤 2박, 챕터 시작 2박, 무사 결투 앞은 비움. 결과는 점수·콤보·히트사운드에만(체력·속도 그대로, JudgeCue.AffectsSpeed). StageDirector가 5박 앞까지 예약하되 다음 멈추는 전투 뒤 노드는 전투가 끝난 뒤 예약. 화면 아래 장구 레인(JangdanLaneView, 태고의 달인 방식)이 그리고, 판정 원·판정 화면(회색·줌)은 장단 노드를 무시(FirstActiveStageCue). 차트에 jangdan 플래그(스테이지 차트만 true, 테스트용 작은 차트는 꺼짐).
+- 전투: 일반 적 4회 연속기(칼 0·1·2·3→5, 창 0·1.5·2.5·4→6, GameConfig.SwordComboGaps/SpearComboGaps), 차트 attacks 4개로. 92박 칼 포졸은 ↓←←↓(좌우가 상쇄돼 제자리에서 싸우던 것을 고침). 적은 가장 이른 공격 하나만 휘두르게 고침(연속기 원이 여러 개 떠서 나중 공격 자세가 먼저 나오던 문제).
+- 전체 판정 374개(사건 61 + 전투 77 + 장단 236), 반 박 170개. 판정 타임라인 다시 뽑음(챕터 곡 박 0·56·116·204·240·308, 클리어 390박) → 곡 101마디(404박) 다시 만들고 mp3.
+- 테스트: 전체 판정 범위(115~130 → 360~440), 전투 판정(55~70 → 70~85), 연속기(T01·T04·T06·B07·B19·B41), 덕킹 값(B44), B24 되감기 자세(실제로 놓친 공격을 거꾸로 감으므로 각도가 한 번 커졌다 0으로), T05는 장단 노드를 끄고 장애물 규칙만 봄. 새 B50 EditMode 2·PlayMode 1. unity-verify EditMode 164/164, PlayMode 144/144.
+- 메모: ← 76개, → 160개로 오른손이 많다(마디 첫 박 ←가 사건 판정과 자주 겹쳐 빠짐). 들어 보고 장단 표를 고칠 수 있다.

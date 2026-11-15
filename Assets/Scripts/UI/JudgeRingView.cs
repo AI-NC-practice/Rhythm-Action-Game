@@ -178,6 +178,7 @@ namespace RhythmActionGame
 
         void OnAppeared(JudgeCue cue)
         {
+            if (cue.Tag is RhythmNote) return;   // 장단 노드는 장구 레인이 그린다 (GDD-beta B18.2)
             var root = new GameObject("Ring", typeof(RectTransform)).GetComponent<RectTransform>();
             root.SetParent(transform, false);
             var ring = new Ring { Cue = cue, Root = root, AppearedAt = RealTime() };
@@ -268,6 +269,7 @@ namespace RhythmActionGame
 
         void OnJudged(JudgeCue cue, Judgement r)
         {
+            if (cue.Tag is RhythmNote) return;
             Vector2 pos = Vector2.zero;
             for (int i = rings.Count - 1; i >= 0; i--)
             {
@@ -336,6 +338,7 @@ namespace RhythmActionGame
         /// <summary>방향키 입력 반응 (GDD-beta B8.2): 원 펄스, 너무 이르면 "빠름", 원이 없으면 누른 키를 아래에 작게.</summary>
         void OnInput(ArrowKey key, JudgeCue cue, InputOutcome outcome)
         {
+            if (cue != null && cue.Tag is RhythmNote) return;
             EnsureLabelLayer();
             float now = RealTime();
             Ring ring = null;

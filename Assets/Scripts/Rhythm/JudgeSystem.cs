@@ -18,6 +18,8 @@ namespace RhythmActionGame
         public Judgement Result;
         /// <summary>같은 장면의 다른 시스템(장애물, 적)이 결과를 받을 때 쓰는 꼬리표.</summary>
         public object Tag;
+        /// <summary>결과를 속도 배율에 반영하는지 (GDD-beta B18.2: 달리기 장단 노드는 반영하지 않음).</summary>
+        public bool AffectsSpeed = true;
     }
 
     /// <summary>입력 하나가 어떻게 처리됐는지 (GDD-beta B8.2 입력 반응).</summary>
@@ -57,7 +59,16 @@ namespace RhythmActionGame
         /// <summary>등장했고 아직 판정되지 않은 원이 있는지 (회색 화면·줌 연출 기준).</summary>
         public bool HasActiveCue
         {
-            get { foreach (var c in cues) if (c.Appeared && !c.Judged) return true; return false; }
+            get { foreach (var c in cues) if (c.Appeared && !c.Judged && !(c.Tag is RhythmNote)) return true; return false; }
+        }
+
+        /// <summary>
+        /// 등장했고 아직 판정되지 않은 사건·전투 원 중 가장 이른 것 (장단 노드 제외, GDD-beta B18.2).
+        /// 판정 화면(회색·줌)과 카메라 돌림은 이것을 본다 — 장단 노드는 장구 레인에만 보인다.
+        /// </summary>
+        public JudgeCue FirstActiveStageCue
+        {
+            get { foreach (var c in cues) if (c.Appeared && !c.Judged && !(c.Tag is RhythmNote)) return c; return null; }
         }
 
         public JudgeCue FirstActiveCue
@@ -216,7 +227,7 @@ namespace RhythmActionGame
             if (!cue.Appeared) { cue.Appeared = true; CueAppeared?.Invoke(cue); }
             cue.Judged = true;
             cue.Result = r;
-            clock.ApplyJudgement(r);
+            if (cue.AffectsSpeed) clock.ApplyJudgement(r);
             CueJudged?.Invoke(cue, r);
         }
     }

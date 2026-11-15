@@ -60,6 +60,8 @@ namespace RhythmActionGame
         public float bpm;
         public int runBeats;
         public ChartEvent[] events;
+        /// <summary>달리기 장단 노드를 넣는 차트인지 (GDD-beta B18.2). 스테이지 차트는 true, 테스트용 작은 차트는 기본 false.</summary>
+        public bool jangdan;
 
         public IEnumerable<ChartEvent> Obstacles => events.Where(e => e.IsObstacle);
         public IEnumerable<ChartEvent> Enemies => events.Where(e => e.IsDuel);

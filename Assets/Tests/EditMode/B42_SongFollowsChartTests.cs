@@ -63,7 +63,7 @@ namespace RhythmActionGame.Tests
         [Test]
         public void B42_SongBeatAtRun_ChapterStartsFromTimeline()
         {
-            CollectionAssert.AreEqual(new[] { 0, 56, 116, 200, 236, 300 }, GameConfig.Music.ChapterSongBeats);
+            CollectionAssert.AreEqual(new[] { 0, 56, 116, 204, 240, 308 }, GameConfig.Music.ChapterSongBeats);
             for (int i = 0; i < 6; i++)
                 Assert.AreEqual(GameConfig.Music.ChapterSongBeats[i], MusicPlan.SongBeatAtRun(MapLayout.Sections[i].StartBeat), 1e-9, $"챕터 {i + 1} 시작");
             Assert.AreEqual(0.0, MusicPlan.SongBeatAtRun(0), 1e-9);

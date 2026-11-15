@@ -120,6 +120,8 @@ namespace RhythmActionGame
             return i >= 0 && i < encounter.Actors.Length ? encounter.Actors[i] : null;
         }
 
+        readonly System.Collections.Generic.HashSet<EnemyActor> posedThisFrame = new System.Collections.Generic.HashSet<EnemyActor>();
+
         partial void UpdateCombat()
         {
             if (encounter == null) return;
@@ -143,7 +145,9 @@ namespace RhythmActionGame
                 float sp = Mathf.Clamp01((float)((beat - encounter.ArriveBeat) / span));
                 foreach (var a in encounter.Actors) if (a != null) a.Standoff(player.transform.position, sp);
             }
-            // 원이 떠 있는 공격: 적이 무기를 휘두르고, 판정 원과 카메라가 무기 끝을 따라간다
+            // 원이 떠 있는 공격: 적이 무기를 휘두르고, 판정 원과 카메라가 무기 끝을 따라간다.
+            // 연속기(GDD-beta B18.3)는 원이 여러 개 떠 있으므로 적마다 가장 이른 공격 하나만 휘두른다
+            posedThisFrame.Clear();
             foreach (var cue in encounter.Cues)
             {
                 if (cue.Judged || !cue.Appeared || !(cue.Tag is CombatStep s)) continue;
@@ -158,7 +162,7 @@ namespace RhythmActionGame
                 if (s.Kind != CombatStepKind.Attack) continue;
                 float p = (float)(1.0 - (cue.TargetBeat - beat) / GameConfig.ApproachBeats);
                 foreach (var idx in s.Attackers)
-                    if (encounter.Actors != null && idx < encounter.Actors.Length && encounter.Actors[idx] != null)
+                    if (encounter.Actors != null && idx < encounter.Actors.Length && encounter.Actors[idx] != null && posedThisFrame.Add(encounter.Actors[idx]))
                         encounter.Actors[idx].Attack(s.Attack, p);
                 var a = ActorOf(s);
                 if (a != null && a.weaponTip != null) cue.WorldPoint = a.weaponTip.position;

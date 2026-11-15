@@ -1,7 +1,7 @@
 # 출처 표기 (Credits)
 
 ## 음악: 스테이지 1 곡 (`Assets/Audio/Music/stage1_song.mp3`)
-퓨전 국악 액션, 120 BPM, 99마디. `harness/scripts/music/make-song.py`가 판정 타임라인(`harness/music/stage1_timeline.json`)을 따라 아래 재료를 잘라 조립했다(판정 박마다 장구·꽹과리 강세).
+퓨전 국악 액션, 120 BPM, 101마디. `harness/scripts/music/make-song.py`가 판정 타임라인(`harness/music/stage1_timeline.json`)을 따라 아래 재료를 잘라 조립했다(판정 박의 장구는 비우고 플레이어가 친다).
 드럼·베이스·현악·징 소리는 코드로 합성했다(외부 음원 없음). 재료 원본은 `harness/music-src/demo/`에 있다.
 
 | 재료 | 저작자 | 출처 | 라이선스 | 바꾼 점 |

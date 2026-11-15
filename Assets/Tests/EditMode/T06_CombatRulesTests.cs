@@ -21,16 +21,14 @@ namespace RhythmActionGame.Tests
             foreach (var ev in StageChart.Load().Enemies)
             {
                 var steps = CombatRules.NormalEnemySteps(ev);
-                Assert.AreEqual(3, steps.Count);
-                Assert.AreEqual(CombatStepKind.Attack, steps[0].Kind);
-                Assert.AreEqual(CombatStepKind.Attack, steps[1].Kind);
-                Assert.AreEqual(CombatStepKind.Finisher, steps[2].Kind);
-                // 칼: 0, 2, 4 / 창: 빠르게 두 번 찌르고 0, 1.5, 3.5 (GDD-beta B16.1)
+                // GDD-beta B18.3: 공격 4회 연속기 + 마무리 ↑. 칼 0·1·2·3 → 5, 창 0·1.5·2.5·4 → 6
+                Assert.AreEqual(5, steps.Count);
+                for (int k = 0; k < 4; k++) Assert.AreEqual(CombatStepKind.Attack, steps[k].Kind);
+                Assert.AreEqual(CombatStepKind.Finisher, steps[4].Kind);
                 bool spear = ev.kind == "spear";
-                Assert.AreEqual(0.0, steps[0].OffsetBeats);
-                Assert.AreEqual(spear ? 1.5 : 2.0, steps[1].OffsetBeats, ev.kind);
-                Assert.AreEqual(spear ? 3.5 : 4.0, steps[2].OffsetBeats, ev.kind);
-                Assert.AreEqual(ArrowKey.Up, steps[2].Key, "마무리 ↑");
+                var expect = spear ? new[] { 0.0, 1.5, 2.5, 4.0, 6.0 } : new[] { 0.0, 1.0, 2.0, 3.0, 5.0 };
+                for (int k = 0; k < 5; k++) Assert.AreEqual(expect[k], steps[k].OffsetBeats, 1e-9, ev.kind + " " + k);
+                Assert.AreEqual(ArrowKey.Up, steps[4].Key, "마무리 ↑");
             }
         }
 

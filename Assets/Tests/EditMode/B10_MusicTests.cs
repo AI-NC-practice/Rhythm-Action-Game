@@ -17,10 +17,10 @@ namespace RhythmActionGame.Tests
             Assert.IsNotNull(clip, "Assets/Audio/Music/ 에 음악 파일");
             StringAssert.StartsWith("Assets/Audio/Music/", GameConfig.Music.ClipPath);
             Assert.AreEqual(120f, GameConfig.Bpm, "GDD 4.1 기준 BPM");
-            Assert.AreEqual(396, GameConfig.Music.LoopBeats, "99마디 = 클리어(382박) + 마무리 3마디");
+            Assert.AreEqual(404, GameConfig.Music.LoopBeats, "101마디 = 클리어(390박) + 마무리 3마디 (B18 연속기로 늘어남)");
             Assert.AreEqual(0, GameConfig.Music.LoopBeats % GameConfig.BeatsPerBar, "마디 단위");
             Assert.That(clip.length, Is.InRange(GameConfig.Music.FirstBeatSeconds + LoopSeconds - 0.01f, GameConfig.Music.FirstBeatSeconds + LoopSeconds + 0.15f),
-                "길이 = 첫 박 + 198초 (+ mp3 꼬리)");
+                "길이 = 첫 박 + 곡 길이 (+ mp3 꼬리)");
             Assert.AreEqual(2, clip.channels);
             var imp = (AudioImporter)AssetImporter.GetAtPath(GameConfig.Music.ClipPath);
             Assert.AreEqual(AudioClipLoadType.DecompressOnLoad, imp.defaultSampleSettings.loadType, "되감기 위치를 정확히 찾도록 메모리에 풀기");

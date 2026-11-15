@@ -75,18 +75,17 @@ namespace RhythmActionGame.Tests
             Assert.IsFalse(boot.player.Running, "자동 이동 정지");
             float stopDist = boot.player.Distance;
             Assert.AreEqual(92 * 2.5f, stopDist, 0.3f);
-            Assert.AreEqual(3, enc.Cues.Count, "공격 2 + 마무리 1");
+            Assert.AreEqual(5, enc.Cues.Count, "공격 4 + 마무리 1 (GDD-beta B18.3)");
             Assert.AreEqual(ArrowKey.Down, enc.Cues[0].Key, "가로베기 ↓");
             Assert.AreEqual(ArrowKey.Left, enc.Cues[1].Key, "내려베기 ←");
-            Assert.AreEqual(ArrowKey.Up, enc.Cues[2].Key, "마무리 ↑");
-            Assert.AreEqual(2.0, enc.Cues[1].TargetBeat - enc.Cues[0].TargetBeat, 1e-6, "공격 간격 2박");
+            Assert.AreEqual(ArrowKey.Up, enc.Cues[4].Key, "마무리 ↑");
+            Assert.AreEqual(1.0, enc.Cues[1].TargetBeat - enc.Cues[0].TargetBeat, 1e-6, "칼 연속기 1박 간격");
             // beta1-1: GDD-beta B10.2 — 첫 원은 도착 후 가장 가까운 박에 등장 (다음 마디 첫 박 대신)
             Assert.AreEqual(CombatRules.EncounterStartBeat(enc.ArriveBeat), enc.Cues[0].TargetBeat, 1e-6, "첫 원은 도착 후 가장 가까운 박에 등장");
 
-            yield return Hit(0, 0.0);
-            yield return Hit(1, 0.0);
+            for (int i = 0; i < 4; i++) yield return Hit(i, 0.0);
             Assert.AreEqual(stopDist, boot.player.Distance, 1e-3f, "전투 중 위치 고정");
-            yield return Hit(2, 0.0);
+            yield return Hit(4, 0.0);
             Assert.AreEqual(ExecutionKind.DisarmSlash, enc.Execution, "땅 위 PERFECT 처형");
             StringAssert.StartsWith("Defeated_DisarmSlash", dir.normalEnemies[0].State);
             Assert.AreEqual(StageState.Combat, dir.State, "다음 마디까지는 정지");
@@ -117,9 +116,9 @@ namespace RhythmActionGame.Tests
             Assert.AreEqual(1.0f, boot.clock.TargetSpeed, 1e-4f, "1.2 × 0.8 = 0.96 → 1.00");
             Assert.AreEqual(1, enc.Attempts, "다시 하지 않음");
             Assert.IsFalse(first[1].Cancelled, "다음 공격 그대로");
-            Assert.IsFalse(first[2].Cancelled, "마무리 그대로");
-            yield return Hit(1, 0.0);
-            yield return Hit(2, 0.12);                       // NORMAL 마무리
+            Assert.IsFalse(first[4].Cancelled, "마무리 그대로");
+            for (int i = 1; i < 4; i++) yield return Hit(i, 0.0);
+            yield return Hit(4, 0.12);                       // NORMAL 마무리
             Assert.AreEqual(ExecutionKind.PushDown, enc.Execution);
             Assert.IsTrue(enc.Done);
         }
@@ -131,9 +130,8 @@ namespace RhythmActionGame.Tests
             yield return Load(89);   // beta1-1: 88 매복 사건(B20 차트)을 건너뛴다. 92 칼 포졸
             yield return UntilCombat();
             var enc = dir.CurrentEncounter;
-            yield return Hit(0, 0.0);
-            yield return Hit(1, 0.0);
-            yield return Hit(2, null);                       // 마무리 무입력
+            for (int i = 0; i < 4; i++) yield return Hit(i, 0.0);
+            yield return Hit(4, null);                       // 마무리 무입력
             Assert.AreEqual(2, dir.Health.Hp);
             Assert.AreEqual(1, enc.Attempts, "다시 하지 않음");
             Assert.IsTrue(enc.Done, "전투 끝");
@@ -152,9 +150,8 @@ namespace RhythmActionGame.Tests
             var enc = dir.CurrentEncounter;
             Assert.AreEqual(ArrowKey.Right, enc.Cues[0].Key, "찌르기 →");
             Assert.AreEqual(ArrowKey.Up, enc.Cues[1].Key, "올려베기 ↑");
-            yield return Hit(0, 0.0);
-            yield return Hit(1, 0.0);
-            yield return Hit(2, 0.0);
+            for (int i = 0; i < 4; i++) yield return Hit(i, 0.0);
+            yield return Hit(4, 0.0);
             Assert.AreEqual(ExecutionKind.KickOffRoof, enc.Execution, "지붕 위 PERFECT: 발차기");
             StringAssert.StartsWith("Defeated_KickOffRoof", dir.normalEnemies[1].State);
 

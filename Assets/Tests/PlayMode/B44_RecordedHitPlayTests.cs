@@ -37,7 +37,7 @@ namespace RhythmActionGame.Tests
             boot.judge.Submit(ArrowKey.Up, now);
             Assert.AreEqual("Hit_Perfect", hit.LastSource.clip.name, "PERFECT = 실제 장구 덩");
             sfx.Tick();
-            Assert.That(sfx.DuckFactor, Is.InRange(0.65f, 0.75f), "누르는 순간 음악을 잠깐 줄임 (−3 dB ≈ 0.71배)");
+            Assert.That(sfx.DuckFactor, Is.InRange(0.55f, 0.65f), "누르는 순간 음악을 잠깐 줄임 (−4.5 dB ≈ 0.60배, B18.1)");
             boot.clock.StopClock();
         }
     }

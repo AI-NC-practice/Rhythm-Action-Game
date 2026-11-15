@@ -76,7 +76,7 @@ namespace RhythmActionGame
         public void Step(float dt)
         {
             if (color == null) EnsureSetup();
-            var cue = judge != null ? judge.FirstActiveCue : null;
+            var cue = judge != null ? judge.FirstActiveStageCue : null;   // 장단 노드는 판정 화면을 켜지 않음 (B18.2)
             float target = cue != null ? 1f : 0f;
             float duration = target > weight ? GameConfig.JudgeEnterSeconds : GameConfig.JudgeExitSeconds;
             weight = Mathf.MoveTowards(weight, target, dt / duration);

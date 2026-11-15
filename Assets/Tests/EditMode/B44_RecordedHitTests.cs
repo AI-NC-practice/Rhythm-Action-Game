@@ -32,7 +32,7 @@ namespace RhythmActionGame.Tests
         public void B44_RecordedHits_Exist_PCM_StartWithin10ms_Timbre()
         {
             Assert.AreEqual("Assets/Audio/Hit", GameConfig.HitSound.RecordedDir);
-            Assert.AreEqual(-3f, GameConfig.HitSound.DuckDb, 1e-6f);
+            Assert.AreEqual(-4.5f, GameConfig.HitSound.DuckDb, 1e-6f);   // GDD-beta B18.1
             Assert.AreEqual(0.08f, GameConfig.HitSound.DuckSeconds, 1e-6f);
             var clips = RhythmActionGame.EditorTools.MusicTool.LoadHitClips();
             for (int i = 0; i < Names.Length; i++)

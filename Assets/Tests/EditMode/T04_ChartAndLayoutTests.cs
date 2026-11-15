@@ -40,7 +40,7 @@ namespace RhythmActionGame.Tests
                 if (e.IsRunEvent) Assert.DoesNotThrow(() => EventCatalog.SlotsFor(e), $"{e.runBeat} 키 오류");
                 if (e.IsDuel)
                 {
-                    Assert.AreEqual(GameConfig.NormalEnemyAttacks, e.attacks.Length, $"{e.runBeat} 일반 적 공격 2회");
+                    Assert.AreEqual(GameConfig.NormalEnemyAttacks, e.attacks.Length, $"{e.runBeat} 일반 적 공격 4회 (GDD-beta B18.3)");
                     foreach (var a in e.attacks) Assert.DoesNotThrow(() => StageChart.ParseKey(a.key));
                 }
                 if (e.IsBoss) Assert.AreEqual(GameConfig.BossAttacks, e.attacks.Length, "무사 공격 5회");

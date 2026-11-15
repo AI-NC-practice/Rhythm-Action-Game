@@ -23,6 +23,7 @@ namespace RhythmActionGame.Tests
             boot.clock.TimeSource = () => now;
             boot.judge.readKeyboard = false;
             boot.judge.OffsetSource = () => 0f;
+            dir.JangdanEnabled = false;   // 장애물 규칙만 본다 (장단 노드는 B50 테스트)
             boot.StartRun(startRunBeat);
             yield return null;
         }

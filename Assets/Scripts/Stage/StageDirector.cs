@@ -113,6 +113,9 @@ namespace RhythmActionGame
             Health.Reset();
             nextEvent = 0;
             while (nextEvent < Chart.events.Length && Chart.events[nextEvent].runBeat < runBeat) nextEvent++;
+            rhythm = JangdanEnabled ? RhythmNotes.Generate(Chart) : new System.Collections.Generic.List<RhythmNote>();   // 달리기 장단 노드 (GDD-beta B18.2)
+            nextRhythm = 0;
+            while (nextRhythm < rhythm.Count && rhythm[nextRhythm].RunBeat < runBeat) nextRhythm++;
             ResetCombat();
             SetState(StageState.Running);
             player.Running = true;
@@ -148,8 +151,43 @@ namespace RhythmActionGame
             UpdateCombat();
         }
 
+        System.Collections.Generic.List<RhythmNote> rhythm = new System.Collections.Generic.List<RhythmNote>();
+        int nextRhythm;
+
+        /// <summary>달리기 장단 노드를 쓰는지 (기본 켬). 다른 규칙만 보는 테스트가 끈다. ResetStage에서 반영.</summary>
+        public bool JangdanEnabled = true;
+
+        /// <summary>이 스테이지의 달리기 장단 노드 (GDD-beta B18.2, 테스트용).</summary>
+        public System.Collections.Generic.IReadOnlyList<RhythmNote> RhythmNoteList => rhythm;
+
+        /// <summary>
+        /// 달리기 장단 노드를 3박 앞까지 예약한다 (GDD-beta B18.2). 다음 멈추는 전투 자리 뒤의 노드는 그 전투가 끝난 뒤에 예약한다
+        /// (전투 동안 달리기 박자가 멈추므로 시계 박자가 그만큼 뒤로 밀린다). 결과는 속도 배율에 반영하지 않는다.
+        /// </summary>
+        void ScheduleRhythm()
+        {
+            double block = double.MaxValue;
+            for (int i = nextEvent; i < Chart.events.Length; i++)
+            {
+                var e = Chart.events[i];
+                if (!e.IsRunEvent && !e.IsForeshadow) { block = e.runBeat; break; }
+            }
+            while (nextRhythm < rhythm.Count)
+            {
+                var n = rhythm[nextRhythm];
+                if (n.RunBeat >= block) return;
+                if (n.RunBeat < player.RunBeat + 0.01) { nextRhythm++; continue; }   // 이미 지난 자리
+                if (n.RunBeat - player.RunBeat > GameConfig.Jangdan.ScheduleAheadBeats) return;
+                var point = MapLayout.PointAt((float)((n.RunBeat + 1) * GameConfig.MetersPerBeat)) + Vector3.up * 1.2f;
+                var cue = judge.Schedule(player.ClockBeatOfRun(n.RunBeat), n.Key, point, n);
+                cue.AffectsSpeed = false;
+                nextRhythm++;
+            }
+        }
+
         void ScheduleUpcoming()
         {
+            ScheduleRhythm();
             while (nextEvent < Chart.events.Length)
             {
                 var ev = Chart.events[nextEvent];

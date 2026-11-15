@@ -94,6 +94,8 @@ namespace RhythmActionGame.Tests
             Assert.IsFalse(enemy.Frozen, "Hit Stop 끝나면 풀림");
             // E: 마무리 원 예고(화면 더 가라앉음) → 처형
             yield return Hit(enc.Cues[2], 0.0);
+            yield return Hit(enc.Cues[3], 0.0);                  // GDD-beta B18.3 연속기 4회
+            yield return Hit(enc.Cues[4], 0.0);
             Assert.IsTrue(hooks.Log.Contains("FinisherWarn"), "마무리 원 예고");
             Assert.AreEqual("Execution", LastFx(), "땅 위 PERFECT 처형");
             Assert.IsTrue(dir.slowMotion.IsActive, "처형 슬로모션");
@@ -132,6 +134,8 @@ namespace RhythmActionGame.Tests
             pd.screenFx.Step(0f);
             Assert.Greater(pd.screenFx.Exposure, 0.3f, "노출 순간 밝아짐");
             yield return Hit(enc.Cues[2], 0.0);
+            yield return Hit(enc.Cues[3], 0.0);                  // GDD-beta B18.3 연속기 4회
+            yield return Hit(enc.Cues[4], 0.0);
             Assert.AreEqual("ExecutionKick", LastFx(), "지붕 위: 발차기");
             pd.cameraFx.Step(0.1f);
             Assert.Greater(pd.cameraFx.Pitch, 5f, "아래로 10°쪽");

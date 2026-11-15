@@ -63,7 +63,7 @@ namespace RhythmActionGame.Tests
             Assert.AreEqual(4, GameConfig.MinObstacleGapBeats);
             Assert.AreEqual(3f, GameConfig.WallRunDistance, Eps);
 
-            Assert.AreEqual(2, GameConfig.NormalEnemyAttacks);
+            Assert.AreEqual(4, GameConfig.NormalEnemyAttacks);   // GDD-beta B18.3 연속기 (GDD 4.5의 2회에서 바꿈)
             Assert.AreEqual(2, GameConfig.NormalEnemyAttackIntervalBeats);
             Assert.AreEqual(5, GameConfig.BossAttacks);
             Assert.AreEqual(1, GameConfig.BossAttackIntervalMinBeats);

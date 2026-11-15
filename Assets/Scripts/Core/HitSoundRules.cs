@@ -20,6 +20,17 @@ namespace RhythmActionGame
         }
 
         /// <summary>
+        /// 달리기 장단 노드의 히트사운드 (GDD-beta B18.2): 맞추면 손에 따라 ← 궁편 "덩"(HitPerfect 소리), → 채편 "덕"(HitNormal 소리).
+        /// 음량은 PERFECT/NORMAL 음량. FAIL은 Pick과 같다.
+        /// </summary>
+        public static float PickRhythm(Judgement result, ArrowKey key, out SfxKind kind)
+        {
+            if (result == Judgement.Fail) return Pick(InputOutcome.Judged, result, out kind);
+            kind = key == ArrowKey.Right ? SfxKind.HitNormal : SfxKind.HitPerfect;
+            return result == Judgement.Perfect ? GameConfig.HitSound.PerfectVolume : GameConfig.HitSound.NormalVolume;
+        }
+
+        /// <summary>
         /// 히트사운드를 몇 초 뒤에 울릴지 (GDD-beta B15.3 박 맞춤). PERFECT이고 목표 박이 아직 오지 않았으면
         /// 목표 박까지 기다린다(최대 SnapMaxWaitSeconds). 그 밖(늦은 PERFECT, NORMAL, FAIL, 원 없음)은 0 = 바로.
         /// </summary>

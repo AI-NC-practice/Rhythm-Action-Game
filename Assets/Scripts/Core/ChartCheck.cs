@@ -41,7 +41,8 @@ namespace RhythmActionGame
             return n;
         }
 
-        public static int TotalJudgements(ChartData c) => RunTargets(c).Count + CombatJudgements(c);
+        /// <summary>전체 판정 수 = 사건 + 전투 + 달리기 장단 노드 (GDD-beta B18.2).</summary>
+        public static int TotalJudgements(ChartData c) => RunTargets(c).Count + CombatJudgements(c) + RhythmNotes.Generate(c).Count;
 
         /// <summary>사건 길이 (달리기 박자). 사건이 아니면 0 (전투는 그 자리에서 멈춘다).</summary>
         public static int Length(ChartEvent e) => e.IsRunEvent ? EventCatalog.Get(e.EventKind).Beats : 0;

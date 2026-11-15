@@ -63,18 +63,18 @@ namespace RhythmActionGame
         }
 
         /// <summary>
-        /// 일반 적: 공격 2회 + 마무리(↑) 1회. 칼은 2박 간격(0, 2, 4), 창은 빠르게 두 번 찌르고(GDD-beta B16.1) 0, 1.5, 3.5.
+        /// 일반 적: 공격 연속기 + 마무리(↑) 1회 (GDD-beta B18.3). 칼 4회는 0·1·2·3 → 마무리 5, 창 4회는 0·1.5·2.5·4 → 마무리 6.
         /// </summary>
         public static List<CombatStep> NormalEnemySteps(ChartEvent ev)
         {
             var steps = new List<CombatStep>();
             double t = 0;
-            bool spear = ev.kind == "spear";
+            var gaps = ev.kind == "spear" ? GameConfig.SpearComboGaps : GameConfig.SwordComboGaps;   // GDD-beta B18.3 연속기
             for (int i = 0; i < ev.attacks.Length; i++)
             {
                 var a = ev.attacks[i];
                 steps.Add(new CombatStep { Kind = CombatStepKind.Attack, OffsetBeats = t, Key = a.Key, Attack = a.attack });
-                t += spear && i < ev.attacks.Length - 1 ? GameConfig.SpearAttackIntervalBeats : GameConfig.NormalEnemyAttackIntervalBeats;
+                t += i < ev.attacks.Length - 1 ? (i < gaps.Length ? gaps[i] : GameConfig.NormalEnemyAttackIntervalBeats) : GameConfig.FinisherGapBeats;
             }
             steps.Add(new CombatStep { Kind = CombatStepKind.Finisher, OffsetBeats = t, Key = ArrowKey.Up, Attack = "finisher" });
             return steps;

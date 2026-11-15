@@ -98,11 +98,16 @@ namespace RhythmActionGame
 
         // ---------------- GDD 4.5 적과의 전투 ----------------
         /// <summary>일반 적(칼·창 포졸)의 공격 수 (마무리 제외).</summary>
-        public const int NormalEnemyAttacks = 2;
+        public const int NormalEnemyAttacks = 4;   // GDD-beta B18.3: 연속기 4회 (GDD 4.5의 2회에서 늘림)
         /// <summary>일반 적의 공격 간격 (박자).</summary>
         public const int NormalEnemyAttackIntervalBeats = 2;
-        /// <summary>창 든 포졸의 공격 간격 (박, GDD-beta B16.1): 빠르게 두 번 찌르고 1.5 + 2박 뒤 마무리 → 0, 1.5, 3.5.</summary>
+        /// <summary>창 든 포졸의 첫 공격 간격 (박, GDD-beta B16.1). B18.3 연속기의 첫 간격.</summary>
         public const float SpearAttackIntervalBeats = 1.5f;
+        /// <summary>일반 적 연속기 공격 간격 (박, GDD-beta B18.3). 칼 0·1·2·3 → 마무리 5, 창 0·1.5·2.5·4 → 마무리 6.</summary>
+        public static readonly float[] SwordComboGaps = { 1f, 1f, 1f };
+        public static readonly float[] SpearComboGaps = { SpearAttackIntervalBeats, 1f, 1.5f };
+        /// <summary>마지막 공격 뒤 마무리까지 (박).</summary>
+        public const float FinisherGapBeats = 2f;
         /// <summary>무사의 공격 수 (마무리 제외).</summary>
         public const int BossAttacks = 5;
         /// <summary>무사 공격 간격 최솟값 (박자).</summary>
@@ -588,7 +593,7 @@ namespace RhythmActionGame
             /// <summary>실제 장구·꽹과리 녹음으로 만든 히트사운드 폴더 (GDD-beta B17.1, make-hitsounds.py). 파일 이름 Hit_Perfect/Normal/Fail/Empty.wav.</summary>
             public const string RecordedDir = "Assets/Audio/Hit";
             /// <summary>누르는 순간 음악을 줄이는 양과 길이 (GDD-beta B17.1): 히트사운드가 튀어나오게.</summary>
-            public const float DuckDb = -3f;
+            public const float DuckDb = -4.5f;   // GDD-beta B18.1 (B17.1의 −3에서 키움)
             public const float DuckSeconds = 0.08f;
             /// <summary>이른 PERFECT 입력의 히트사운드를 목표 박까지 기다려 울리는 최대 시간 (초, GDD-beta B15.3) = PERFECT 창.</summary>
             public const float SnapMaxWaitSeconds = PerfectWindowMs / 1000f;
@@ -596,9 +601,47 @@ namespace RhythmActionGame
             public const int DspBufferSize = 512;
         }
 
+        // ---------------- GDD-beta B18.2 달리기 장단 노드 ----------------
+        /// <summary>
+        /// 달리기 장단 노드: ← = 궁편(왼손 "덩"), → = 채편(오른손 "덕"). 챕터(1~6)마다 4마디 장단 표를 돌려 쓴다.
+        /// 표 한 칸 = "마디 안 박위치+손" (L = ←, R = →). 뒤 챕터일수록 반 박이 많다. GDD에 없음, 사용자 결정(약 3배)에 맞춰 Claude가 정함.
+        /// </summary>
+        public static class Jangdan
+        {
+            public static readonly string[][] Bars =
+            {
+                new[] { "0L 2L 3R", "0L 1R 2L 3R", "0L 2L 2.5R 3R", "0L 1R 2L 3R" },
+                new[] { "0L 1R 2L 3R", "0L 1R 1.5R 2L 3R", "0L 1R 2L 2.5R 3R", "0L 0.5R 1R 2L 3R" },
+                new[] { "0L 0.5R 1R 2L 2.5R 3R", "0L 1R 1.5R 2L 3R 3.5R", "0L 0.5R 1R 1.5R 2L 3R", "0L 1R 2L 2.5R 3R 3.5R" },
+                new[] { "0L 1R 2L 3R", "0L 1R 2L 3R", "0L 1R 2L 3R", "0L 1R 2L 3R" },
+                new[] { "0L 0.5R 1R 1.5L 2R 2.5R 3L", "0L 1R 1.5R 2L 3R 3.5R", "0L 0.5R 1.5L 2R 3L 3.5R", "0L 1R 2L 2.5R 3R 3.5R" },
+                new[] { "0L 1R 2L 3R", "0L 1R 2L 3R", "0L 1R 2L 3R", "0L 1R 2L 3R" },
+            };
+            /// <summary>사건 판정·다른 노드와의 최소 간격 (박).</summary>
+            public const double MinGapBeats = 0.5;
+            /// <summary>멈추는 전투(대치·포위·무사) 자리 앞뒤로 비우는 박.</summary>
+            public const double CombatClearBeats = 2;
+            /// <summary>챕터 시작 뒤 비우는 박 (첫 판정은 챕터 시작 + 2박 이후, B04).</summary>
+            public const double ChapterLeadBeats = 2;
+            /// <summary>슬로모션 후보 판정 뒤 비우는 박 (B04).</summary>
+            public const double SlowMoClearBeats = 2;
+            /// <summary>장단 노드를 몇 박 앞까지 예약하는지 (레인에 미리 보이게, 다음 멈추는 전투 앞까지만).</summary>
+            public const double ScheduleAheadBeats = 5;
+            /// <summary>장구 레인 (1080p 기준 px): 화면 아래 가로 레인, 노드가 1박에 LanePxPerBeat씩 왼쪽 판정 표시로 흘러옴.</summary>
+            public const float LaneWidthPx = 1100f;
+            public const float LaneHeightPx = 96f;
+            public const float LaneBottomPx = 40f;
+            public const float HitMarkerInsetPx = 110f;
+            public const float LanePxPerBeat = 220f;
+            public const double LaneLookAheadBeats = 4;
+            public const float NoteSizePx = 70f;
+            public static readonly UnityEngine.Color KungColor = new UnityEngine.Color(0.25f, 0.55f, 0.95f, 1f);   // ← 궁편
+            public static readonly UnityEngine.Color DeokColor = new UnityEngine.Color(0.95f, 0.3f, 0.25f, 1f);    // → 채편
+        }
+
         // ---------------- B10 배경 음악 (GDD 1장 사운드: 국악 퓨전, BPM 고정, 보컬 없음) ----------------
         /// <summary>
-        /// 배경 음악 "스테이지 1" — 퓨전 국악 액션, 120 BPM, 99마디(396박, 3분 18초). harness/scripts/music/make-song.py가
+        /// 배경 음악 "스테이지 1" — 퓨전 국악 액션, 120 BPM, 101마디(404박, 3분 22초). harness/scripts/music/make-song.py가
         /// 판정 타임라인(harness/music/stage1_timeline.json, GDD-beta B16.2)을 따라 공유마당 국악기 음원(태평소·꽹과리·장구)과
         /// 코드로 만든 드럼·베이스·현악을 조립했다: 판정 박마다 장구·꽹과리 강세, 전투는 절정, 전투 앞은 빌드업 (docs/CREDITS.md).
         /// 저장소 용량 때문에 mp3로 넣었고(wav-to-mp3.ps1), mp3 변환이 앞에 둔 지연만큼 첫 박이 뒤로 밀려 있다.
@@ -607,15 +650,15 @@ namespace RhythmActionGame
         {
             /// <summary>음악 파일 (Assets 기준 경로).</summary>
             public const string ClipPath = "Assets/Audio/Music/stage1_song.mp3";
-            /// <summary>곡 길이 (박). 음악 시각 = 첫 박 + (곡 박 × 0.5초) mod 198초. 클리어(382박) 뒤 마무리 3마디, 더 길어지면 처음으로.</summary>
-            public const int LoopBeats = 396;
+            /// <summary>곡 길이 (박). 음악 시각 = 첫 박 + (곡 박 × 0.5초) mod 202초. 클리어(390박) 뒤 마무리 3마디, 더 길어지면 처음으로.</summary>
+            public const int LoopBeats = 404;
             /// <summary>판정 타임라인 (모두 PERFECT 진행의 판정 시계 박자, 오토플레이로 뽑음, B16.2).</summary>
             public const string TimelinePath = "harness/music/stage1_timeline.json";
             /// <summary>
             /// 챕터 1~6이 시작되는 곡 박 (판정 타임라인의 챕터 시작 시계 박자, GDD-beta B16.3). 챕터 되감기·챕터 이동은 시계가 0박부터
             /// 다시 시작하므로 곡은 이 위치부터 재생한다.
             /// </summary>
-            public static readonly int[] ChapterSongBeats = { 0, 56, 116, 200, 236, 300 };
+            public static readonly int[] ChapterSongBeats = { 0, 56, 116, 204, 240, 308 };   // B18: 연속기로 전투가 길어져 다시 잼
             /// <summary>
             /// 음악 첫 박의 파일 안 시각 (초) = mp3 인코더 지연이 Unity가 가져온 클립에 남긴 만큼(25 ms).
             /// 테스트 B10_Downbeat가 실제 가져온 클립에서 잰다 (Windows 디코더로는 14 ms였지만 Unity 디코더는 25 ms).
@@ -624,7 +667,7 @@ namespace RhythmActionGame
             /// <summary>음악이 박자 시계와 이만큼(초) 넘게 어긋나면 재생 위치를 다시 맞춘다 (반복 이음매, mp3 꼬리 등). GDD에 없음, Claude가 정함.</summary>
             public const float ResyncThresholdSeconds = 0.05f;
             /// <summary>음악 기준 음량. GDD에 없음, Claude가 정함 (곡이 크게 만들어져 히트사운드·효과음이 묻히지 않게 낮춤).</summary>
-            public const float Volume = 0.6f;
+            public const float Volume = 0.45f;   // GDD-beta B18.1: 장구 히트사운드가 묻히지 않게 (0.6에서 낮춤)
             /// <summary>곡이 있으면 합성 장단 반주(GDD-beta B7)는 끈다. GDD에 없음, Claude가 정함 (곡에 장구가 이미 있음).</summary>
             public const bool KeepJangguBacking = false;
             /// <summary>음 높이 보정 피치 시프터의 창 길이와 최소 지연 (초, GDD-beta B15.1). 평균 지연 = 최소 + 창/2 = 22 ms.</summary>

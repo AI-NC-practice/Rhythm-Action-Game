@@ -48,6 +48,12 @@ fail = fail[:int(0.18 * SR)]; fail[-int(0.02 * SR):] *= np.linspace(1, 0, int(0.
 fail = fail / (np.abs(fail).max() + 1e-9) * 0.95
 empty = deok2[:int(0.08 * SR)].copy(); empty[-int(0.01 * SR):] *= np.linspace(1, 0, int(0.01 * SR)); empty *= 0.95
 
+def punch(y, drive=2.4):
+    """B18.1: 소리를 단단하게(포화) 해 같은 최고값에서 더 크게 들리게."""
+    y = np.tanh(drive * y) / np.tanh(drive)
+    return y / (np.abs(y).max() + 1e-9) * 0.97
+
+perfect, normal, fail = punch(perfect), punch(normal), punch(fail)
 for name, y in [('Hit_Perfect', perfect), ('Hit_Normal', normal), ('Hit_Fail', fail), ('Hit_Empty', empty)]:
     save(os.path.join(out_dir, name + '.wav'), np.stack([y, y], axis=1)[:, :1])
     onset = np.argmax(np.abs(y) > 0.1 * np.abs(y).max()) / SR * 1000

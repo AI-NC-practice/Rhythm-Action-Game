@@ -180,6 +180,11 @@ namespace RhythmActionGame.EditorTools
             ringView.worldCamera = cam;
             ringView.labelLayer = (RectTransform)labelCanvas.transform;
             ringView.additiveMaterial = UiAdditiveMat();
+            // 장구 레인 (GDD-beta B18.2): 달리기 장단 노드
+            var laneCanvas = UiFactory.CreateCanvas("JangdanLaneCanvas", GameConfig.RingCanvasOrder - 1);
+            var lane = laneCanvas.gameObject.AddComponent<JangdanLaneView>();
+            lane.judge = judge;
+            lane.clock = clock;
 
             var director = systems.AddComponent<StageDirector>();
             director.clock = clock;
@@ -250,6 +255,7 @@ namespace RhythmActionGame.EditorTools
             boot.presentation = presentation;
             boot.backing = backing;
             boot.hitSound = hitSound;
+            boot.jangdanLane = lane;
 
             BuildGameExtra(boot, chart);
             EditorSceneManager.SaveScene(scene, GameScenePath);

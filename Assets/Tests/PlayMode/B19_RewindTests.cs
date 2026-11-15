@@ -69,7 +69,9 @@ namespace RhythmActionGame.Tests
             Assert.IsFalse(cues[1].Cancelled, "다음 공격으로 넘어감");
             yield return Hit(cues[1], null);                       // 공격 FAIL
             Assert.AreEqual(1, dir.Health.Hp);
-            yield return Hit(cues[2], 0.0);                        // 마무리 PERFECT
+            yield return Hit(cues[2], 0.0);                        // GDD-beta B18.3 연속기
+            yield return Hit(cues[3], 0.0);
+            yield return Hit(cues[4], 0.0);                        // 마무리 PERFECT
             Assert.IsTrue(enc.Done);
             Assert.AreNotEqual(ExecutionKind.PushDown, enc.Execution, "마무리 성공이면 처형");
             Assert.AreEqual(1, enc.Attempts, "재도전 없음");
@@ -86,8 +88,10 @@ namespace RhythmActionGame.Tests
             var cues = enc.Cues.ToList();
             yield return Hit(cues[0], 0.0);                        // 1.25
             yield return Hit(cues[1], 0.0);                        // 1.30
+            yield return Hit(cues[2], 0.0);                        // GDD-beta B18.3 연속기 (1.30 유지)
+            yield return Hit(cues[3], 0.0);
             Assert.AreEqual(1.30f, boot.clock.TargetSpeed, 1e-4f);
-            yield return Hit(cues[2], null);                       // 마무리 FAIL
+            yield return Hit(cues[4], null);                       // 마무리 FAIL
             Assert.AreEqual(2, dir.Health.Hp, "체력 −1");
             Assert.AreEqual(1.04f, boot.clock.TargetSpeed, 1e-4f, "속도 ×0.8 (1.30 → 1.04)");
             Assert.IsFalse(dir.Rewinding, "일반 적은 되감지 않음");

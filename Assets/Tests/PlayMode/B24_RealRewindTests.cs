@@ -80,8 +80,10 @@ namespace RhythmActionGame.Tests
             real += 0.35f; yield return null;
             float a3 = Quaternion.Angle(Quaternion.identity, boss.weaponPivot.localRotation);
             Assert.Greater(a1, 10f, "되감기 시작: 휘두른 자세에서");
-            Assert.Less(a2, a1, "자세가 거꾸로 돌아감");
-            Assert.Less(a3, a2);
+            // GDD-beta B18.3: 적은 실제로 놓친(가장 이른) 공격을 휘두르므로, 다 휘두른 공격을 거꾸로 감으면
+            // 내려친 자세 → 들어 올린 자세(크게) → 처음 자세로 돌아간다. 각도가 한 번 커졌다가 0으로 간다.
+            Assert.Greater(Mathf.Abs(a2 - a1), 1f, "자세가 되감기며 바뀜");
+            Assert.Less(a3, a2, "끝으로 갈수록 처음 자세로");
             Assert.Less(a3, 5f, "끝에서 처음 자세");
             Assert.AreEqual("Rewinding", boss.State);
         }
