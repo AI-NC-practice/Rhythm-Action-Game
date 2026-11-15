@@ -69,6 +69,7 @@ namespace RhythmActionGame
             if (presentation != null) presentation.ResetAll();
             player.ResetTo(runBeat);
             clock.ResetSpeed();
+            clock.MusicBeatOffset = MusicPlan.SongBeatAtRun(runBeat);   // 챕터 되감기·이동은 그 챕터의 곡 위치부터 (GDD-beta B16.3)
             clock.StartClock();
             if (backing != null) backing.ResetSchedule();
             if (director != null) director.ResetStage(runBeat);

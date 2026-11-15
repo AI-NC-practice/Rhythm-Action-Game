@@ -1,0 +1,1029 @@
+{
+ "judges": [
+  {
+   "beat": 4.02,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 12.02,
+   "key": "Down",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 16.02,
+   "key": "Left",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 21.02,
+   "key": "Left",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 21.52,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 22.52,
+   "key": "Left",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 26.02,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 28.02,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 32.02,
+   "key": "Left",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 38.02,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 40.02,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 45.02,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 45.52,
+   "key": "Left",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 46.52,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 50.02,
+   "key": "Left",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 50.52,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 52.02,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 1
+  },
+  {
+   "beat": 60.02,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 2
+  },
+  {
+   "beat": 66.02,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 2
+  },
+  {
+   "beat": 68.02,
+   "key": "Left",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 2
+  },
+  {
+   "beat": 74.02,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 2
+  },
+  {
+   "beat": 76.02,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 2
+  },
+  {
+   "beat": 80.02,
+   "key": "Down",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 2
+  },
+  {
+   "beat": 86.02,
+   "key": "Left",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 2
+  },
+  {
+   "beat": 90.02,
+   "key": "Left",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 2
+  },
+  {
+   "beat": 94.0,
+   "key": "Down",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 2
+  },
+  {
+   "beat": 96.0,
+   "key": "Left",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 2
+  },
+  {
+   "beat": 98.0,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 2
+  },
+  {
+   "beat": 104.0,
+   "key": "Down",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 2
+  },
+  {
+   "beat": 108.0,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 2
+  },
+  {
+   "beat": 114.0,
+   "key": "Down",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 2
+  },
+  {
+   "beat": 115.5,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 2
+  },
+  {
+   "beat": 120.0,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 3
+  },
+  {
+   "beat": 126.0,
+   "key": "Left",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 3
+  },
+  {
+   "beat": 128.0,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 3
+  },
+  {
+   "beat": 134.0,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 3
+  },
+  {
+   "beat": 138.0,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 3
+  },
+  {
+   "beat": 139.5,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 3
+  },
+  {
+   "beat": 141.5,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 3
+  },
+  {
+   "beat": 150.0,
+   "key": "Left",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 3
+  },
+  {
+   "beat": 150.5,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 3
+  },
+  {
+   "beat": 152.0,
+   "key": "Down",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 3
+  },
+  {
+   "beat": 160.0,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 3
+  },
+  {
+   "beat": 162.0,
+   "key": "Down",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 3
+  },
+  {
+   "beat": 166.0,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 3
+  },
+  {
+   "beat": 170.0,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 3
+  },
+  {
+   "beat": 172.0,
+   "key": "Down",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 3
+  },
+  {
+   "beat": 174.0,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 3
+  },
+  {
+   "beat": 182.0,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 3
+  },
+  {
+   "beat": 186.0,
+   "key": "Left",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 3
+  },
+  {
+   "beat": 188.0,
+   "key": "Down",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 3
+  },
+  {
+   "beat": 192.0,
+   "key": "Left",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 3
+  },
+  {
+   "beat": 196.0,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 3
+  },
+  {
+   "beat": 204.0,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 4
+  },
+  {
+   "beat": 210.0,
+   "key": "Down",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 4
+  },
+  {
+   "beat": 211.0,
+   "key": "Left",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 4
+  },
+  {
+   "beat": 212.0,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 4
+  },
+  {
+   "beat": 213.0,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 4
+  },
+  {
+   "beat": 214.0,
+   "key": "Down",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 4
+  },
+  {
+   "beat": 216.0,
+   "key": "Down",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 4
+  },
+  {
+   "beat": 218.0,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 4
+  },
+  {
+   "beat": 220.0,
+   "key": "Down",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 4
+  },
+  {
+   "beat": 222.0,
+   "key": "Left",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 4
+  },
+  {
+   "beat": 222.5,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 4
+  },
+  {
+   "beat": 223.0,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 4
+  },
+  {
+   "beat": 223.5,
+   "key": "Down",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 4
+  },
+  {
+   "beat": 239.5,
+   "key": "Left",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 5
+  },
+  {
+   "beat": 240.0,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 5
+  },
+  {
+   "beat": 240.5,
+   "key": "Left",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 5
+  },
+  {
+   "beat": 241.0,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 5
+  },
+  {
+   "beat": 244.0,
+   "key": "Down",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 5
+  },
+  {
+   "beat": 246.0,
+   "key": "Left",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 5
+  },
+  {
+   "beat": 250.0,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 5
+  },
+  {
+   "beat": 256.0,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 5
+  },
+  {
+   "beat": 262.0,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 5
+  },
+  {
+   "beat": 264.0,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 5
+  },
+  {
+   "beat": 270.0,
+   "key": "Left",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 5
+  },
+  {
+   "beat": 272.0,
+   "key": "Down",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 5
+  },
+  {
+   "beat": 278.0,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 5
+  },
+  {
+   "beat": 282.0,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 5
+  },
+  {
+   "beat": 283.5,
+   "key": "Left",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 5
+  },
+  {
+   "beat": 285.5,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 5
+  },
+  {
+   "beat": 294.0,
+   "key": "Left",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 5
+  },
+  {
+   "beat": 296.0,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 5
+  },
+  {
+   "beat": 302.0,
+   "key": "Down",
+   "result": "Perfect",
+   "state": "Running",
+   "chapter": 6
+  },
+  {
+   "beat": 314.0,
+   "key": "Left",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 316.0,
+   "key": "Down",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 318.0,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 319.0,
+   "key": "Left",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 321.0,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 322.0,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 323.0,
+   "key": "Down",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 325.0,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 326.0,
+   "key": "Down",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 328.0,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 329.0,
+   "key": "Left",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 330.0,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 331.0,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 338.0,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 340.0,
+   "key": "Down",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 340.5,
+   "key": "Left",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 342.0,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 343.0,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 345.0,
+   "key": "Left",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 345.5,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 347.0,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 347.5,
+   "key": "Down",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 348.0,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 350.0,
+   "key": "Left",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 351.0,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 352.0,
+   "key": "Down",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 354.0,
+   "key": "Left",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 354.5,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 356.0,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 356.5,
+   "key": "Down",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 358.0,
+   "key": "Down",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 359.0,
+   "key": "Left",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 360.0,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 364.0,
+   "key": "Left",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 365.0,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 366.0,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 368.0,
+   "key": "Left",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 369.0,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 370.0,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 371.0,
+   "key": "Down",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 372.0,
+   "key": "Left",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 373.0,
+   "key": "Right",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 374.0,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 375.0,
+   "key": "Down",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  },
+  {
+   "beat": 378.0,
+   "key": "Up",
+   "result": "Perfect",
+   "state": "Combat",
+   "chapter": 6
+  }
+ ],
+ "states": [
+  {
+   "beat": 92.02,
+   "state": "Combat"
+  },
+  {
+   "beat": 100.0,
+   "state": "Running"
+  },
+  {
+   "beat": 136.0,
+   "state": "Combat"
+  },
+  {
+   "beat": 144.0,
+   "state": "Running"
+  },
+  {
+   "beat": 168.0,
+   "state": "Combat"
+  },
+  {
+   "beat": 176.0,
+   "state": "Running"
+  },
+  {
+   "beat": 208.0,
+   "state": "Combat"
+  },
+  {
+   "beat": 224.0,
+   "state": "Running"
+  },
+  {
+   "beat": 280.0,
+   "state": "Combat"
+  },
+  {
+   "beat": 288.0,
+   "state": "Running"
+  },
+  {
+   "beat": 308.0,
+   "state": "Combat"
+  },
+  {
+   "beat": 382,
+   "state": "Cleared"
+  }
+ ],
+ "chapters": [
+  {
+   "number": 1,
+   "run": 0.0,
+   "clock": 0.02
+  },
+  {
+   "number": 2,
+   "run": 56.0,
+   "clock": 56.02
+  },
+  {
+   "number": 3,
+   "run": 108.0,
+   "clock": 116.0
+  },
+  {
+   "number": 4,
+   "run": 176.0,
+   "clock": 200.0
+  },
+  {
+   "number": 5,
+   "run": 196.0,
+   "clock": 236.0
+  },
+  {
+   "number": 6,
+   "run": 252.0,
+   "clock": 300.0
+  }
+ ],
+ "combats": [
+  {
+   "start": 92.02,
+   "end": 100.0,
+   "kind": "normal"
+  },
+  {
+   "start": 136.0,
+   "end": 144.0,
+   "kind": "normal"
+  },
+  {
+   "start": 168.0,
+   "end": 176.0,
+   "kind": "normal"
+  },
+  {
+   "start": 208.0,
+   "end": 224.0,
+   "kind": "surround"
+  },
+  {
+   "start": 280.0,
+   "end": 288.0,
+   "kind": "normal"
+  },
+  {
+   "start": 308.0,
+   "end": 382,
+   "kind": "boss"
+  }
+ ],
+ "end": 378.0
+}

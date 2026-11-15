@@ -4,23 +4,23 @@ using UnityEngine;
 
 namespace RhythmActionGame.Tests
 {
-    /// <summary>배경 음악 (B10): 스테이지 1 곡 — 퓨전 국악 액션, 120 BPM, 96마디(384박).</summary>
+    /// <summary>배경 음악 (B10): 스테이지 1 곡 — 퓨전 국악 액션, 120 BPM, 99마디(396박, 판정 타임라인을 따름 B16.2).</summary>
     public class B10_MusicTests
     {
         static AudioClip Clip() => AssetDatabase.LoadAssetAtPath<AudioClip>(GameConfig.Music.ClipPath);
         static float LoopSeconds => GameConfig.Music.LoopBeats * GameConfig.SecondsPerBeat;
 
         [Test]
-        public void B10_Clip_InAssetsAudioMusic_384Beats_ImportSettings()
+        public void B10_Clip_InAssetsAudioMusic_396Beats_ImportSettings()
         {
             var clip = Clip();
             Assert.IsNotNull(clip, "Assets/Audio/Music/ 에 음악 파일");
             StringAssert.StartsWith("Assets/Audio/Music/", GameConfig.Music.ClipPath);
             Assert.AreEqual(120f, GameConfig.Bpm, "GDD 4.1 기준 BPM");
-            Assert.AreEqual(384, GameConfig.Music.LoopBeats, "96마디 = 스테이지 길이(모두 PERFECT일 때 약 384박)");
+            Assert.AreEqual(396, GameConfig.Music.LoopBeats, "99마디 = 클리어(382박) + 마무리 3마디");
             Assert.AreEqual(0, GameConfig.Music.LoopBeats % GameConfig.BeatsPerBar, "마디 단위");
             Assert.That(clip.length, Is.InRange(GameConfig.Music.FirstBeatSeconds + LoopSeconds - 0.01f, GameConfig.Music.FirstBeatSeconds + LoopSeconds + 0.15f),
-                "길이 = 첫 박 + 192초 (+ mp3 꼬리)");
+                "길이 = 첫 박 + 198초 (+ mp3 꼬리)");
             Assert.AreEqual(2, clip.channels);
             var imp = (AudioImporter)AssetImporter.GetAtPath(GameConfig.Music.ClipPath);
             Assert.AreEqual(AudioClipLoadType.DecompressOnLoad, imp.defaultSampleSettings.loadType, "되감기 위치를 정확히 찾도록 메모리에 풀기");
@@ -28,14 +28,14 @@ namespace RhythmActionGame.Tests
         }
 
         [Test]
-        public void B10_MusicTimeAt_FirstBeatPlusHalfSecondPerBeat_WrapsEvery384Beats()
+        public void B10_MusicTimeAt_FirstBeatPlusHalfSecondPerBeat_WrapsEveryLoop()
         {
             float f = GameConfig.Music.FirstBeatSeconds;
             float len = f + LoopSeconds + 0.05f;               // mp3 꼬리가 붙은 클립 길이
             Assert.AreEqual(f, BeatClock.MusicTimeAt(0, len), 1e-5f);
             Assert.AreEqual(f + 5f, BeatClock.MusicTimeAt(10, len), 1e-4f);
-            Assert.AreEqual(f, BeatClock.MusicTimeAt(384, len), 1e-3f, "384박마다 처음(첫 박)으로 — 클립 길이가 아니라 박 수로 반복");
-            Assert.AreEqual(f + 1.25f, BeatClock.MusicTimeAt(386.5, len), 1e-3f);
+            Assert.AreEqual(f, BeatClock.MusicTimeAt(GameConfig.Music.LoopBeats, len), 1e-3f, "LoopBeats마다 처음(첫 박)으로 — 클립 길이가 아니라 박 수로 반복");
+            Assert.AreEqual(f + 1.25f, BeatClock.MusicTimeAt(GameConfig.Music.LoopBeats + 2.5, len), 1e-3f);
             Assert.AreEqual(f + LoopSeconds - 0.5f, BeatClock.MusicTimeAt(-1, len), 1e-3f, "음수 박도 반복 안으로");
             Assert.AreEqual(0f, BeatClock.MusicTimeAt(10, 0f), "클립 없음");
             Assert.AreEqual(0.05f, GameConfig.Music.ResyncThresholdSeconds, 1e-6f);
@@ -43,7 +43,7 @@ namespace RhythmActionGame.Tests
             Assert.IsFalse(BeatClock.NeedsResync(10.02f, 10f), "20 ms는 그대로 (끊김 방지)");
             Assert.IsTrue(BeatClock.NeedsResync(10.3f, 10f), "300 ms는 다시 맞춤");
             Assert.IsTrue(BeatClock.NeedsResync(9.9f, 10f));
-            Assert.IsFalse(BeatClock.NeedsResync(LoopSeconds - 0.01f, 0.02f), "곡 끝(191.99초)과 처음(0.02초)은 30 ms 차이");
+            Assert.IsFalse(BeatClock.NeedsResync(LoopSeconds - 0.01f, 0.02f), "곡 끝과 처음(0.02초)은 30 ms 차이");
             Assert.IsTrue(BeatClock.NeedsResync(LoopSeconds + 0.04f, 0.0f - 0.0f + 0.5f), "꼬리로 넘어간 위치는 다시 맞춤");
         }
 

@@ -1,97 +1,121 @@
-"""B10 스테이지 곡 (전체): 퓨전 국악 액션, 120 BPM, 96마디(384박 = 3분 12초), 반복 이음매 없이 처음으로 돌아감.
+"""B10/B42 스테이지 곡: 판정 타임라인을 따라 만든다 (GDD-beta B16.2). 퓨전 국악 액션, 120 BPM.
 
-길이는 오토플레이로 잰 스테이지 길이(모두 PERFECT일 때 약 384박, 무사 결투는 약 308박부터)에 맞췄다.
-게임은 박 위치로 곡 위치를 정하므로(BeatClock.MusicTimeAt) 재도전으로 길어지면 처음부터 다시 돈다.
-악기·조각은 song_kit.py. 추임새 자리는 비어 있으면 .score.txt에만 적힌다.
+- 곡 위치 = 시계 박자. 재도전이 없으면 판정의 시계 박자는 매번 같으므로(B16.2), 모두 PERFECT 진행의
+  판정 타임라인(parse-timeline.py)을 따라 구간을 짠다:
+    달리기 = 기본 박(A, 챕터마다 베이스 바꿈), 일반 전투 = 절정(B), 포위·무사 결투 = 더 센 절정,
+    전투 직전 1~2마디 = 빌드업(심장박동·롤·쓸어 올리기), 전투 시작 = 터짐(크래시·큰북·징).
+- 판정 박마다 장구·꽹과리 강세: 정박은 장구 "덩" + 꽹과리 열린 소리, 반 박은 장구 "덕" + 꽹과리.
+  노드가 곡의 타격이 되고 히트사운드(B14)가 그 위에 겹친다.
+- 끝: 클리어 뒤 엇박 강타 → 징 → 심장박동으로 잦아들어 처음으로 이어짐.
+악기·조각은 song_kit.py.
 
 사용 (프로젝트 루트):
-  python harness/scripts/music/make-song.py <장구 wav> <출력 wav>
+  python harness/scripts/music/make-song.py <장구 wav> <타임라인 json> <출력 wav>
 """
-import sys, os
+import sys, os, json, math
 sys.path.insert(0, os.path.dirname(__file__))
 import song_kit as k
 
-BARS = 96
-k.init(BARS, sys.argv[1])
+jg, tl_path, out_path = sys.argv[1], sys.argv[2], sys.argv[3]
+tl = json.load(open(tl_path, encoding='utf-8'))
+judges = tl['judges']
+combats = tl['combats']
+cleared = next((s['beat'] for s in tl['states'] if s['state'] == 'Cleared'), tl['end'] + 4)
+
+END_BAR = int(math.ceil(cleared / 4.0))          # 클리어가 오는 마디부터 마무리
+BARS = END_BAR + 3                                # 강타 1 + 징 1 + 잦아듦 1
+k.init(BARS, jg)
 B = k.bar_start
 
-# 1~2마디: 도입 (심장박동)
-k.intro(0)
+def combat_at(bar):
+    """마디 가운데가 전투 안이면 그 전투."""
+    mid = B(bar) + 2
+    for c in combats:
+        if c['start'] <= mid < c['end']: return c
+    return None
 
-# 3~10마디 A1: 첫 달리기
-k.drop(B(2)); k.chuimsae('얼쑤', B(2) + 0.5)
-for bar in range(2, 10): k.groove(bar)
-k.put_tps('042', 2, 0, 20)
-k.put_tps('027', 7, 1, 12, g=0.8)
-k.chuimsae('좋다', B(9) + 2.5)
+def chapter_at(beat):
+    ch = 1
+    for c in tl['chapters']:
+        if c['clock'] <= beat + 1e-6: ch = c['number']
+    return ch
 
-# 11~18마디 A2: 베이스가 움직이고 다른 태평소
-for bar in range(10, 18): k.groove(bar, riff='A2')
-k.put_tps('038', 10, 0, 24, g=0.85)
-k.put_tps('059', 16, 6, 8, g=0.8)
+# 전투가 시작되는 마디 (터짐 자리)와 그 앞 빌드업 마디
+combat_bars = {}
+for c in combats:
+    b0 = int(math.floor(c['start'] / 4.0))
+    combat_bars[b0] = c
+build_bars = set()
+for b0 in combat_bars:
+    for d in (1, 2):
+        if b0 - d >= 1 and combat_at(b0 - d) is None and (b0 - d) not in combat_bars: build_bars.add(b0 - d)
 
-# 19~20마디: 빌드업
-k.build(18)
+# 1마디: 도입 (심장박동 + 롤)
+for b in (0, 2): k.heartbeat(b, 0.8)
+k.put('pad', k.pad_chord([46, 53, 58], 4 * k.BEAT), 0, 0.7)
+k.roll(0, [(2, 3, 0.25), (3, 3.75, 0.125)])
+k.put('drums', k.riser(4), 0, 0.3)
+k.drop(B(1)); k.chuimsae('얼쑤', B(1) + 0.5)
 
-# 21~28마디 B1: 절정
-k.drop(B(20)); k.chuimsae('얼씨구', B(20) + 0.5)
-for bar in range(20, 28): k.groove(bar, climax=True, chords=k.CHORDS_B, transpose=2 if bar % 2 else 0)
-k.put_tps('058', 20, 1, 28, g=0.95)
-k.chuimsae('어이', B(27) + 3.5)
+TPS_ORDER = ['042', '038', '059', '027', '046', '058']
+TPS_LEN = {'042': 20, '038': 24, '059': 28, '027': 12, '046': 16, '058': 28}
+tps_free = 0.0
+tps_i = 0
 
-# 29~32마디: 쉼 (반 박자, 태평소 독주)
-for bar in range(28, 32): k.halftime(bar)
-k.put_tps('046', 28, 0, 16, g=0.85)
+def try_tps(bar, keys, g=0.85):
+    """태평소 구절을 겹치지 않게 놓는다."""
+    global tps_free, tps_i
+    if B(bar) < tps_free: return
+    key = keys[tps_i % len(keys)]; tps_i += 1
+    k.put_tps(key, bar, 0 if key != '027' else 1, TPS_LEN[key], g=g)
+    tps_free = B(bar) + TPS_LEN[key] + 4
 
-# 33~48마디 A3·A4: 두 번째 달리기
-k.drop(B(32)); k.chuimsae('얼쑤', B(32) + 0.5)
-for bar in range(32, 40): k.groove(bar)
-k.put_tps('059', 32, 0, 28, g=0.85)
-for bar in range(40, 48): k.groove(bar, riff='A2')
-k.put_tps('027', 40, 1, 12, g=0.8)
-k.put_tps('038', 44, 8, 16, g=0.8)
+run_since = 1
+for bar in range(1, END_BAR):
+    c = combat_at(bar)
+    if bar in combat_bars and bar > 1:
+        cb = combat_bars[bar]
+        k.drop(B(bar)); k.chuimsae('얼씨구' if cb['kind'] != 'normal' else '좋다', B(bar) + 0.5)
+    if c is not None:
+        rel = bar - int(math.floor(c['start'] / 4.0))
+        if c['kind'] == 'boss':
+            k.groove(bar, climax=True, chords=k.CHORDS_B, transpose=2 if bar % 2 else 0, double=(rel // 4) % 2 == 1)
+            if rel % 8 == 0: try_tps(bar, ['058', '038', '059'], g=0.95)
+        elif c['kind'] == 'surround':
+            k.groove(bar, climax=True, chords=k.CHORDS_B, transpose=2 if bar % 2 else 0, double=rel >= 2)
+            if rel == 0: try_tps(bar, ['058'], g=0.95)
+        else:
+            k.groove(bar, climax=True, chords=k.CHORDS_B)
+        run_since = bar + 1
+        continue
+    if bar in build_bars:
+        nxt = bar + 1
+        if nxt in build_bars: continue                     # 두 마디 빌드업은 첫 마디에서 한 번에
+        start = bar - 1 if (bar - 1) in build_bars else bar
+        k.build(start, bars=bar - start + 1)
+        continue
+    ch = chapter_at(B(bar))
+    k.groove(bar, riff='A2' if ch in (2, 5) else 'A')
+    if (bar - run_since) % 8 == 0: try_tps(bar, TPS_ORDER)
 
-# 49~50마디: 빌드업
-k.build(48)
+# 판정 강세: 판정 박마다 장구·꽹과리 (노드 = 곡의 타격)
+for j in judges:
+    b = j['beat']
+    if abs(b - round(b)) < 1e-6:
+        k.hit('janggu', k.DEONG[int(b) % len(k.DEONG)], b, 1.15, pan=-0.1, label=f'판정 강세 {j["key"]}')
+        k.hit('kkw', k.KKW_OPEN, b, 0.35, pan=0.3)
+    else:
+        k.hit('janggu', k.DEOK[int(b * 2) % len(k.DEOK)], b, 1.0, pan=0.1, label=f'판정 강세(반 박) {j["key"]}')
+        k.hit('kkw', k.KKW[int(b * 2) % len(k.KKW)], b, 0.55, pan=0.35)
 
-# 51~58마디 B2: 절정
-k.drop(B(50)); k.chuimsae('얼씨구', B(50) + 0.5)
-for bar in range(50, 58): k.groove(bar, climax=True, chords=k.CHORDS_B, transpose=2 if bar % 2 else 0)
-k.put_tps('058', 50, 1, 28, g=0.95)
+# 마무리: 엇박 강타 → 징 + 태평소 긴 음 → 심장박동으로 잦아들어 처음으로
+k.stabs(END_BAR); k.chuimsae('하', B(END_BAR) + 3.0)
+k.drop(B(END_BAR + 1))
+k.put('pad', k.pad_chord([46, 53, 58, 61], 4 * k.BEAT + 2.0), B(END_BAR + 1), 1.2)
+k.put('bass', k.bass_note(k.Bb0 + 12, 1.5), B(END_BAR + 1), 0.8)
+k.put_tps('046', END_BAR + 1, 6, 8)
+for b in (0, 2): k.heartbeat(B(END_BAR + 2) + b, 0.6)
 
-# 59~62마디: 다리 (심장박동 + 태평소 긴 음)
-k.bridge(58, 4)
-k.put_tps('046', 58, 6, 16, g=0.85)
-
-# 63~70마디 A5: 세 번째 달리기 (무사 결전 앞)
-k.drop(B(62)); k.chuimsae('좋다', B(62) + 0.5)
-for bar in range(62, 70): k.groove(bar, riff='A2' if bar >= 66 else 'A')
-k.put_tps('042', 62, 0, 20)
-k.put_tps('059', 67, 6, 12, g=0.8)
-
-# 71~72마디: 빌드업 (무사 결전 진입 무렵)
-k.build(70)
-
-# 73~84마디 B3: 가장 큰 절정 (무사 결전)
-k.drop(B(72)); k.chuimsae('얼씨구', B(72) + 0.5)
-for bar in range(72, 84): k.groove(bar, climax=True, chords=k.CHORDS_B, transpose=2 if bar % 2 else 0, double=bar >= 76)
-k.put_tps('058', 72, 1, 28, g=0.95)
-k.put_tps('038', 79, 0, 20, g=0.9)
-k.chuimsae('어이', B(79) + 3.5)
-
-# 85~92마디: 마지막 달리기
-k.drop(B(84))
-for bar in range(84, 92): k.groove(bar, riff='A2')
-k.put_tps('059', 84, 0, 28, g=0.85)
-
-# 93마디: 엇박 강타 → 94마디: 징 + 태평소 긴 음 → 95~96마디: 심장박동으로 잦아들며 처음으로
-k.stabs(92); k.chuimsae('하', B(92) + 3.0)
-k.drop(B(93))
-k.put('pad', k.pad_chord([46, 53, 58, 61], 4 * k.BEAT + 2.0), B(93), 1.2)
-k.put('bass', k.bass_note(k.Bb0 + 12, 1.5), B(93), 0.8)
-k.put_tps('046', 93, 6, 8)
-for b in (0, 2, 4, 6): k.heartbeat(B(94) + b, 0.6 + 0.03 * b)
-k.put('pad', k.pad_chord([46, 53, 58], 8 * k.BEAT), B(94), 0.6)
-
-sec = k.render(sys.argv[2], loop_beats=BARS * 4)
-print('wrote', sys.argv[2], f'{sec:.1f}s,', len(k.score), 'events,', len([1 for _, l in k.score if '추임새 자리' in l]), 'chuimsae slots empty')
+sec = k.render(out_path, loop_beats=BARS * 4)
+print('wrote', out_path, f'{sec:.1f}s, {BARS} bars ({BARS * 4} beats), end bar {END_BAR},', len(judges), 'judge accents,',
+      len([1 for _, l in k.score if '추임새 자리' in l]), 'chuimsae slots empty')

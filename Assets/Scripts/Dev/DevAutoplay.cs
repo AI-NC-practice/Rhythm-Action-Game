@@ -11,6 +11,7 @@ namespace RhythmActionGame
     public class DevAutoplay : MonoBehaviour
     {
         GameBootstrap hooked;
+        int lastSection = -1;
         int missLeft = -1;
         string shotDir;
         double nextShot = 3.5;
@@ -45,6 +46,12 @@ namespace RhythmActionGame
             {
                 double rel = boot.clock.CurrentBeat - e0.StartBeat;
                 if (rel >= nextShot && rel < shotEnd) { ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(shotDir, $"duel_{rel:00.00}.png")); Debug.Log($"[autoplay] 화면 저장 {rel:0.00}박"); nextShot = System.Math.Floor(rel * 4 + 1) / 4; }
+            }
+            // 챕터(구간)가 바뀌면 달리기 박자와 시계 박자를 남긴다 (곡 위치를 챕터에 맞추는 데 씀, B10)
+            if (boot.player != null)
+            {
+                var sec = MapLayout.SectionOf((int)boot.player.RunBeat);
+                if (sec.Number != lastSection) { lastSection = sec.Number; Debug.Log($"[autoplay] 구간 {sec.Number} 시작: 달리기 {boot.player.RunBeat:0.00}박, 시계 {boot.clock.CurrentBeat:0.00}박"); }
             }
             var cue = boot.judge.FirstActiveCue;
             if (cue == null || boot.clock.CurrentBeat < cue.TargetBeat) return;

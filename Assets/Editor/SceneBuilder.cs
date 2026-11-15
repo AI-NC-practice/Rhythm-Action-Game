@@ -58,9 +58,9 @@ namespace RhythmActionGame.EditorTools
             var title = UiFactory.CreateText(canvas.transform, "Title", "Rhythm-Action-Game", 96, Color.white, new Vector2(1600, 160));
             title.rectTransform.anchoredPosition = new Vector2(0, 220);
             // 음악 출처 (B10, CC BY): 화면 아래 가운데
-            var credit = UiFactory.CreateText(canvas.transform, "MusicCredit", GameConfig.Music.Credit, 22, new Color(1f, 1f, 1f, 0.6f), new Vector2(1600, 40));
+            var credit = UiFactory.CreateText(canvas.transform, "MusicCredit", GameConfig.Music.Credit, 15, new Color(1f, 1f, 1f, 0.5f), new Vector2(1600, 28));
             credit.rectTransform.anchorMin = credit.rectTransform.anchorMax = new Vector2(0.5f, 0f);
-            credit.rectTransform.anchoredPosition = new Vector2(0, 40);
+            credit.rectTransform.anchoredPosition = new Vector2(0, 24);
             BuildTitleUiExtra(canvas);
         }
 
@@ -96,7 +96,7 @@ namespace RhythmActionGame.EditorTools
             var systems = new GameObject("Systems");
             var music = systems.AddComponent<AudioSource>();
             music.playOnAwake = false;
-            // 배경 음악 (B10): 120 BPM에 맞춘 128박 루프. BeatClock이 박자 위치로 재생 위치를 맞춘다.
+            // 배경 음악 (B10, B16): 판정 타임라인을 따라 만든 곡. BeatClock이 박자 위치로 재생 위치를 맞춘다.
             music.clip = MusicTool.LoadClip();
             music.loop = true;
             music.volume = GameConfig.Music.Volume;

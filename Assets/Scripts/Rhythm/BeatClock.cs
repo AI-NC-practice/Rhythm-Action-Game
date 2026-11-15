@@ -66,6 +66,12 @@ namespace RhythmActionGame
             TickMusicSync();
         }
 
+        /// <summary>
+        /// 시계 0박에 해당하는 곡 박 (GDD-beta B16.3). 챕터 되감기·챕터 이동은 시계가 0박부터 다시 시작하므로
+        /// 곡은 그 챕터가 시작되는 곡 위치부터 재생한다. GameBootstrap.StartRun이 정한다.
+        /// </summary>
+        public double MusicBeatOffset { get; set; }
+
         /// <summary>음악 위치를 다시 맞춘 횟수 (테스트·진단용).</summary>
         public int MusicResyncCount { get; private set; }
 
@@ -73,7 +79,7 @@ namespace RhythmActionGame
         public float ExpectedMusicTime()
         {
             if (music == null || music.clip == null) return 0f;
-            return MusicTimeAt(CurrentBeat + MusicLeadBeats(), music.clip.length);
+            return MusicTimeAt(CurrentBeat + MusicBeatOffset + MusicLeadBeats(), music.clip.length);
         }
 
         double MusicLeadBeats() =>
@@ -147,7 +153,7 @@ namespace RhythmActionGame
             music.Play();
             // 음 높이 보정이 음악을 LatencySeconds만큼 늦추므로 재생 위치를 그만큼 앞당긴다 (GDD-beta B15.1)
             if (pitchCorrector != null) pitchCorrector.Clear();
-            music.time = MusicTimeAt(beat + MusicLeadBeats(), music.clip.length);
+            music.time = MusicTimeAt(beat + MusicBeatOffset + MusicLeadBeats(), music.clip.length);
         }
 
         /// <summary>

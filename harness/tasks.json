@@ -969,8 +969,8 @@
                                          "GDD-beta B16.3: 챕터 되감기·챕터 이동 때 곡이 그 챕터의 곡 위치부터 재생 (MusicBeatOffset, 값은 GameConfig) — 테스트",
                                          "unity-verify 통과, 타이틀 출처 글자 크기 줄임"
                                      ],
-                      "status":  "in_progress",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  1,
                       "max_attempts":  3,
                       "notes":  ""
                   },
@@ -985,7 +985,7 @@
                                          "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과",
                                          "사용자가 플레이해 노드가 곡의 타격처럼 느껴지는지, 반 박 패턴과 챕터 되감기 곡 위치를 확인"
                                      ],
-                      "status":  "pending",
+                      "status":  "in_progress",
                       "attempts":  0,
                       "max_attempts":  1,
                       "notes":  ""

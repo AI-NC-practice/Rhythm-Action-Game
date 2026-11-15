@@ -1,7 +1,7 @@
 ﻿# Unity verify report
-time: 2026-11-15 19:23:12
+time: 2026-11-15 19:33:07
 
-## EditMode : total=158 passed=158 failed=0 skipped=0 result=Passed
+## EditMode : total=161 passed=161 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Config_MatchGddBetaB1
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_LabelPose_PopThenRise_045s
@@ -40,10 +40,10 @@ time: 2026-11-15 19:23:12
   - [Passed] RhythmActionGame.Tests.B08_SfxSynthTests.B08_Timbre_LowIsLow_MetalIsHigh_JingRings
   - [Passed] RhythmActionGame.Tests.B08_SfxSynthTests.B08_Wav_Header16BitMono44k
   - [Passed] RhythmActionGame.Tests.B08_SfxSynthTests.B08_WavFiles_InAssetsAudioSfx
-  - [Passed] RhythmActionGame.Tests.B10_MusicTests.B10_Clip_InAssetsAudioMusic_384Beats_ImportSettings
+  - [Passed] RhythmActionGame.Tests.B10_MusicTests.B10_Clip_InAssetsAudioMusic_396Beats_ImportSettings
   - [Passed] RhythmActionGame.Tests.B10_MusicTests.B10_Credit_Attribution_AuthorsAndLicenses
   - [Passed] RhythmActionGame.Tests.B10_MusicTests.B10_Downbeat_OnEveryGameBeat_AtFirstBeatSeconds
-  - [Passed] RhythmActionGame.Tests.B10_MusicTests.B10_MusicTimeAt_FirstBeatPlusHalfSecondPerBeat_WrapsEvery384Beats
+  - [Passed] RhythmActionGame.Tests.B10_MusicTests.B10_MusicTimeAt_FirstBeatPlusHalfSecondPerBeat_WrapsEveryLoop
   - [Passed] RhythmActionGame.Tests.B12_SmoothClockTests.B12_Config_JudgeWindowsUnchanged_LatencyDefaults
   - [Passed] RhythmActionGame.Tests.B12_SmoothClockTests.B12_FromRealtime_MapsInputEventTime_NotInFuture
   - [Passed] RhythmActionGame.Tests.B12_SmoothClockTests.B12_Smooth_AdvancesEveryFrame_WithinOneBuffer_NeverBackwards
@@ -87,6 +87,9 @@ time: 2026-11-15 19:23:12
   - [Passed] RhythmActionGame.Tests.B38_HitSnapTests.B38_SnapDelay_EarlyPerfectWaitsForBeat_OthersImmediate
   - [Passed] RhythmActionGame.Tests.B41_ChartSplitTests.B41_RunEvents_HaveHalfBeatJudgements_GapAtLeastHalfBeat
   - [Passed] RhythmActionGame.Tests.B41_ChartSplitTests.B41_SpearDuel_FastDoubleThrust_SwordUnchanged
+  - [Passed] RhythmActionGame.Tests.B42_SongFollowsChartTests.B42_Song_AccentOnEveryJudgeBeat
+  - [Passed] RhythmActionGame.Tests.B42_SongFollowsChartTests.B42_SongBeatAtRun_ChapterStartsFromTimeline
+  - [Passed] RhythmActionGame.Tests.B42_SongFollowsChartTests.B42_Timeline_MatchesChart_AllPerfect_ChaptersAndCombats
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_BeatAndSpeed_MatchGdd41
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_Judge_MatchGdd42
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_ObstacleAndCombat_MatchGdd44To46
@@ -161,7 +164,7 @@ time: 2026-11-15 19:23:12
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_SpeedFx_Intensity
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_Texts_MatchGdd48
 
-## PlayMode : total=141 passed=141 failed=0 skipped=0 result=Passed
+## PlayMode : total=142 passed=142 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -266,6 +269,7 @@ time: 2026-11-15 19:23:12
   - [Passed] RhythmActionGame.Tests.B36_HitSoundPlayTests.B36_GameScene_EveryInput_PlaysHitSound_SeparateFromSfxPool
   - [Passed] RhythmActionGame.Tests.B37_SpeedOnBarTests.B37_SpeedAppliesOnNextBar_HudAtOnce_PitchCorrected_RewindAtOnce
   - [Passed] RhythmActionGame.Tests.B38_HitSnapPlayTests.B38_GameScene_EarlyPerfectScheduledOnBeat_LateAndNormalImmediate
+  - [Passed] RhythmActionGame.Tests.B42_ChapterMusicTests.B42_StartRunAtChapter_MusicStartsAtChapterSongBeat
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_ChapterStartBeats_MatchSections
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(1)
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(4)

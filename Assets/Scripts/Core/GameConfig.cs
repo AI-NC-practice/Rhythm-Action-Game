@@ -593,16 +593,24 @@ namespace RhythmActionGame
 
         // ---------------- B10 배경 음악 (GDD 1장 사운드: 국악 퓨전, BPM 고정, 보컬 없음) ----------------
         /// <summary>
-        /// 배경 음악 "스테이지 1" — 퓨전 국악 액션, 120 BPM, 96마디(384박, 3분 12초). harness/scripts/music/make-song.py로
-        /// 공유마당 국악기 음원(태평소·꽹과리·장구)과 코드로 만든 드럼·베이스·현악을 악보대로 조립했다(docs/CREDITS.md).
+        /// 배경 음악 "스테이지 1" — 퓨전 국악 액션, 120 BPM, 99마디(396박, 3분 18초). harness/scripts/music/make-song.py가
+        /// 판정 타임라인(harness/music/stage1_timeline.json, GDD-beta B16.2)을 따라 공유마당 국악기 음원(태평소·꽹과리·장구)과
+        /// 코드로 만든 드럼·베이스·현악을 조립했다: 판정 박마다 장구·꽹과리 강세, 전투는 절정, 전투 앞은 빌드업 (docs/CREDITS.md).
         /// 저장소 용량 때문에 mp3로 넣었고(wav-to-mp3.ps1), mp3 변환이 앞에 둔 지연만큼 첫 박이 뒤로 밀려 있다.
         /// </summary>
         public static class Music
         {
             /// <summary>음악 파일 (Assets 기준 경로).</summary>
             public const string ClipPath = "Assets/Audio/Music/stage1_song.mp3";
-            /// <summary>곡 길이 (박). 음악 시각 = 첫 박 + (박 × 0.5초) mod 192초. 스테이지가 더 길어지면 처음으로 이어진다.</summary>
-            public const int LoopBeats = 384;
+            /// <summary>곡 길이 (박). 음악 시각 = 첫 박 + (곡 박 × 0.5초) mod 198초. 클리어(382박) 뒤 마무리 3마디, 더 길어지면 처음으로.</summary>
+            public const int LoopBeats = 396;
+            /// <summary>판정 타임라인 (모두 PERFECT 진행의 판정 시계 박자, 오토플레이로 뽑음, B16.2).</summary>
+            public const string TimelinePath = "harness/music/stage1_timeline.json";
+            /// <summary>
+            /// 챕터 1~6이 시작되는 곡 박 (판정 타임라인의 챕터 시작 시계 박자, GDD-beta B16.3). 챕터 되감기·챕터 이동은 시계가 0박부터
+            /// 다시 시작하므로 곡은 이 위치부터 재생한다.
+            /// </summary>
+            public static readonly int[] ChapterSongBeats = { 0, 56, 116, 200, 236, 300 };
             /// <summary>
             /// 음악 첫 박의 파일 안 시각 (초) = mp3 인코더 지연이 Unity가 가져온 클립에 남긴 만큼(25 ms).
             /// 테스트 B10_Downbeat가 실제 가져온 클립에서 잰다 (Windows 디코더로는 14 ms였지만 Unity 디코더는 25 ms).
