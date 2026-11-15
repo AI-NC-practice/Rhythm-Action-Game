@@ -167,6 +167,7 @@ namespace RhythmActionGame
         /// <summary>원 빛 색: 마무리 금색, 내 공격 주홍, 그 밖(막기·피하기·사건) 청록.</summary>
         public static Color RingGlowColor(JudgeCue cue)
         {
+            if (cue.Tag is RhythmNote n) return n.Key == ArrowKey.Left ? GameConfig.Jangdan.KungColor : GameConfig.Jangdan.DeokColor;   // B18.2 손 색
             if (IsFinisher(cue)) return FinisherGlowColor;
             if (IsStrike(cue)) return StrikeColor;
             return GlowColor;
@@ -178,7 +179,6 @@ namespace RhythmActionGame
 
         void OnAppeared(JudgeCue cue)
         {
-            if (cue.Tag is RhythmNote) return;   // 장단 노드는 장구 레인이 그린다 (GDD-beta B18.2)
             var root = new GameObject("Ring", typeof(RectTransform)).GetComponent<RectTransform>();
             root.SetParent(transform, false);
             var ring = new Ring { Cue = cue, Root = root, AppearedAt = RealTime() };
@@ -204,7 +204,8 @@ namespace RhythmActionGame
                 ring.StrikeIcon = UiFactory.CreateImage(root, "StrikeIcon", VfxFactory.SwordIcon, GameConfig.StrikeRingColor, GameConfig.StrikeIconPx);
                 ring.StrikeIcon.rectTransform.anchoredPosition = GameConfig.StrikeIconOffsetPx;
             }
-            AssignChain(ring);
+            if (cue.Tag is RhythmNote) ring.Button.color = RingGlowColor(cue) * new Color(0.6f, 0.6f, 0.6f, 0.9f);   // 손 색 버튼
+            else AssignChain(ring);                                   // 장단 노드는 묶음 대신 장단 줄의 고정 칸
             rings.Add(ring);
             UpdateRing(ring);
         }
@@ -269,7 +270,6 @@ namespace RhythmActionGame
 
         void OnJudged(JudgeCue cue, Judgement r)
         {
-            if (cue.Tag is RhythmNote) return;
             Vector2 pos = Vector2.zero;
             for (int i = rings.Count - 1; i >= 0; i--)
             {
@@ -338,7 +338,6 @@ namespace RhythmActionGame
         /// <summary>방향키 입력 반응 (GDD-beta B8.2): 원 펄스, 너무 이르면 "빠름", 원이 없으면 누른 키를 아래에 작게.</summary>
         void OnInput(ArrowKey key, JudgeCue cue, InputOutcome outcome)
         {
-            if (cue != null && cue.Tag is RhythmNote) return;
             EnsureLabelLayer();
             float now = RealTime();
             Ring ring = null;
@@ -614,6 +613,13 @@ namespace RhythmActionGame
                 AnimateCharge(r, until, d);
             }
             if (r.Locked) return;
+            if (r.Cue.Tag is RhythmNote note)
+            {
+                // 장단 줄 (GDD-beta B18.2): 화면 위쪽 한 줄, 노드 순서대로 왼쪽부터 칸을 돌려 씀
+                r.Root.anchoredPosition = RowSlot(note.Index);
+                r.Locked = true;
+                return;
+            }
             var radii = RingLayout.SafeRadii(Size());
             Vector2 pos;
             bool clamped;
@@ -650,7 +656,16 @@ namespace RhythmActionGame
                 }
                 if (RealTime() - r.AppearedAt >= GameConfig.RingLockSeconds) r.Locked = true;
             }
+            if (pos.y > GameConfig.Jangdan.EventMaxYPx) pos.y = GameConfig.Jangdan.EventMaxYPx;   // 장단 줄을 피해 그 아래로 (B18.2)
             r.Root.anchoredPosition = pos;
+        }
+
+        /// <summary>장단 줄의 index번째 노드 자리 (순서대로 왼쪽부터 RowSlots칸을 돌려 씀).</summary>
+        public static Vector2 RowSlot(int index)
+        {
+            int n = GameConfig.Jangdan.RowSlots;
+            int slot = ((index % n) + n) % n;
+            return new Vector2((slot - (n - 1) * 0.5f) * GameConfig.Jangdan.RowSpacingPx, GameConfig.Jangdan.RowYPx);
         }
 
         /// <summary>

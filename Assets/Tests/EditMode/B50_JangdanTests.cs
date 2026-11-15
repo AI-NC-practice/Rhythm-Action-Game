@@ -37,6 +37,26 @@ namespace RhythmActionGame.Tests
         }
 
         [Test]
+        public void B50_RowSlots_InOrder_LeftToRight_Wrap6_NoOverlap()
+        {
+            // 장단 줄 (B18.2 표시): 노드 순서대로 왼쪽부터 6칸, 160 px 간격, 화면 위쪽 한 줄
+            Assert.AreEqual(6, GameConfig.Jangdan.RowSlots);
+            for (int i = 0; i < 6; i++)
+            {
+                var p = JudgeRingView.RowSlot(i);
+                Assert.AreEqual(GameConfig.Jangdan.RowYPx, p.y, 1e-4f);
+                Assert.AreEqual((i - 2.5f) * 160f, p.x, 1e-3f, "왼쪽부터 차례로");
+            }
+            Assert.AreEqual(JudgeRingView.RowSlot(0), JudgeRingView.RowSlot(6), "6칸을 돌려 씀");
+            // 동시에 떠 있는 장단 원(2박 안, 최소 0.5박 간격 → 최대 5개)은 서로 다른 칸
+            var notes = RhythmNotes.Generate(StageChart.Load());
+            for (int i = 0; i < notes.Count; i++)
+                for (int j = i + 1; j < notes.Count && notes[j].RunBeat - notes[i].RunBeat <= GameConfig.ApproachBeats; j++)
+                    Assert.AreNotEqual(notes[i].Index % 6, notes[j].Index % 6, $"함께 뜨는 원은 다른 칸 ({notes[i].RunBeat}, {notes[j].RunBeat})");
+            Assert.Greater(GameConfig.Jangdan.RowYPx - GameConfig.Jangdan.EventMaxYPx, 140f, "사건·전투 원과 장단 줄 사이 간격");
+        }
+
+        [Test]
         public void B50_ChartWithoutFlag_NoJangdan_And_RhythmHitSound()
         {
             var small = new ChartData { name = "t", bpm = 120, runBeats = 64, events = new ChartEvent[0] };

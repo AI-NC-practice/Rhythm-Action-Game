@@ -8,6 +8,8 @@ namespace RhythmActionGame
     {
         public double RunBeat;
         public ArrowKey Key;
+        /// <summary>스테이지 안 순서 (장단 줄의 칸 = Index mod RowSlots).</summary>
+        public int Index;
     }
 
     /// <summary>
@@ -41,7 +43,7 @@ namespace RhythmActionGame
                     if (stops.Any(e => r > e - GameConfig.Jangdan.CombatClearBeats - 1e-9 && r < e + GameConfig.Jangdan.CombatClearBeats - 1e-9)) continue;
                     if (slow.Any(e => r > e - 1e-9 && r < e + GameConfig.Jangdan.SlowMoClearBeats + 1e-9)) continue;
                     if (notes.Count > 0 && r - notes[notes.Count - 1].RunBeat < GameConfig.Jangdan.MinGapBeats - 1e-9) continue;
-                    notes.Add(new RhythmNote { RunBeat = r, Key = key });
+                    notes.Add(new RhythmNote { RunBeat = r, Key = key, Index = notes.Count });
                 }
             }
             return notes;

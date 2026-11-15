@@ -20,7 +20,6 @@ namespace RhythmActionGame
         public PresentationDirector presentation;
         public JangguBacking backing;
         public HitSoundPlayer hitSound;
-        public JangdanLaneView jangdanLane;
         public bool autoStart = true;
 
         public static GameBootstrap Instance { get; private set; }

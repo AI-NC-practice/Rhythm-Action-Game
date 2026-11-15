@@ -625,16 +625,16 @@ namespace RhythmActionGame
             public const double ChapterLeadBeats = 2;
             /// <summary>슬로모션 후보 판정 뒤 비우는 박 (B04).</summary>
             public const double SlowMoClearBeats = 2;
-            /// <summary>장단 노드를 몇 박 앞까지 예약하는지 (레인에 미리 보이게, 다음 멈추는 전투 앞까지만).</summary>
+            /// <summary>장단 노드를 몇 박 앞까지 예약하는지 (다음 멈추는 전투 앞까지만).</summary>
             public const double ScheduleAheadBeats = 5;
-            /// <summary>장구 레인 (1080p 기준 px): 화면 아래 가로 레인, 노드가 1박에 LanePxPerBeat씩 왼쪽 판정 표시로 흘러옴.</summary>
-            public const float LaneWidthPx = 1100f;
-            public const float LaneHeightPx = 96f;
-            public const float LaneBottomPx = 40f;
-            public const float HitMarkerInsetPx = 110f;
-            public const float LanePxPerBeat = 220f;
-            public const double LaneLookAheadBeats = 4;
-            public const float NoteSizePx = 70f;
+            /// <summary>
+            /// 장단 줄 (1080p 기준 px, 화면 가운데 기준): 장단 노드의 판정 원은 화면 위쪽 한 줄(RowYPx)에 왼쪽부터 차례로 뜬다.
+            /// RowSlots칸을 노드 순서대로 돌려 쓰므로(동시에 떠 있는 원은 최대 5개) 서로 겹치지 않는다. 사건·전투 원은 EventMaxYPx 아래로만.
+            /// </summary>
+            public const float RowYPx = 300f;
+            public const int RowSlots = 6;
+            public const float RowSpacingPx = 160f;
+            public const float EventMaxYPx = 120f;
             public static readonly UnityEngine.Color KungColor = new UnityEngine.Color(0.25f, 0.55f, 0.95f, 1f);   // ← 궁편
             public static readonly UnityEngine.Color DeokColor = new UnityEngine.Color(0.95f, 0.3f, 0.25f, 1f);    // → 채편
         }

@@ -1,7 +1,7 @@
 ﻿# Unity verify report
-time: 2026-11-15 22:38:14
+time: 2026-11-15 22:54:08
 
-## EditMode : total=164 passed=164 failed=0 skipped=0 result=Passed
+## EditMode : total=165 passed=165 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Config_MatchGddBetaB1
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_LabelPose_PopThenRise_045s
@@ -93,6 +93,7 @@ time: 2026-11-15 22:38:14
   - [Passed] RhythmActionGame.Tests.B44_RecordedHitTests.B44_RecordedHits_Exist_PCM_StartWithin10ms_Timbre
   - [Passed] RhythmActionGame.Tests.B50_JangdanTests.B50_ChartWithoutFlag_NoJangdan_And_RhythmHitSound
   - [Passed] RhythmActionGame.Tests.B50_JangdanTests.B50_JangdanNotes_Rules_GapsAndClearZones
+  - [Passed] RhythmActionGame.Tests.B50_JangdanTests.B50_RowSlots_InOrder_LeftToRight_Wrap6_NoOverlap
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_BeatAndSpeed_MatchGdd41
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_Judge_MatchGdd42
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_ObstacleAndCombat_MatchGdd44To46
