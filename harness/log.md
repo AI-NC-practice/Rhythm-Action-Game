@@ -375,3 +375,6 @@ BuildGray와 smoke-test를 통과했다(Builds/Gray/RhythmActionGame.exe). 사�
 
 ### 2026-11-15 B42 [beta] 곡을 차트에 맞춰 다시 만들기 + 챕터 곡 위치 — done (evaluator PASS)
 개발 빌드 오토플레이를 화면 없이 돌려(157초) 판정 타임라인을 뽑았다(harness/scripts/music/parse-timeline.py → harness/music/stage1_timeline.json): 판정 130개(반 박 40), 전투 6(일반 4, 포위, 무사), 챕터 시작 시계 박자 0·56·116·200·236·300, 클리어 382박(클리어 순간 로그의 시계 값이 엉뚱해 무사 시작 + 74박으로 계산). make-song.py를 타임라인을 따라 다시 썼다: 달리기 = 기본 박, 일반 전투 = 절정, 포위·무사 = 더 센 절정, 전투 앞 1~2마디 = 빌드업, 전투 시작 = 터짐, 판정 박마다 장구 덩(정박)·덕(반 박) + 꽹과리 강세. 99마디(396박) mp3로 바꿔 넣었다. 챕터 되감기·챕터 이동은 시계가 0부터라 BeatClock.MusicBeatOffset = MusicPlan.SongBeatAtRun(runBeat)(GameConfig.Music.ChapterSongBeats)로 곡을 그 챕터 위치부터 튼다. 타이틀 출처 글자 22 → 15. DevAutoplay에 챕터 시작 로그 추가. 테스트: B10을 396박에 맞추고 B42 EditMode 3·PlayMode 1 추가. 곡 분석: 판정 박의 소리 시작 세기가 판정 없는 16분 엇박의 1.88배. unity-verify EditMode 161/161, PlayMode 142/142.
+
+### 2026-11-15 B43 [사용자] 곡·차트 맞춤 확인 — needs_user
+BuildGray와 smoke-test를 통과했다(Builds/Gray/RhythmActionGame.exe). 사용자 플레이 확인을 기다린다.

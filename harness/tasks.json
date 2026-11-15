@@ -985,10 +985,10 @@
                                          "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과",
                                          "사용자가 플레이해 노드가 곡의 타격처럼 느껴지는지, 반 박 패턴과 챕터 되감기 곡 위치를 확인"
                                      ],
-                      "status":  "in_progress",
+                      "status":  "needs_user",
                       "attempts":  0,
                       "max_attempts":  1,
-                      "notes":  ""
+                      "notes":  "BuildGray + smoke-test 통과(2026-11-15). 사용자 플레이 확인 대기."
                   },
                   {
                       "id":  "T10",
