@@ -42,6 +42,8 @@ namespace RhythmActionGame
         public int ActivePulses => pulses.Count;
         /// <summary>박 펄스 화면 가장자리 (GDD-beta B17.2, BeatFx가 매 프레임 넣음). 다른 비네트와 최댓값으로 합친다.</summary>
         public float BeatVignette { get; set; }
+        /// <summary>슬로모션 회색 화면 (GDD-beta B17.4 2차, BulletTimeFx가 매 프레임 넣음, 음수). 다른 채도와 최솟값으로 합친다.</summary>
+        public float SlowSaturation { get; set; }
         public VolumeProfile Profile => volume != null ? volume.profile : null;
 
         void Awake() => EnsureSetup();
@@ -112,6 +114,7 @@ namespace RhythmActionGame
             Color vigColor = Color.black;
             float ca = 0f, ld = 0f, bl = GameConfig.Fx.BloomBase;
             if (BeatVignette > vig) vig = BeatVignette;
+            if (SlowSaturation < sat) sat = SlowSaturation;
             // 노출: 밝히는 섬광이 있으면 그중 최댓값, 없으면 가장 어두운 값 (판정 화면 포함)
             float brightest = 0f, darkest = Mathf.Min(0f, exp);
             foreach (var a in pulses)

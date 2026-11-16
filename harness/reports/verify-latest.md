@@ -1,5 +1,5 @@
 ﻿# Unity verify report
-time: 2026-11-16 11:04:18
+time: 2026-11-16 11:32:43
 
 ## EditMode : total=173 passed=173 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
@@ -96,7 +96,7 @@ time: 2026-11-16 11:04:18
   - [Passed] RhythmActionGame.Tests.B45_BeatPulseTests.B45_Step_OneBeatOneStep_LowestOnBeat_FeetAlternate
   - [Passed] RhythmActionGame.Tests.B45_BeatPulseTests.B45_TickBeats_TwoAndOneBeatBefore_WithinApproach
   - [Passed] RhythmActionGame.Tests.B45_BeatPulseTests.B45_TickClip_ShortHigh_LastIsHigher
-  - [Passed] RhythmActionGame.Tests.B47_BulletTimeTests.B47_Config_MatchesGddBetaB17_4
+  - [Passed] RhythmActionGame.Tests.B47_BulletTimeTests.B47_Config_MatchesGddBetaB17_4_Second
   - [Passed] RhythmActionGame.Tests.B47_BulletTimeTests.B47_IsBulletCue_ByTag
   - [Passed] RhythmActionGame.Tests.B47_BulletTimeTests.B47_Spots_Gate_SurroundLastSimultaneous_BossCounterAndLastFlurry
   - [Passed] RhythmActionGame.Tests.B50_JangdanTests.B50_ChartWithoutFlag_NoJangdan_And_RhythmHitSound
@@ -286,8 +286,8 @@ time: 2026-11-16 11:04:18
   - [Passed] RhythmActionGame.Tests.B45_BeatFxPlayTests.B45_CueTicks_TwoAndOneBeatBefore_StageOnly_NoDup_NoClash_SettingOff
   - [Passed] RhythmActionGame.Tests.B45_BeatFxPlayTests.B45_GameScene_PulseOnBeat_RingHudVignette_StepBob
   - [Passed] RhythmActionGame.Tests.B45_BeatFxPlayTests.B45_Title_CueTicksToggle_Saved
-  - [Passed] RhythmActionGame.Tests.B47_BulletTimePlayTests.B47_GameScene_ClosingGate_BulletTime_NoPerfectSlowMo
-  - [Passed] RhythmActionGame.Tests.B47_BulletTimePlayTests.B47_SlowsClockMusicScreen_FromOneBeatBefore_ReturnsAfterJudge
+  - [Passed] RhythmActionGame.Tests.B47_BulletTimePlayTests.B52_GameScene_ClosingGate_PressAtNormalSpeed_ThenGateCameraCut
+  - [Passed] RhythmActionGame.Tests.B47_BulletTimePlayTests.B52_NoSlowBeforePress_SlowAfterDodge_GrayMuffled_ThenBack_SkipIfNextClose_NoneOnFail
   - [Passed] RhythmActionGame.Tests.B50_JangdanPlayTests.B50_GameScene_LaneShowsNotes_NoJudgeScreen_FailKeepsHpAndSpeed
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_ChapterStartBeats_MatchSections
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(1)

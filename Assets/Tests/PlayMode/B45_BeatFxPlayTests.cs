@@ -52,7 +52,7 @@ namespace RhythmActionGame.Tests
             Assert.AreEqual(accent, fx.Pulse, 1e-3f, "마디 첫 박은 더 크게");
             var ring = boot.ringView.Rings.FirstOrDefault(r => r.Cue == cue);
             Assert.IsNotNull(ring, "판정 원이 떠 있음");
-            Assert.AreEqual(1f + accent * GameConfig.BeatFx.RingScale, ring.Target.rectTransform.localScale.x, 1e-3f, "판정 원 테두리 펄스");
+            Assert.AreEqual(1f, ring.Target.rectTransform.localScale.x, 1e-4f, "판정 원 테두리에는 박 펄스 없음 (B52: 누르는 순간 원이 출렁이지 않게)");
             Assert.AreEqual(1f + accent * GameConfig.BeatFx.HudScale, fx.hud.Hearts[0].rectTransform.localScale.x, 1e-3f, "HUD 펄스");
             Assert.AreEqual(1f + accent * GameConfig.BeatFx.HudScale, fx.hud.SpeedText.rectTransform.localScale.x, 1e-3f);
             Assert.AreEqual(1f + accent * GameConfig.BeatFx.LaneScale, boot.jangdanLane.HitMarker.rectTransform.localScale.x, 1e-3f, "장구 레인 판정 표시 펄스");
@@ -68,7 +68,7 @@ namespace RhythmActionGame.Tests
             boot.player.Running = true;
             fx.Step(1f);
             Assert.AreEqual(1f, fx.Pulse, 1e-3f, "보통 박");
-            Assert.AreEqual(1f + GameConfig.BeatFx.RingScale, ring.Target.rectTransform.localScale.x, 1e-3f);
+            Assert.AreEqual(1f, ring.Target.rectTransform.localScale.x, 1e-4f);
 
             // 박 사이: 원래 크기, 걸음은 발 쪽으로
             boot.judge.Cancel(cue);

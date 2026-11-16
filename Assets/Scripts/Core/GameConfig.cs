@@ -526,6 +526,8 @@ namespace RhythmActionGame
             public static readonly FxPreset Rewind = P("Rewind", 4, kick: 0.3f, pitch: -3f, rise: 0.2f, hold: 0.3f, release: 0.3f);
             // B10.2 대치: 카메라가 적 쪽으로 살짝 다가감 (FOV −4°), 첫 원이 뜨는 2박(1초) 동안
             public static readonly FxPreset Standoff = P("Standoff", 2, fov: -4f, rise: 0.2f, hold: 0.8f, release: 0.3f);
+            /// <summary>칼이 머리 위를 스쳐 감 (GDD-beta B17.4 2차): 몸을 숙이고 위를 올려다봄. 회피 슬로모션 동안 (실제 시간으로 흐름).</summary>
+            public static readonly FxPreset NearMiss = P("NearMiss", 3, height: -0.35f, pitch: -14f, roll: 5f, fov: -6f, rise: 0.08f, hold: 0.45f, release: 0.25f);
             // B11.2 내 공격 PERFECT: 칼끼리 맞부딪쳐 무사가 밀림 (패링과 같은 충돌 연출)
             public static readonly FxPreset StrikePerfect = P("StrikePerfect", 3, hitStop: 0.07f, trauma: 0.35f, hz: 25f, kick: -0.05f, pitch: -1.5f, fov: -3f, rise: 0.02f, hold: 0.05f, release: 0.25f);
             // B11.2 내 공격 NORMAL: 부딪쳤지만 내가 밀림 (뒤로 StrikeSelfPushMeters)
@@ -686,28 +688,38 @@ namespace RhythmActionGame
             public const float RunBlendPerSecond = 4f;
         }
 
-        // ---------------- B47 아슬아슬 회피 슬로모션 (GDD-beta B17.4) ----------------
+        // ---------------- B47·B52 아슬아슬 회피 슬로모션 (GDD-beta B17.4 2차) ----------------
         /// <summary>
-        /// 회피 슬로모션 (GDD-beta B17.4, 2026-11-16 사용자 승인). 정해진 판정 1박 전부터 박자 시계·음악·화면이 함께 느려지고,
-        /// 판정이 나면 원래 속도로 돌아온다. 곡도 같은 배율로 느려지므로 곡과 판정 박의 관계는 그대로다.
+        /// 회피 슬로모션 (GDD-beta B17.4 2차, 2026-11-16 사용자 승인). 노드가 다가오는 동안에는 느려지지 않는다.
+        /// 회피 판정을 PERFECT·NORMAL로 피한 직후 박자 시계·음악·화면이 함께 느려져 "간신히 피하는" 장면을 보여 주고 돌아온다.
+        /// 곡도 같은 배율로 느려지므로 곡과 판정 박의 관계는 그대로다. 모든 값은 GDD에 없음, Claude가 정함.
         /// </summary>
         public static class BulletTime
         {
             /// <summary>느려지는 배율 (박자 시계·음악·Time.timeScale).</summary>
-            public const float Factor = 0.4f;
-            /// <summary>판정 목표 몇 박 전부터 느려지는지.</summary>
-            public const float LeadBeats = 1f;
-            /// <summary>느려지는 데 걸리는 박 (시계 박).</summary>
-            public const float RampInBeats = 0.25f;
-            /// <summary>판정 뒤 원래 속도로 돌아오는 시간 (실제 초).</summary>
+            public const float Factor = 0.3f;
+            /// <summary>피한 직후 느려지는 데 걸리는 시간 (실제 초).</summary>
+            public const float InSeconds = 0.06f;
+            /// <summary>느린 채로 머무는 시간 (실제 초, 들어가는 시간 포함).</summary>
+            public const float HoldSeconds = 0.6f;
+            /// <summary>원래 속도로 돌아오는 시간 (실제 초).</summary>
             public const float ReleaseSeconds = 0.15f;
+            /// <summary>다음 판정 목표 이만큼(박) 전에는 돌아오기 시작한다 (노드는 누르는 느낌 그대로).</summary>
+            public const float ClearBeats = 0.6f;
             /// <summary>먹먹함: 저역 통과 주파수 (Hz) — 평소 / 가장 먹먹할 때.</summary>
             public const float LowPassOpenHz = 22000f;
             public const float LowPassMuffledHz = 700f;
             /// <summary>가장 먹먹할 때 음악 음량 배율.</summary>
             public const float MusicGain = 0.6f;
+            /// <summary>슬로 동안 화면 채도 (회색, ColorAdjustments.saturation).</summary>
+            public const float Saturation = -70f;
             /// <summary>회피 슬로모션 판정: 무사 결투 받아치기, 3단계 난타 마지막 무사 공격 (O 기준 박).</summary>
             public static readonly double[] BossBeats = { 37.5, 66 };
+            /// <summary>대문 컷: 카메라를 문 건너편 앞 이 거리(m)·높이(m)에 두고, 문 쪽 이 높이(m)를 본다.</summary>
+            public const float GateCamAheadMeters = 4.0f;
+            public const float GateCamHeight = 1.3f;
+            public const float GateCamSideMeters = 1.2f;
+            public const float GateLookHeight = 0.8f;
             /// <summary>
             /// B4 2·3번(사건·전투 PERFECT 뒤 0.4초 슬로모션)을 쓰는지. GDD-beta B17.4로 없앰(false).
             /// 처형·윈드밀 마무리(SlowMoMode.Always)는 그대로.

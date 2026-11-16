@@ -245,7 +245,8 @@ namespace RhythmActionGame
         public void SetSlowFactor(float f, double at)
         {
             f = Mathf.Clamp(f, 0.05f, 1f);
-            if (Mathf.Approximately(f, SlowFactor)) return;
+            if (f > 0.9999f) f = 1f;   // 돌아올 때 정확히 1 (부동소수 오차로 0.99999994에 머물지 않게)
+            if (f == SlowFactor) return;
             SlowFactor = f;
             if (IsRunning) timeline.SetSpeed(applied * f, at);
             ApplyPitch();

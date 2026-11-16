@@ -7,15 +7,20 @@ namespace RhythmActionGame.Tests
     public class B47_BulletTimeTests
     {
         [Test]
-        public void B47_Config_MatchesGddBetaB17_4()
+        public void B47_Config_MatchesGddBetaB17_4_Second()
         {
-            Assert.AreEqual(0.4f, GameConfig.BulletTime.Factor, 1e-6f, "0.4배");
-            Assert.AreEqual(1f, GameConfig.BulletTime.LeadBeats, 1e-6f, "1박 전부터");
-            Assert.AreEqual(0.25f, GameConfig.BulletTime.RampInBeats, 1e-6f, "0.25박에 걸쳐");
-            Assert.AreEqual(0.15f, GameConfig.BulletTime.ReleaseSeconds, 1e-6f, "판정 뒤 0.15초에 복귀");
+            // GDD-beta B17.4 2차 (B52): 피한 직후 0.3배, 실제 0.6초, 0.15초에 복귀, 다음 판정 0.6박 전에는 복귀 시작
+            Assert.AreEqual(0.3f, GameConfig.BulletTime.Factor, 1e-6f, "0.3배");
+            Assert.AreEqual(0.06f, GameConfig.BulletTime.InSeconds, 1e-6f);
+            Assert.AreEqual(0.6f, GameConfig.BulletTime.HoldSeconds, 1e-6f, "실제 0.6초");
+            Assert.AreEqual(0.15f, GameConfig.BulletTime.ReleaseSeconds, 1e-6f, "0.15초에 복귀");
+            Assert.AreEqual(0.6f, GameConfig.BulletTime.ClearBeats, 1e-6f, "다음 판정 0.6박 전");
+            Assert.AreEqual(-70f, GameConfig.BulletTime.Saturation, 1e-6f, "회색 화면");
             Assert.Less(GameConfig.BulletTime.LowPassMuffledHz, 1500f, "물속처럼 먹먹하게");
             Assert.Less(GameConfig.BulletTime.MusicGain, 1f, "작게");
             Assert.IsFalse(GameConfig.BulletTime.PerfectCandidateSlowMo, "B4 2·3번 PERFECT 뒤 슬로모션 없앰");
+            Assert.Less(GameConfig.Fx.NearMiss.Height, 0f, "칼 회피: 몸을 숙임");
+            Assert.Less(GameConfig.Fx.NearMiss.Pitch, 0f, "위를 올려다봄");
         }
 
         [Test]

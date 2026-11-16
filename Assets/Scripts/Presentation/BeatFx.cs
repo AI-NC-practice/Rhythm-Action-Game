@@ -4,7 +4,8 @@ namespace RhythmActionGame
 {
     /// <summary>
     /// 화면이 박에 맞춰 숨 쉼 (GDD-beta B17.2). 박자 시계 박자로 매 프레임:
-    /// - 박 펄스: 판정 원 테두리(목표 원)·장구 레인 판정 표시·HUD가 살짝 커졌다 돌아오고, 화면 가장자리(비네트)가 어두워졌다 돌아온다. 마디 첫 박은 더 크게.
+    /// - 박 펄스: 장구 레인 판정 표시·HUD가 살짝 커졌다 돌아오고, 화면 가장자리(비네트)가 어두워졌다 돌아온다. 마디 첫 박은 더 크게.
+    ///   판정 원 테두리에는 걸지 않는다 (B52: 누르는 순간 원이 출렁여 맞추기 어려움).
     /// - 걸음·카메라: 달리는 동안 1박 = 한 걸음(박 순간 가장 낮음, 왼발·오른발 번갈아 좌우), 멈춰 있으면 박마다 살짝 내려앉는다.
     ///   카메라 계층 Motion → BeatBob(여기) → FxOffset(CameraFx) → PlayerCamera.
     /// 연출 끄기(F1)·일시정지·시계 멈춤이면 모두 0. 연출이라 판정·이동·점수는 바꾸지 않는다.
@@ -65,10 +66,6 @@ namespace RhythmActionGame
                 bob.localRotation = Quaternion.Euler(0f, 0f, BobRoll);
             }
             if (screenFx != null) screenFx.BeatVignette = Pulse * GameConfig.BeatFx.Vignette;
-            float ring = 1f + Pulse * GameConfig.BeatFx.RingScale;
-            if (ringView != null)
-                foreach (var r in ringView.Rings)
-                    if (r.Target != null) r.Target.rectTransform.localScale = Vector3.one * ring;
             if (lane != null && lane.HitMarker != null)
                 lane.HitMarker.rectTransform.localScale = Vector3.one * (1f + Pulse * GameConfig.BeatFx.LaneScale);
             if (hud != null && hud.Hearts != null)

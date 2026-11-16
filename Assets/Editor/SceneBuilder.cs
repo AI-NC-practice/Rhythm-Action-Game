@@ -271,6 +271,11 @@ namespace RhythmActionGame.EditorTools
             bullet.slowMotion = director.slowMotion;
             bullet.sfx = sfx;
             bullet.lowPass = lowPass;
+            bullet.screenFx = screenFx;
+            bullet.cameraFx = cameraFx;
+            bullet.cam = cam;
+            bullet.playerBody = new Renderer[] { bodyRenderer, swordRenderer };
+            bullet.presentation = presentation;
 
             var boot = new GameObject("GameBootstrap").AddComponent<GameBootstrap>();
             boot.director = director;

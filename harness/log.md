@@ -436,3 +436,13 @@ BuildGray와 smoke-test를 통과했다(Builds/Gray/RhythmActionGame.exe). 사�
 - B4 2·3번(PERFECT 뒤 0.4초 슬로모션)을 없앰(GameConfig.BulletTime.PerfectCandidateSlowMo = false, TimeFx·StageDirector). 해당 테스트(B02·B05·B07)를 새 규칙으로 고침. 입력 시각을 일정한 빠르기로 미리 계산하는 전투 테스트(B07·B11·B26·B27·B33·B34·T07)는 bulletTime을 끄고 돌림.
 - 새 테스트 B47 EditMode 3·PlayMode 2. unity-verify EditMode 173/173, PlayMode 149/149. BuildGray + smoke-test 통과, 전체 오토플레이 344판정 모두 PERFECT·클리어, 회피 슬로모션 4번 걸림(시계 227·251·356.5·385박).
 평가: evaluator PASS (harness/reports/B47-eval-1.md). 다음: 사용자 테스트 빌드 확인 → B48(전투 소리 실제 녹음, 다운로드 승인 필요).
+
+## B52 [beta] 회피 슬로모션 2차: 피한 직후 슬로 컷 + 회색 화면 + 대문 카메라 (2026-11-16) — done (evaluator PASS)
+사용자 피드백(B47): "슬로가 공격을 간신히 피하는 느낌이 아니다. 칼이 머리를 스치고 지나가는 걸, 문이 닫히는 걸 간신히 피하는 걸 슬로로. 노드에 슬로를 걸지 말고 노드는 누르는 느낌이 있어야 한다. 대문은 문 앞으로 카메라를 옮겨 주인공과 문을 함께. 슬로 때 회색 화면. 보스전 판정이 빡빡하다 — 테스트해 달라."
+- 보스전 진단(임시 테스트, 커밋 안 함): 실제 무사 결투에서 모든 노드를 ±50 ms 어긋나게 눌러도 49/49 PERFECT(회피 슬로 켬·끔 모두) → 판정 계산은 정상. 원인은 느낌: 빠른 패턴 한가운데서 곡이 0.4배로 느려져 몸의 박자가 깨지고(B47), 누르는 순간 판정 원이 박 펄스로 출렁임(B45).
+- BulletTimeFx 다시 씀: 노드 앞에서는 느려지지 않음. 회피 판정 PERFECT·NORMAL 직후 0.06초에 0.3배 → 실제 0.6초 → 0.15초에 복귀, 다음 판정 목표 0.6박 전이면 일찍 복귀(너무 가까우면 건너뜀). FAIL은 없음. 슬로 동안 음악 낮고 먹먹(700 Hz, 0.6배) + 회색(ScreenFx.SlowSaturation −70). 처형·윈드밀 슬로모션에도 먹먹함·회색.
+- 대문: 피한 순간 카메라를 문 건너편 앞(4 m 앞, 1.3 m 높이, 옆 1.2 m)에서 문 쪽을 보게 두고 몸을 보이게(3인칭), 끝나면 1인칭. 칼(포위 마지막 동시 공격, 무사 A37.5·A66): FxPreset NearMiss(숙이고 위를 올려다봄).
+- 판정 원 테두리 박 펄스 뺌(B45 변경, GDD-beta B17.2에 적음). BeatClock 슬로 배율이 돌아올 때 정확히 1이 되게.
+- 테스트: B47 EditMode 설정 값을 2차로, PlayMode 2개를 새 동작으로 다시 씀, B45 원 펄스 단언 변경. unity-verify EditMode 173/173, PlayMode 149/149. BuildGray + smoke-test 통과, 전체 오토플레이 344판정 모두 PERFECT·클리어, 슬로는 피한 박(시계 228·252·357.5·386)에서 시작.
+평가: evaluator PASS (harness/reports/B52-eval-1.md). 다음: 사용자 테스트 빌드 확인 → B48.
+- 제안: 슬로 동안 칼날·문짝에 잔상이나 바람 줄기 이펙트를 더하면 "스쳐 감"이 더 잘 보일 수 있다(에셋 단계).
