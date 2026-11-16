@@ -826,25 +826,125 @@ namespace RhythmActionGame
         /// <summary>맵 꾸미기·분위기 (작업 T15, GDD 5·6, 2026-11-16 사용자 맵 디자인 요청).</summary>
         public static class Map
         {
-            /// <summary>길 옆 장식이 길(경로 중심선)에서 떨어져야 하는 최소 거리 (m, 모델 반폭 더하기 전).</summary>
-            public const float DressClearance = 4.5f;
-            /// <summary>장식 배치 간격 (m, 길을 따라).</summary>
-            public const float DressSpacing = 11f;
-            /// <summary>집·담 장식의 길 옆 거리 (m): 가까운 줄, 먼 줄.</summary>
-            public const float DressNear = 9f;
-            public const float DressFar = 17f;
-            /// <summary>마을 구간(1·3·5)의 가장 먼 집 줄 (m) — 배경 그림까지 빈 땅을 줄인다.</summary>
-            public const float DressFarthest = 27f;
-            /// <summary>장식 집 높이 (m) — 지붕 길보다 조금 낮게 해 지붕 위가 트여 보이게.</summary>
-            public const float DressHouseHeight = 4.2f;
-            /// <summary>궁궐 담 장식 높이 (m).</summary>
-            public const float PalaceWallHeight = 4.5f;
+            // ----- 작업 R03: R01 맵 재설계 안(docs/proposals/map-redesign.html, 사용자 승인 2026-11-16). GDD에 없음, R01에서 정함 -----
+
             /// <summary>배치 무작위 씨앗 (같은 결과).</summary>
-            public const int DressSeed = 1716;
+            public const int DressSeed = 16;
+            /// <summary>모퉁이 곡선: 모퉁이 앞뒤 이 거리(m)만 곡선으로 잇는다. 경로 거리·박자 관계는 그대로.</summary>
+            public const float CornerRadius = 8f;
+            /// <summary>달리는 길 반폭 (m): 폭 3.6 m는 항상 비운다.</summary>
+            public const float Corridor = 1.8f;
+            /// <summary>사건 지점 앞뒤 이 거리(m) 안에서는 길가 이 반폭(m) 안쪽에 소품을 두지 않는다.</summary>
+            public const float EventClearAlong = 3f;
+            public const float EventClearHalf = 2.4f;
+            /// <summary>1줄 건물 사이 틈 (m)과 샛골목 확률·폭 (m).</summary>
+            public const float GapMax = 1.2f;
+            public const float AlleyChance = 0.18f;
+            public const float AlleyMin = 3f, AlleyMax = 4.5f;
+            /// <summary>1줄 건물 앞면 들쭉날쭉 (m), 회전 (±도), 크기 배율 범위.</summary>
+            public const float FrontJitter = 0.6f;
+            public const float YawJitter = 4f;
+            public const float ScaleMin = 0.92f, ScaleMax = 1.08f;
+            /// <summary>뒤 줄: 길가(반폭)에서 2줄 8.5 m, 3줄 20 m 뒤 (±1.5 m).</summary>
+            public const float Row2Back = 8.5f, Row3Back = 20f, RowJitter = 1.5f;
+            /// <summary>길 위 지붕(기와지붕 바다·궁궐 담 위)이 있는 곳의 옆 건물 최소 반폭 = 지붕 반폭 + 이 값 (m).</summary>
+            public const float RoofSideGap = 0.2f;
+            /// <summary>길(중심선)에서 건물 발자국까지 최소 거리 (m) — 모퉁이에서 길을 막지 않게.</summary>
+            public const float BuildingClearance = 2.6f;
+            /// <summary>계획 단계 건물 발자국 깊이 = 명세 깊이 × 이 값 (실제 모델은 빌드 때 다시 검사).</summary>
+            public const float FootprintMargin = 1.3f;
+
+            /// <summary>건물·담 모듈: 너비 범위, 깊이, 높이 (m). 높이는 R02 명세 height_m.</summary>
+            public struct Module
+            {
+                public string Id; public float WidthMin, WidthMax, Depth, Height;
+                public Module(string id, float w0, float w1, float d, float h) { Id = id; WidthMin = w0; WidthMax = w1; Depth = d; Height = h; }
+            }
+            public static readonly Module[] Modules =
+            {
+                new Module("choga", 7, 9, 6, 4.0f), new Module("choga_L", 9, 11, 8, 4.0f), new Module("house_giwa", 10, 13, 8, 5.5f),
+                new Module("giwa_s", 7, 9, 6, 4.8f), new Module("giwa_long", 14, 18, 6, 5.0f), new Module("giwa_gate", 8, 10, 6, 6.0f),
+                new Module("sijeon", 12, 15, 7, 7.0f), new Module("palace_hall", 24, 30, 14, 14f), new Module("pavilion", 8, 9, 8, 9.0f),
+                new Module("wall_earth", 6, 8, 0.7f, 2.2f), new Module("wall_stone", 6, 8, 1.0f, 2.2f), new Module("wall_palace", 8, 10, 1.2f, 5.0f),
+                new Module("fence", 5, 7, 0.3f, 1.4f),
+            };
+
+            /// <summary>소품: 발자국(지름, m)과 높이 (m).</summary>
+            public struct PropDef
+            {
+                public string Id; public float Footprint, Height;
+                public PropDef(string id, float fp, float h) { Id = id; Footprint = fp; Height = h; }
+            }
+            public static readonly PropDef[] Props =
+            {
+                new PropDef("jangdok", 2.2f, 1.3f), new PropDef("well", 2.0f, 2.2f), new PropDef("pine", 3.5f, 7f), new PropDef("zelkova", 6f, 11f),
+                new PropDef("jangseung", 0.8f, 3f), new PropDef("firewood", 1.6f, 1.2f), new PropDef("pyeongsang", 2f, 0.6f), new PropDef("jige", 0.9f, 1.6f),
+                new PropDef("jars", 1.4f, 1.0f), new PropDef("cart", 1.6f, 1.2f), new PropDef("stall_a", 2.2f, 2.6f), new PropDef("stall_b", 2.2f, 2.6f),
+                new PropDef("stall_pot", 2.4f, 1.3f), new PropDef("cloth_rack", 2f, 2.2f), new PropDef("straw", 1.8f, 1.2f), new PropDef("lantern", 0.5f, 3f),
+                new PropDef("basket", 1.2f, 1.0f), new PropDef("banner_pole", 0.5f, 5f),
+            };
+
+            /// <summary>길 구역 (경로 거리 m): 이름, 반폭(길 중심 → 1줄 건물 앞면), 왼쪽·오른쪽 1줄 모듈, 소품과 10 m당 개수, 2·3줄 모듈.</summary>
+            public struct Zone
+            {
+                public float Start, End, Half; public string Name;
+                public string[] Left, Right, Props, Row2, Row3; public float PropsPer10m;
+            }
+            static Zone Z(float s, float e, string name, float half, string[] l, string[] r, string[] props, float dens, string[] r2, string[] r3)
+                => new Zone { Start = s, End = e, Name = name, Half = half, Left = l, Right = r, Props = props, PropsPer10m = dens, Row2 = r2, Row3 = r3 };
+            static readonly string[] None = new string[0];
+            public static readonly Zone[] Zones =
+            {
+                Z(0, 15, "마을 어귀", 3.2f, new[] { "fence" }, new[] { "fence" }, new[] { "jangseung", "zelkova", "straw", "jige" }, 3, new[] { "choga" }, None),
+                Z(15, 85, "초가 골목", 3.3f, new[] { "choga", "choga_L", "wall_earth", "fence" }, new[] { "choga", "wall_earth", "choga_L", "fence" },
+                  new[] { "jangdok", "firewood", "jige", "straw", "jars", "basket" }, 3, new[] { "choga", "choga_L", "house_giwa" }, new[] { "house_giwa", "choga" }),
+                Z(85, 140, "장터 큰길", 5.0f, new[] { "sijeon", "giwa_long", "giwa_s" }, new[] { "sijeon", "giwa_long", "house_giwa" },
+                  new[] { "stall_a", "stall_b", "stall_pot", "cloth_rack", "straw", "lantern", "basket", "cart", "jars" }, 10, new[] { "house_giwa", "sijeon" }, new[] { "house_giwa" }),
+                Z(140, 215, "장터 뒷골목", 4.6f, new[] { "sijeon", "giwa_s", "choga", "giwa_long" }, new[] { "house_giwa", "sijeon", "wall_earth", "giwa_s" },
+                  new[] { "stall_a", "stall_b", "basket", "straw", "lantern", "jars", "jige", "stall_pot" }, 6, new[] { "house_giwa", "choga" }, new[] { "house_giwa" }),
+                Z(215, 270, "양반 돌담길", 3.4f, new[] { "wall_stone", "giwa_gate", "giwa_s", "house_giwa" }, new[] { "wall_stone", "house_giwa", "giwa_gate", "giwa_long" },
+                  new[] { "pine", "jars", "jangdok", "well" }, 3, new[] { "house_giwa" }, new[] { "house_giwa", "pavilion" }),
+                Z(270, 410, "기와지붕 바다", 2.6f, new[] { "house_giwa", "giwa_s", "giwa_long" }, new[] { "giwa_long", "house_giwa", "giwa_s" }, None, 0,
+                  new[] { "house_giwa", "giwa_s", "giwa_long" }, new[] { "house_giwa", "giwa_long" }),
+                Z(410, 440, "뒷마당", 3.4f, new[] { "wall_stone", "choga" }, new[] { "house_giwa", "wall_stone" }, new[] { "jangdok", "firewood", "jars", "pyeongsang" }, 4, new[] { "house_giwa" }, None),
+                Z(440, 490, "관아 마당", 15f, new[] { "wall_stone" }, new[] { "wall_stone" }, new[] { "zelkova", "pyeongsang", "jangdok", "banner_pole", "cart" }, 2, new[] { "house_giwa" }, new[] { "house_giwa" }),
+                Z(490, 560, "궁궐 담 길", 4.2f, new[] { "wall_palace" }, new[] { "house_giwa", "wall_stone", "giwa_gate" }, new[] { "pine", "lantern", "banner_pole" }, 2, new[] { "palace_hall" }, new[] { "palace_hall" }),
+                Z(560, 625, "궁궐 담 위", 0f, None, None, None, 0, new[] { "palace_hall" }, new[] { "house_giwa" }),
+                Z(625, 660, "성문 누각", 0f, None, None, None, 0, new[] { "house_giwa", "giwa_long" }, new[] { "house_giwa" }),   // 성문 위에서 내려다보는 도성 지붕
+            };
+
+            /// <summary>복선 적이 서는 자리: 종류, 뿌리(사건 위치)에서 앞으로 (m), 옆 (m, +오른쪽). 높이는 그 아래 실제 지붕·담에 맞춘다.</summary>
+            public struct Stand
+            {
+                public string Kind; public float Ahead, Lateral, Spacing;
+                public Stand(string k, float a, float l, float s) { Kind = k; Ahead = a; Lateral = l; Spacing = s; }
+            }
+            public static readonly Stand[] ForeshadowStands =
+            {
+                new Stand("roof_watchers", 8f, 8.5f, 1.6f),      // 장터 오른쪽 2층 시전 용마루 위 (모퉁이 140 m 전)
+                new Stand("wall_climbers", 25f, -15.5f, 1.6f),   // 관아 마당 왼쪽 담 위
+                new Stand("gate_warrior", 35f, 1.6f, 1.2f),      // 성문 위 (모퉁이 곡선 지나 곧은 성문 길)
+            };
+            /// <summary>길가 장식 인스턴싱을 묶는 칸 크기 (m). 칸마다 경계로 카메라·그림자 컬링 (드로우콜).</summary>
+            public const float DressCell = 320f;
+            /// <summary>작은 소품(그림자 없는 것)은 카메라에서 이 거리(m)보다 먼 칸이면 그리지 않는다 — 안개 속이라 거의 안 보임.</summary>
+            public const float PropDrawDistance = 70f;
+            /// <summary>작은 소품을 묶는 칸 크기 (m) — 거리 컬링이 듣도록 건물 칸보다 잘게.</summary>
+            public const float PropCell = 40f;
+            /// <summary>적·복선 발밑 지지면 검사: 이 높이 차(m) 안에 실제 보이는 지붕·담·땅이 있어야 한다.</summary>
+            public const float SupportTolerance = 1.0f;
+            /// <summary>길 위 지붕(기와집 이어 붙임)의 이음매를 지붕 위에 서는 적 자리에서 이만큼(m) 비킨다.</summary>
+            public const float SeamClearance = 1.5f;
+            /// <summary>추격 적이 나란히 달리는 옆 거리 (m). 길 위 지붕에서는 지붕 반폭 − RoofRunnerInset 이하 (지붕 가장자리 밖으로 나가지 않게).</summary>
+            public const float ChaseLateral = 3.5f;
+            public const float RoofRunnerInset = 1.5f;
+
+            /// <summary>먼 배경 파노라마 (R02 그림 6장을 이어 붙인 한 장, 둘레를 한 번만 돈다).</summary>
+            public const float BackdropTopFade = 0.55f;
 
             /// <summary>먼 배경(산·지붕 실루엣)을 그린 원통 반지름·높이 (m). 맵 중심 기준.</summary>
             public const float BackdropRadius = 300f;
-            public const float BackdropHeight = 110f;
+            public const float BackdropHeight = 150f;
             /// <summary>원통 밑을 땅 아래로 내리는 깊이 (m).</summary>
             public const float BackdropSink = 6f;
 

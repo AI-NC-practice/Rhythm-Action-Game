@@ -1412,10 +1412,10 @@
                                          "드로우콜을 재서 T15(평균 290)보다 크게 늘지 않음 (harness/reports/drawcalls.md)",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  "피드백 8번, 1번 일부."
+                      "notes":  "evaluator PASS (1회차, 2026-11-16, harness/reports/R03-eval-1.md). MapPlan 직접 배치·장터 거리·모퉁이 곡선·적 발밑·배경 파노라마. 단서: 드로우콜 290→약 369(사용자 승인), T14 기존 실패(R05). 발 IK는 별도 작업 후보."
                   },
                   {
                       "id":  "R04",

@@ -17,6 +17,7 @@ namespace RhythmActionGame.EditorTools
     public static partial class SceneBuilder
     {
         public const string BackdropDir = "Assets/Art/Backdrop";
+        public const string PanoramaPath = "Assets/Art/Backdrops/panorama.png";
 
         // ---------- 모델 감싸기 ----------
 
@@ -29,7 +30,7 @@ namespace RhythmActionGame.EditorTools
         {
             var root = new GameObject(name);
             root.transform.SetParent(parent, false);
-            var m = (GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>($"Assets/Art/Models/{id}.glb"));
+            var m = (GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(ToonMaterials.StaticPath(id)));
             PrefabUtility.UnpackPrefabInstance(m, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
             m.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
             m.transform.localScale = Vector3.one;
@@ -57,8 +58,9 @@ namespace RhythmActionGame.EditorTools
         }
 
         /// <summary>상자 자리에 모델을 꽉 맞춘다(크기·방향). 상자는 충돌만 남기고 그리기를 끈다.</summary>
-        static void FitIntoBox(Transform box, string id, int tiles = 1, string centerId = null)
+        static void FitIntoBox(Transform box, string id, int tiles = 1, string centerId = null, int centerIndex = -1)
         {
+            if (centerIndex < 0) centerIndex = tiles / 2;
             var size = box.lossyScale;
             bool alongZ = size.z > size.x;
             float len = alongZ ? size.z : size.x, thick = alongZ ? size.x : size.z;
@@ -67,7 +69,7 @@ namespace RhythmActionGame.EditorTools
             var bottom = box.position - box.up * size.y * 0.5f;
             for (int i = 0; i < tiles; i++)
             {
-                string use = centerId != null && i == tiles / 2 ? centerId : id;
+                string use = centerId != null && i == centerIndex ? centerId : id;
                 var w = Wrap(use, box.parent, $"Model_{use}_{box.name}_{i}");
                 float piece = len / tiles;
                 var c = bottom + axis * (-len * 0.5f + piece * (i + 0.5f));
@@ -80,121 +82,201 @@ namespace RhythmActionGame.EditorTools
         }
 
         /// <summary>긴 상자(지붕 길·담)를 비율이 맞는 개수로 나눠 모델을 늘어놓는다.</summary>
-        static void TileIntoBox(Transform box, string id, string centerId = null)
+        /// <param name="avoid">상자 길이 방향 위치(상자 시작에서 m)들. 이 근처(±GameConfig.Map.SeamClearance)에 모델 이음매가 오지 않게 조각 수를 고른다
+        /// (작업 R03: 기와집을 이어 붙인 지붕은 이음매에서 지붕 끝이 내려가 골이 생긴다 — 그 위에 서는 적이 공중에 뜨지 않게).</param>
+        static void TileIntoBox(Transform box, string id, string centerId = null, IList<float> avoid = null)
         {
             var size = box.lossyScale;
             float len = Mathf.Max(size.x, size.z);
             var probe = Wrap(id, box.parent, "probe");
             float aspect = probe.Size.x / Mathf.Max(probe.Size.y, 0.01f);
             Object.DestroyImmediate(probe.Go);
-            int tiles = Mathf.Max(1, Mathf.RoundToInt(len / (size.y * aspect)));
-            FitIntoBox(box, id, tiles, centerId);
-        }
-
-        // ---------- 챕터 꾸미기 ----------
-
-        struct Dress { public string Id; public float Offset, Length, Height, Depth; public bool Uniform; }
-
-        static Dress House(float offset) => new Dress { Id = "house_giwa", Offset = offset, Height = GameConfig.Map.DressHouseHeight, Uniform = true };
-        static Dress Wall(float offset, float h, float len) => new Dress { Id = "wall_stone", Offset = offset, Height = h, Length = len, Depth = 1.0f };
-        static Dress Prop(string id, float offset) => new Dress { Id = id, Offset = offset, Height = id == "cart" ? 1.2f : 1.0f, Uniform = true };
-
-        /// <summary>챕터(구간)별 길 옆 장식 세트: 가까운 줄, 먼 줄.</summary>
-        static Dress[] DressFor(int section, System.Random rnd)
-        {
-            float near = GameConfig.Map.DressNear, far = GameConfig.Map.DressFar, farthest = GameConfig.Map.DressFarthest;
-            switch (section)
+            int ideal = Mathf.Max(1, Mathf.RoundToInt(len / (size.y * aspect)));
+            int tiles = ideal;
+            if (avoid != null && avoid.Count > 0)
             {
-                case 1: return new[] { House(near), House(far), House(farthest) };                                                // 마을 골목: 담 너머 초가·기와
-                case 2: return new[] { Wall(near - 2f, 2.2f, 7f), House(far) };                                  // 돌담과 지붕
-                case 3: return new[] { House(near), House(far), House(farthest) };                                                // 기와지붕 바다
-                case 4: return new[] { Prop(rnd.Next(2) == 0 ? "jars" : "cart", near + 2f), Wall(far, 2.6f, 9f) }; // 마당: 항아리·수레, 둘레 담
-                case 5: return new[] { Wall(near - 1f, GameConfig.Map.PalaceWallHeight, 10f), House(far + 2f), House(farthest + 2f) };  // 궁궐 담
-                default: return new[] { Wall(near - 1f, GameConfig.Map.PalaceWallHeight, 10f) };                 // 성문 위
+                int Bad(int n)
+                {
+                    int bad = 0;
+                    for (int k = 1; k < n; k++) { float seam = len * k / n; foreach (var s in avoid) if (Mathf.Abs(s - seam) < GameConfig.Map.SeamClearance) bad++; }
+                    return bad;
+                }
+                tiles = Enumerable.Range(Mathf.Max(1, ideal - 3), 7).OrderBy(n => Bad(n)).ThenBy(n => Mathf.Abs(n - ideal)).First();
             }
-        }
-
-        static List<Vector3> routeSamples;
-
-        static float RouteDistance(Vector3 p)
-        {
-            if (routeSamples == null)
+            // 가운데 모델(성문 누각)은 적이 서지 않는 칸에 — 누각 지붕은 길 높이와 맞지 않는다
+            int center = tiles / 2;
+            if (centerId != null && avoid != null && avoid.Count > 0)
             {
-                routeSamples = new List<Vector3>();
-                for (float d = -10f; d <= MapLayout.TotalLength + 10f; d += 1.5f) routeSamples.Add(MapLayout.FlatPointAt(d, out _));
+                bool Free(int i) => !avoid.Any(s => s > len * i / tiles - GameConfig.Map.SeamClearance && s < len * (i + 1) / tiles + GameConfig.Map.SeamClearance);
+                var free = Enumerable.Range(0, tiles).Where(Free).OrderBy(i => Mathf.Abs(i - tiles / 2)).ToList();
+                if (free.Count > 0) center = free[0];
             }
-            float best = float.MaxValue;
-            foreach (var s in routeSamples) { float dx = s.x - p.x, dz = s.z - p.z; best = Mathf.Min(best, dx * dx + dz * dz); }
-            return Mathf.Sqrt(best);
+            FitIntoBox(box, id, tiles, centerId, center);
         }
 
-        static void BuildDressing(Transform map)
+        // ---------- 챕터 배치 (작업 R03: R01 재설계 안, MapPlan) ----------
+
+        /// <summary>
+        /// MapPlan의 배치를 모델로 짓는다. 이름 Dress_&lt;구간&gt;_&lt;번호&gt;_&lt;에셋&gt;_&lt;줄&gt;_s&lt;그림자 1/0&gt;.
+        /// 건물: 길이 = 계획 너비, 평면 비율은 모델 그대로(담·울타리만 두께를 계획대로), 높이 = 명세 높이 × 크기 배율.
+        /// 건물·담·큰 나무만 그림자를 드리운다 (드로우콜). 합치기(인스턴싱)는 적 발밑 검사 뒤 MergeDressing에서.
+        /// </summary>
+        static Transform BuildDressing(Transform map, ChartData chart)
         {
             var parent = new GameObject("Dressing").transform;
             parent.SetParent(map);
             parent.gameObject.isStatic = true;
-            var rnd = new System.Random(GameConfig.Map.DressSeed);
-            routeSamples = null;
+            var plan = MapPlan.Build(chart);
             int n = 0;
-            foreach (var sec in MapLayout.Sections)
+            foreach (var p in plan.Items)
             {
-                float a = sec.StartBeat * GameConfig.MetersPerBeat, b = sec.EndBeat * GameConfig.MetersPerBeat;
-                for (float d = a + 4f; d < b; d += GameConfig.Map.DressSpacing)
+                int sec = MapLayout.SectionOf(Mathf.FloorToInt(p.S / GameConfig.MetersPerBeat)).Number;
+                // 그림자: 건물·담(줄 상관없이 한 묶음)과 큰 나무만. 작은 소품은 그림자 없이 — 같은 모델이 그림자 유무로 묶음이 갈리지 않게 (드로우콜, 작업 R03)
+                bool shadow = p.Kind == MapPlan.Kind.Building || p.Id == "zelkova" || p.Id == "pine";
+                string row = p.Kind == MapPlan.Kind.Prop ? "p" : $"r{p.Row}";
+                var w = Wrap(p.Id, parent, $"Dress_{sec}_{n++}_{p.Id}_{row}_s{(shadow ? 1 : 0)}");
+                if (p.Kind == MapPlan.Kind.Building)
                 {
-                    var center = MapLayout.FlatPointAt(d, out var fwd);
-                    var right = MapLayout.RightOf(fwd);
-                    foreach (var side in new[] { -1f, 1f })
-                        foreach (var (dr, row) in DressFor(sec.Number, rnd).Select((x, i) => (x, i)))
-                        {
-                            float jitter = (float)(rnd.NextDouble() - 0.5) * 2.5f;
-                            var p = center + right * side * (dr.Offset + jitter) + fwd * (float)(rnd.NextDouble() - 0.5) * 3f;
-                            p.y = 0f;
-                            var w = Wrap(dr.Id, parent, $"Dress_{sec.Number}_{n++}_{dr.Id}_r{row}");
-                            Vector3 scale;
-                            if (dr.Uniform) { float k = dr.Height / w.Size.y; scale = Vector3.one * k; }
-                            else scale = new Vector3(dr.Length / w.Size.x, dr.Height / w.Size.y, dr.Depth / w.Size.z);
-                            // 길에서 떨어졌는지: 모델의 길 쪽 두께 절반 + 여유를, 길이 방향 양끝·가운데에서 모두 검사 (모퉁이에서 길을 막지 않게)
-                            float halfLen = 0.5f * w.Size.x * scale.x, halfDepth = 0.5f * w.Size.z * scale.z;
-                            var along = Vector3.Cross(Vector3.up, -right * side).normalized;
-                            bool clear = true;
-                            foreach (var k in new[] { -1f, 0f, 1f })
-                                if (RouteDistance(p + along * halfLen * k) < GameConfig.Map.DressClearance + halfDepth) clear = false;
-                            if (!clear) { Object.DestroyImmediate(w.Go); continue; }
-                            w.Go.transform.SetPositionAndRotation(p, Quaternion.LookRotation(-right * side, Vector3.up));   // 길을 바라봄
-                            w.Go.transform.localScale = scale;
-                        }
+                    var mod = MapPlan.ModuleOf(p.Id);
+                    float len = p.S1 - p.S0;
+                    float kx = len / w.Size.x;
+                    float ky = mod.Height * p.Scale / w.Size.y;
+                    float kz = MapPlan.IsWall(p.Id) ? mod.Depth / w.Size.z : kx;
+                    // 실제 모델 깊이로 발자국을 다시 검사 — 모퉁이 다음 길을 막으면 짓지 않는다
+                    if (!MapPlan.BuildingClear(p, w.Size.z * kz)) { Object.DestroyImmediate(w.Go); continue; }
+                    MapPlan.Pose(p, out var front, out var rot, out var away);
+                    w.Go.transform.SetPositionAndRotation(front + away * (w.Size.z * kz * 0.5f), rot);
+                    w.Go.transform.localScale = new Vector3(kx, ky, kz);
+                }
+                else
+                {
+                    var def = MapPlan.PropOf(p.Id);
+                    float k = def.Height * p.Scale / w.Size.y;
+                    var c = MapLayout.FlatPointAt(p.S, out var fwd);
+                    var away = MapLayout.RightOf(fwd) * p.Side;
+                    var pos = c + away * p.Off; pos.y = 0f;
+                    w.Go.transform.SetPositionAndRotation(pos, Quaternion.LookRotation(-away, Vector3.up) * Quaternion.Euler(0, p.Yaw, 0));
+                    w.Go.transform.localScale = Vector3.one * k;
                 }
             }
-            MergeDressing(parent);
+            return parent;
+        }
+
+        // ---------- 적·복선 발밑 (작업 R03) ----------
+
+        /// <summary>
+        /// 적과 복선 그림자 발밑에 실제로 보이는 지붕·담·땅이 있는지 잰다. 보이는 메시(충돌만 하는 회색 상자는 그리지 않으므로 빼고)의
+        /// 삼각형과 발 위치를 지나는 수직선이 만나는 높이를 직접 계산한다 (물리 충돌체 없이 — 빌드 중 메시 충돌체가 광선에 안 잡히는 경우가 있었다).
+        /// 복선 그림자와 달리며 나오는 적은 그 지지면 높이로 맞춘다. 결과는 MapSupportReport에 남긴다.
+        /// </summary>
+        static void CheckSupports(Transform map, Transform eventProps, EnemySet enemies)
+        {
+            var exclude = new HashSet<Transform>(eventProps.GetComponentsInChildren<Transform>(true));
+            var enemiesRoot = map.Find("Enemies");
+            if (enemiesRoot != null) foreach (var t in enemiesRoot.GetComponentsInChildren<Transform>(true)) exclude.Add(t);
+            var surfaces = new List<(MeshRenderer r, Vector3[] v, int[] tri)>();
+            foreach (var mr in map.GetComponentsInChildren<MeshRenderer>(true))
+            {
+                if (!mr.enabled || exclude.Contains(mr.transform) || mr.name == "Backdrop") continue;
+                var mf = mr.GetComponent<MeshFilter>();
+                if (mf == null || mf.sharedMesh == null) continue;
+                var m = mf.sharedMesh;
+                var l2w = mr.transform.localToWorldMatrix;
+                surfaces.Add((mr, m.vertices.Select(x => l2w.MultiplyPoint3x4(x)).ToArray(), m.triangles));
+            }
+            // (x, z)를 지나는 수직선이 보이는 메시와 만나는 높이들
+            List<(float y, Transform owner)> HeightsAt(Vector3 p)
+            {
+                var ys = new List<(float, Transform)>();
+                foreach (var s in surfaces)
+                {
+                    var bb = s.r.bounds;
+                    if (p.x < bb.min.x || p.x > bb.max.x || p.z < bb.min.z || p.z > bb.max.z) continue;
+                    for (int i = 0; i < s.tri.Length; i += 3)
+                    {
+                        Vector3 a = s.v[s.tri[i]], b = s.v[s.tri[i + 1]], c = s.v[s.tri[i + 2]];
+                        float d = (b.z - c.z) * (a.x - c.x) + (c.x - b.x) * (a.z - c.z);
+                        if (Mathf.Abs(d) < 1e-9f) continue;
+                        float w1 = ((b.z - c.z) * (p.x - c.x) + (c.x - b.x) * (p.z - c.z)) / d;
+                        float w2 = ((c.z - a.z) * (p.x - c.x) + (a.x - c.x) * (p.z - c.z)) / d;
+                        float w3 = 1f - w1 - w2;
+                        if (w1 < 0f || w2 < 0f || w3 < 0f) continue;
+                        ys.Add((w1 * a.y + w2 * b.y + w3 * c.y, s.r.transform));
+                    }
+                }
+                return ys;
+            }
+            string Owner(Transform t)
+            {
+                for (var x = t; x != null; x = x.parent)
+                    if (x.name.StartsWith("Dress_") || x.name.StartsWith("Model_") || x.name == "Ground" || x.name.StartsWith("Path_")) return x.name;
+                return t.name;
+            }
+
+            var report = map.gameObject.AddComponent<MapSupportReport>();
+            // kind: foreshadow = 가장 높은 지붕·담 윗면에 세움 / runner = 달리며 나오는 적(추격·매복·돌진), 발 근처(위 3 m~아래 5 m)에서
+            //       발 높이에 가장 가까운 면(지붕 비탈·땅)에 맞춤 / enemy = 멈춰 싸우는 적, 그대로 두고 발밑(±허용치)을 확인만
+            void Add(Transform fig, string kind)
+            {
+                var f = fig.position;
+                float tol = GameConfig.Map.SupportTolerance;
+                var ys = HeightsAt(f);
+                float lo = kind == "foreshadow" ? -1e9f : kind == "runner" ? f.y - 5f : f.y - tol;
+                float hi = kind == "foreshadow" ? 1e9f : kind == "runner" ? f.y + 3f : f.y + tol;
+                var inRange = ys.Where(h => h.y >= lo && h.y <= hi).ToList();
+                bool ok = inRange.Count > 0;
+                var best = !ok ? default : kind == "foreshadow" ? inRange.OrderByDescending(h => h.y).First() : inRange.OrderBy(h => Mathf.Abs(h.y - f.y)).First();
+                report.entries.Add(new MapSupportReport.Entry { figure = fig.name + " @" + fig.parent.name, kind = kind, footY = f.y, supportY = ok ? best.y : float.NaN, support = ok ? Owner(best.owner) : "", snapped = ok && kind != "enemy" });
+                if (ok && kind != "enemy") fig.position = new Vector3(f.x, best.y, f.z);
+            }
+            foreach (var prop in eventProps.GetComponentsInChildren<EventProp>(true))
+            {
+                if (prop.kind == StageChart.TypeForeshadow)
+                    foreach (Transform c in prop.transform) if (c.name.StartsWith("Prop_foreshadow_")) Add(c, "foreshadow");
+                if (prop.enemy != null) Add(prop.enemy, "runner");
+            }
+            foreach (var a in enemies.Normal) Add(a.transform, "enemy");
+            foreach (var a in enemies.Surround) Add(a.transform, "enemy");
+            if (enemies.Boss != null) Add(enemies.Boss.transform, "enemy");
         }
 
         /// <summary>
         /// 드로우콜 줄이기 (작업 T15): 장식을 (메시, 머티리얼, 그림자)마다 모아 DressingInstancer가 GPU 인스턴싱으로 그린다.
-        /// 먼 줄(1번 줄부터)은 그림자를 드리우지 않는다. 원래 장식 물체는 위치 기록용 빈 물체(Dress_*)로 남긴다.
+        /// 이름이 _s1로 끝나는 것(건물·담·큰 나무)만 그림자를 드리운다. 원래 장식 물체는 위치 기록용 빈 물체(Dress_*)로 남긴다.
         /// (메시를 합쳐 에셋으로 저장하면 225 MB가 되어 저장소에 맞지 않아 이 방법을 쓴다.)
         /// </summary>
         static void MergeDressing(Transform parent)
         {
             var inst = parent.gameObject.AddComponent<DressingInstancer>();
-            var map = new Dictionary<(Mesh, int, Material, bool), List<Matrix4x4>>();
+            var map = new Dictionary<(Mesh, int, Material, bool, int, int), (List<Matrix4x4> m, Bounds b)>();
+            var smallProps = new HashSet<Mesh>();   // 그림자 없는 작은 소품: 먼 칸은 그리지 않음
             foreach (var t in parent.Cast<Transform>().Where(t => t.name.StartsWith("Dress_")).ToList())
             {
-                bool shadow = t.name.EndsWith("_r0");
+                bool shadow = t.name.EndsWith("_s1");
+                bool small = t.name.Contains("_p_") && !shadow;
+                // 작업 R03: GameConfig.Map.DressCell 칸마다 따로 묶어 칸 경계로 컬링 (뒤·그림자 거리 밖 칸은 그리지 않음)
+                float cell = small ? GameConfig.Map.PropCell : GameConfig.Map.DressCell;   // 작은 소품은 잘게 나눠 먼 칸을 거리로 뺀다
+                int cx = Mathf.FloorToInt(t.position.x / cell), cz = Mathf.FloorToInt(t.position.z / cell);
                 foreach (var mf in t.GetComponentsInChildren<MeshFilter>(true))
                 {
                     var mr = mf.GetComponent<MeshRenderer>();
                     if (mr == null) continue;
+                    var wb = mr.bounds;
+                    if (small) smallProps.Add(mf.sharedMesh);
                     for (int sm = 0; sm < mf.sharedMesh.subMeshCount; sm++)
                     {
-                        var key = (mf.sharedMesh, sm, mr.sharedMaterials[Mathf.Min(sm, mr.sharedMaterials.Length - 1)], shadow);
-                        if (!map.TryGetValue(key, out var list)) map[key] = list = new List<Matrix4x4>();
-                        list.Add(mf.transform.localToWorldMatrix);
+                        var key = (mf.sharedMesh, sm, mr.sharedMaterials[Mathf.Min(sm, mr.sharedMaterials.Length - 1)], shadow, cx, cz);
+                        if (!map.TryGetValue(key, out var e)) e = (new List<Matrix4x4>(), wb);
+                        e.m.Add(mf.transform.localToWorldMatrix);
+                        e.b.Encapsulate(wb);
+                        map[key] = e;
                     }
                 }
                 foreach (var c in t.GetComponentsInChildren<Transform>(true).Where(c => c != t).ToList()) Object.DestroyImmediate(c.gameObject);
             }
             foreach (var kv in map)
-                inst.groups.Add(new DressingInstancer.Group { mesh = kv.Key.Item1, subMesh = kv.Key.Item2, material = kv.Key.Item3, castShadows = kv.Key.Item4, matrices = kv.Value.ToArray() });
+                inst.groups.Add(new DressingInstancer.Group { mesh = kv.Key.Item1, subMesh = kv.Key.Item2, material = kv.Key.Item3, castShadows = kv.Key.Item4, matrices = kv.Value.m.ToArray(), bounds = kv.Value.b,
+                    maxDistance = smallProps.Contains(kv.Key.Item1) ? GameConfig.Map.PropDrawDistance : 0f });
             parent.gameObject.isStatic = false;
         }
 
@@ -202,14 +284,13 @@ namespace RhythmActionGame.EditorTools
 
         static void BuildBackdrop(Transform map)
         {
+            // 작업 R03: R02에서 그린 배경 6장을 이어 붙인 파노라마 한 장 (harness/scripts/map/make-backdrop.py) — 둘레를 한 번만 돌아 같은 그림이 되풀이되지 않는다
             Directory.CreateDirectory(BackdropDir);
-            string texPath = $"{BackdropDir}/backdrop.png";
-            File.WriteAllBytes(texPath, PaintBackdrop(2048, 512).EncodeToPNG());
-            AssetDatabase.ImportAsset(texPath);
-            if (AssetImporter.GetAtPath(texPath) is TextureImporter ti)
+            string texPath = PanoramaPath;
+            if (AssetImporter.GetAtPath(texPath) is TextureImporter ti && (ti.wrapModeU != TextureWrapMode.Repeat || ti.maxTextureSize != 8192 || ti.npotScale != TextureImporterNPOTScale.None))
             {
                 ti.wrapModeU = TextureWrapMode.Repeat; ti.wrapModeV = TextureWrapMode.Clamp;
-                ti.mipmapEnabled = true; ti.maxTextureSize = 2048;
+                ti.mipmapEnabled = true; ti.maxTextureSize = 8192; ti.npotScale = TextureImporterNPOTScale.None;
                 ti.SaveAndReimport();
             }
             string matPath = $"{BackdropDir}/Backdrop.mat";
@@ -218,10 +299,11 @@ namespace RhythmActionGame.EditorTools
             mat.shader = Shader.Find("RhythmActionGame/Backdrop");
             mat.SetTexture("_MainTex", AssetDatabase.LoadAssetAtPath<Texture2D>(texPath));
             mat.SetColor("_FogColor", FogColor);
+            mat.SetFloat("_TopFade", GameConfig.Map.BackdropTopFade);
             EditorUtility.SetDirty(mat);
 
             string meshPath = $"{BackdropDir}/BackdropCylinder.asset";
-            var mesh = Cylinder(64, GameConfig.Map.BackdropRadius, GameConfig.Map.BackdropHeight);
+            var mesh = Cylinder(96, GameConfig.Map.BackdropRadius, GameConfig.Map.BackdropHeight);
             AssetDatabase.DeleteAsset(meshPath);
             AssetDatabase.CreateAsset(mesh, meshPath);
             var go = new GameObject("Backdrop", typeof(MeshFilter), typeof(MeshRenderer));
@@ -249,8 +331,8 @@ namespace RhythmActionGame.EditorTools
             {
                 float a = i / (float)seg * Mathf.PI * 2f;
                 var d = new Vector3(Mathf.Cos(a), 0, Mathf.Sin(a)) * radius;
-                v.Add(d); uv.Add(new Vector2(i / (float)seg * 3f, 0f));                 // 그림이 둘레를 3번 돈다
-                v.Add(d + Vector3.up * height); uv.Add(new Vector2(i / (float)seg * 3f, 1f));
+                v.Add(d); uv.Add(new Vector2(i / (float)seg, 0f));                      // 파노라마가 둘레를 한 번 돈다 (작업 R03)
+                v.Add(d + Vector3.up * height); uv.Add(new Vector2(i / (float)seg, 1f));
             }
             for (int i = 0; i < seg; i++)
             {
@@ -264,57 +346,6 @@ namespace RhythmActionGame.EditorTools
         }
 
         static readonly Color FogColor = new Color(0.86f, 0.68f, 0.56f);
-
-        /// <summary>해 질 녘 하늘, 먼 산 세 겹, 궁궐·기와지붕 실루엣 (가로로 이어지게 sin 합으로).</summary>
-        static Texture2D PaintBackdrop(int w, int h)
-        {
-            var tex = new Texture2D(w, h, TextureFormat.RGB24, true);
-            var px = new Color[w * h];
-            Color skyTop = new Color(0.42f, 0.5f, 0.68f), skyLow = new Color(0.96f, 0.72f, 0.52f);
-            float Ridge(float u, int seed, float baseV, float amp)
-            {
-                float s = 0f;
-                for (int k = 1; k <= 6; k++)
-                {
-                    float ph = (seed * 13.7f + k * 3.1f) % 6.283f;
-                    s += Mathf.Sin(2f * Mathf.PI * (k + seed % 3) * u + ph) / (k * 0.9f);
-                }
-                return baseV + amp * (0.5f + 0.25f * s);
-            }
-            // 기와지붕 실루엣: 일정 간격 집, 처마가 휜 지붕
-            float Roofs(float u)
-            {
-                const int houses = 46;
-                float x = u * houses, f = x - Mathf.Floor(x);
-                int idx = Mathf.FloorToInt(x);
-                float hgt = 0.11f + 0.035f * Mathf.Abs(Mathf.Sin(idx * 2.3f));
-                float t = Mathf.Abs(f - 0.5f) * 2f;                                   // 0 가운데 → 1 가장자리
-                float curve = 1f - Mathf.Pow(t, 1.6f) * 0.55f + (t > 0.85f ? (t - 0.85f) * 0.9f : 0f);   // 처마 끝이 살짝 들림
-                return f < 0.06f || f > 0.94f ? 0.06f : 0.06f + hgt * curve;
-            }
-            // 궁궐: 둘레 한 곳에 크게
-            float Palace(float u)
-            {
-                float d = Mathf.Abs(Mathf.DeltaAngle(u * 360f, 110f)) / 360f;
-                if (d > 0.045f) return 0f;
-                float t = d / 0.045f;
-                return 0.30f * (1f - Mathf.Pow(t, 1.4f) * 0.5f) + (t > 0.9f ? (t - 0.9f) * 0.8f : 0f);
-            }
-            for (int y = 0; y < h; y++)
-                for (int x = 0; x < w; x++)
-                {
-                    float u = x / (float)w, v = y / (float)h;
-                    var c = Color.Lerp(skyLow, skyTop, Mathf.SmoothStep(0.15f, 0.95f, v));
-                    if (v < Ridge(u, 1, 0.20f, 0.30f)) c = Color.Lerp(new Color(0.66f, 0.6f, 0.7f), skyLow, 0.35f);   // 먼 산
-                    if (v < Ridge(u, 2, 0.14f, 0.22f)) c = new Color(0.5f, 0.45f, 0.55f);                             // 중간 산
-                    if (v < Ridge(u, 3, 0.09f, 0.12f)) c = new Color(0.36f, 0.33f, 0.38f);                            // 가까운 산
-                    if (v < Mathf.Max(Roofs(u), Palace(u))) c = new Color(0.2f, 0.18f, 0.2f);                        // 지붕·궁궐 실루엣
-                    px[y * w + x] = c;
-                }
-            tex.SetPixels(px);
-            tex.Apply();
-            return tex;
-        }
 
         /// <summary>해 질 녘 해·주변광·하늘·안개.</summary>
         static void BuildAtmosphere(Light sun)

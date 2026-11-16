@@ -1,7 +1,8 @@
 # Compile the project and run EditMode + PlayMode tests in Unity batch mode.
-# Usage: powershell -NoProfile -ExecutionPolicy Bypass -File harness/scripts/unity-verify.ps1 [-Platform EditMode|PlayMode|All]
+# Usage: powershell -NoProfile -ExecutionPolicy Bypass -File harness/scripts/unity-verify.ps1 [-Platform EditMode|PlayMode|All] [-Filter <test name regex>]
+#   -Filter: run only matching tests (quick check while working; the full run without -Filter is what counts)
 # Exit codes: 0 = all passed, 1 = compile error or test failure, 3 = Unity Editor is open
-param([ValidateSet('EditMode', 'PlayMode', 'All')][string]$Platform = 'All')
+param([ValidateSet('EditMode', 'PlayMode', 'All')][string]$Platform = 'All', [string]$Filter = '')
 . "$PSScriptRoot\common.ps1"
 Assert-UnityClosed
 
@@ -17,7 +18,9 @@ foreach ($pf in $platforms) {
     Remove-Item $log, $xml -ErrorAction SilentlyContinue
 
     Write-Output "Running $pf tests (this takes 1-3 minutes)..."
-    $code = Invoke-Unity -UnityArgs @('-runTests', '-testPlatform', $pf, '-testResults', "`"$xml`"") -LogFile $log
+    $uargs = @('-runTests', '-testPlatform', $pf, '-testResults', "`"$xml`"")
+    if ($Filter -ne '') { $uargs += @('-testFilter', "`"$Filter`"") }
+    $code = Invoke-Unity -UnityArgs $uargs -LogFile $log
 
     $errs = Get-CompileErrors -LogFile $log
     if ($errs.Count -gt 0) {

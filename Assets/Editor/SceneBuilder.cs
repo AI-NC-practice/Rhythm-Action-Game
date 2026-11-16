@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -86,13 +87,14 @@ namespace RhythmActionGame.EditorTools
             var map = new GameObject("Map").transform;
             BuildGround(map);
             BuildSections(map);
-            BuildRoofs(map);
-            BuildAlley(map);
+            BuildRoofs(map, chart);
             BuildObstacles(map, chart);
-            BuildDressing(map);        // 챕터 컨셉 장식 (작업 T15)
-            BuildBackdrop(map);        // 먼 외곽 그림 원통
+            var dressing = BuildDressing(map, chart);   // 챕터별 직접 배치 (작업 R03: R01 재설계 안, MapPlan)
+            BuildBackdrop(map);        // 먼 외곽 그림 원통 (파노라마 한 장)
             var eventProps = BuildEventProps(map, chart);
             var enemies = BuildEnemies(map, chart);
+            CheckSupports(map, eventProps, enemies);   // 적·복선 발밑에 실제 지붕·담·땅 (작업 R03)
+            MergeDressing(dressing);                    // 그 뒤 장식을 GPU 인스턴싱으로 합침 (작업 T15)
 
             // 시스템
             var systems = new GameObject("Systems");
@@ -324,10 +326,10 @@ namespace RhythmActionGame.EditorTools
             var gc = MapCenter(); float gs = GameConfig.Map.BackdropRadius * 2f + 20f;   // 작업 T15: 땅이 외곽 그림 원통까지 닿게
             var ground = Box(map, "Ground", new Vector3(gc.x, -0.1f, gc.z), new Vector3(gs, 0.2f, gs), Quaternion.identity, Mat("Ground", new Color(0.55f, 0.5f, 0.42f)));
             ground.isStatic = true;
-            // 지면 위 길 (폭 3 m)
+            // 지면 위 길 (폭 3 m). 작업 R03: 모퉁이 곡선을 따라 짧은 조각으로
             int i = 0;
-            foreach (var r in MapLayout.SplitAtCorners(0, MapLayout.TotalLength))
-                StripBox(map, $"Path_{i++}", r.x, r.y, 0.02f, GameConfig.PathWidth, 0.04f, 0f, Mat("Path", new Color(0.7f, 0.66f, 0.58f))).isStatic = true;   // 정적 배칭 (작업 T15)
+            foreach (var r in MapLayout.SplitAlongCurve(0, MapLayout.TotalLength))
+                StripBox(map, $"Path_{i++}", r.x, r.y, 0.02f, GameConfig.PathWidth, 0.04f, 0f, Mat("Path", new Color(0.7f, 0.66f, 0.58f)), curved: true).isStatic = true;   // 정적 배칭 (작업 T15)
         }
 
         static void BuildSections(Transform map)
@@ -342,33 +344,37 @@ namespace RhythmActionGame.EditorTools
             }
         }
 
-        static void BuildRoofs(Transform map)
+        static void BuildRoofs(Transform map, ChartData chart)
         {
+            // 작업 R03: 지붕 위에 서는 적(멈춰 싸우는 적·무사의 등장 자리, 매복 적이 나오는 자리)의 경로 거리 — 지붕 이음매를 여기서 비킨다
+            var stands = new List<float>();
+            foreach (var e in chart.events)
+            {
+                if ((e.IsDuel || e.IsBoss) && e.onRoof) { stands.Add(e.Distance + GameConfig.EnemySpawnMeters); stands.Add(e.Distance); }
+                if (e.IsEnemy && e.approach == EventCatalog.Ambush) stands.Add(e.Distance + EventCatalog.Get(EventCatalog.Ambush).Beats * 0.5f * GameConfig.MetersPerBeat);
+                if (e.IsEnemy && e.approach == EventCatalog.Chase) stands.Add(e.Distance + 2f);   // 추격 적 출발 자리 (EventProps: 사건 시작 + 2 m)
+                if (e.IsForeshadow && GameConfig.Map.ForeshadowStands.Any(s => s.Kind == e.kind))   // 길 위 지붕에 서는 복선 (성문 무사)
+                {
+                    var st = GameConfig.Map.ForeshadowStands.First(s => s.Kind == e.kind);
+                    for (int i = 0; i < 3; i++) stands.Add(e.Distance + st.Ahead + i * st.Spacing);
+                }
+            }
             var parent = new GameObject("Roofs").transform;
             parent.SetParent(map);
             int n = 0;
             foreach (var roof in MapLayout.Roofs)
             {
-                var color = roof.AssetId == "gate" ? new Color(0.55f, 0.25f, 0.2f) : roof.AssetId == "wall_stone" ? new Color(0.6f, 0.6f, 0.58f) : new Color(0.32f, 0.33f, 0.36f);
+                var color = roof.AssetId == "gate" ? new Color(0.55f, 0.25f, 0.2f) : roof.AssetId.StartsWith("wall") ? new Color(0.6f, 0.6f, 0.58f) : new Color(0.32f, 0.33f, 0.36f);
+                // 지붕은 곧은 상자: 모퉁이 꼭짓점까지 직선(VertexPointAt)으로 — 곡선 길(안쪽으로 최대 약 2 m)도 지붕 폭 안에 든다
                 foreach (var r in MapLayout.SplitAtCorners(roof.Start, Mathf.Min(roof.End, MapLayout.TotalLength + 5f)))
                 {
-                    var box = StripBox(parent, $"Prop_{roof.AssetId}_{n++}", r.x, r.y, roof.Height * 0.5f, 6f, roof.Height, 0f, Mat("Roof_" + roof.AssetId, color));
+                    var box = StripBox(parent, $"Prop_{roof.AssetId}_{n++}", r.x, r.y, roof.Height * 0.5f, roof.Width, roof.Height, 0f, Mat("Roof_" + roof.AssetId, color));
                     // 작업 T15: 지붕 길 상자는 충돌만, 보이는 것은 모델 (성문 길은 돌담 줄 가운데에 성문)
-                    if (roof.AssetId == "gate") TileIntoBox(box.transform, "wall_stone", "gate");
-                    else TileIntoBox(box.transform, roof.AssetId);
+                    var avoid = stands.Where(s => s > r.x && s < r.y).Select(s => s - r.x).ToList();
+                    if (roof.AssetId == "gate") TileIntoBox(box.transform, "wall_stone", "gate", avoid);
+                    else TileIntoBox(box.transform, roof.AssetId, null, avoid);
                 }
             }
-        }
-
-        static void BuildAlley(Transform map)
-        {
-            // 1구간 골목 양옆 담 (높이 3 m)
-            var parent = new GameObject("Alley").transform;
-            parent.SetParent(map);
-            var m = Mat("AlleyWall", new Color(0.78f, 0.74f, 0.66f));
-            float end = MapLayout.Sections[0].EndBeat * GameConfig.MetersPerBeat - 4f;
-            TileIntoBox(StripBox(parent, "AlleyWall_L", 4f, end, 1.5f, 0.6f, 3f, -2.6f, m).transform, "wall_stone");   // 작업 T15: 돌담 모델
-            TileIntoBox(StripBox(parent, "AlleyWall_R", 4f, end, 1.5f, 0.6f, 3f, 2.6f, m).transform, "wall_stone");
         }
 
         static void BuildObstacles(Transform map, ChartData chart)
@@ -522,10 +528,13 @@ namespace RhythmActionGame.EditorTools
         }
 
         /// <summary>경로 거리 [a, b] 를 따라 놓는 상자. centerY는 발 높이 기준이 아니라 월드 y(지면 0 기준).</summary>
-        static GameObject StripBox(Transform parent, string name, float a, float b, float centerY, float width, float height, float sideOffset, Material m)
+        static GameObject StripBox(Transform parent, string name, float a, float b, float centerY, float width, float height, float sideOffset, Material m, bool curved = false)
         {
-            var pa = MapLayout.FlatPointAt(a, out var fwd);
-            var pb = MapLayout.FlatPointAt(b - 0.001f, out _);
+            // curved: 곡선 경로 위 짧은 조각(방향 = 두 끝을 잇는 선). 아니면 직선 구간 경로(모퉁이 꼭짓점까지 곧게).
+            var pa = curved ? MapLayout.FlatPointAt(a, out var fwd) : MapLayout.VertexPointAt(a, out fwd);
+            var pb = curved ? MapLayout.FlatPointAt(b - 0.001f, out _) : MapLayout.VertexPointAt(b - 0.001f, out _);
+            // 방향 = 두 끝을 잇는 선 (작업 R03: 모퉁이 꼭짓점에서 시작하는 조각이 앞 구간 방향으로 돌아가던 문제)
+            if ((pb - pa).sqrMagnitude > 1e-6f) fwd = (pb - pa).normalized;
             var right = MapLayout.RightOf(fwd);
             var center = (pa + pb) * 0.5f + right * sideOffset;
             center.y = centerY;

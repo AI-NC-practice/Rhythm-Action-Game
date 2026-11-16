@@ -17,6 +17,8 @@ namespace RhythmActionGame
         public string companion = "";
         /// <summary>판정별 키 방향 (← −1, → +1, 그 밖 0).</summary>
         public float[] slotSides = new float[0];
+        /// <summary>추격 적이 나란히 달리는 옆 거리 (m). 작업 R03: 길 위 지붕에서는 지붕 가장자리보다 안쪽.</summary>
+        public float chaseLateral = GameConfig.Map.ChaseLateral;
         /// <summary>판정별 박자 (사건 시작 기준).</summary>
         public float[] slotOffsets = new float[0];
         /// <summary>복선이 보이는 길이 (박자).</summary>
@@ -171,7 +173,7 @@ namespace RhythmActionGame
                 case EventCatalog.Chase:
                     // 옆 지붕에서 나란히 달림 (플레이어보다 2 m 앞)
                     float cs = slotSides.Length > 0 ? -slotSides[0] : 1f;
-                    p = new Vector3(cs * 3.5f, enemyHome.y, playerZ + 2f);
+                    p = new Vector3(cs * chaseLateral, enemyHome.y, playerZ + 2f);
                     if (u > 0 && r == Judgement.Perfect) { q = enemyHomeRot * Quaternion.Euler(0, 0, cs * Mathf.Min(90f, u * 180f)); EnemyDown = true; }
                     break;
             }

@@ -21,6 +21,8 @@ namespace RhythmActionGame.Tests
     {
         static readonly int[] Beats = { 24, 84, 140, 186, 224, 258 };
         const string NoBatchScene = "Assets/Scenes/Test/Game_NoBatch.unity";
+        /// <summary>T15 때 잰 뒤 평균 그리기 호출 (harness/reports/drawcalls.md, 2026-11-16).</summary>
+        const long T15AverageDrawCalls = 290;
 
         /// <summary>Unity 6의 그리기 호출 카운터 (종류별). 합계 = 그리기 호출.</summary>
         static readonly string[] DrawCounters = { "Standard Draw Calls Count", "Standard Instanced Draw Calls Count", "SRP Batcher Draw Calls Count", "BRG Draw Calls Count" };
@@ -114,6 +116,9 @@ namespace RhythmActionGame.Tests
             Assert.Greater(sum[4], 0, "뒤 그리기 호출을 잼");
             Assert.Less(sum[5], sum[1], "SetPass가 줄어듦");
             Assert.LessOrEqual(sum[4], sum[0], "그리기 호출이 늘지 않음");
+            // 작업 R03: 맵을 다시 지어도 T15 결과(평균 약 290)보다 크게 늘지 않음 — +30% 이내.
+            // 장식 모델이 4종 → 35종이 되어 약 +26%(363~368). 2026-11-16 사용자가 이 정도는 받아들임 (처음 기준 +25%).
+            Assert.LessOrEqual(sum[4] / n, T15AverageDrawCalls * 13 / 10, $"R03: 평균 그리기 호출 {sum[4] / n} (T15 {T15AverageDrawCalls})");
         }
 
         [UnityTest]

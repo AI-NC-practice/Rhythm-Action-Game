@@ -1,7 +1,7 @@
 ﻿# Unity verify report
-time: 2026-11-16 21:16:21
+time: 2026-11-16 22:30:48
 
-## EditMode : total=193 passed=193 failed=0 skipped=0 result=Passed
+## EditMode : total=200 passed=200 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Config_MatchGddBetaB1
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_LabelPose_PopThenRise_045s
@@ -109,6 +109,13 @@ time: 2026-11-16 21:16:21
   - [Passed] RhythmActionGame.Tests.R02_MapAssetTests.R02_Glb_LowPoly_UnderLimit_WithBakedColorAndNormal
   - [Passed] RhythmActionGame.Tests.R02_MapAssetTests.R02_SpecList_Has35Models_And6Backdrops
   - [Passed] RhythmActionGame.Tests.R02_MapAssetTests.R02_ToonMaterial_HasBakedTextures
+  - [Passed] RhythmActionGame.Tests.R03_MapPlanTests.R03_Backdrop_PanoramaOfSixPaintings
+  - [Passed] RhythmActionGame.Tests.R03_MapPlanTests.R03_Path_CornersCurved_BeatsAndLengthKept
+  - [Passed] RhythmActionGame.Tests.R03_MapPlanTests.R03_Plan_ForeshadowStandsOnPlannedRoofOrWall
+  - [Passed] RhythmActionGame.Tests.R03_MapPlanTests.R03_Plan_MarketStreet_BetweenSection1And2
+  - [Passed] RhythmActionGame.Tests.R03_MapPlanTests.R03_Plan_PropDensity_MatchesR01
+  - [Passed] RhythmActionGame.Tests.R03_MapPlanTests.R03_Plan_RunCorridorClear_BuildingsOffPath
+  - [Passed] RhythmActionGame.Tests.R03_MapPlanTests.R03_Plan_SameBuildingNeverTwiceInARow_RotationAndScaleVary
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_BeatAndSpeed_MatchGdd41
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_Judge_MatchGdd42
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_ObstacleAndCombat_MatchGdd44To46
@@ -196,7 +203,7 @@ time: 2026-11-16 21:16:21
   - [Passed] RhythmActionGame.Tests.T14_EnemyRigTests.T14_GameScene_EveryEnemy_HasModel_WeaponOnHandBone_NoCapsule
   - [Passed] RhythmActionGame.Tests.T14_EnemyRigTests.T14_PlayerController_HasExecutionAndHitStates
 
-## PlayMode : total=163 passed=162 failed=1 skipped=0 result=Failed(Child)
+## PlayMode : total=166 passed=165 failed=1 skipped=0 result=Failed(Child)
 - FAIL RhythmActionGame.Tests.T14_EnemyCombatPlayTests.T14_Enemy_Model_WeaponInHand_ImpactOnTargetBeat_CrossfadeBetweenAttacks: 다음 공격 상태 Expected string length 15 but was 17. Strings differ at index 7. Expected: "Attack_overhead" But was: "Attack_horizontal" ------------------^
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
@@ -319,6 +326,9 @@ time: 2026-11-16 21:16:21
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(1)
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(4)
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(6)
+  - [Passed] RhythmActionGame.Tests.R03_MapScenePlayTests.R03_Backdrop_GoesAroundOnce_NoRepeat
+  - [Passed] RhythmActionGame.Tests.R03_MapScenePlayTests.R03_ChapterPreviews_EyeHeightPng
+  - [Passed] RhythmActionGame.Tests.R03_MapScenePlayTests.R03_EnemiesAndForeshadow_StandOnVisibleRoofWallOrGround
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Font_HasJudgeGlyphs
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Fx_GrayAndZoom_EnterAndExit
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Label_ShownFor0_45Seconds_GddBeta

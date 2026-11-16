@@ -65,6 +65,8 @@ namespace RhythmActionGame
             prop.beats = beats;
             prop.span = e.span;
             prop.companion = e.IsObstacle && !string.IsNullOrEmpty(e.approach) ? e.approach : "";
+            float roofHalf = MapLayout.RoofHalfAt(e.Distance);
+            prop.chaseLateral = roofHalf > 0f ? Mathf.Min(GameConfig.Map.ChaseLateral, roofHalf - GameConfig.Map.RoofRunnerInset) : GameConfig.Map.ChaseLateral;   // 작업 R03
             prop.slotOffsets = new float[slots.Count];
             prop.slotSides = new float[slots.Count];
             for (int i = 0; i < slots.Count; i++)
@@ -120,9 +122,15 @@ namespace RhythmActionGame
                     Box(root, "Prop_banner", new Vector3(0.6f, 3.2f, Z(1)), new Vector3(0.05f, 1.4f, 0.8f), mat("Banner", Cloth));
                     break;
                 case StageChart.TypeForeshadow:
-                    // 먼 지붕 위 그림자 2~3명 (경로 옆 12 m, 높이 6 m)
+                    // 먼 지붕·담 위 그림자 3명. 작업 R03: 종류마다 정한 자리(MapPlan.ForeshadowStand, 그 아래 실제 지붕·담) —
+                    // 높이는 SceneBuilder가 발밑 지붕·담 윗면에 맞춘다. 자리가 없는 종류(시험 차트)는 예전처럼 옆 12 m, 높이 6 m.
+                    bool hasStand = Array.Exists(GameConfig.Map.ForeshadowStands, s => s.Kind == e.kind);
                     for (int i = 0; i < 3; i++)
-                        EnemyFigure(root, $"Prop_foreshadow_{i}", new Vector3(10f + i * 1.2f, 6f, 25f + i * 1.5f), mat("Foreshadow", Shadow));
+                    {
+                        var local = hasStand ? root.InverseTransformPoint(MapPlan.ForeshadowStand(e, i)) : new Vector3(10f + i * 1.2f, 6f, 25f + i * 1.5f);
+                        if (hasStand) local.y = -p.y;   // 땅(0) 기준. 지지면 높이는 빌드 때 맞춘다
+                        EnemyFigure(root, $"Prop_foreshadow_{i}", local, mat("Foreshadow", Shadow));
+                    }
                     break;
             }
 
@@ -131,7 +139,7 @@ namespace RhythmActionGame
             {
                 float side = prop.slotSides.Length > 0 ? prop.slotSides[0] : 1f;
                 var start = enemyHow == EventCatalog.Ambush ? new Vector3(-side * 3.2f, 0, Z(2))
-                          : enemyHow == EventCatalog.Chase ? new Vector3(-side * 3.5f, 0.5f, Z(0) + 2f)
+                          : enemyHow == EventCatalog.Chase ? new Vector3(-side * prop.chaseLateral, 0.5f, Z(0) + 2f)
                           : new Vector3(0, 0, Z(2) + 8f);
                 prop.enemy = EnemyFigure(root, $"Enemy_{enemyHow}", start, mat("EnemySword", Enemy));
             }
