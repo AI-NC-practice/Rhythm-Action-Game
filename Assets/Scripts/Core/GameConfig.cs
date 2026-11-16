@@ -797,6 +797,33 @@ namespace RhythmActionGame
             /// <summary>머리 메시로 볼 뼈 가중치 (머리·목 합이 이 값 이상인 삼각형은 1인칭 카메라에 그리지 않음).</summary>
             public const float HeadWeightThreshold = 0.5f;
 
+            // ----- 작업 R06: 1인칭 카메라·동작 정리 (사용자 피드백 2·6·7번, GDD에 없음) -----
+            /// <summary>장애물 동작·피격 중 카메라가 머리 뼈를 따라가는 비율. 1 = 카메라가 머리에 붙음 → 머리 없는 몸이 화면 앞에 보이지 않는다.</summary>
+            public const float ActionHeadFollowWeight = 1f;
+            /// <summary>달리기 ↔ 동작 사이 따라가기 비율을 바꾸는 빠르기 (1/초, 지수 감쇠).</summary>
+            public const float ActionBlendSharpness = 10f;
+            /// <summary>벽타기: 몸(모델 루트)을 발 기준으로 벽 반대쪽으로 눕히는 각도 (도). 발은 벽을 밟고 머리는 길 쪽.</summary>
+            public const float WallRunLeanDegrees = 45f;
+            /// <summary>벽타기 NORMAL(휘청임)의 기울기 (도).</summary>
+            public const float WallRunNormalLeanDegrees = 35f;
+            /// <summary>벽타기 때 발이 가는 옆 거리 (m): 벽을 못 찾았을 때 기본값 = 벽 안쪽 면 (벽 중심 2.0 m − 두께 절반 0.25 m) 조금 안.</summary>
+            public const float WallRunFootOffset = 1.7f;
+            /// <summary>벽 찾기 광선 길이 (m)와 발바닥–벽 면 틈 (m).</summary>
+            public const float WallRunMaxSearch = 4f;
+            public const float WallRunFootGap = 0.05f;
+            /// <summary>벽타기 카메라 기울기 (도, 몸과 같은 방향 = 벽 반대쪽으로). NORMAL은 절반에 흔들림.</summary>
+            public const float WallRunCameraRoll = 20f;
+            /// <summary>아래로 피하기(미끄러지기) 중 내 몸(팔·다리)이 화면을 가리는 비율 상한 (0~1, PlayMode 측정).</summary>
+            public const float SlideMaxScreenCover = 0.2f;
+            /// <summary>목 단면이 화면 가장자리 밖 이 비율(뷰포트) 안에만 있어도 몸을 숨긴다 (카메라 흔들림 여유).</summary>
+            public const float NeckViewMargin = 0.15f;
+            /// <summary>동작 중 카메라가 달리는 방향에서 이 각도(도) 넘게 돌아가면 몸을 숨긴다 (앞구르기 한 바퀴).</summary>
+            public const float HideBodyViewAngle = 60f;
+            /// <summary>머리가 엉덩이보다 이 높이(m) 안쪽으로 낮아지면 몸이 뒤집힌 것으로 보고 숨긴다 (앞구르기).</summary>
+            public const float InvertedHeadAboveHips = 0.15f;
+            /// <summary>뒤집혔다가 머리가 엉덩이보다 이 높이(m) 넘게 올라오면 다시 보인다 (미끄러지기 최저 약 0.31 m라 거기선 안 숨김).</summary>
+            public const float UprightHeadAboveHips = 0.45f;
+
             /// <summary>툰 명암 단계 수 (GDD 6 "2~3단계").</summary>
             public const int ToonSteps = 3;
             /// <summary>가장 어두운 단계의 밝기 (0~1).</summary>

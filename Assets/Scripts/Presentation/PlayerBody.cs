@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -21,6 +22,10 @@ namespace RhythmActionGame
         public BeatClock clock;
         /// <summary>카메라 받침 (Player/CameraRig). 머리 뼈를 따라 움직인다.</summary>
         public Transform cameraRig;
+        /// <summary>몸 받침 (Player/BodyOffset, 작업 R06). 장애물 동작 동안 몸을 카메라 궤적과 함께 옮기고 벽타기에서 눕힌다.</summary>
+        public Transform bodyOffset;
+        /// <summary>화면 카메라 (PlayerCamera, 작업 R06). 목 단면이 화면에 들어오면 몸을 숨긴다.</summary>
+        public Camera viewCamera;
         /// <summary>상태 이름별 클립 길이 (초). SceneBuilder가 채운다.</summary>
         public string[] stateNames;
         public float[] stateSeconds;
@@ -41,6 +46,38 @@ namespace RhythmActionGame
         Vector3 headRest;
         Vector3 rigOffset;
         bool hooked;
+        /// <summary>동작(장애물·피격) 중이면 1, 달리기면 0 (작업 R06). 부드럽게 바뀐다.</summary>
+        float actionBlend;
+        /// <summary>남은 동작 시간 (초, 박자 시계 시간 × 속도 배율).</summary>
+        float actionLeft;
+        /// <summary>지금 동작이 실패·피격인지 (작업 R06: 1인칭 실패 연출 = 카메라만 흔들고 몸은 화면에서 숨김).</summary>
+        bool failAction;
+        /// <summary>카메라를 머리에 그대로 붙이는 동작인지 (벽타기·미끄러지기·실패·피격).</summary>
+        bool followFull;
+        StageDirector.ObstacleRun wallRunFor;
+        float wallFootOffset = GameConfig.Body.WallRunFootOffset;
+
+        /// <summary>벽타기 발 옆 거리 (m, 테스트용).</summary>
+        public float WallFootOffset => wallFootOffset;
+
+        /// <summary>벽 안쪽 면까지 옆 거리 (허리 높이에서 벽 쪽으로 광선). 못 찾으면 GameConfig 값.</summary>
+        float MeasureWall(float side)
+        {
+            var from = transform.position + Vector3.up * 1.0f;
+            var dir = transform.right * Mathf.Sign(side);
+            foreach (var h in Physics.RaycastAll(from, dir, GameConfig.Body.WallRunMaxSearch, ~0, QueryTriggerInteraction.Ignore).OrderBy(h => h.distance))
+                if (!h.transform.IsChildOf(transform) && h.distance > 0.5f) return Mathf.Max(0.5f, h.distance - GameConfig.Body.WallRunFootGap);
+            return GameConfig.Body.WallRunFootOffset;
+        }
+        bool inverted;
+
+        /// <summary>화면에 그리는 몸을 숨겼는지 (테스트용).</summary>
+        public bool BodyHidden { get; private set; }
+
+        /// <summary>지금 동작 중 비율 (0 달리기 ~ 1 동작, 테스트용).</summary>
+        public float ActionBlend => actionBlend;
+        /// <summary>벽타기 몸 기울기 (도, 테스트용). 양수 = 왼쪽으로 눕힘.</summary>
+        public float LeanDegrees { get; private set; }
 
         void Awake()
         {
@@ -114,6 +151,7 @@ namespace RhythmActionGame
             LastState = state;
             LastMirror = false;
             if (state.StartsWith("Exec_")) ExecStartBeat = clock != null ? clock.CurrentBeat : double.NaN;
+            if (state == BodyMoves.Hit) { BeginAction(seconds.TryGetValue(state, out var hs) ? hs : 1f); failAction = true; }   // R06: 맞는 동안 1인칭 실패 연출
             if (animator == null || animator.runtimeAnimatorController == null) return;
             animator.SetBool(MirrorParam, false);
             animator.CrossFadeInFixedTime(state, GameConfig.Body.CrossFadeSeconds, 0);
@@ -122,6 +160,8 @@ namespace RhythmActionGame
         /// <summary>판정 결과 하나에 맞는 동작을 재생한다.</summary>
         public void Play(ObstacleCategory? category, ArrowKey key, Judgement r)
         {
+            BeginAction(GameConfig.Body.ActionBeats * GameConfig.SecondsPerBeat);
+            failAction = r == Judgement.Fail;
             string action = category.HasValue ? BodyMoves.ActionOf(category.Value) : BodyMoves.ActionOfKey(key);
             string state = BodyMoves.State(action, r);
             bool mirror = BodyMoves.Mirror(action, key);
@@ -130,12 +170,15 @@ namespace RhythmActionGame
             if (animator == null || animator.runtimeAnimatorController == null) return;
             float len = seconds.TryGetValue(state, out var s) ? s : 1f;
             animator.SetBool(MirrorParam, mirror);
-            animator.SetFloat(ActionSpeedParam, BodyMoves.SpeedToFit(len, GameConfig.Body.ActionBeats, GameConfig.SecondsPerBeat));
+            // 벽타기 PERFECT/NORMAL은 달리기 클립 → 달리기 빠르기 그대로 (2박에 끝나면 같은 클립의 Run으로 이어짐)
+            bool wallRunning = action == "WallRun" && r != Judgement.Fail;
+            animator.SetFloat(ActionSpeedParam, BodyMoves.SpeedToFit(len, wallRunning ? GameConfig.Body.RunCycleBeats : GameConfig.Body.ActionBeats, GameConfig.SecondsPerBeat));
             animator.CrossFadeInFixedTime(state, GameConfig.Body.CrossFadeSeconds, 0);
         }
 
         public void PlayRun()
         {
+            actionLeft = 0f;
             LastState = BodyMoves.Run;
             LastMirror = false;
             if (animator == null || animator.runtimeAnimatorController == null) return;
@@ -152,6 +195,9 @@ namespace RhythmActionGame
 
         double lastNow = double.NaN;
 
+        /// <summary>동작 시간 동안 카메라를 머리에 붙인다 (Animator와 같은 시간: 속도 배율·일시정지 반영).</summary>
+        void BeginAction(float seconds) => actionLeft = seconds;
+
         /// <summary>
         /// Animator는 직접 돌린다: 박자 시계와 같은 시간(clock.Now)으로 진행해 음악·판정과 어긋나지 않는다.
         /// 속도 배율(판정 속도·회피 슬로모션)을 곱하고, 일시정지면 멈춘다.
@@ -166,6 +212,7 @@ namespace RhythmActionGame
             float speed = clock == null ? 1f : clock.IsPaused ? 0f : clock.IsRunning ? clock.SpeedMultiplier : 1f;
             animator.Update((float)dt * speed);
             followDt += (float)dt * speed;
+            actionLeft -= (float)dt * speed;
         }
 
         float followDt;
@@ -173,22 +220,120 @@ namespace RhythmActionGame
         /// <summary>머리 뼈 따라가기는 LateUpdate(Cinemachine Brain보다 먼저, 실행 순서 −50)에서, 시간은 박자 시계 시간으로.</summary>
         void LateUpdate()
         {
-            FollowHead(followDt);
+            float target = actionLeft > 0f ? 1f : 0f;
+            // 동작이 시작되면 바로 1 (판정과 함께 카메라 궤적이 튀므로 몸도 같은 프레임에), 끝날 때만 부드럽게 달리기로
+            actionBlend = target >= actionBlend ? target : Mathf.Lerp(actionBlend, target, 1f - Mathf.Exp(-GameConfig.Body.ActionBlendSharpness * followDt));
+            if (Mathf.Abs(actionBlend - target) < 1e-3f) actionBlend = target;
+            PlaceBody(out var motionPos);
+            FollowHead(followDt, motionPos);
             followDt = 0f;
+            UpdateVisibility();
+        }
+
+        /// <summary>
+        /// 작업 R06: 1인칭에서 머리 없는 몸이 보이지 않게.
+        /// (1) 실패·피격 동작 동안은 화면에 그리는 몸을 숨긴다(그림자는 원래 메시가 그대로) — 3인칭용 실패 동작이 몸을 크게 움직여 카메라가 몸 안에 들어가거나 목 단면이 보이므로.
+        /// (2) 그 밖의 동작에서도 목 단면(목 뼈)이 화면 안(여유 포함)에 들어오면 숨긴다.
+        /// </summary>
+        void UpdateVisibility()
+        {
+            if (VisibleBody == null) return;
+            bool hide = false;
+            if (actionBlend > 0f)
+            {
+                if (failAction && actionLeft > 0f) hide = true;
+                else if (viewCamera != null && head != null)
+                {
+                    var neck = animator.GetBoneTransform(HumanBodyBones.Neck) ?? head;
+                    var vp = viewCamera.WorldToViewportPoint(neck.position);
+                    float m = GameConfig.Body.NeckViewMargin;
+                    hide = vp.z > 0f && vp.x > -m && vp.x < 1f + m && vp.y > -m && vp.y < 1f + m;
+                    // (3) 카메라가 달리는 방향에서 크게 돌아감 (앞구르기 한 바퀴 등) → 거꾸로 된 내 몸이 화면을 덮지 않게
+                    if (Vector3.Angle(viewCamera.transform.forward, transform.forward) > GameConfig.Body.HideBodyViewAngle) hide = true;
+                    // (4) 몸이 뒤집힘 (앞구르기에서 머리가 엉덩이보다 낮음) → 굴러 넘어오는 다리가 화면을 덮지 않게.
+                    //     일어설 때 무릎이 화면을 덮으므로 머리가 충분히 올라올 때까지 숨긴 채로 둔다.
+                    var hips = animator.GetBoneTransform(HumanBodyBones.Hips);
+                    if (hips != null)
+                    {
+                        float up = head.position.y - hips.position.y;
+                        if (up < GameConfig.Body.InvertedHeadAboveHips) inverted = true;
+                        else if (up > GameConfig.Body.UprightHeadAboveHips) inverted = false;
+                    }
+                    if (inverted) hide = true;
+                    // (5) 카메라가 목보다 낮음 = 몸통 안 (동작이 끝나 몸이 먼저 일어설 때 등)
+                    if (viewCamera.transform.position.y < neck.position.y) hide = true;
+                }
+            }
+            if (actionBlend <= 0f) inverted = false;
+            BodyHidden = hide;
+            VisibleBody.enabled = !hide;
+        }
+
+        /// <summary>
+        /// 작업 R06: 카메라를 머리에 붙이는 동작(벽타기·미끄러지기·실패·피격, followFull)은 몸 받침을 카메라 연출 궤적(StageDirector.motion)과
+        /// 같이 옮긴다 → 카메라가 몸을 떠나지 않는다. 높이는 동작 클립이 이미 내는 것(미끄러지기·실패로 쓰러짐)은 빼고, 실패로 뒤로 튕기는 것은 몸도 함께.
+        /// 벽타기는 발을 벽 안쪽 면(옆으로 쏜 광선으로 잰 거리)에 두고 발 기준으로 벽 반대쪽으로 약 45° 눕힌다.
+        /// 넘기·오르기·뛰어내리기·옆으로 피하기는 예전(T13)처럼 몸은 제자리, 카메라는 머리를 일부만 따라간다.
+        /// </summary>
+        void PlaceBody(out Vector3 motionPos)
+        {
+            motionPos = Vector3.zero;
+            Vector3 pos = Vector3.zero;
+            float lean = 0f;
+            var run = director != null ? director.Current : null;
+            followFull = failAction && actionLeft > 0f;
+            if (run != null && run.HasResult && actionBlend > 0f && director.motion != null)
+            {
+                float p = director.TraversalProgress;
+                float bell = Mathf.Sin(Mathf.Clamp01(p) * Mathf.PI);
+                string action = run.HasCategory ? BodyMoves.ActionOf(run.Category) : null;
+                bool fail = run.Result == Judgement.Fail;
+                bool slide = action == "Slide" || (action == null && LastState.StartsWith("Slide"));
+                followFull = fail || slide || action == "WallRun";
+                if (followFull)
+                {
+                    motionPos = director.motion.localPosition;
+                    if (action == "WallRun" && !fail)
+                    {
+                        if (wallRunFor != run) { wallRunFor = run; wallFootOffset = MeasureWall(run.Side); }
+                        float deg = run.Result == Judgement.Perfect ? GameConfig.Body.WallRunLeanDegrees : GameConfig.Body.WallRunNormalLeanDegrees;
+                        pos = new Vector3(run.Side * wallFootOffset * bell, motionPos.y, 0f);
+                        lean = run.Side * deg * bell;
+                    }
+                    else
+                    {
+                        pos = motionPos;
+                        pos.y = 0f;   // 높이는 클립이 낸다 (미끄러지기·쓰러짐)
+                    }
+                    motionPos *= actionBlend;
+                    pos *= actionBlend;
+                    lean *= actionBlend;
+                }
+            }
+            LeanDegrees = lean;
+            if (bodyOffset != null)
+            {
+                bodyOffset.localPosition = pos;
+                bodyOffset.localRotation = Quaternion.Euler(0f, 0f, lean);
+            }
         }
 
         /// <summary>
         /// 카메라 받침이 머리 뼈를 따라간다. 박자 시계 시간으로 한다 (작업 T15 수정: 실제 프레임 시간이면 무거운 씬에서
         /// 프레임마다 움직임이 달라진다). Update에서 하면 컷 카메라 검사 사이에 받침이 움직이므로 LateUpdate에서 한다.
         /// </summary>
-        void FollowHead(float dt)
+        void FollowHead(float dt, Vector3 motionPos)
         {
             if (cameraRig == null || head == null) return;
             var now = transform.InverseTransformPoint(head.position);
-            var target = (now - headRest) * GameConfig.Body.HeadFollowWeight;
-            float k = 1f - Mathf.Exp(-GameConfig.Body.HeadFollowSharpness * dt);
+            // 동작 중(R06): 머리를 다 따라가고(몸 받침 이동 포함), 카메라 연출 위치는 몸이 이미 옮겼으니 빼서 두 번 움직이지 않게
+            float full = followFull ? actionBlend : 0f;
+            float w = Mathf.Lerp(GameConfig.Body.HeadFollowWeight, GameConfig.Body.ActionHeadFollowWeight, full);
+            var target = (now - headRest) * w;
+            // 동작 중에는 머리를 그대로 따라감 (부드럽게 늦추면 몸이 먼저 일어설 때 카메라가 몸통 안에 남음). 달리기는 출렁임을 부드럽게.
+            float k = Mathf.Lerp(1f - Mathf.Exp(-GameConfig.Body.HeadFollowSharpness * dt), 1f, full);
             rigOffset = Vector3.Lerp(rigOffset, target, k);
-            cameraRig.localPosition = new Vector3(0f, GameConfig.EyeHeight, GameConfig.Body.EyeForward) + rigOffset;
+            cameraRig.localPosition = new Vector3(0f, GameConfig.EyeHeight, GameConfig.Body.EyeForward) + rigOffset - motionPos;
         }
 
 

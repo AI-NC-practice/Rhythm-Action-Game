@@ -930,7 +930,7 @@
                                          "다운로드 전 사용자 승인, Assets/Audio/Music/에 저장",
                                          "Claude가 박자 분석으로 첫 박 오프셋을 맞추고 반주 대신 연결, unity-verify 통과"
                                      ],
-                      "status":  "needs_user",
+                      "status":  "done",
                       "attempts":  1,
                       "max_attempts":  1,
                       "notes":  "사용자 결정(2026-11-13): Suno 대신 무료 국악 음원. #197은 2026-11-14 사용자가 거절(전우치 OST 같은 곡 원함). 사용자 선택(2026-11-14 \"무료 데모 먼저\"): 공유마당 국악기 음원(태평소독주 시그널음악 6개·꽹과리 CC BY, 장구 공공누리 1유형)을 잘라 코드로 만든 드럼·베이스·현악과 함께 악보대로 조립(harness/scripts/music/song_kit.py, make-song.py). 데모 2(심장박동·빌드업·펌핑)를 사용자가 좋다고 함. 추임새는 무료 음원을 못 찾아 자리만 비워 둠(나중에). 2026-11-15 전체 곡 96마디(384박, 오토플레이로 잰 스테이지 길이) → mp3(Assets/Audio/Music/stage1_song.mp3, 첫 박 25 ms) → BeatClock 연결, 384박마다 반복, 50 ms 넘게 어긋나면 다시 맞춤. acceptance 1번(Suno 로그인·생성)은 이 결정으로 대체됨. 사용자 청취 확인 대기."
@@ -1470,10 +1470,10 @@
                                          "결과별 미리보기 PNG",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  "피드백 2·6·7번."
+                      "notes":  "피드백 2·6·7번. 완료: 실패·피격은 1인칭 연출(몸 숨김 + 카메라 튕김), 벽타기 45° 눕힘 + 달리기 클립 + 카메라 기울기, 미끄러지기 가림 0.86→0.12 (PASS 1회차)."
                   },
                   {
                       "id":  "R07",

@@ -195,6 +195,7 @@ namespace RhythmActionGame.EditorTools
             playerBody.director = director;
             playerBody.clock = clock;
             playerBody.cameraRig = rig.transform;
+            playerBody.viewCamera = cam;
             BuildDirectorExtra(director, enemies);
 
             // 새 사건·안 멈추는 적·복선 소품 진행 (GDD-beta B2)
@@ -617,7 +618,9 @@ namespace RhythmActionGame.EditorTools
             var model = (GameObject)PrefabUtility.InstantiatePrefab(fbx);
             PrefabUtility.UnpackPrefabInstance(model, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
             model.name = "Model";
-            model.transform.SetParent(player, false);
+            var bodyOffset = new GameObject("BodyOffset").transform;   // 작업 R06: 동작 중 몸 옮기기·벽타기 기울기 (PlayerBody)
+            bodyOffset.SetParent(player, false);
+            model.transform.SetParent(bodyOffset, false);
             model.transform.localPosition = Vector3.zero;
             model.transform.localRotation = Quaternion.identity;
             smr = model.GetComponentInChildren<SkinnedMeshRenderer>();
@@ -638,6 +641,7 @@ namespace RhythmActionGame.EditorTools
             var body = player.gameObject.AddComponent<PlayerBody>();
             body.animator = animator;
             body.body = smr;
+            body.bodyOffset = bodyOffset;
             body.stateNames = names;
             body.stateSeconds = seconds;
             return body;

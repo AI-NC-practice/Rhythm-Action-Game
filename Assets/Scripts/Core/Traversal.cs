@@ -68,7 +68,7 @@ namespace RhythmActionGame
                         case ObstacleCategory.Slide: pos.y = -1.0f * bell; euler.x = 8f * bell; break;
                         case ObstacleCategory.Drop: pos.y = 0.3f * Mathf.Sin(p * Mathf.PI * 2f) * (1 - p); euler.x = 360f * Smooth(p, 0.45f, 0.8f); break; // 착지 후 앞구르기
                         case ObstacleCategory.Dodge: pos.x = side * 1.0f * bell; euler.z = -side * 8f * bell; break;
-                        case ObstacleCategory.WallRun: pos.x = side * 0.9f * bell; pos.y = 1.2f * bell; euler.z = -side * 20f * bell; break;
+                        case ObstacleCategory.WallRun: pos.x = side * 0.9f * bell; pos.y = 1.2f * bell; euler.z = side * GameConfig.Body.WallRunCameraRoll * bell; break; // R06: 몸처럼 벽 반대쪽으로 기울임
                     }
                     break;
 
@@ -82,7 +82,7 @@ namespace RhythmActionGame
                         case ObstacleCategory.Slide: pos.y = -0.7f * bell; euler.z = 6f * wobble; break;
                         case ObstacleCategory.Drop: pos.y = -0.3f * bell; euler.z = 8f * wobble; break;
                         case ObstacleCategory.Dodge: pos.x = side * 0.6f * bell; euler.z = side * 10f * wobble; break;
-                        case ObstacleCategory.WallRun: pos.x = side * 0.7f * bell; pos.y = 0.5f * bell; euler.z = -side * 8f * bell + 6f * wobble; break;
+                        case ObstacleCategory.WallRun: pos.x = side * 0.7f * bell; pos.y = 0.5f * bell; euler.z = side * GameConfig.Body.WallRunCameraRoll * 0.5f * bell + 6f * wobble; break;
                     }
                     break;
 

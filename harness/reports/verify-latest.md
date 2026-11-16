@@ -1,5 +1,5 @@
 ﻿# Unity verify report
-time: 2026-11-16 22:49:50
+time: 2026-11-16 23:23:43
 
 ## EditMode : total=200 passed=200 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
@@ -203,7 +203,7 @@ time: 2026-11-16 22:49:50
   - [Passed] RhythmActionGame.Tests.T14_EnemyRigTests.T14_GameScene_EveryEnemy_HasModel_WeaponOnHandBone_NoCapsule
   - [Passed] RhythmActionGame.Tests.T14_EnemyRigTests.T14_PlayerController_HasExecutionAndHitStates
 
-## PlayMode : total=168 passed=168 failed=0 skipped=0 result=Passed
+## PlayMode : total=173 passed=173 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -330,6 +330,11 @@ time: 2026-11-16 22:49:50
   - [Passed] RhythmActionGame.Tests.R03_MapScenePlayTests.R03_EnemiesAndForeshadow_StandOnVisibleRoofWallOrGround
   - [Passed] RhythmActionGame.Tests.R04_NoGrayShapesPlayTests.R04_EventPropPreviews_Png
   - [Passed] RhythmActionGame.Tests.R04_NoGrayShapesPlayTests.R04_GameScene_NoVisibleGrayPrimitive
+  - [Passed] RhythmActionGame.Tests.R06_FirstPersonViewPlayTests.R06_Fail_HeadlessBodyNeverInFront
+  - [Passed] RhythmActionGame.Tests.R06_FirstPersonViewPlayTests.R06_Normal_WallRunLeans_SlideCoverCapped
+  - [Passed] RhythmActionGame.Tests.R06_FirstPersonViewPlayTests.R06_Perfect_WallRunLeans45_SlideCoverCapped
+  - [Passed] RhythmActionGame.Tests.R06_FirstPersonViewPlayTests.R06_WallRun_CameraTiltsWithBody_AwayFromWall
+  - [Passed] RhythmActionGame.Tests.R06_FirstPersonViewPlayTests.R06_WallRun_OnStageWall_Preview
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Font_HasJudgeGlyphs
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Fx_GrayAndZoom_EnterAndExit
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Label_ShownFor0_45Seconds_GddBeta
