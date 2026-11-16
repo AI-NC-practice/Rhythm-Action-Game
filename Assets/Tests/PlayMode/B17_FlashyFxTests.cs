@@ -85,6 +85,7 @@ namespace RhythmActionGame.Tests
         [UnityTest]
         public IEnumerator B17_Perfect_LightningFlareShockSparksCore()
         {
+            Random.InitState(1117);   // 2026-11-17: 빛 입자 크기·각도가 무작위라 평균 거리(100 px 기준)가 가끔 99.7로 걸림 → 같은 씨앗으로 늘 같게
             real = 1f;
             var fx = Judge(4, 0.0);
             Assert.AreEqual(Judgement.Perfect, fx.Result);

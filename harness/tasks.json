@@ -1595,10 +1595,10 @@
                                          "1인칭 미리보기 PNG (구간별 뒤돌아보기)",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "PASS 1회차. 컷 자리 달리기 40.5·90.5·126.5·238.5박 (LookBackCut, CameraOwner.LookBack, 165°). 2026-11-17 사용자 결정: 1챕터는 레인에 장단 노드가 안 보이는 틈이 없으므로 판정 원이 없고 컷 동안 칠 노드가 없으면 된다(레인에 다음 노드가 내려오는 것은 허용, GDD-beta B19.1). 2·3·5챕터는 레인도 빈 틈."
                   },
                   {
                       "id":  "R18e",

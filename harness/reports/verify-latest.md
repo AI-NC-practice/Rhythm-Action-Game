@@ -1,5 +1,5 @@
 ﻿# Unity verify report
-time: 2026-11-17 04:09:50
+time: 2026-11-17 04:38:51
 
 ## EditMode : total=204 passed=204 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
@@ -207,7 +207,7 @@ time: 2026-11-17 04:09:50
   - [Passed] RhythmActionGame.Tests.T14_EnemyRigTests.T14_GameScene_EveryEnemy_HasModel_WeaponOnHandBone_NoCapsule
   - [Passed] RhythmActionGame.Tests.T14_EnemyRigTests.T14_PlayerController_HasExecutionAndHitStates
 
-## PlayMode : total=184 passed=183 failed=0 skipped=1 result=Passed
+## PlayMode : total=187 passed=186 failed=0 skipped=1 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -325,6 +325,7 @@ time: 2026-11-17 04:09:50
   - [Passed] RhythmActionGame.Tests.B53_MusicMuteTests.B53_GameScene_PauseToggle_MutesOnlyMusic_ClockAndSfxKeepGoing
   - [Passed] RhythmActionGame.Tests.B53_MusicMuteTests.B53_Setting_DefaultOn_Saved
   - [Passed] RhythmActionGame.Tests.B53_MusicMuteTests.B53_Title_MusicToggle
+  - [Passed] RhythmActionGame.Tests.Bug1117_EnemyClipPlayTests.Bug1117_EnemyClip_Ch2DeathRewind_Ch5
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_ChapterStartBeats_MatchSections
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(1)
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(4)
@@ -349,6 +350,8 @@ time: 2026-11-17 04:09:50
   - [Passed] RhythmActionGame.Tests.R18b_HiddenEnemiesPlayTests.R18b_Ambush_HiddenUntilTwoBeatsBefore
   - [Passed] RhythmActionGame.Tests.R18b_HiddenEnemiesPlayTests.R18b_GroundCombat_HiddenNoticeRunArrive
   - [Passed] RhythmActionGame.Tests.R18c_LeapInPlayTests.R18c_RoofFighters_OvertakeLeapLand
+  - [Passed] RhythmActionGame.Tests.R18d_LookBackPlayTests.R18d_LookBack_Chapters
+  - [Passed] RhythmActionGame.Tests.R18d_LookBackPlayTests.R18d_LookBack_OncePerChaseChapter_NoRings_EnemyVisible
   - [Skipped] RhythmActionGame.Tests.Review_StageWalkthroughPlayTests.Review_Stage1_Walkthrough_Shots
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Font_HasJudgeGlyphs
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Fx_GrayAndZoom_EnterAndExit

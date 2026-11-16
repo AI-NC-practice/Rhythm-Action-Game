@@ -498,28 +498,85 @@ namespace RhythmActionGame.EditorTools
                 }
                 var ys = new float[n];
                 var gap = new bool[n];
+                for (int i = 0; i < n; i++) if (col[i].HasValue) ys[i] = col[i].Value;
+                // 사용자 버그 신고 2026-11-17 (2챕터 낮은 담, 5챕터 궁궐 담을 뚫음): 면이 없는 칸(길 위 장애물·담 밑)은
+                // 높이 차가 작으면 그 안의 가장 높은 면을 발로 넘는 포물선으로 뛰어넘고, 크면 높은 쪽 높이를 지킨 뒤 아래 단계에서 뛰어내린다.
                 for (int i = 0; i < n; i++)
                 {
-                    if (col[i].HasValue) { ys[i] = col[i].Value; continue; }
-                    gap[i] = true;
-                    int a = i - 1; while (a >= 0 && !col[a].HasValue) a--;
-                    int b = i + 1; while (b < n && !col[b].HasValue) b++;
-                    ys[i] = a >= 0 && b < n ? Mathf.Lerp(col[a].Value, col[b].Value, (i - a) / (float)(b - a)) : a >= 0 ? col[a].Value : b < n ? col[b].Value : py[i];
+                    if (col[i].HasValue) continue;
+                    int a = i; while (a < n && !col[a].HasValue) a++;   // [i, a) 이 빈 칸
+                    int L = i - 1, R = a;
+                    float yL = L >= 0 ? col[L].Value : (R < n ? col[R].Value : py[i]);
+                    float yR = R < n ? col[R].Value : yL;
+                    if (Mathf.Abs(yL - yR) <= 1f)
+                    {
+                        float apex = 0.3f;
+                        for (int j = i; j < a; j++)
+                        {
+                            float k = (j - L) / (float)(R - L);
+                            float b0 = Mathf.Lerp(yL, yR, k);
+                            var pt = MapLayout.PointAt(d0 + j * step, out var fwd);
+                            var tops = HeightsAt(pt + MapLayout.RightOf(fwd) * lat).Where(h => h.y > b0 - 0.5f && h.y < b0 + 3f && !IsNotGround(Owner(h.owner))).ToList();
+                            if (tops.Count > 0) apex = Mathf.Max(apex, (tops.Max(h => h.y) + 0.15f - b0) / Mathf.Max(0.2f, 4f * k * (1f - k)));
+                        }
+                        apex = Mathf.Min(apex, 3.5f);
+                        for (int j = i; j < a; j++) { float k = (j - L) / (float)(R - L); ys[j] = Mathf.Lerp(yL, yR, k) + apex * 4f * k * (1f - k); gap[j] = true; }
+                    }
+                    else
+                    {
+                        float hi = Mathf.Max(yL, yR);
+                        for (int j = i; j < a; j++) { ys[j] = hi; gap[j] = true; }
+                    }
+                    i = a - 1;
                 }
+                // 높이가 1 m 넘게 갑자기 바뀌는 곳: 높은 면 끝까지 그 높이로 가고, 낮은 쪽 1.5 m에서 떨어지는 포물선 (벽 속을 비스듬히 지나가지 않게)
                 for (int i = 0; i < n - 1; i++)
                 {
-                    if (gap[i] || gap[i + 1] || Mathf.Abs(ys[i + 1] - ys[i]) <= 1f) continue;
-                    int a = i, b = i + 1;
-                    while (a > 0 && Mathf.Abs(py[a - 1] - py[a]) > 1e-3f) a--;
-                    while (b < n - 1 && Mathf.Abs(py[b + 1] - py[b]) > 1e-3f) b++;
-                    if (b - a < 4) { a = Mathf.Max(0, i - 3); b = Mathf.Min(n - 1, i + 4); }
-                    for (int j = a + 1; j < b; j++)
+                    if (Mathf.Abs(ys[i + 1] - ys[i]) <= 1f) continue;
+                    bool upAhead = ys[i + 1] > ys[i];
+                    int h = upAhead ? i + 1 : i, sgn = upAhead ? -1 : 1;
+                    float hiY = ys[h];
+                    // 높은 면(담·지붕 덮개)이 이어지는 칸까지는 그 위를 걷는다 (길 경사로 기준으로는 빠져도 보이는 덮개가 있으면)
+                    for (int k = 1; k <= 8; k++)
                     {
-                        float t = Mathf.Abs(py[b] - py[a]) > 0.1f ? (py[j] - py[a]) / (py[b] - py[a]) : (j - a) / (float)(b - a);
-                        ys[j] = Mathf.Lerp(ys[a], ys[b], Mathf.Clamp01(t));
-                        gap[j] = true;
+                        int j = h + sgn;
+                        if (j < 0 || j >= n) break;
+                        var pt = MapLayout.PointAt(d0 + j * step, out var fwd);
+                        var on = HeightsAt(pt + MapLayout.RightOf(fwd) * lat).Where(hh => Mathf.Abs(hh.y - hiY) < 0.4f && !IsNotGround(Owner(hh.owner))).ToList();
+                        if (on.Count == 0) break;
+                        ys[j] = on.Max(hh => hh.y); gap[j] = false; h = j; hiY = ys[j];
                     }
-                    i = b - 1;
+                    int last = h;
+                    // 떨어지는 길이: 처마·담 지붕이 높은 면보다 넓게 나와 있으면 그 밖까지 (발이 아래 면보다 늘 위) — 1.5 m부터 늘려 봄
+                    var lo0 = new float[9];
+                    for (int k = 1; k <= 8; k++) { int j = h + sgn * k; lo0[k] = j >= 0 && j < n ? ys[j] : ys[h + sgn * (k - 1) >= 0 && h + sgn * (k - 1) < n ? h + sgn * (k - 1) : h]; }
+                    int len = 3;
+                    for (; len <= 8; len++)
+                    {
+                        bool clear = true;
+                        for (int k = 1; k <= len && clear; k++)
+                        {
+                            int j = h + sgn * k;
+                            if (j < 0 || j >= n) break;
+                            float t = k / (float)len;
+                            float y = Mathf.Max(lo0[k], hiY + 0.25f * 4f * t * (1f - t) - (hiY - lo0[k]) * t * t);
+                            var pt = MapLayout.PointAt(d0 + j * step, out var fwd);
+                            var above = HeightsAt(pt + MapLayout.RightOf(fwd) * lat).Where(hh => hh.y > y + 0.05f && hh.y < hiY + 1.0f && !IsNotGround(Owner(hh.owner)));
+                            if (above.Any() && k < len) clear = false;
+                        }
+                        if (clear) break;
+                    }
+                    len = Mathf.Min(len, 8);
+                    for (int k = 1; k <= len; k++)
+                    {
+                        int j = h + sgn * k;
+                        if (j < 0 || j >= n) break;
+                        float t = k / (float)len;
+                        ys[j] = Mathf.Max(lo0[k], hiY + 0.25f * 4f * t * (1f - t) - (hiY - lo0[k]) * t * t);
+                        gap[j] = true;
+                        last = j;
+                    }
+                    i = Mathf.Max(i, Mathf.Max(h, last));
                 }
                 prop.chaseD0 = d0;
                 prop.chaseStep = step;

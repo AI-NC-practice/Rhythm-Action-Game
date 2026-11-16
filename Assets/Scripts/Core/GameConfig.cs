@@ -412,6 +412,16 @@ namespace RhythmActionGame
         /// <summary>연출 수치. 제안서 2장 표와 3장 등급표, 4장 겹침 규칙의 값.</summary>
         public static class Fx
         {
+            // ----- 작업 R18d (GDD-beta B19.1): 뒤돌아보기 컷 -----
+            /// <summary>
+            /// 컷 시작 달리기 박 (1·2·3·5챕터 한 번씩). harness/music/stage1_timeline.json에서 고름: 컷 시작부터 3박 안에 방향키 판정 원이 없고
+            /// (원은 목표 2박 전부터 뜸), 컷 동안(앞뒤 0.25박) 장단 노드를 칠 일이 없음. 바로 앞 추격 적이 공격 뒤 뒤처진 때.
+            /// </summary>
+            public static readonly double[] LookBackRunBeats = { 40.5, 90.5, 126.5, 238.5 };
+            /// <summary>컷 길이 (박), 돌아보는 각도 (도), 돌아보기·돌아오기에 쓰는 비율 (나머지는 보고 있음).</summary>
+            public const double LookBackBeats = 1.0;
+            public const float LookBackYaw = 165f;
+            public const float LookBackTurnPart = 0.3f;
             // 4장 겹침 규칙
             /// <summary>기울기(롤) 합계 한도 (도).</summary>
             public const float RollLimit = 10f;
@@ -1059,8 +1069,8 @@ namespace RhythmActionGame
             // ----- 작업 R18c (GDD-beta B19.3 뒷부분): 앞질러 지붕을 넘어 착지하는 지붕 위 전투 적 -----
             /// <summary>멈춤 몇 박 전에 옆 지붕 줄에 나타나 달리기 시작하는지, 지붕을 박차는 박, 전투 자리에 발이 닿는 박, 대기로 돌아오는 박 (멈춤 기준).</summary>
             public const float LeapRunBeats = 12f;
-            public const float LeapTakeoffBefore = 2.75f;
-            public const float LeapContactBefore = 1.25f;
+            public const float LeapTakeoffBefore = 3.25f;
+            public const float LeapContactBefore = 1.75f;
             public const float LeapIdleBefore = 0.4f;
             /// <summary>옆 지붕 줄의 옆 거리 범위 (m)와 간격, 나타나는 자리(플레이어 뒤 m), 박차는 자리(전투 자리보다 앞 m).</summary>
             public const float LeapLateralMin = 6f;

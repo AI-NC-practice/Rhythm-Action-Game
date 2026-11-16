@@ -214,6 +214,9 @@ namespace RhythmActionGame.EditorTools
             var presentation = systems.AddComponent<PresentationDirector>();
             presentation.cameraFx = cameraFx;
             presentation.timeFx = timeFx;
+            var lookBack = systems.AddComponent<LookBackCut>();   // 작업 R18d
+            lookBack.cameraFx = cameraFx;
+            lookBack.presentation = presentation;
             director.presentation = presentation;
             var screenGo = new GameObject("ScreenFx");
             screenGo.transform.SetParent(systems.transform, false);

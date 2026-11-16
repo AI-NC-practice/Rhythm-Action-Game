@@ -12,6 +12,8 @@ namespace RhythmActionGame
         SurroundTurn = 3,
         Execution = 4,
         Windmill = 5,
+        /// <summary>작업 R18d: 뒤돌아보기 컷 (판정 원이 없는 틈에만, 가장 높음).</summary>
+        LookBack = 6,
     }
 
     /// <summary>
