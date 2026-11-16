@@ -344,5 +344,54 @@ namespace RhythmActionGame.Tests
             rtx.Release();
             Object.Destroy(shotGo);
         }
+
+        /// <summary>
+        /// R06 후속 (사용자 피드백 2026-11-16 4번): 4장 마당 포위 전투에서 카메라가 공격하는 적 쪽(뒤 230°까지)으로 돌거나
+        /// 동시 공격에 낮아질 때 몸은 앞을 보고 서 있어 카메라가 내 등·몸통 안을 봤다(화면 대부분 검게). 몸이 카메라 방향을 따라 돌고,
+        /// 카메라가 목보다 낮으면 숨긴다.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator R06_Chapter4Surround_BodyTurnsWithCamera_NoScreenCover()
+        {
+            yield return Load(null, 176);
+            Directory.CreateDirectory(OutDir);
+            probe.measuring = true;
+            int frames = 0, combat = 0, covered = 0, neck = 0, turned = 0;
+            float maxCover = 0f, maxYawGap = 0f;
+            bool shot = false;
+            float lastCamYaw = 0f;
+            while (boot.player.RunBeat < 197 && frames < 8000)
+            {
+                now += 0.01; frames++;
+                foreach (var c in boot.judge.Cues.ToArray())
+                    if (!c.Judged && c.Appeared && now >= boot.clock.TimeOfBeat(c.TargetBeat) - 1e-6) { boot.judge.Submit(c.Key, now); break; }
+                if (dir.Health.Hp < GameConfig.MaxHp) dir.Health.Reset();
+                yield return null;
+                if (dir.State != StageState.Combat) continue;
+                combat++;
+                if (probe.lastNeckInView) neck++;
+                if (probe.lastCover > 0.3f) covered++;
+                maxCover = Mathf.Max(maxCover, probe.lastCover);
+                float camYaw = dir.motion.localEulerAngles.y;
+                bool steady = Mathf.Abs(Mathf.DeltaAngle(camYaw, lastCamYaw)) < 1f;   // 도는 중에는 몸이 한 프레임 늦음 (카메라 연출이 몸보다 뒤에 갱신)
+                lastCamYaw = camYaw;
+                if (Mathf.Abs(Mathf.DeltaAngle(0f, camYaw)) > 90f)
+                {
+                    turned++;
+                    if (steady) maxYawGap = Mathf.Max(maxYawGap, Mathf.Abs(Mathf.DeltaAngle(camYaw, body.BodyYaw)));
+                    if (!shot) { shot = true; probe.shotPath = $"{OutDir}/Ch4_surround_back.png"; }
+                }
+            }
+            probe.measuring = false;
+            Results.RemoveAll(x => x.Name == "Ch4_Surround");
+            Results.Add(new CaseResult { Name = "Ch4_Surround", MaxCover = maxCover, Frames = combat, NeckFrames = neck });
+            WriteTable();
+            Debug.Log($"[R06] ch4 surround: combat frames {combat}, cover>0.3 {covered}, max {maxCover:0.00}, neck {neck}, turned {turned}, yaw gap {maxYawGap:0.0}");
+            Assert.Greater(combat, 200, "포위 전투를 지남");
+            Assert.Greater(turned, 10, "카메라가 뒤쪽 적으로 돈 프레임이 있음");
+            Assert.Less(maxYawGap, 2f, "몸이 카메라 방향을 따라 돎 (회전이 멈춘 프레임)");
+            Assert.AreEqual(0, neck, "목 단면이 화면에 보이지 않음");
+            Assert.LessOrEqual(covered, combat / 50, $"내 몸이 화면을 30% 넘게 가린 프레임 {covered}/{combat}");
+        }
     }
 }

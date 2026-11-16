@@ -78,6 +78,8 @@ namespace RhythmActionGame
         public float ActionBlend => actionBlend;
         /// <summary>벽타기 몸 기울기 (도, 테스트용). 양수 = 왼쪽으로 눕힘.</summary>
         public float LeanDegrees { get; private set; }
+        /// <summary>몸이 카메라 연출을 따라 돈 각도 (도, 테스트용).</summary>
+        public float BodyYaw { get; private set; }
 
         void Awake()
         {
@@ -238,18 +240,21 @@ namespace RhythmActionGame
         void UpdateVisibility()
         {
             if (VisibleBody == null) return;
-            bool hide = false;
-            if (actionBlend > 0f)
+            bool hide = actionBlend > 0f && failAction && actionLeft > 0f;
+            if (!hide && viewCamera != null && head != null)
             {
-                if (failAction && actionLeft > 0f) hide = true;
-                else if (viewCamera != null && head != null)
+                // 아래 (2)(3)(5)는 동작 밖(포위 전투 카메라 회전·낮추기 등)에도 적용 — R06 후속: 4장 포위 전투에서 카메라가 몸 안을 봄
+                var neck = animator.GetBoneTransform(HumanBodyBones.Neck) ?? head;
+                var vp = viewCamera.WorldToViewportPoint(neck.position);
+                float m = GameConfig.Body.NeckViewMargin;
+                hide = vp.z > 0f && vp.x > -m && vp.x < 1f + m && vp.y > -m && vp.y < 1f + m;
+                // (3) 카메라가 몸 앞 방향에서 크게 돌아감 (앞구르기 한 바퀴 등) → 거꾸로 된 내 몸이 화면을 덮지 않게
+                var bodyFwd = bodyOffset != null ? bodyOffset.forward : transform.forward;
+                if (Vector3.Angle(viewCamera.transform.forward, bodyFwd) > GameConfig.Body.HideBodyViewAngle) hide = true;
+                // (5) 카메라가 목보다 낮음 = 몸통 안 (동작이 끝나 몸이 먼저 일어설 때, 포위 전투 동시 공격에 낮출 때 등)
+                if (viewCamera.transform.position.y < neck.position.y) hide = true;
+                if (actionBlend > 0f)
                 {
-                    var neck = animator.GetBoneTransform(HumanBodyBones.Neck) ?? head;
-                    var vp = viewCamera.WorldToViewportPoint(neck.position);
-                    float m = GameConfig.Body.NeckViewMargin;
-                    hide = vp.z > 0f && vp.x > -m && vp.x < 1f + m && vp.y > -m && vp.y < 1f + m;
-                    // (3) 카메라가 달리는 방향에서 크게 돌아감 (앞구르기 한 바퀴 등) → 거꾸로 된 내 몸이 화면을 덮지 않게
-                    if (Vector3.Angle(viewCamera.transform.forward, transform.forward) > GameConfig.Body.HideBodyViewAngle) hide = true;
                     // (4) 몸이 뒤집힘 (앞구르기에서 머리가 엉덩이보다 낮음) → 굴러 넘어오는 다리가 화면을 덮지 않게.
                     //     일어설 때 무릎이 화면을 덮으므로 머리가 충분히 올라올 때까지 숨긴 채로 둔다.
                     var hips = animator.GetBoneTransform(HumanBodyBones.Hips);
@@ -260,8 +265,6 @@ namespace RhythmActionGame
                         else if (up > GameConfig.Body.UprightHeadAboveHips) inverted = false;
                     }
                     if (inverted) hide = true;
-                    // (5) 카메라가 목보다 낮음 = 몸통 안 (동작이 끝나 몸이 먼저 일어설 때 등)
-                    if (viewCamera.transform.position.y < neck.position.y) hide = true;
                 }
             }
             if (actionBlend <= 0f) inverted = false;
@@ -311,10 +314,13 @@ namespace RhythmActionGame
                 }
             }
             LeanDegrees = lean;
+            // 카메라 연출이 몸 방향을 돌리면(포위 전투에서 공격하는 적 쪽, 윈드밀 회전) 몸도 같이 돈다 → 카메라가 내 등·몸통 안을 보지 않는다
+            float yaw = director != null && director.motion != null ? director.motion.localEulerAngles.y : 0f;
+            BodyYaw = yaw;
             if (bodyOffset != null)
             {
                 bodyOffset.localPosition = pos;
-                bodyOffset.localRotation = Quaternion.Euler(0f, 0f, lean);
+                bodyOffset.localRotation = Quaternion.Euler(0f, yaw, 0f) * Quaternion.Euler(0f, 0f, lean);
             }
         }
 
@@ -325,7 +331,8 @@ namespace RhythmActionGame
         void FollowHead(float dt, Vector3 motionPos)
         {
             if (cameraRig == null || head == null) return;
-            var now = transform.InverseTransformPoint(head.position);
+            // 머리 움직임은 몸 받침 기준으로 재고(몸이 돌거나 기울어도 같은 값), 눈 위치를 몸 받침과 함께 옮기고 돌린다
+            var now = bodyOffset != null ? bodyOffset.InverseTransformPoint(head.position) : transform.InverseTransformPoint(head.position);
             // 동작 중(R06): 머리를 다 따라가고(몸 받침 이동 포함), 카메라 연출 위치는 몸이 이미 옮겼으니 빼서 두 번 움직이지 않게
             float full = followFull ? actionBlend : 0f;
             float w = Mathf.Lerp(GameConfig.Body.HeadFollowWeight, GameConfig.Body.ActionHeadFollowWeight, full);
@@ -333,7 +340,9 @@ namespace RhythmActionGame
             // 동작 중에는 머리를 그대로 따라감 (부드럽게 늦추면 몸이 먼저 일어설 때 카메라가 몸통 안에 남음). 달리기는 출렁임을 부드럽게.
             float k = Mathf.Lerp(1f - Mathf.Exp(-GameConfig.Body.HeadFollowSharpness * dt), 1f, full);
             rigOffset = Vector3.Lerp(rigOffset, target, k);
-            cameraRig.localPosition = new Vector3(0f, GameConfig.EyeHeight, GameConfig.Body.EyeForward) + rigOffset - motionPos;
+            var eye = new Vector3(0f, GameConfig.EyeHeight, GameConfig.Body.EyeForward) + rigOffset;
+            if (bodyOffset != null) eye = bodyOffset.localPosition + bodyOffset.localRotation * eye;
+            cameraRig.localPosition = eye - motionPos;
         }
 
 

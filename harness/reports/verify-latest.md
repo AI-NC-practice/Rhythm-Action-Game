@@ -1,5 +1,5 @@
 ﻿# Unity verify report
-time: 2026-11-16 23:23:43
+time: 2026-11-16 23:49:45
 
 ## EditMode : total=200 passed=200 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
@@ -203,7 +203,7 @@ time: 2026-11-16 23:23:43
   - [Passed] RhythmActionGame.Tests.T14_EnemyRigTests.T14_GameScene_EveryEnemy_HasModel_WeaponOnHandBone_NoCapsule
   - [Passed] RhythmActionGame.Tests.T14_EnemyRigTests.T14_PlayerController_HasExecutionAndHitStates
 
-## PlayMode : total=173 passed=173 failed=0 skipped=0 result=Passed
+## PlayMode : total=174 passed=174 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -330,6 +330,7 @@ time: 2026-11-16 23:23:43
   - [Passed] RhythmActionGame.Tests.R03_MapScenePlayTests.R03_EnemiesAndForeshadow_StandOnVisibleRoofWallOrGround
   - [Passed] RhythmActionGame.Tests.R04_NoGrayShapesPlayTests.R04_EventPropPreviews_Png
   - [Passed] RhythmActionGame.Tests.R04_NoGrayShapesPlayTests.R04_GameScene_NoVisibleGrayPrimitive
+  - [Passed] RhythmActionGame.Tests.R06_FirstPersonViewPlayTests.R06_Chapter4Surround_BodyTurnsWithCamera_NoScreenCover
   - [Passed] RhythmActionGame.Tests.R06_FirstPersonViewPlayTests.R06_Fail_HeadlessBodyNeverInFront
   - [Passed] RhythmActionGame.Tests.R06_FirstPersonViewPlayTests.R06_Normal_WallRunLeans_SlideCoverCapped
   - [Passed] RhythmActionGame.Tests.R06_FirstPersonViewPlayTests.R06_Perfect_WallRunLeans45_SlideCoverCapped
