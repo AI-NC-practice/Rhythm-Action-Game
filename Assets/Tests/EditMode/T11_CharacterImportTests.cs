@@ -61,7 +61,8 @@ namespace RhythmActionGame.Tests
                 Assert.AreEqual(1, withMesh.Count, $"{c.id}: 메시 FBX 하나");
                 Assert.AreEqual($"{dir}/{c.id}_{c.animations[0]}.fbx", withMesh[0]);
                 int tris = AssetDatabase.LoadAllAssetsAtPath(withMesh[0]).OfType<Mesh>().Sum(m => m.triangles.Length / 3);
-                Assert.LessOrEqual(tris, 5000, $"{c.id} 삼각형 5,000 이하 ({tris})");
+                // T11R(2026-11-16 사용자 결정): 손가락·모자 챙이 무너지지 않게 캐릭터 상한 15,000
+                Assert.LessOrEqual(tris, 15000, $"{c.id} 삼각형 15,000 이하 ({tris})");
             }
             var player = AssetDatabase.LoadAllAssetsAtPath("Assets/Art/Models/player/player_forward_run_1.fbx").OfType<Avatar>().First();
             Assert.IsTrue(player.humanDescription.human.Any(h => h.humanName.Contains("Index")), "player는 손가락 뼈 (humanoid-fingers)");

@@ -76,3 +76,5 @@ __pycache__/
 
 # T11: VARCO 원본 동작 FBX(각 8 MB, 다시 받기: harness/reports/varco/t11-<id>.txt)
 harness/reports/varco/*_raw/
+harness/reports/varco/v2_high/
+harness/reports/varco/test/
