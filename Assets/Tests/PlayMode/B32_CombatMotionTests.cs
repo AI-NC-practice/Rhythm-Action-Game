@@ -189,6 +189,9 @@ namespace RhythmActionGame.Tests
                 yield return null;
                 Assert.AreEqual(Judgement.Perfect, c.Result);
                 bool wall = Flat(p0 + pm - C).magnitude > GameConfig.CombatArenaRadius - 0.1f || Flat(p0 + pm + f * dir.FightDistance - C).magnitude > GameConfig.CombatArenaRadius - 0.1f;   // 원 가장자리에 몰리면 물러남 (B13.1)
+                // 작업 R07 후속: 지붕 위(성문 위 무사)에서는 옆으로 지붕 안쪽까지만 — 지붕 끝에 몰린 이동도 가장자리처럼 본다
+                if (!float.IsPositiveInfinity(dir.ArenaLateral))
+                    wall |= Mathf.Abs(Vector3.Dot(p0 + pm - C, dir.ArenaRight)) > dir.ArenaLateral - 0.05f || Mathf.Abs(Vector3.Dot(p0 + pm + f * dir.FightDistance - C, dir.ArenaRight)) > dir.ArenaLateral - 0.05f;
                 if (step.Key != ArrowKey.Down && !wall)
                     Assert.Less(Vector3.Distance(Flat(p0 + pm), Flat(dir.MotionPlayerTarget)), 0.05f, $"{i}: {step.Kind} {step.Key} 이동 목표 (표 B13.1)");
                 yield return Frames(Mathf.CeilToInt(GameConfig.CombatMoveSeconds / Dt) + 2);

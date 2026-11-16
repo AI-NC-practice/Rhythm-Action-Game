@@ -269,12 +269,18 @@ namespace RhythmActionGame.EditorTools
             float? Surface(Vector3 q, float pathY)
             {
                 float top = pathY < 0.3f ? pathY + 0.15f : pathY + 0.6f;   // 땅 길에서는 땅만 (집 기단 위로 달리지 않게)
-                var hs = HeightsAt(q).Where(h => h.y >= pathY - 3.5f && h.y <= top && !IsNotGround(Owner(h.owner))).ToList();
-                return hs.Count == 0 ? (float?)null : hs.Max(h => h.y);
+                var all = HeightsAt(q);
+                var hs = all.Where(h => h.y >= pathY - 3.5f && h.y <= top && !IsNotGround(Owner(h.owner))).ToList();
+                if (hs.Count == 0) return null;
+                float y = hs.Max(h => h.y);
+                // 작업 R07 후속: 머리 위 2 m 안에 다른 면(좌판·처마·집)이 있으면 그 속을 지나가므로 못 씀
+                if (all.Any(h => h.y > y + 0.3f && h.y < y + 2.0f)) return null;
+                return y;
             }
             foreach (var prop in eventProps.GetComponentsInChildren<EventProp>(true))
             {
                 string how = prop.companion != "" ? prop.companion : prop.kind;
+                if (how == EventCatalog.Charge && prop.enemy != null) { ChargeProfile(prop); continue; }
                 if (how != EventCatalog.Chase || prop.enemy == null) continue;
                 float side = prop.slotSides.Length > 0 ? -prop.slotSides[0] : 1f;
                 float step = 0.5f;
@@ -343,6 +349,55 @@ namespace RhythmActionGame.EditorTools
                 Debug.Log($"[SceneBuilder] 추격 프로필 {prop.name}: {n}점, 옆 거리 {bestLat:0.00} m, 면 있음 {bestHits}/{n}");
             }
 
+            // 작업 R07 후속: 돌진 적 — 옆 거리는 집 자리 그대로, 길을 따라 보이는 면 높이 (모자란 칸은 앞뒤를 잇고, 높이가 갑자기 바뀌면 플레이어 경로에 맞춰 오름)
+            void ChargeProfile(EventProp prop)
+            {
+                float lat = prop.enemy.localPosition.x;
+                float step = 0.5f;
+                float d0 = Mathf.Max(0f, (prop.runBeat - EventProp.ChaseBeatsBefore) * GameConfig.MetersPerBeat - 40f);
+                float d1 = (prop.runBeat + prop.beats + EventProp.ChaseBeatsAfter) * GameConfig.MetersPerBeat + 2f;
+                int n = Mathf.FloorToInt((d1 - d0) / step) + 1;
+                var col = new float?[n];
+                var py = new float[n];
+                for (int i = 0; i < n; i++)
+                {
+                    var pt = MapLayout.PointAt(d0 + i * step, out var fwd);
+                    py[i] = pt.y;
+                    col[i] = Surface(pt + MapLayout.RightOf(fwd) * lat, pt.y);
+                }
+                var ys = new float[n];
+                var gap = new bool[n];
+                for (int i = 0; i < n; i++)
+                {
+                    if (col[i].HasValue) { ys[i] = col[i].Value; continue; }
+                    gap[i] = true;
+                    int a = i - 1; while (a >= 0 && !col[a].HasValue) a--;
+                    int b = i + 1; while (b < n && !col[b].HasValue) b++;
+                    ys[i] = a >= 0 && b < n ? Mathf.Lerp(col[a].Value, col[b].Value, (i - a) / (float)(b - a)) : a >= 0 ? col[a].Value : b < n ? col[b].Value : py[i];
+                }
+                for (int i = 0; i < n - 1; i++)
+                {
+                    if (gap[i] || gap[i + 1] || Mathf.Abs(ys[i + 1] - ys[i]) <= 1f) continue;
+                    int a = i, b = i + 1;
+                    while (a > 0 && Mathf.Abs(py[a - 1] - py[a]) > 1e-3f) a--;
+                    while (b < n - 1 && Mathf.Abs(py[b + 1] - py[b]) > 1e-3f) b++;
+                    if (b - a < 4) { a = Mathf.Max(0, i - 3); b = Mathf.Min(n - 1, i + 4); }
+                    for (int j = a + 1; j < b; j++)
+                    {
+                        float t = Mathf.Abs(py[b] - py[a]) > 0.1f ? (py[j] - py[a]) / (py[b] - py[a]) : (j - a) / (float)(b - a);
+                        ys[j] = Mathf.Lerp(ys[a], ys[b], Mathf.Clamp01(t));
+                        gap[j] = true;
+                    }
+                    i = b - 1;
+                }
+                prop.chaseD0 = d0;
+                prop.chaseStep = step;
+                prop.chaseY = ys;
+                prop.chaseX = Enumerable.Repeat(lat, n).ToArray();
+                prop.chaseGap = gap;
+                Debug.Log($"[SceneBuilder] 돌진 프로필 {prop.name}: {n}점, 옆 {lat:0.0} m, 면 있음 {col.Count(c => c.HasValue)}/{n}");
+            }
+
             // 작업 R07: 지붕 위 적이 PERFECT 발차기에 떨어질 자리 — 플레이어 반대쪽에서 옆으로 돌린 여러 방향·거리 중 보이는 면이 가장 낮은 곳 (같으면 앞쪽)
             foreach (var a in enemies.Normal)
             {
@@ -362,6 +417,32 @@ namespace RhythmActionGame.EditorTools
                 a.hasKickLanding = true;
                 a.kickLanding = best;
                 Debug.Log($"[SceneBuilder] 지붕 발차기 착지 {a.name}: {pos} → {best} (낙차 {pos.y - best.y:0.0} m)");
+            }
+
+            // 작업 R07 후속: 지붕 위 전투(지붕 위 적·무사) 자리 둘레의 보이는 면 높이 격자 — 전투 중 발을 지붕 면에 붙이고 옆으로 갈 수 있는 곳을 정한다
+            var roofFighters = enemies.Normal.Where(a => a.onRoof).ToList();
+            if (enemies.Boss != null && enemies.Boss.onRoof) roofFighters.Add(enemies.Boss);
+            foreach (var a in roofFighters)
+            {
+                int n = GameConfig.CombatArenaGridCells;
+                float step = 0.5f;
+                var pos = a.transform.position;
+                var origin = new Vector3(pos.x - n * step * 0.5f, 0f, pos.z - n * step * 0.5f);
+                var ys = new float[n * n];
+                int found = 0;
+                for (int z = 0; z < n; z++)
+                    for (int x = 0; x < n; x++)
+                    {
+                        var q = new Vector3(origin.x + x * step, pos.y, origin.z + z * step);
+                        var hs = HeightsAt(q).Where(h => h.y >= pos.y - 2.5f && h.y <= pos.y + 0.3f && !IsNotGround(Owner(h.owner))).ToList();
+                        ys[z * n + x] = hs.Count > 0 ? hs.Max(h => h.y) : float.NaN;
+                        if (hs.Count > 0) found++;
+                    }
+                a.arenaOrigin = origin;
+                a.arenaStep = step;
+                a.arenaN = n;
+                a.arenaY = ys;
+                Debug.Log($"[SceneBuilder] 지붕 전투 높이 격자 {a.name}: {n}×{n}, 면 있음 {found}, 가운데 {a.ArenaSurface(pos):0.00} (상자 높이 {pos.y:0.00})");
             }
 
             // 작업 R07: 매복 적은 옆(3.2 m)에서 길 쪽(1 m)으로 튀어나온다 — 지붕 비탈에서는 들어올수록 면이 높아지므로 끝자리 면 높이를 잰다

@@ -47,10 +47,10 @@ namespace RhythmActionGame.Tests
 
         class Stat
         {
-            public int runFrames, movingFrames, glideFrames, inPlaceRunFrames, idleFrames, footFrames, floatFrames;
+            public int runFrames, movingFrames, glideFrames, inPlaceRunFrames, idleFrames, footFrames, floatFrames, insideFrames;
             public float maxSpeed, maxGap;
             public string worst;
-            public override string ToString() => $"이동 {movingFrames}, 달리기 {runFrames}, 미끄러짐 {glideFrames}, 제자리 달리기 {inPlaceRunFrames}, 대기 {idleFrames}, 최고 {maxSpeed:0.0} m/s, 발밑 검사 {footFrames} 중 뜸 {floatFrames} (최대 {maxGap:0.00} m {worst})";
+            public override string ToString() => $"이동 {movingFrames}, 달리기 {runFrames}, 미끄러짐 {glideFrames}, 제자리 달리기 {inPlaceRunFrames}, 대기 {idleFrames}, 최고 {maxSpeed:0.0} m/s, 발밑 검사 {footFrames} 중 뜸 {floatFrames} (최대 {maxGap:0.00} m {worst}), 건물 속 {insideFrames}";
         }
 
         const float FootTolerance = 0.35f;
@@ -63,6 +63,7 @@ namespace RhythmActionGame.Tests
         void BuildSupportColliders()
         {
             supportRoot = new GameObject("R07_Support");
+            supportRootStatic = supportRoot;
             int n = 0;
             foreach (var inst in Object.FindObjectsByType<DressingInstancer>(FindObjectsSortMode.None))
                 foreach (var g in inst.groups)
@@ -110,6 +111,12 @@ namespace RhythmActionGame.Tests
         /// 발(루트) 아래 지지면까지 거리 (m). 발 딛는 폭(앞뒤 0.35 m)의 세 점에서 위 0.3 m부터 아래로 쏘아 가장 가까운 값
         /// (기와집 이음매 골처럼 좁은 틈 위를 지나는 순간은 뜬 것으로 치지 않음). 없으면 무한대.
         /// </summary>
+        static GameObject supportRootStatic;
+
+        /// <summary>
+        /// (작업 R07 후속) 보이는 메시로 만든 검사용 충돌체만 센다 — 게임의 보이지 않는 충돌 상자(지붕 길 상자 등)는 보이는 지붕보다 넓을 수 있어
+        /// 공중에 뜬 무사를 놓쳤다 (사용자 피드백 2026-11-17).
+        /// </summary>
         static float FootGap(Transform root)
         {
             float best = float.PositiveInfinity;
@@ -120,6 +127,7 @@ namespace RhythmActionGame.Tests
                 foreach (var h in Physics.RaycastAll(from, Vector3.down, 3f, ~0, QueryTriggerInteraction.Ignore))
                 {
                     if (h.transform.IsChildOf(root)) continue;
+                    if (supportRootStatic != null && !h.transform.IsChildOf(supportRootStatic.transform)) continue;
                     best = Mathf.Min(best, Mathf.Abs(h.distance - 0.3f));
                 }
             }
@@ -128,6 +136,10 @@ namespace RhythmActionGame.Tests
 
         static void CountFoot(Stat st, Transform root)
         {
+            // 작업 R07 후속: 길 옆 집·담 속을 지나감 (허리 높이가 장식 윗면보다 아래이고, 발이 장식 바닥보다 위)
+            var waist = root.position + Vector3.up * 1.0f;
+            float top = DressingInstancer.TopBelow(waist + Vector3.up * 30f, 999f);
+            if (!float.IsNegativeInfinity(top) && top > waist.y + 0.3f && InsideDressing(waist)) st.insideFrames++;
             float gap = FootGap(root);
             st.footFrames++;
             if (gap > FootTolerance)
@@ -168,6 +180,16 @@ namespace RhythmActionGame.Tests
             }
         }
 
+        /// <summary>점이 보이는 길 옆 장식(검사용 충돌체) 안에 있음: 위·아래로 쏜 광선이 모두 그 메시에 맞음.</summary>
+        static bool InsideDressing(Vector3 p)
+        {
+            if (supportRootStatic == null) return false;
+            bool up = false, down = false;
+            foreach (var h in Physics.RaycastAll(p, Vector3.up, 20f)) if (h.transform.IsChildOf(supportRootStatic.transform) && h.collider.name == "dress") { up = true; break; }
+            foreach (var h in Physics.RaycastAll(p, Vector3.down, 20f)) if (h.transform.IsChildOf(supportRootStatic.transform) && h.collider.name == "dress") { down = true; break; }
+            return up && down;
+        }
+
         /// <summary>플레이어 앞뒤 60 m 안 (보이는 곳)만 발밑을 본다.</summary>
         bool Near(Transform t) => (t.position - boot.player.transform.position).sqrMagnitude < 60f * 60f;
 
@@ -196,6 +218,11 @@ namespace RhythmActionGame.Tests
             yield return Load(30);
             yield return Play(52, stats);
             Report("ch1", stats);
+            var ch2 = new Dictionary<string, Stat>();   // 72박 밧줄 그네 + 돌진 적 (사용자 피드백 2026-11-17 "벽을 뚫고 오네")
+            yield return Load(56);
+            yield return Play(76, ch2);
+            Report("ch2", ch2);
+            foreach (var kv in ch2) stats["2:" + kv.Key] = kv.Value;
             var ch3 = new Dictionary<string, Stat>();
             yield return Load(112);
             yield return Play(117.6, ch3, null, 4000);
@@ -219,7 +246,10 @@ namespace RhythmActionGame.Tests
         static void AssertGrounded(Dictionary<string, Stat> stats)
         {
             foreach (var kv in stats.Where(k => k.Value.footFrames > 0))
+            {
                 Assert.LessOrEqual(kv.Value.floatFrames, kv.Value.footFrames / 50, $"{kv.Key}: 공중에 뜸 ({kv.Value})");
+                Assert.LessOrEqual(kv.Value.insideFrames, kv.Value.footFrames / 50, $"{kv.Key}: 건물을 뚫고 지나감 ({kv.Value})");
+            }
         }
 
         /// <summary>5구간 돌진(220박)·전투, 6구간 무사(260박~): 적이 다가올 때 달리고, 멈춰 싸울 때는 제자리에서 달리지 않음.</summary>

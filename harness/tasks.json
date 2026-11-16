@@ -1498,12 +1498,49 @@
                       "notes":  "피드백 4·1번 + 사용자 요청(2026-11-16): 상대가 발차기로 건물에서 떨어지는 장면. 지금은 3구간 지붕 위 창 포졸 PERFECT 때만 나오고 hit_fall 클립 + 코드 궤적이라 약함. 완료: 적·소품 적 이동 속도에 맞춘 달리기, 추격 적 실제 경로·발밑 높이 프로필로 뜬 적 0, 지붕 발차기 Mixamo Flying Back Death + 빌드 때 고른 골목으로 떨어짐 + 카메라 따라봄 (PASS 1회차)."
                   },
                   {
+                      "id":  "R17",
+                      "title":  "[사용자] 추격 연출 개편안 승인 (docs/proposals/chase-redesign.md)",
+                      "type":  "human",
+                      "depends_on":  [
+                                         "R07"
+                                     ],
+                      "acceptance":  [
+                                         "사용자가 docs/proposals/chase-redesign.md의 A(뒤돌아보기 컷)·B(옆 건물 추격 + 뛰어들기)·C(앞질러 착지하는 전투 적)·D(매복 숨김 / 시민)·E(돌진 적 걷기→질주) 중 넣을 것을 정함",
+                                         "시민을 넣으면 종류 수와 VARCO 포인트(1종 약 300) 승인",
+                                         "승인 내용을 docs/GDD-beta.md 새 절로 옮기고 R18 acceptance를 구체화"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  1,
+                      "notes":  "사용자 피드백(2026-11-17): 옆에서 같이 뛰는 추격 적이 같은 편 같음, 돌진 적이 서 있다가 갑자기 달려옴, 아무것도 안 하는 병사(매복 적이 R03에서 엄폐 담이 없어져 보임) — 시민으로 바꾸라. 사용자 아이디어: 가끔 뒤돌아보면 적들이 따라옴, 옆 건물에서 쫓아옴, 앞질러서 싸움."
+                  },
+                  {
+                      "id":  "R18",
+                      "title":  "추격 연출 개편 구현 (R17 승인 범위)",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "R17"
+                                     ],
+                      "acceptance":  [
+                                         "R17에서 승인된 항목만 구현 (제안서 5장 R18-a~e 나누기 참고)",
+                                         "판정 박·키·수는 그대로 (차트 판정 변화 없음), 뒤돌아보기 컷은 판정 원이 떠 있는 동안 없음 — 테스트",
+                                         "모든 적이 공중에 뜨지 않고 건물을 뚫지 않음 (R07_EnemyRunPlayTests 기준 유지)",
+                                         "1인칭·3인칭 미리보기 PNG",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  "R17 승인 후 시작. Mixamo 착지 동작은 사용자 승인 → 사용자 로그인, Claude 다운로드. 시민은 VARCO 포인트 승인 후."
+                  },
+                  {
                       "id":  "R08",
                       "title":  "미뤄 둔 것 1: 슬로모션 성공/실패 차이 + 리듬감 2 다듬기",
                       "type":  "unity",
                       "skill":  "unity-feature",
                       "depends_on":  [
-                                         "R07"
+                                         "R18"
                                      ],
                       "acceptance":  [
                                          "슬로모션 성공과 실패가 화면·소리로 확실히 다름 (B47·B52 사용자 의견: 나중에 다 손보자)",

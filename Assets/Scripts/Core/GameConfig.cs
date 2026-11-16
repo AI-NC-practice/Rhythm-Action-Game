@@ -298,6 +298,13 @@ namespace RhythmActionGame
         // ---------------- GDD-beta B13 움직이며 싸우는 전투 ----------------
         /// <summary>결투 원 반지름 (m, 전투를 시작한 자리 중심).</summary>
         public const float CombatArenaRadius = 5f;
+        /// <summary>작업 R07 후속: 지붕 위 전투에서 길 가운데로부터 옆으로 가는 최대 거리 (m)와 지붕 끝 여유 (m). 지붕 밖 공중으로 나가지 않게.</summary>
+        public const float CombatRoofMaxLateral = 2.5f;
+        public const float CombatRoofEdgeMargin = 0.8f;
+        /// <summary>작업 R07 후속: 지붕 위 전투에서 가운데 면 높이와 이만큼(m) 넘게 차이 나는 비탈·틈으로는 옆으로 가지 않는다.</summary>
+        public const float CombatRoofSlopeDrop = 0.6f;
+        /// <summary>작업 R07 후속: 지붕 위 전투 자리 높이 격자 크기 (칸 수 × 0.5 m, 적 자리 중심).</summary>
+        public const int CombatArenaGridCells = 44;
         /// <summary>싸움 거리 (m): 칼·무사, 창.</summary>
         public const float FightDistanceSword = 2.2f;
         public const float FightDistanceSpear = 2.6f;

@@ -188,6 +188,31 @@ namespace RhythmActionGame
             return true;
         }
 
+        /// <summary>로컬 z(사건 가운데 기준)를 길 거리로 바꿔 실제 길 위 자리·방향에 놓는다. 옆 거리·높이 차이는 집 자리 그대로.</summary>
+        bool ChargeOnPath(Vector3 local, Quaternion localRot)
+        {
+            float center = M(runBeat + beats * 0.5f);
+            float d = center + local.z;
+            if (d < 0f) return false;
+            var home = MapLayout.PointAt(center);
+            var pt = MapLayout.PointAt(d, out var fwd);
+            var w = pt + MapLayout.RightOf(fwd) * local.x;
+            w.y = pt.y + (transform.TransformPoint(enemyHome).y - home.y);
+            // 빌드 때 잰 발밑 높이 프로필이 있으면 그 높이 (담·지붕을 오르내리는 길에서 공중에 뜨지 않게)
+            float f = chaseY != null && chaseY.Length > 1 ? (d - chaseD0) / chaseStep : -1f;
+            ChaseHopping = false;
+            if (f >= 0f && f <= chaseY.Length - 1)
+            {
+                int i = Mathf.Min((int)f, chaseY.Length - 2);
+                w.y = Mathf.Lerp(chaseY[i], chaseY[i + 1], f - i);
+                ChaseHopping = chaseGap != null && chaseGap.Length == chaseY.Length && (chaseGap[i] || chaseGap[i + 1]);
+            }
+            enemy.position = w;
+            // 길 방향 기준으로 집 자리의 로컬 회전을 그대로 (플레이어 쪽을 봄)
+            enemy.rotation = Quaternion.LookRotation(fwd, Vector3.up) * localRot;
+            return true;
+        }
+
         void AnimateEnemy(double t, StageDirector.ObstacleRun run, System.Func<int, float> slotZ, float playerZ)
         {
             string how = companion != "" ? companion : kind;
@@ -206,6 +231,8 @@ namespace RhythmActionGame
                         if (r == Judgement.Perfect) { q = enemyHomeRot * Quaternion.Euler(-Mathf.Min(90f, u * 180f), 0, 0); EnemyDown = true; }
                         else if (r == Judgement.Normal) p.z = slotZ(0) - u * 4f;
                     }
+                    // 작업 R07 후속 (사용자 피드백 2026-11-17 "벽을 뚫고 오네"): 로컬 직선이 아니라 실제 길을 따라 달려온다 (모퉁이에서 건물을 뚫지 않게)
+                    if (ChargeOnPath(p, q)) { if (EnemyDown) State = "Enemy_Down"; return; }
                     break;
                 case EventCatalog.Ambush:
                     // 키 반대쪽 담 뒤에서 판정 1박 전에 튀어나옴

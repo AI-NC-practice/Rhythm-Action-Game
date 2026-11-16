@@ -26,6 +26,35 @@ namespace RhythmActionGame
         /// <summary>작업 R07: 지붕 위 적이 발차기에 떨어질 자리 (빌드 때 보이는 메시로 고른 가장 낮은 면: 골목·마당·낮은 지붕). hasKickLanding이 false면 실행 중에 고른다.</summary>
         public bool hasKickLanding;
         public Vector3 kickLanding;
+
+        /// <summary>
+        /// 작업 R07 후속: 지붕 위 전투 자리 둘레의 보이는 면 높이 격자 (빌드 때 잼). arenaOrigin에서 x·z로 arenaStep(m) 간격 arenaN×arenaN,
+        /// 면이 없으면 NaN. 전투 중 발을 지붕 면에 붙이고, 옆으로 갈 수 있는 거리를 정한다 (보이지 않는 충돌 상자 위 공중에 서지 않게).
+        /// </summary>
+        public Vector3 arenaOrigin;
+        public float arenaStep = 0.5f;
+        public int arenaN;
+        public float[] arenaY = new float[0];
+
+        public bool HasArena => arenaN > 0 && arenaY != null && arenaY.Length == arenaN * arenaN;
+
+        /// <summary>(x, z)의 보이는 면 높이. 그 칸에 면이 없으면 가장 가까운(3칸 안) 면, 그것도 없으면 NaN.</summary>
+        public float ArenaSurface(Vector3 p, bool exact = false)
+        {
+            if (!HasArena) return float.NaN;
+            int ix = Mathf.RoundToInt((p.x - arenaOrigin.x) / arenaStep), iz = Mathf.RoundToInt((p.z - arenaOrigin.z) / arenaStep);
+            for (int r = 0; r <= (exact ? 0 : 3); r++)
+                for (int dz = -r; dz <= r; dz++)
+                    for (int dx = -r; dx <= r; dx++)
+                    {
+                        if (Mathf.Max(Mathf.Abs(dx), Mathf.Abs(dz)) != r) continue;
+                        int x = ix + dx, z = iz + dz;
+                        if (x < 0 || z < 0 || x >= arenaN || z >= arenaN) continue;
+                        float y = arenaY[z * arenaN + x];
+                        if (!float.IsNaN(y)) return y;
+                    }
+            return float.NaN;
+        }
         /// <summary>무기 회전 축 (어깨 위치).</summary>
         public Transform weaponPivot;
         /// <summary>무기 끝 (판정 원과 카메라가 따라가는 점).</summary>

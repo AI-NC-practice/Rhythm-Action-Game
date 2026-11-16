@@ -52,6 +52,7 @@ namespace RhythmActionGame
             charging = false;
             SurroundMotionActive = false;
             moveT = 1f;
+            ArenaLateral = float.PositiveInfinity;
             if (player != null) { player.CombatOffset = Vector3.zero; player.CombatFacing = null; }
         }
 
@@ -65,6 +66,7 @@ namespace RhythmActionGame
             MotionActive = true;
             MotionCenter = player.transform.position;
             MotionPlayer = pFrom = pTo = MotionCenter;
+            ArenaLateral = e.Event.onRoof ? RoofLateralAt(MotionCenter, Flat(player.transform.forward).normalized, e.Actors[0]) : float.PositiveInfinity;
             FightDistance = motionActor.kind == "spear" ? GameConfig.FightDistanceSpear : GameConfig.FightDistanceSword;
             var start = motionActor.transform.position;
             var dir = Flat(start - MotionCenter);
@@ -83,10 +85,88 @@ namespace RhythmActionGame
             motionActor.FacePoint = MotionPlayer;
         }
 
+        /// <summary>지붕 위 전투에서 길 가운데로부터 옆으로 갈 수 있는 거리 (m, 작업 R07 후속). 땅이면 무한대.</summary>
+        public float ArenaLateral { get; private set; } = float.PositiveInfinity;
+        Vector3 arenaFwd = Vector3.forward;
+        float arenaC0 = float.NaN;
+        /// <summary>지붕 위 전투의 옆 방향 (테스트용).</summary>
+        public Vector3 ArenaRight => Vector3.Cross(Vector3.up, arenaFwd);
+
+        /// <summary>
+        /// 지붕 위에서 옆으로 갈 수 있는 거리: 가운데에서 옆으로 0.25 m씩 나가며 발밑 충돌면(지붕 상자)이 같은 높이에 있는 마지막 자리 − 여유,
+        /// GameConfig.CombatRoofMaxLateral 이하 (사용자 피드백 2026-11-17: 마지막 무사가 지붕 밖 공중을 걸음).
+        /// </summary>
+        float RoofLateralAt(Vector3 c, Vector3 fwd, EnemyActor actor)
+        {
+            arenaFwd = fwd.sqrMagnitude > 1e-6f ? fwd : Vector3.forward;
+            var right = Vector3.Cross(Vector3.up, arenaFwd);
+            float half = float.PositiveInfinity;
+            bool grid = actor != null && actor.HasArena;
+            float c0 = grid ? actor.ArenaSurface(c) : c.y;
+            if (float.IsNaN(c0)) c0 = c.y;
+            arenaC0 = c0;
+            foreach (float s in new[] { 1f, -1f })
+            {
+                float last = 0f;
+                for (float o = 0.25f; o <= 8f; o += 0.25f)
+                {
+                    var q = c + right * (s * o);
+                    bool ok = false;
+                    if (grid)   // 보이는 지붕 면이 가운데 높이에서 0.6 m 안 (빌드 때 잰 격자)
+                    {
+                        float y = actor.ArenaSurface(q, true);
+                        ok = !float.IsNaN(y) && Mathf.Abs(y - c0) < GameConfig.CombatRoofSlopeDrop;
+                    }
+                    else
+                        foreach (var h in Physics.RaycastAll(q + Vector3.up * 0.6f, Vector3.down, 1.2f, ~0, QueryTriggerInteraction.Ignore))
+                            if (Mathf.Abs(h.point.y - c.y) < 0.4f) { ok = true; break; }
+                    if (!ok) break;
+                    last = o;
+                }
+                half = Mathf.Min(half, last);
+            }
+            return Mathf.Clamp(half - GameConfig.CombatRoofEdgeMargin, 0.5f, GameConfig.CombatRoofMaxLateral);
+        }
+
+        /// <summary>
+        /// 작업 R07 후속: 적 자리에 보이는 면이 없으면(지붕 이음매 골·틈) 길 방향 앞뒤 2 m 안에서 두 사람 모두 면이 있는 가장 가까운 비킴.
+        /// </summary>
+        /// <summary>그리기용 이음매 비키기 (테스트용).</summary>
+        public Vector3 SeamOffset { get; private set; }
+
+        Vector3 SeamShift(Vector3 enemy, Vector3 player)
+        {
+            if (motionActor == null || !motionActor.HasArena || !Seamy(enemy)) return Vector3.zero;
+            for (float o = 0.25f; o <= 2f; o += 0.25f)
+                foreach (float s in new[] { 1f, -1f })
+                {
+                    var d = arenaFwd * (s * o);
+                    if (!Seamy(enemy + d) && !Seamy(player + d)) return d;
+                }
+            return Vector3.zero;
+        }
+
+        /// <summary>발 딛는 폭(길 방향 앞뒤 0.5 m) 안에 면이 없거나 가운데보다 크게 낮은 칸(이음매 골)이 있음.</summary>
+        bool Seamy(Vector3 p)
+        {
+            foreach (float o in new[] { -0.5f, 0f, 0.5f })
+            {
+                float y = motionActor.ArenaSurface(p + arenaFwd * o, true);
+                if (float.IsNaN(y) || (!float.IsNaN(arenaC0) && y < arenaC0 - GameConfig.CombatRoofSlopeDrop)) return true;
+            }
+            return false;
+        }
+
         Vector3 ClampArena(Vector3 p, float y)
         {
             var d = Flat(p - MotionCenter);
             if (d.magnitude > GameConfig.CombatArenaRadius) d = d.normalized * GameConfig.CombatArenaRadius;
+            if (!float.IsPositiveInfinity(ArenaLateral))   // 지붕 위: 옆으로는 지붕 안쪽까지만
+            {
+                var right = Vector3.Cross(Vector3.up, arenaFwd);
+                float lat = Vector3.Dot(d, right);
+                if (Mathf.Abs(lat) > ArenaLateral) d -= right * (lat - Mathf.Sign(lat) * ArenaLateral);
+            }
             var r = MotionCenter + d;
             r.y = y;
             return r;
@@ -233,9 +313,22 @@ namespace RhythmActionGame
                 facing = Quaternion.RotateTowards(facing, smooth, GameConfig.CombatFaceMaxDegPerSec * dt);
             }
             player.CombatOffset = Flat(MotionPlayer - MotionCenter);
+            var shownEnemy = MotionEnemy;
+            if (encounter.Event.onRoof && motionActor.HasArena)
+            {
+                // 작업 R07 후속: 지붕 위에서는 발을 보이는 지붕 면에 붙인다 (보이지 않는 상자 위 공중에 서지 않게).
+                // 적이 기와집 이음매 골 위면 두 사람을 함께 길 방향으로 비켜 그린다 (싸움 거리·이동 상태는 그대로)
+                var o = SeamShift(MotionEnemy, MotionPlayer);
+                SeamOffset = o;
+                shownEnemy = MotionEnemy + o;
+                player.CombatOffset += Flat(o);
+                float py = motionActor.ArenaSurface(MotionPlayer + o), ey = motionActor.ArenaSurface(shownEnemy);
+                if (!float.IsNaN(py)) player.CombatOffset += Vector3.up * (py - MotionCenter.y);
+                if (!float.IsNaN(ey)) shownEnemy.y = ey;
+            }
             player.CombatFacing = facing;
             player.Place();
-            motionActor.MotionPosition = MotionEnemy;
+            motionActor.MotionPosition = shownEnemy;
             motionActor.FacePoint = MotionPlayer;
         }
 
