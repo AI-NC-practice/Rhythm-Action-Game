@@ -1,0 +1,1307 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>맵 재설계 안</title>
+<style>
+:root{--bg:#f6f2ea;--card:#fffdf8;--ink:#2b2622;--mute:#6f665c;--line:#ddd3c4;--ground:#e9e1d1;--street:#d8ccb6;--edge:#5a5048;
+--obs:#2f6fb0;--en:#c0392b;--fs:#7a4fb0;--lm:#f2c14e;--bad:#c0392b;--ok:#2e7d4f}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1d1b19;--card:#262320;--ink:#eee6da;--mute:#b3a898;--line:#3d3833;--ground:#2f2b27;--street:#433d36;--edge:#141210;--obs:#6aa8e6;--en:#ef6f60;--fs:#b58ae6;--ok:#5fbf86}}
+:root[data-theme="dark"]{--bg:#1d1b19;--card:#262320;--ink:#eee6da;--mute:#b3a898;--line:#3d3833;--ground:#2f2b27;--street:#433d36;--edge:#141210;--obs:#6aa8e6;--en:#ef6f60;--fs:#b58ae6;--ok:#5fbf86}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 "Pretendard","Malgun Gothic",system-ui,sans-serif}
+main{max-width:1100px;margin:0 auto;padding:24px 16px 60px}
+h1{font-size:26px;margin:0 0 4px} h2{font-size:19px;margin:36px 0 10px;border-bottom:1px solid var(--line);padding-bottom:6px} h3{font-size:15px;margin:0 0 4px}
+.sub{color:var(--mute)} .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+table{border-collapse:collapse;width:100%} th,td{text-align:left;vertical-align:top;padding:7px 8px;border-bottom:1px solid var(--line)} th{white-space:nowrap;font-weight:600}
+td.why{color:var(--mute);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px} article{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px} article p{margin:0;font-size:14px}
+svg.map{width:100%;max-width:760px;height:auto;display:block;margin:auto}
+svg text.zl{font-size:12px;font-weight:700;fill:var(--ink)} svg text.zs{font-size:10px;fill:var(--mute)} svg text.bl{font-size:9px;fill:#fff;text-anchor:middle;paint-order:stroke;stroke:#0006;stroke-width:2px}
+svg text.el{font-size:9.5px;fill:var(--ink);font-weight:700;paint-order:stroke;stroke:var(--card);stroke-width:3px} svg text.tick{font-size:9px;fill:var(--mute)}
+.strip{margin:0 0 18px} .strip figcaption{font-weight:600;margin-bottom:4px} .scroll{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--mute)} .legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+ul.checks{list-style:none;padding:0;margin:0} ul.checks li{padding:4px 0} ul.checks b{display:inline-block;min-width:40px} li.ok b{color:var(--ok)} li.bad b{color:var(--bad)} ul.checks span{color:var(--mute);font-size:13px}
+.big{font-size:28px;font-weight:700} .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px} .kpis>div{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 14px} .kpis small{color:var(--mute)}
+ol.ask li{margin:6px 0}
+</style></head><body><main>
+<h1>맵 재설계 안 (R01)</h1>
+<p class="sub">2026-11-16 · 경로 660 m · 실제 차트(stage1.json)의 사건 59개 위치에 맞춰 계산한 배치. 승인되면 R02(에셋) → R03(맵) → R04(회색 상자 교체)로 진행.</p>
+
+<div class="kpis">
+<div><small>배치 계산 결과</small><div class="big">276채</div><small>건물·담 (1~3줄)</small></div>
+<div><small>길가 소품</small><div class="big">182개</div><small>달리는 길 밖에만</small></div>
+<div><small>새 에셋</small><div class="big">35개</div><small>기존 11개는 계속 사용</small></div>
+<div><small>예상 VARCO 포인트</small><div class="big">10,800</div><small>다시 만들기 포함 최대 약 13,400</small></div>
+</div>
+
+<h2>1. 전체 경로</h2>
+<div class="card"><svg viewBox="0 0 760 1000" class="map" role="img" aria-label="전체 경로 배치도">
+<line x1="91.6" y1="890.0" x2="128.4" y2="890.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.6" y1="886.0" x2="128.4" y2="886.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.6" y1="882.0" x2="128.4" y2="882.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.6" y1="878.0" x2="128.4" y2="878.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.6" y1="874.0" x2="128.4" y2="874.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.6" y1="870.0" x2="128.4" y2="870.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.6" y1="866.0" x2="128.4" y2="866.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.6" y1="862.0" x2="128.4" y2="862.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="860.0" x2="128.6" y2="860.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="856.0" x2="128.6" y2="856.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="852.0" x2="128.6" y2="852.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="848.0" x2="128.6" y2="848.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="844.0" x2="128.6" y2="844.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="840.0" x2="128.6" y2="840.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="836.0" x2="128.6" y2="836.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="832.0" x2="128.6" y2="832.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="828.0" x2="128.6" y2="828.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="824.0" x2="128.6" y2="824.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="820.0" x2="128.6" y2="820.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="816.0" x2="128.6" y2="816.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="812.0" x2="128.6" y2="812.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="808.0" x2="128.6" y2="808.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="804.0" x2="128.6" y2="804.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="800.0" x2="128.6" y2="800.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="796.0" x2="128.6" y2="796.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="792.0" x2="128.6" y2="792.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="788.0" x2="128.6" y2="788.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="784.0" x2="128.6" y2="784.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="780.0" x2="128.6" y2="780.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="776.0" x2="128.6" y2="776.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="772.0" x2="128.6" y2="772.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="768.0" x2="128.6" y2="768.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="764.0" x2="128.6" y2="764.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="760.0" x2="128.6" y2="760.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="756.0" x2="128.6" y2="756.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="752.0" x2="128.6" y2="752.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="748.0" x2="128.6" y2="748.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="744.0" x2="128.6" y2="744.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="740.0" x2="128.6" y2="740.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="736.0" x2="128.6" y2="736.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="732.0" x2="128.6" y2="732.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="728.0" x2="128.6" y2="728.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="91.4" y1="724.0" x2="128.6" y2="724.0" stroke="#d8c38f" stroke-width="4.5" opacity=".55"/>
+<line x1="88.0" y1="720.0" x2="132.0" y2="720.0" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="88.0" y1="716.0" x2="132.0" y2="716.0" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="88.0" y1="712.0" x2="132.0" y2="712.0" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="88.0" y1="708.0" x2="132.0" y2="708.0" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="88.0" y1="704.0" x2="132.0" y2="704.0" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="88.0" y1="700.0" x2="132.0" y2="700.0" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="88.0" y1="696.0" x2="132.0" y2="696.0" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="88.0" y1="692.0" x2="132.0" y2="692.0" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="88.0" y1="688.0" x2="132.0" y2="688.0" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="88.0" y1="684.0" x2="132.0" y2="684.0" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="88.0" y1="680.0" x2="132.0" y2="680.0" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="88.0" y1="676.0" x2="132.0" y2="676.0" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="88.0" y1="672.0" x2="132.0" y2="672.0" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="88.0" y1="668.0" x2="132.0" y2="668.0" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="88.0" y1="664.0" x2="132.0" y2="664.0" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="88.0" y1="660.0" x2="132.0" y2="660.0" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="88.0" y1="656.0" x2="132.0" y2="656.0" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="88.0" y1="652.0" x2="132.0" y2="652.0" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="88.0" y1="648.0" x2="132.0" y2="648.0" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="88.0" y1="644.0" x2="132.0" y2="644.0" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="88.0" y1="640.0" x2="132.0" y2="640.0" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="88.0" y1="636.0" x2="132.0" y2="636.0" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="88.0" y1="632.0" x2="132.0" y2="632.0" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="88.0" y1="628.0" x2="132.0" y2="628.0" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="88.0" y1="624.0" x2="132.0" y2="624.0" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="88.0" y1="620.0" x2="132.0" y2="620.0" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="88.0" y1="616.0" x2="132.0" y2="616.0" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="88.0" y1="612.0" x2="132.0" y2="612.0" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="88.8" y1="610.0" x2="131.2" y2="610.0" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="114.0" y1="588.8" x2="114.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="118.0" y1="588.8" x2="118.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="122.0" y1="588.8" x2="122.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="126.0" y1="588.8" x2="126.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="130.0" y1="588.8" x2="130.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="134.0" y1="588.8" x2="134.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="138.0" y1="588.8" x2="138.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="142.0" y1="588.8" x2="142.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="146.0" y1="588.8" x2="146.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="150.0" y1="588.8" x2="150.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="154.0" y1="588.8" x2="154.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="158.0" y1="588.8" x2="158.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="162.0" y1="588.8" x2="162.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="166.0" y1="588.8" x2="166.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="170.0" y1="588.8" x2="170.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="174.0" y1="588.8" x2="174.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="178.0" y1="588.8" x2="178.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="182.0" y1="588.8" x2="182.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="186.0" y1="588.8" x2="186.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="190.0" y1="588.8" x2="190.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="194.0" y1="588.8" x2="194.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="198.0" y1="588.8" x2="198.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="202.0" y1="588.8" x2="202.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="206.0" y1="588.8" x2="206.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="210.0" y1="588.8" x2="210.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="214.0" y1="588.8" x2="214.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="218.0" y1="588.8" x2="218.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="222.0" y1="588.8" x2="222.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="226.0" y1="588.8" x2="226.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="230.0" y1="588.8" x2="230.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="234.0" y1="588.8" x2="234.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="238.0" y1="588.8" x2="238.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="242.0" y1="588.8" x2="242.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="246.0" y1="588.8" x2="246.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="250.0" y1="588.8" x2="250.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="254.0" y1="588.8" x2="254.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="258.0" y1="588.8" x2="258.0" y2="631.2" stroke="#e7a95b" stroke-width="4.5" opacity=".55"/>
+<line x1="260.0" y1="591.2" x2="260.0" y2="628.8" stroke="#a9b0b8" stroke-width="4.5" opacity=".55"/>
+<line x1="264.0" y1="591.2" x2="264.0" y2="628.8" stroke="#a9b0b8" stroke-width="4.5" opacity=".55"/>
+<line x1="268.0" y1="591.2" x2="268.0" y2="628.8" stroke="#a9b0b8" stroke-width="4.5" opacity=".55"/>
+<line x1="272.0" y1="591.2" x2="272.0" y2="628.8" stroke="#a9b0b8" stroke-width="4.5" opacity=".55"/>
+<line x1="276.0" y1="591.2" x2="276.0" y2="628.8" stroke="#a9b0b8" stroke-width="4.5" opacity=".55"/>
+<line x1="280.0" y1="591.2" x2="280.0" y2="628.8" stroke="#a9b0b8" stroke-width="4.5" opacity=".55"/>
+<line x1="284.0" y1="591.2" x2="284.0" y2="628.8" stroke="#a9b0b8" stroke-width="4.5" opacity=".55"/>
+<line x1="288.0" y1="591.2" x2="288.0" y2="628.8" stroke="#a9b0b8" stroke-width="4.5" opacity=".55"/>
+<line x1="292.0" y1="591.2" x2="292.0" y2="628.8" stroke="#a9b0b8" stroke-width="4.5" opacity=".55"/>
+<line x1="296.0" y1="591.2" x2="296.0" y2="628.8" stroke="#a9b0b8" stroke-width="4.5" opacity=".55"/>
+<line x1="300.0" y1="591.2" x2="300.0" y2="628.8" stroke="#a9b0b8" stroke-width="4.5" opacity=".55"/>
+<line x1="304.0" y1="591.2" x2="304.0" y2="628.8" stroke="#a9b0b8" stroke-width="4.5" opacity=".55"/>
+<line x1="308.0" y1="591.2" x2="308.0" y2="628.8" stroke="#a9b0b8" stroke-width="4.5" opacity=".55"/>
+<line x1="312.0" y1="591.2" x2="312.0" y2="628.8" stroke="#a9b0b8" stroke-width="4.5" opacity=".55"/>
+<line x1="316.0" y1="591.2" x2="316.0" y2="628.8" stroke="#a9b0b8" stroke-width="4.5" opacity=".55"/>
+<line x1="320.0" y1="591.2" x2="320.0" y2="628.8" stroke="#a9b0b8" stroke-width="4.5" opacity=".55"/>
+<line x1="324.0" y1="591.2" x2="324.0" y2="628.8" stroke="#a9b0b8" stroke-width="4.5" opacity=".55"/>
+<line x1="328.0" y1="591.2" x2="328.0" y2="628.8" stroke="#a9b0b8" stroke-width="4.5" opacity=".55"/>
+<line x1="332.0" y1="591.2" x2="332.0" y2="628.8" stroke="#a9b0b8" stroke-width="4.5" opacity=".55"/>
+<line x1="336.0" y1="591.2" x2="336.0" y2="628.8" stroke="#a9b0b8" stroke-width="4.5" opacity=".55"/>
+<line x1="340.0" y1="591.2" x2="340.0" y2="628.8" stroke="#a9b0b8" stroke-width="4.5" opacity=".55"/>
+<line x1="344.0" y1="591.2" x2="344.0" y2="628.8" stroke="#a9b0b8" stroke-width="4.5" opacity=".55"/>
+<line x1="348.0" y1="591.2" x2="348.0" y2="628.8" stroke="#a9b0b8" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="591.2" x2="352.0" y2="628.8" stroke="#a9b0b8" stroke-width="4.5" opacity=".55"/>
+<line x1="356.0" y1="591.2" x2="356.0" y2="628.8" stroke="#a9b0b8" stroke-width="4.5" opacity=".55"/>
+<line x1="360.0" y1="591.2" x2="360.0" y2="628.8" stroke="#a9b0b8" stroke-width="4.5" opacity=".55"/>
+<line x1="364.0" y1="591.2" x2="364.0" y2="628.8" stroke="#a9b0b8" stroke-width="4.5" opacity=".55"/>
+<line x1="368.0" y1="591.2" x2="368.0" y2="628.8" stroke="#a9b0b8" stroke-width="4.5" opacity=".55"/>
+<line x1="370.0" y1="592.0" x2="370.0" y2="628.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="606.0" x2="388.0" y2="606.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="602.0" x2="388.0" y2="602.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="598.0" x2="388.0" y2="598.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="594.0" x2="388.0" y2="594.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="590.0" x2="388.0" y2="590.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="586.0" x2="388.0" y2="586.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="582.0" x2="388.0" y2="582.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="578.0" x2="388.0" y2="578.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="574.0" x2="388.0" y2="574.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="570.0" x2="388.0" y2="570.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="566.0" x2="388.0" y2="566.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="562.0" x2="388.0" y2="562.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="558.0" x2="388.0" y2="558.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="554.0" x2="388.0" y2="554.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="550.0" x2="388.0" y2="550.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="546.0" x2="388.0" y2="546.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="542.0" x2="388.0" y2="542.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="538.0" x2="388.0" y2="538.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="534.0" x2="388.0" y2="534.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="530.0" x2="388.0" y2="530.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="526.0" x2="388.0" y2="526.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="522.0" x2="388.0" y2="522.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="518.0" x2="388.0" y2="518.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="514.0" x2="388.0" y2="514.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="510.0" x2="388.0" y2="510.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="506.0" x2="388.0" y2="506.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="502.0" x2="388.0" y2="502.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="498.0" x2="388.0" y2="498.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="494.0" x2="388.0" y2="494.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="490.0" x2="388.0" y2="490.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="486.0" x2="388.0" y2="486.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="482.0" x2="388.0" y2="482.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="478.0" x2="388.0" y2="478.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="474.0" x2="388.0" y2="474.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="470.0" x2="388.0" y2="470.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="466.0" x2="388.0" y2="466.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="462.0" x2="388.0" y2="462.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="458.0" x2="388.0" y2="458.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="454.0" x2="388.0" y2="454.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="450.0" x2="388.0" y2="450.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="446.0" x2="388.0" y2="446.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="442.0" x2="388.0" y2="442.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="438.0" x2="388.0" y2="438.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="434.0" x2="388.0" y2="434.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="430.0" x2="388.0" y2="430.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="426.0" x2="388.0" y2="426.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="422.0" x2="388.0" y2="422.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="418.0" x2="388.0" y2="418.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="414.0" x2="388.0" y2="414.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="410.0" x2="388.0" y2="410.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="406.0" x2="388.0" y2="406.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="402.0" x2="388.0" y2="402.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="398.0" x2="388.0" y2="398.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="394.0" x2="388.0" y2="394.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="390.0" x2="388.0" y2="390.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="386.0" x2="388.0" y2="386.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="382.0" x2="388.0" y2="382.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="378.0" x2="388.0" y2="378.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="374.0" x2="388.0" y2="374.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="370.0" x2="388.0" y2="370.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="366.0" x2="388.0" y2="366.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="362.0" x2="388.0" y2="362.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="358.0" x2="388.0" y2="358.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="354.0" x2="388.0" y2="354.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="350.0" x2="388.0" y2="350.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="346.0" x2="388.0" y2="346.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="342.0" x2="388.0" y2="342.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="338.0" x2="388.0" y2="338.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="352.0" y1="334.0" x2="388.0" y2="334.0" stroke="#7f8794" stroke-width="4.5" opacity=".55"/>
+<line x1="351.2" y1="330.0" x2="388.8" y2="330.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="351.2" y1="326.0" x2="388.8" y2="326.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="351.2" y1="322.0" x2="388.8" y2="322.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="351.2" y1="318.0" x2="388.8" y2="318.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="351.2" y1="314.0" x2="388.8" y2="314.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="351.2" y1="310.0" x2="388.8" y2="310.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="351.2" y1="306.0" x2="388.8" y2="306.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="351.2" y1="302.0" x2="388.8" y2="302.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="351.2" y1="298.0" x2="388.8" y2="298.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="351.2" y1="294.0" x2="388.8" y2="294.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="351.2" y1="290.0" x2="388.8" y2="290.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="351.2" y1="286.0" x2="388.8" y2="286.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="351.2" y1="282.0" x2="388.8" y2="282.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="351.2" y1="278.0" x2="388.8" y2="278.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="351.2" y1="274.0" x2="388.8" y2="274.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="328.0" y1="270.0" x2="412.0" y2="270.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="328.0" y1="266.0" x2="412.0" y2="266.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="328.0" y1="262.0" x2="412.0" y2="262.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="328.0" y1="258.0" x2="412.0" y2="258.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="328.0" y1="254.0" x2="412.0" y2="254.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="328.0" y1="250.0" x2="412.0" y2="250.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="328.0" y1="246.0" x2="412.0" y2="246.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="328.0" y1="242.0" x2="412.0" y2="242.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="328.0" y1="238.0" x2="412.0" y2="238.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="328.0" y1="234.0" x2="412.0" y2="234.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="328.0" y1="230.0" x2="412.0" y2="230.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="328.0" y1="226.0" x2="412.0" y2="226.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="328.0" y1="222.0" x2="412.0" y2="222.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="328.0" y1="218.0" x2="412.0" y2="218.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="328.0" y1="214.0" x2="412.0" y2="214.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="328.0" y1="210.0" x2="412.0" y2="210.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="328.0" y1="206.0" x2="412.0" y2="206.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="328.0" y1="202.0" x2="412.0" y2="202.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="328.0" y1="198.0" x2="412.0" y2="198.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="328.0" y1="194.0" x2="412.0" y2="194.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="328.0" y1="190.0" x2="412.0" y2="190.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="328.0" y1="186.0" x2="412.0" y2="186.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="328.0" y1="182.0" x2="412.0" y2="182.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="328.0" y1="178.0" x2="412.0" y2="178.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="328.0" y1="174.0" x2="412.0" y2="174.0" stroke="#c3b089" stroke-width="4.5" opacity=".55"/>
+<line x1="349.6" y1="170.0" x2="390.4" y2="170.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="374.0" y1="149.6" x2="374.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="378.0" y1="149.6" x2="378.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="382.0" y1="149.6" x2="382.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="386.0" y1="149.6" x2="386.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="390.0" y1="149.6" x2="390.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="394.0" y1="149.6" x2="394.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="398.0" y1="149.6" x2="398.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="402.0" y1="149.6" x2="402.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="406.0" y1="149.6" x2="406.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="410.0" y1="149.6" x2="410.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="414.0" y1="149.6" x2="414.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="418.0" y1="149.6" x2="418.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="422.0" y1="149.6" x2="422.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="426.0" y1="149.6" x2="426.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="430.0" y1="149.6" x2="430.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="434.0" y1="149.6" x2="434.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="438.0" y1="149.6" x2="438.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="442.0" y1="149.6" x2="442.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="446.0" y1="149.6" x2="446.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="450.0" y1="149.6" x2="450.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="454.0" y1="149.6" x2="454.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="458.0" y1="149.6" x2="458.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="462.0" y1="149.6" x2="462.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="466.0" y1="149.6" x2="466.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="470.0" y1="149.6" x2="470.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="474.0" y1="149.6" x2="474.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="478.0" y1="149.6" x2="478.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="482.0" y1="149.6" x2="482.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="486.0" y1="149.6" x2="486.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="490.0" y1="149.6" x2="490.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="494.0" y1="149.6" x2="494.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="498.0" y1="149.6" x2="498.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="502.0" y1="149.6" x2="502.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="506.0" y1="149.6" x2="506.0" y2="190.4" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="510.0" y1="152.0" x2="510.0" y2="188.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="514.0" y1="152.0" x2="514.0" y2="188.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="518.0" y1="152.0" x2="518.0" y2="188.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="522.0" y1="152.0" x2="522.0" y2="188.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="526.0" y1="152.0" x2="526.0" y2="188.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="530.0" y1="152.0" x2="530.0" y2="188.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="534.0" y1="152.0" x2="534.0" y2="188.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="538.0" y1="152.0" x2="538.0" y2="188.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="542.0" y1="152.0" x2="542.0" y2="188.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="546.0" y1="152.0" x2="546.0" y2="188.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="550.0" y1="152.0" x2="550.0" y2="188.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="554.0" y1="152.0" x2="554.0" y2="188.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="558.0" y1="152.0" x2="558.0" y2="188.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="562.0" y1="152.0" x2="562.0" y2="188.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="566.0" y1="152.0" x2="566.0" y2="188.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="570.0" y1="152.0" x2="570.0" y2="188.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="574.0" y1="152.0" x2="574.0" y2="188.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="578.0" y1="152.0" x2="578.0" y2="188.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="582.0" y1="152.0" x2="582.0" y2="188.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="586.0" y1="152.0" x2="586.0" y2="188.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="590.0" y1="152.0" x2="590.0" y2="188.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="594.0" y1="152.0" x2="594.0" y2="188.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="598.0" y1="152.0" x2="598.0" y2="188.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="602.0" y1="152.0" x2="602.0" y2="188.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="606.0" y1="152.0" x2="606.0" y2="188.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="610.0" y1="152.0" x2="610.0" y2="188.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="614.0" y1="152.0" x2="614.0" y2="188.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="618.0" y1="152.0" x2="618.0" y2="188.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="622.0" y1="152.0" x2="622.0" y2="188.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="626.0" y1="152.0" x2="626.0" y2="188.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="630.0" y1="152.0" x2="630.0" y2="188.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="634.0" y1="152.0" x2="634.0" y2="188.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="638.0" y1="152.0" x2="638.0" y2="188.0" stroke="#c47a66" stroke-width="4.5" opacity=".55"/>
+<line x1="640.0" y1="152.0" x2="640.0" y2="188.0" stroke="#9a5a44" stroke-width="4.5" opacity=".55"/>
+<line x1="644.0" y1="152.0" x2="644.0" y2="188.0" stroke="#9a5a44" stroke-width="4.5" opacity=".55"/>
+<line x1="648.0" y1="152.0" x2="648.0" y2="188.0" stroke="#9a5a44" stroke-width="4.5" opacity=".55"/>
+<line x1="632.0" y1="168.0" x2="668.0" y2="168.0" stroke="#9a5a44" stroke-width="4.5" opacity=".55"/>
+<line x1="632.0" y1="164.0" x2="668.0" y2="164.0" stroke="#9a5a44" stroke-width="4.5" opacity=".55"/>
+<line x1="632.0" y1="160.0" x2="668.0" y2="160.0" stroke="#9a5a44" stroke-width="4.5" opacity=".55"/>
+<line x1="632.0" y1="156.0" x2="668.0" y2="156.0" stroke="#9a5a44" stroke-width="4.5" opacity=".55"/>
+<line x1="632.0" y1="152.0" x2="668.0" y2="152.0" stroke="#9a5a44" stroke-width="4.5" opacity=".55"/>
+<line x1="632.0" y1="148.0" x2="668.0" y2="148.0" stroke="#9a5a44" stroke-width="4.5" opacity=".55"/>
+<line x1="632.0" y1="144.0" x2="668.0" y2="144.0" stroke="#9a5a44" stroke-width="4.5" opacity=".55"/>
+<line x1="632.0" y1="140.0" x2="668.0" y2="140.0" stroke="#9a5a44" stroke-width="4.5" opacity=".55"/>
+<line x1="632.0" y1="136.0" x2="668.0" y2="136.0" stroke="#9a5a44" stroke-width="4.5" opacity=".55"/>
+<line x1="632.0" y1="132.0" x2="668.0" y2="132.0" stroke="#9a5a44" stroke-width="4.5" opacity=".55"/>
+<line x1="632.0" y1="128.0" x2="668.0" y2="128.0" stroke="#9a5a44" stroke-width="4.5" opacity=".55"/>
+<line x1="632.0" y1="124.0" x2="668.0" y2="124.0" stroke="#9a5a44" stroke-width="4.5" opacity=".55"/>
+<line x1="632.0" y1="120.0" x2="668.0" y2="120.0" stroke="#9a5a44" stroke-width="4.5" opacity=".55"/>
+<line x1="632.0" y1="116.0" x2="668.0" y2="116.0" stroke="#9a5a44" stroke-width="4.5" opacity=".55"/>
+<line x1="632.0" y1="112.0" x2="668.0" y2="112.0" stroke="#9a5a44" stroke-width="4.5" opacity=".55"/>
+<polyline fill="none" stroke="var(--ink)" stroke-width="2.4" points="110.0,890.0 110.0,886.0 110.0,882.0 110.0,878.0 110.0,874.0 110.0,870.0 110.0,866.0 110.0,862.0 110.0,858.0 110.0,854.0 110.0,850.0 110.0,846.0 110.0,842.0 110.0,838.0 110.0,834.0 110.0,830.0 110.0,826.0 110.0,822.0 110.0,818.0 110.0,814.0 110.0,810.0 110.0,806.0 110.0,802.0 110.0,798.0 110.0,794.0 110.0,790.0 110.0,786.0 110.0,782.0 110.0,778.0 110.0,774.0 110.0,770.0 110.0,766.0 110.0,762.0 110.0,758.0 110.0,754.0 110.0,750.0 110.0,746.0 110.0,742.0 110.0,738.0 110.0,734.0 110.0,730.0 110.0,726.0 110.0,722.0 110.0,718.0 110.0,714.0 110.0,710.0 110.0,706.0 110.0,702.0 110.0,698.0 110.0,694.0 110.0,690.0 110.0,686.0 110.0,682.0 110.0,678.0 110.0,674.0 110.0,670.0 110.0,666.0 110.0,662.0 110.0,658.0 110.0,654.0 110.0,650.0 110.0,646.0 110.0,642.0 110.0,638.0 110.0,634.0 110.0,630.0 110.0,626.0 110.2,622.2 111.0,619.0 112.2,616.2 114.0,614.0 116.2,612.2 119.0,611.0 122.2,610.2 126.0,610.0 130.0,610.0 134.0,610.0 138.0,610.0 142.0,610.0 146.0,610.0 150.0,610.0 154.0,610.0 158.0,610.0 162.0,610.0 166.0,610.0 170.0,610.0 174.0,610.0 178.0,610.0 182.0,610.0 186.0,610.0 190.0,610.0 194.0,610.0 198.0,610.0 202.0,610.0 206.0,610.0 210.0,610.0 214.0,610.0 218.0,610.0 222.0,610.0 226.0,610.0 230.0,610.0 234.0,610.0 238.0,610.0 242.0,610.0 246.0,610.0 250.0,610.0 254.0,610.0 258.0,610.0 262.0,610.0 266.0,610.0 270.0,610.0 274.0,610.0 278.0,610.0 282.0,610.0 286.0,610.0 290.0,610.0 294.0,610.0 298.0,610.0 302.0,610.0 306.0,610.0 310.0,610.0 314.0,610.0 318.0,610.0 322.0,610.0 326.0,610.0 330.0,610.0 334.0,610.0 338.0,610.0 342.0,610.0 346.0,610.0 350.0,610.0 354.0,610.0 357.8,609.8 361.0,609.0 363.8,607.8 366.0,606.0 367.8,603.8 369.0,601.0 369.8,597.8 370.0,594.0 370.0,590.0 370.0,586.0 370.0,582.0 370.0,578.0 370.0,574.0 370.0,570.0 370.0,566.0 370.0,562.0 370.0,558.0 370.0,554.0 370.0,550.0 370.0,546.0 370.0,542.0 370.0,538.0 370.0,534.0 370.0,530.0 370.0,526.0 370.0,522.0 370.0,518.0 370.0,514.0 370.0,510.0 370.0,506.0 370.0,502.0 370.0,498.0 370.0,494.0 370.0,490.0 370.0,486.0 370.0,482.0 370.0,478.0 370.0,474.0 370.0,470.0 370.0,466.0 370.0,462.0 370.0,458.0 370.0,454.0 370.0,450.0 370.0,446.0 370.0,442.0 370.0,438.0 370.0,434.0 370.0,430.0 370.0,426.0 370.0,422.0 370.0,418.0 370.0,414.0 370.0,410.0 370.0,406.0 370.0,402.0 370.0,398.0 370.0,394.0 370.0,390.0 370.0,386.0 370.0,382.0 370.0,378.0 370.0,374.0 370.0,370.0 370.0,366.0 370.0,362.0 370.0,358.0 370.0,354.0 370.0,350.0 370.0,346.0 370.0,342.0 370.0,338.0 370.0,334.0 370.0,330.0 370.0,326.0 370.0,322.0 370.0,318.0 370.0,314.0 370.0,310.0 370.0,306.0 370.0,302.0 370.0,298.0 370.0,294.0 370.0,290.0 370.0,286.0 370.0,282.0 370.0,278.0 370.0,274.0 370.0,270.0 370.0,266.0 370.0,262.0 370.0,258.0 370.0,254.0 370.0,250.0 370.0,246.0 370.0,242.0 370.0,238.0 370.0,234.0 370.0,230.0 370.0,226.0 370.0,222.0 370.0,218.0 370.0,214.0 370.0,210.0 370.0,206.0 370.0,202.0 370.0,198.0 370.0,194.0 370.0,190.0 370.0,186.0 370.2,182.2 371.0,179.0 372.2,176.2 374.0,174.0 376.2,172.2 379.0,171.0 382.2,170.2 386.0,170.0 390.0,170.0 394.0,170.0 398.0,170.0 402.0,170.0 406.0,170.0 410.0,170.0 414.0,170.0 418.0,170.0 422.0,170.0 426.0,170.0 430.0,170.0 434.0,170.0 438.0,170.0 442.0,170.0 446.0,170.0 450.0,170.0 454.0,170.0 458.0,170.0 462.0,170.0 466.0,170.0 470.0,170.0 474.0,170.0 478.0,170.0 482.0,170.0 486.0,170.0 490.0,170.0 494.0,170.0 498.0,170.0 502.0,170.0 506.0,170.0 510.0,170.0 514.0,170.0 518.0,170.0 522.0,170.0 526.0,170.0 530.0,170.0 534.0,170.0 538.0,170.0 542.0,170.0 546.0,170.0 550.0,170.0 554.0,170.0 558.0,170.0 562.0,170.0 566.0,170.0 570.0,170.0 574.0,170.0 578.0,170.0 582.0,170.0 586.0,170.0 590.0,170.0 594.0,170.0 598.0,170.0 602.0,170.0 606.0,170.0 610.0,170.0 614.0,170.0 618.0,170.0 622.0,170.0 626.0,170.0 630.0,170.0 634.0,170.0 637.8,169.8 641.0,169.0 643.8,167.8 646.0,166.0 647.8,163.8 649.0,161.0 649.8,157.8 650.0,154.0 650.0,150.0 650.0,146.0 650.0,142.0 650.0,138.0 650.0,134.0 650.0,130.0 650.0,126.0 650.0,122.0 650.0,118.0 650.0,114.0 650.0,110.0"/>
+<polyline fill="none" stroke="var(--bad)" stroke-dasharray="3 3" stroke-width="1.2" points="110.0,626.0 110.0,610.0 126.0,610.0"/>
+<polyline fill="none" stroke="var(--bad)" stroke-dasharray="3 3" stroke-width="1.2" points="354.0,610.0 370.0,610.0 370.0,594.0"/>
+<polyline fill="none" stroke="var(--bad)" stroke-dasharray="3 3" stroke-width="1.2" points="370.0,186.0 370.0,170.0 386.0,170.0"/>
+<polyline fill="none" stroke="var(--bad)" stroke-dasharray="3 3" stroke-width="1.2" points="634.0,170.0 650.0,170.0 650.0,154.0"/>
+<line x1="110.0" y1="875.0" x2="162.0" y2="875.0" stroke="var(--mute)" stroke-width=".6"/>
+<text x="162.0" y="875.0" class="zl" text-anchor="start">마을 어귀</text>
+<text x="162.0" y="890.0" class="zs" text-anchor="start">0–15 m</text>
+<line x1="110.0" y1="790.0" x2="58.0" y2="790.0" stroke="var(--mute)" stroke-width=".6"/>
+<text x="58.0" y="790.0" class="zl" text-anchor="end">초가 골목</text>
+<text x="58.0" y="805.0" class="zs" text-anchor="end">15–85 m</text>
+<line x1="110.0" y1="665.0" x2="162.0" y2="665.0" stroke="var(--mute)" stroke-width=".6"/>
+<text x="162.0" y="665.0" class="zl" text-anchor="start">장터 큰길</text>
+<text x="162.0" y="680.0" class="zs" text-anchor="start">85–140 m</text>
+<line x1="185.0" y1="610.0" x2="185.0" y2="558.0" stroke="var(--mute)" stroke-width=".6"/>
+<text x="185.0" y="558.0" class="zl" text-anchor="middle">장터 뒷골목</text>
+<text x="185.0" y="573.0" class="zs" text-anchor="middle">140–215 m</text>
+<line x1="315.0" y1="610.0" x2="315.0" y2="662.0" stroke="var(--mute)" stroke-width=".6"/>
+<text x="315.0" y="662.0" class="zl" text-anchor="middle">양반 돌담길</text>
+<text x="315.0" y="677.0" class="zs" text-anchor="middle">215–270 m</text>
+<line x1="370.0" y1="470.0" x2="318.0" y2="470.0" stroke="var(--mute)" stroke-width=".6"/>
+<text x="318.0" y="470.0" class="zl" text-anchor="end">기와지붕 바다</text>
+<text x="318.0" y="485.0" class="zs" text-anchor="end">270–410 m</text>
+<line x1="370.0" y1="300.0" x2="422.0" y2="300.0" stroke="var(--mute)" stroke-width=".6"/>
+<text x="422.0" y="300.0" class="zl" text-anchor="start">뒷마당</text>
+<text x="422.0" y="315.0" class="zs" text-anchor="start">410–440 m</text>
+<line x1="370.0" y1="220.0" x2="302.0" y2="220.0" stroke="var(--mute)" stroke-width=".6"/>
+<text x="302.0" y="220.0" class="zl" text-anchor="end">관아 마당</text>
+<text x="302.0" y="235.0" class="zs" text-anchor="end">440–490 m</text>
+<line x1="440.0" y1="170.0" x2="440.0" y2="222.0" stroke="var(--mute)" stroke-width=".6"/>
+<text x="440.0" y="222.0" class="zl" text-anchor="middle">궁궐 담 길</text>
+<text x="440.0" y="237.0" class="zs" text-anchor="middle">490–560 m</text>
+<line x1="575.0" y1="170.0" x2="575.0" y2="118.0" stroke="var(--mute)" stroke-width=".6"/>
+<text x="575.0" y="118.0" class="zl" text-anchor="middle">궁궐 담 위</text>
+<text x="575.0" y="133.0" class="zs" text-anchor="middle">560–625 m</text>
+<line x1="650.0" y1="145.0" x2="702.0" y2="145.0" stroke="var(--mute)" stroke-width=".6"/>
+<text x="702.0" y="145.0" class="zl" text-anchor="start">성문 누각</text>
+<text x="702.0" y="160.0" class="zs" text-anchor="start">625–660 m</text>
+<circle cx="110.0" cy="890.0" r="6" fill="var(--lm)" stroke="var(--ink)"/>
+<circle cx="110.0" cy="610.0" r="6" fill="var(--lm)" stroke="var(--ink)"/>
+<circle cx="370.0" cy="610.0" r="6" fill="var(--lm)" stroke="var(--ink)"/>
+<circle cx="370.0" cy="270.0" r="6" fill="var(--lm)" stroke="var(--ink)"/>
+<circle cx="370.0" cy="170.0" r="6" fill="var(--lm)" stroke="var(--ink)"/>
+<circle cx="650.0" cy="170.0" r="6" fill="var(--lm)" stroke="var(--ink)"/>
+<circle cx="110.0" cy="870.0" r="2.6" fill="var(--obs)"><title>4박 10 m 수레↑</title></circle>
+<circle cx="110.0" cy="830.0" r="2.6" fill="var(--obs)"><title>12박 30 m 빨랫줄↓</title></circle>
+<circle cx="110.0" cy="810.0" r="2.6" fill="var(--obs)"><title>16박 40 m 항아리</title></circle>
+<circle cx="110.0" cy="790.0" r="2.6" fill="var(--obs)"><title>20박 50 m 술독</title></circle>
+<circle cx="110.0" cy="770.0" r="2.6" fill="var(--en)"><title>24박 60 m 매복(칼포졸)</title></circle>
+<circle cx="110.0" cy="750.0" r="2.6" fill="var(--obs)"><title>28박 70 m 낮은담↑</title></circle>
+<circle cx="110.0" cy="730.0" r="2.6" fill="var(--obs)"><title>32박 80 m 벽타기</title></circle>
+<circle cx="110.0" cy="710.0" r="2.6" fill="var(--en)"><title>36박 90 m 추격(칼포졸)</title></circle>
+<circle cx="110.0" cy="690.0" r="2.6" fill="var(--obs)"><title>40박 100 m 항아리</title></circle>
+<circle cx="110.0" cy="670.0" r="2.6" fill="var(--obs)"><title>44박 110 m 술독</title></circle>
+<circle cx="110.0" cy="670.0" r="2.6" fill="var(--fs)"><title>44박 110 m 복선:지붕위감시</title></circle>
+<circle cx="110.0" cy="650.0" r="2.6" fill="var(--en)"><title>48박 120 m 매복(칼포졸)</title></circle>
+<circle cx="110.0" cy="630.0" r="2.6" fill="var(--obs)"><title>52박 130 m 낮은담↑</title></circle>
+<circle cx="130.0" cy="610.0" r="2.6" fill="var(--obs)"><title>60박 150 m 벽타기</title></circle>
+<circle cx="150.0" cy="610.0" r="2.6" fill="var(--obs)"><title>64박 160 m 차양↑</title></circle>
+<circle cx="170.0" cy="610.0" r="2.6" fill="var(--obs)"><title>68박 170 m 항아리</title></circle>
+<circle cx="190.0" cy="610.0" r="2.6" fill="var(--obs)"><title>72박 180 m 밧줄↑</title></circle>
+<circle cx="210.0" cy="610.0" r="2.6" fill="var(--obs)"><title>76박 190 m 낮은담↑</title></circle>
+<circle cx="230.0" cy="610.0" r="2.6" fill="var(--obs)"><title>80박 200 m 처마↓</title></circle>
+<circle cx="250.0" cy="610.0" r="2.6" fill="var(--en)"><title>84박 210 m 추격(칼포졸)</title></circle>
+<circle cx="270.0" cy="610.0" r="2.6" fill="var(--en)"><title>88박 220 m 매복(칼포졸)</title></circle>
+<circle cx="290.0" cy="610.0" r="2.6" fill="var(--en)"><title>92박 230 m 전투(칼포졸)</title></circle>
+<circle cx="310.0" cy="610.0" r="2.6" fill="var(--obs)"><title>96박 240 m 빨랫줄↓</title></circle>
+<circle cx="330.0" cy="610.0" r="2.6" fill="var(--obs)"><title>100박 250 m 지붕오르기</title></circle>
+<circle cx="350.0" cy="610.0" r="2.6" fill="var(--obs)"><title>104박 260 m 기와미끄럼</title></circle>
+<circle cx="370.0" cy="590.0" r="2.6" fill="var(--obs)"><title>112박 280 m 지붕건너기</title></circle>
+<circle cx="370.0" cy="570.0" r="2.6" fill="var(--en)"><title>116박 290 m 추격(창포졸)</title></circle>
+<circle cx="370.0" cy="550.0" r="2.6" fill="var(--obs)"><title>120박 300 m 지붕건너기</title></circle>
+<circle cx="370.0" cy="530.0" r="2.6" fill="var(--en)"><title>124박 310 m 추격(창포졸)</title></circle>
+<circle cx="370.0" cy="510.0" r="2.6" fill="var(--en)"><title>128박 320 m 지붕 위 전투(창포졸)</title></circle>
+<circle cx="370.0" cy="490.0" r="2.6" fill="var(--en)"><title>132박 330 m 매복(칼포졸)</title></circle>
+<circle cx="370.0" cy="470.0" r="2.6" fill="var(--obs)"><title>136박 340 m 처마↓</title></circle>
+<circle cx="370.0" cy="440.0" r="2.6" fill="var(--obs)"><title>142박 355 m 긴도약</title></circle>
+<circle cx="370.0" cy="410.0" r="2.6" fill="var(--en)"><title>148박 370 m 추격(칼포졸)</title></circle>
+<circle cx="370.0" cy="390.0" r="2.6" fill="var(--en)"><title>152박 380 m 지붕 위 전투(칼포졸)</title></circle>
+<circle cx="370.0" cy="370.0" r="2.6" fill="var(--en)"><title>156박 390 m 매복(칼포졸)</title></circle>
+<circle cx="370.0" cy="350.0" r="2.6" fill="var(--en)"><title>160박 400 m 추격(창포졸)</title></circle>
+<circle cx="370.0" cy="330.0" r="2.6" fill="var(--obs)"><title>164박 410 m 뛰어내리기</title></circle>
+<circle cx="370.0" cy="310.0" r="2.6" fill="var(--obs)"><title>168박 420 m 항아리</title></circle>
+<circle cx="370.0" cy="310.0" r="2.6" fill="var(--fs)"><title>168박 420 m 복선:담넘기</title></circle>
+<circle cx="370.0" cy="290.0" r="2.6" fill="var(--obs)"><title>172박 430 m 낮은담↑</title></circle>
+<circle cx="370.0" cy="250.0" r="2.6" fill="var(--obs)"><title>180박 450 m 낮은담↑</title></circle>
+<circle cx="370.0" cy="230.0" r="2.6" fill="var(--en)"><title>184박 460 m 포위 전투</title></circle>
+<circle cx="380.0" cy="170.0" r="2.6" fill="var(--obs)"><title>198박 495 m 화살</title></circle>
+<circle cx="400.0" cy="170.0" r="2.6" fill="var(--obs)"><title>202박 505 m 닫히는대문</title></circle>
+<circle cx="420.0" cy="170.0" r="2.6" fill="var(--obs)"><title>206박 515 m 벽타기</title></circle>
+<circle cx="440.0" cy="170.0" r="2.6" fill="var(--obs)"><title>210박 525 m 항아리</title></circle>
+<circle cx="470.0" cy="170.0" r="2.6" fill="var(--obs)"><title>216박 540 m 벽타기</title></circle>
+<circle cx="490.0" cy="170.0" r="2.6" fill="var(--en)"><title>220박 550 m 돌진(칼포졸)</title></circle>
+<circle cx="510.0" cy="170.0" r="2.6" fill="var(--obs)"><title>224박 560 m 지붕오르기</title></circle>
+<circle cx="530.0" cy="170.0" r="2.6" fill="var(--en)"><title>228박 570 m 매복(창포졸)</title></circle>
+<circle cx="550.0" cy="170.0" r="2.6" fill="var(--obs)"><title>232박 580 m 처마↓</title></circle>
+<circle cx="570.0" cy="170.0" r="2.6" fill="var(--en)"><title>236박 590 m 추격(칼포졸)</title></circle>
+<circle cx="590.0" cy="170.0" r="2.6" fill="var(--en)"><title>240박 600 m 지붕 위 전투(창포졸)</title></circle>
+<circle cx="610.0" cy="170.0" r="2.6" fill="var(--en)"><title>244박 610 m 추격(창포졸)</title></circle>
+<circle cx="610.0" cy="170.0" r="2.6" fill="var(--fs)"><title>244박 610 m 복선:성문무사</title></circle>
+<circle cx="630.0" cy="170.0" r="2.6" fill="var(--obs)"><title>248박 620 m 성문오르기</title></circle>
+<circle cx="650.0" cy="170.0" r="2.6" fill="var(--obs)"><title>252박 630 m 깃발줄↓</title></circle>
+<circle cx="650.0" cy="130.0" r="2.6" fill="var(--en)"><title>260박 650 m 무사 결전</title></circle>
+<text x="102.0" y="912.0" class="zl">출발</text>
+</svg>
+<div class="legend"><span><i style="background:var(--lm)"></i>랜드마크</span><span><i style="background:var(--obs)"></i>장애물·사건</span><span><i style="background:var(--en)"></i>적</span><span><i style="background:var(--fs)"></i>복선</span><span><i style="border:1px dashed var(--bad)"></i>지금의 90° 꺾임 → 곡선</span></div></div>
+
+<h2>2. 1인칭 눈높이에서 보이는 장면</h2>
+<div class="grid"><article><h3>1 · 마을 어귀 → 초가 골목 (0~85 m)</h3><p>장승 한 쌍 사이로 출발한다. 오른쪽에 큰 느티나무, 낮은 싸리 울타리 너머로 초가 지붕들이 보인다. 곧 흙담과 초가가 붙어 선 6.6 m 골목으로 들어간다. 담 밑에는 장독대·장작더미·지게가 놓여 있고, 빨랫줄(12박)이 길을 가로지른다. 매복 포졸은 초가 사립문에서 튀어나온다. 80 m 벽타기 지점은 골목이 2 m로 좁아지는 흙담 통로다.</p></article><article><h3>1 뒤 ~ 2 · 장터 (85~215 m)</h3><p>통로를 빠져나오면 폭 10 m 장터 큰길이다. 양쪽에 2층 시전 상점채가 이어지고, 앞에는 흰 차양·색 천 차양 좌판, 옹기 진열, 포목 천 걸이, 짚단, 청사초롱 장대가 빽빽하다(10 m당 10개). 110 m부터 오른쪽 길가 지붕 위에 감시 포졸이 서 있다(복선). 적 높이를 그 지붕 높이에 맞춰 공중에 뜨지 않게 한다. 140 m 모퉁이는 큰 느티나무와 우물이 있는 장터 광장이고, 곡선으로 돌아 장터 뒷골목으로 이어진다. 뒷골목은 차양 튕기기(160 m), 밧줄 넘기(180 m), 낮은 처마(200 m)가 장터 소품 그대로 나온다.</p></article><article><h3>2 끝 · 양반 돌담길 (215~270 m)</h3><p>장터 소음이 끝나고 돌담과 기와집, 솟을대문이 이어지는 조용한 길이다. 소나무가 담 위로 넘어온다. 230 m 칼 포졸 전투는 우물이 있는 작은 공터에서 한다. 길 끝 정면에 2층 누각이 보이고, 250 m에서 기와지붕으로 올라간다.</p></article><article><h3>3 · 기와지붕 바다 (270~440 m)</h3><p>발밑은 기와지붕, 양옆과 앞으로 기와집·작은 기와집·긴 행랑채 지붕이 겹겹이 이어진다. 높이는 4.5~5.5 m로 지붕마다 조금씩 다르다. 추격 포졸은 3.5 m 옆 지붕을 달리고, 지붕 위 창 포졸 전투에서 PERFECT면 그 포졸이 발차기에 맞아 골목으로 떨어진다. 410 m에서 뒷마당으로 뛰어내리면 장독대와 평상이 있고, 낮은 담을 넘어 관아 마당으로 들어간다.</p></article><article><h3>4 · 관아 마당 (440~490 m)</h3><p>30 m 마당을 높이 2.6 m 담이 둘러싼다. 가운데는 비워 두고, 담 쪽에 느티나무·평상·장독대·깃발 장대를 둔다. 포졸들이 담을 넘어 들어온다(복선, 발밑에 담이 있다).</p></article><article><h3>5 · 6 · 궁궐 담 → 성문 (490~660 m)</h3><p>모퉁이를 돌면 정면에 궁궐 전각 지붕이 크게 보인다. 왼쪽은 5 m 궁궐 담, 오른쪽은 관청 기와집과 솟을대문이다. 505 m 닫히는 대문은 길을 가로지르는 궁궐 문(문짝 두 짝)이다. 560 m부터는 궁궐 담 위를 달리며 왼쪽 아래로 전각, 오른쪽 아래로 도성 지붕 바다가 보인다. 마지막은 성문 누각과 깃발, 무사 결전이다.</p></article></div>
+
+<h2>3. 배치 원칙 (수치는 GameConfig.Map으로)</h2>
+<div class="card"><table><tr><th>길 폭 (담·건물 앞면 사이)</th><td>초가 골목 6.6 m · 장터 큰길 10 m · 장터 뒷골목 9.2 m · 양반 돌담길 6.8 m · 궁궐 담 길 8.4 m · 관아 마당 30 m</td><td class='why'>지금은 장식이 길에서 4.5 m + 모델 두께 절반 이상 떨어져 있어 거리가 휑했다. 골목은 좁게, 장터는 넓게 강약을 준다.</td></tr><tr><th>달리는 길</th><td>가운데 폭 3.6 m는 항상 비움</td><td class='why'>소품이 판정 동작을 가리지 않게 한다. 사건 지점 앞뒤 3 m는 길가 2.4 m 안쪽도 비운다.</td></tr><tr><th>건물 사이 틈</th><td>0~1.2 m (붙여서 이어지는 거리), 18% 확률로 3~4.5 m 샛골목</td><td class='why'>샛골목 사이로 뒤 줄 지붕이 보여 깊이가 생긴다.</td></tr><tr><th>같은 모델 반복</th><td>같은 건물 모델이 연달아 붙지 않음, 같은 쪽 최근 2채와 다른 모델</td><td class='why'>담은 이어져야 자연스러워서 예외.</td></tr><tr><th>변화</th><td>회전 ±4°, 크기 0.92~1.08배, 기단 높이 0~0.4 m, 앞면 들쭉날쭉 0~0.6 m</td><td class='why'>줄 맞춘 느낌을 없앤다.</td></tr><tr><th>깊이 (줄 수)</th><td>1줄: 길가 · 2줄: 길에서 8.5 m 뒤(±1.5) · 3줄: 20 m 뒤(±1.5) · 그 너머 40~300 m: 낮은 지붕 바다(인스턴싱) · 300 m: 배경 그림</td><td class='why'>가까운 곳은 실제 모델, 먼 곳은 그림 착시 (사용자 요구 사항).</td></tr><tr><th>소품 밀도 (10 m당)</th><td>어귀 3 · 초가 골목 3 · 장터 큰길 10 · 장터 뒷골목 6 · 양반 돌담길 3 · 뒷마당 4 · 관아 마당 2 · 궁궐 담 길 2</td><td class='why'>장터가 가장 북적이고, 지붕·담 위는 비운다.</td></tr><tr><th>시선 끝 랜드마크</th><td>출발(장승·느티나무), 140 m 장터 광장(큰 느티나무·우물), 270 m 누각, 440 m 관아 정문, 490 m 궁궐 전각, 630 m 성문 누각</td><td class='why'>모퉁이마다 정면에 큰 것이 보여 길을 따라가는 이유가 생긴다.</td></tr><tr><th>모퉁이</th><td>90° 꺾임을 반지름 8 m 곡선으로 (경로 길이·판정 박자 유지)</td><td class='why'>순간이동처럼 보이던 꺾임을 없앤다. 곡선 안에 걸리는 사건은 화살 세례(198박, 495 m)와 깃발 줄(252박, 630 m) 두 개 — R03에서 곡선을 피하게 사건 자리를 몇 m 옮기거나 그 모퉁이만 반지름을 줄인다.</td></tr></table></div>
+
+<h2>4. 구간별 배치도 (경로를 펴서 위에서 본 그림)</h2>
+<p class="sub">가로 = 경로 거리(m), 세로 = 달리는 방향 기준 왼쪽(위)·오른쪽(아래). 점선 상자 = 달리는 길 3.6 m. 진한 건물 = 길가 1줄, 옅을수록 뒤 줄. 빨간 막대 = 매복 대문. 마우스를 올리면 이름이 나온다. 가로로 스크롤된다.</p>
+<div class="legend" style="margin-bottom:10px"><span><i style="background:#c9a86a"></i>초가</span><span><i style="background:#6d7480"></i>기와</span><span><i style="background:#8a6f58"></i>시전</span><span><i style="background:#b08b62"></i>흙담</span><span><i style="background:#8d8d88"></i>돌담</span><span><i style="background:#b5654f"></i>궁궐 담</span><span><i style="background:#e8e0cc"></i>좌판</span><span><i style="background:#5f8f4f"></i>나무</span></div>
+<figure class="strip"><figcaption>1구간 앞: 어귀 + 초가 골목 · 0–85 m</figcaption><div class="scroll"><svg viewBox="0 0 615 450" width="615" height="450">
+<rect x="0" y="0" width="615" height="450" fill="var(--ground)"/>
+<rect x="10.0" y="247.4" width="105.0" height="44.8" fill="var(--street)"/>
+<text x="13.0" y="444" class="zs">마을 어귀 · 길 폭 6.4 m</text>
+<rect x="115.0" y="248.1" width="490.0" height="46.2" fill="var(--street)"/>
+<text x="118.0" y="444" class="zs">초가 골목 · 길 폭 6.6 m</text>
+<rect x="10.0" y="237.6" width="595.0" height="25.2" fill="none" stroke="var(--ink)" stroke-dasharray="4 4" stroke-width=".8"/>
+<rect x="136.0" y="25.3" width="59.3" height="42.0" fill="#c9a86a" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>초가</title></rect>
+<rect x="219.2" y="15.0" width="82.4" height="46.8" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="320.5" y="15.0" width="59.7" height="36.6" fill="#c9a86a" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>초가</title></rect>
+<rect x="387.1" y="15.0" width="71.2" height="55.7" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="477.4" y="19.2" width="56.2" height="42.0" fill="#c9a86a" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>초가</title></rect>
+<rect x="540.2" y="15.0" width="64.8" height="49.2" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="133.2" y="384.4" width="52.3" height="42.0" fill="#c9a86a" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>초가</title></rect>
+<rect x="201.8" y="386.0" width="70.9" height="49.0" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="302.9" y="378.4" width="58.1" height="42.0" fill="#c9a86a" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>초가</title></rect>
+<rect x="392.8" y="396.2" width="73.5" height="38.8" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="475.9" y="398.0" width="57.6" height="37.0" fill="#c9a86a" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>초가</title></rect>
+<rect x="550.0" y="396.5" width="55.0" height="38.5" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="27.7" y="98.4" width="55.4" height="42.0" fill="#c9a86a" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>초가</title></rect>
+<rect x="90.7" y="104.0" width="24.3" height="42.0" fill="#c9a86a" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>초가</title></rect>
+<rect x="30.4" y="314.6" width="55.2" height="42.0" fill="#c9a86a" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>초가</title></rect>
+<rect x="89.3" y="299.0" width="25.7" height="42.0" fill="#c9a86a" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>초가</title></rect>
+<rect x="127.0" y="86.3" width="75.9" height="56.0" fill="#bf9a5c" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>ㄱ자 초가</title></rect>
+<rect x="207.9" y="97.6" width="50.6" height="42.0" fill="#c9a86a" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>초가</title></rect>
+<rect x="265.9" y="79.2" width="79.1" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="351.9" y="101.8" width="61.3" height="42.0" fill="#c9a86a" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>초가</title></rect>
+<rect x="419.8" y="86.5" width="68.1" height="56.0" fill="#bf9a5c" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>ㄱ자 초가</title></rect>
+<rect x="493.8" y="87.9" width="74.4" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="572.0" y="76.4" width="33.0" height="56.0" fill="#bf9a5c" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>ㄱ자 초가</title></rect>
+<rect x="136.6" y="304.5" width="63.6" height="56.0" fill="#bf9a5c" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>ㄱ자 초가</title></rect>
+<rect x="213.3" y="299.7" width="78.6" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="300.8" y="306.4" width="54.0" height="42.0" fill="#c9a86a" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>초가</title></rect>
+<rect x="364.3" y="298.8" width="74.0" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="455.1" y="298.2" width="75.4" height="56.0" fill="#bf9a5c" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>ㄱ자 초가</title></rect>
+<rect x="537.0" y="318.0" width="68.0" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="10.0" y="200.5" width="41.6" height="2.1" fill="#a99a6a" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>싸리 울타리</title></rect>
+<rect x="51.6" y="200.5" width="38.3" height="2.1" fill="#a99a6a" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>싸리 울타리</title></rect>
+<rect x="96.8" y="200.5" width="18.2" height="2.1" fill="#a99a6a" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>싸리 울타리</title></rect>
+<rect x="10.0" y="247.4" width="39.9" height="2.1" fill="#a99a6a" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>싸리 울타리</title></rect>
+<rect x="57.8" y="247.4" width="39.0" height="2.1" fill="#a99a6a" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>싸리 울타리</title></rect>
+<rect x="96.8" y="247.4" width="18.2" height="2.1" fill="#a99a6a" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>싸리 울타리</title></rect>
+<rect x="115.0" y="159.8" width="56.0" height="42.0" fill="#c9a86a" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>초가</title></rect>
+<text x="143.0" y="183.8" class="bl">초가</text>
+<rect x="174.4" y="144.2" width="72.2" height="56.0" fill="#bf9a5c" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>ㄱ자 초가</title></rect>
+<text x="210.5" y="175.2" class="bl">ㄱ자 초가</text>
+<rect x="254.6" y="197.0" width="45.2" height="4.9" fill="#b08b62" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>흙담</title></rect>
+<text x="277.2" y="202.4" class="bl">흙담</text>
+<rect x="327.4" y="159.7" width="59.3" height="42.0" fill="#c9a86a" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>초가</title></rect>
+<text x="357.1" y="183.7" class="bl">초가</text>
+<rect x="394.3" y="145.9" width="65.5" height="56.0" fill="#bf9a5c" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>ㄱ자 초가</title></rect>
+<text x="427.0" y="176.9" class="bl">ㄱ자 초가</text>
+<rect x="484.9" y="197.0" width="47.7" height="4.9" fill="#b08b62" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>흙담</title></rect>
+<text x="508.7" y="202.4" class="bl">흙담</text>
+<rect x="542.0" y="207.5" width="63.0" height="3.5" fill="#6f6a60" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>벽타기 벽</title></rect>
+<text x="573.5" y="212.2" class="bl">벽타기 벽</text>
+<rect x="115.0" y="248.1" width="44.9" height="4.9" fill="#b08b62" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>흙담</title></rect>
+<text x="137.5" y="253.6" class="bl">흙담</text>
+<rect x="162.7" y="251.9" width="49.8" height="42.0" fill="#c9a86a" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>초가</title></rect>
+<text x="187.6" y="275.9" class="bl">초가</text>
+<rect x="213.8" y="251.4" width="65.9" height="56.0" fill="#bf9a5c" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>ㄱ자 초가</title></rect>
+<text x="246.7" y="282.4" class="bl">ㄱ자 초가</text>
+<rect x="286.6" y="248.1" width="42.2" height="2.1" fill="#a99a6a" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>싸리 울타리</title></rect>
+<rect x="333.1" y="248.1" width="46.9" height="4.9" fill="#b08b62" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>흙담</title></rect>
+<text x="356.5" y="253.6" class="bl">흙담</text>
+<rect x="401.2" y="252.3" width="49.8" height="56.0" fill="#bf9a5c" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>ㄱ자 초가</title></rect>
+<text x="426.1" y="283.3" class="bl">ㄱ자 초가</text>
+<rect x="451.0" y="248.1" width="42.0" height="42.0" fill="#c9a86a" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>초가</title></rect>
+<rect x="464.0" y="245.1" width="16" height="6" fill="var(--en)"/>
+<text x="472.0" y="272.1" class="bl">초가</text>
+<rect x="493.0" y="248.1" width="52.1" height="4.9" fill="#b08b62" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>흙담</title></rect>
+<text x="519.0" y="253.6" class="bl">흙담</text>
+<rect x="575.9" y="248.1" width="29.1" height="2.1" fill="#a99a6a" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>싸리 울타리</title></rect>
+<rect x="542.0" y="207.5" width="63.0" height="3.5" fill="#6f6a60" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>벽타기 벽</title></rect>
+<text x="573.5" y="212.2" class="bl">벽타기 벽</text>
+<circle cx="51.7" cy="260.0" r="21.0" fill="#5f8f4f" opacity=".85"><title>느티나무</title></circle>
+<rect x="50.6" y="198.4" width="12.6" height="12.6" rx="2" fill="#d2b56a" stroke="var(--edge)" stroke-width=".5"><title>짚단·멍석</title></rect>
+<rect x="12.6" y="198.4" width="12.6" height="12.6" rx="2" fill="#d2b56a" stroke="var(--edge)" stroke-width=".5"><title>짚단·멍석</title></rect>
+<rect x="31.9" y="203.8" width="6.3" height="6.3" rx="2" fill="#9b7348" stroke="var(--edge)" stroke-width=".5"><title>지게</title></rect>
+<rect x="536.0" y="239.0" width="9.8" height="9.8" rx="2" fill="#6b3f28" stroke="var(--edge)" stroke-width=".5"><title>항아리 무리</title></rect>
+<rect x="447.3" y="195.6" width="15.4" height="15.4" rx="2" fill="#7a4a30" stroke="var(--edge)" stroke-width=".5"><title>장독대</title></rect>
+<rect x="393.6" y="239.0" width="15.4" height="15.4" rx="2" fill="#7a4a30" stroke="var(--edge)" stroke-width=".5"><title>장독대</title></rect>
+<rect x="182.3" y="239.0" width="8.4" height="8.4" rx="2" fill="#b89558" stroke="var(--edge)" stroke-width=".5"><title>광주리 더미</title></rect>
+<rect x="524.0" y="239.0" width="9.8" height="9.8" rx="2" fill="#6b3f28" stroke="var(--edge)" stroke-width=".5"><title>항아리 무리</title></rect>
+<rect x="165.9" y="239.0" width="11.2" height="11.2" rx="2" fill="#94673f" stroke="var(--edge)" stroke-width=".5"><title>장작더미</title></rect>
+<rect x="377.1" y="239.0" width="9.8" height="9.8" rx="2" fill="#6b3f28" stroke="var(--edge)" stroke-width=".5"><title>항아리 무리</title></rect>
+<rect x="126.9" y="239.0" width="9.8" height="9.8" rx="2" fill="#6b3f28" stroke="var(--edge)" stroke-width=".5"><title>항아리 무리</title></rect>
+<rect x="394.2" y="204.6" width="6.3" height="6.3" rx="2" fill="#9b7348" stroke="var(--edge)" stroke-width=".5"><title>지게</title></rect>
+<rect x="306.3" y="239.0" width="15.4" height="15.4" rx="2" fill="#7a4a30" stroke="var(--edge)" stroke-width=".5"><title>장독대</title></rect>
+<rect x="151.7" y="198.4" width="12.6" height="12.6" rx="2" fill="#d2b56a" stroke="var(--edge)" stroke-width=".5"><title>짚단·멍석</title></rect>
+<rect x="376.2" y="198.4" width="12.6" height="12.6" rx="2" fill="#d2b56a" stroke="var(--edge)" stroke-width=".5"><title>짚단·멍석</title></rect>
+<rect x="139.3" y="239.0" width="11.2" height="11.2" rx="2" fill="#94673f" stroke="var(--edge)" stroke-width=".5"><title>장작더미</title></rect>
+<rect x="253.5" y="239.0" width="15.4" height="15.4" rx="2" fill="#7a4a30" stroke="var(--edge)" stroke-width=".5"><title>장독대</title></rect>
+<rect x="258.9" y="201.2" width="9.8" height="9.8" rx="2" fill="#6b3f28" stroke="var(--edge)" stroke-width=".5"><title>항아리 무리</title></rect>
+<rect x="172.6" y="201.2" width="9.8" height="9.8" rx="2" fill="#6b3f28" stroke="var(--edge)" stroke-width=".5"><title>항아리 무리</title></rect>
+<rect x="238.9" y="239.0" width="11.2" height="11.2" rx="2" fill="#94673f" stroke="var(--edge)" stroke-width=".5"><title>장작더미</title></rect>
+<rect x="142.8" y="204.5" width="6.3" height="6.3" rx="2" fill="#9b7348" stroke="var(--edge)" stroke-width=".5"><title>지게</title></rect>
+<rect x="327.9" y="239.4" width="6.3" height="6.3" rx="2" fill="#9b7348" stroke="var(--edge)" stroke-width=".5"><title>지게</title></rect>
+<rect x="245.0" y="199.8" width="11.2" height="11.2" rx="2" fill="#94673f" stroke="var(--edge)" stroke-width=".5"><title>장작더미</title></rect>
+<rect x="326.3" y="203.3" width="6.3" height="6.3" rx="2" fill="#9b7348" stroke="var(--edge)" stroke-width=".5"><title>지게</title></rect>
+<circle cx="66.0" cy="277.5" r="21.0" fill="#5f8f4f" opacity=".85"><title>느티나무</title></circle>
+<rect x="28.2" y="205.4" width="5.6" height="5.6" rx="2" fill="#8b5a3a" stroke="var(--edge)" stroke-width=".5"><title>장승</title></rect>
+<rect x="28.2" y="239.0" width="5.6" height="5.6" rx="2" fill="#8b5a3a" stroke="var(--edge)" stroke-width=".5"><title>장승</title></rect>
+<line x1="80.0" y1="237.6" x2="80.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="82.0" y="207.0" class="el">4 수레↑</text>
+<line x1="220.0" y1="237.6" x2="220.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="222.0" y="220.5" class="el">12 빨랫줄↓</text>
+<line x1="290.0" y1="237.6" x2="290.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="292.0" y="234.0" class="el">16 항아리</text>
+<line x1="360.0" y1="237.6" x2="360.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="362.0" y="247.5" class="el">20 술독</text>
+<line x1="430.0" y1="237.6" x2="430.0" y2="212.4" stroke="var(--en)" stroke-width="2.4"/>
+<text x="432.0" y="207.0" class="el">24 매복(칼포졸)</text>
+<line x1="500.0" y1="237.6" x2="500.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="502.0" y="220.5" class="el">28 낮은담↑</text>
+<line x1="570.0" y1="237.6" x2="570.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="572.0" y="234.0" class="el">32 벽타기</text>
+<text x="10.0" y="10" class="tick">0</text>
+<text x="80.0" y="10" class="tick">10</text>
+<text x="150.0" y="10" class="tick">20</text>
+<text x="220.0" y="10" class="tick">30</text>
+<text x="290.0" y="10" class="tick">40</text>
+<text x="360.0" y="10" class="tick">50</text>
+<text x="430.0" y="10" class="tick">60</text>
+<text x="500.0" y="10" class="tick">70</text>
+<text x="570.0" y="10" class="tick">80</text>
+</svg></div></figure>
+<figure class="strip"><figcaption>1구간 뒤 ~ 2구간: 장터 큰길 · 광장 · 장터 뒷골목 · 85–215 m</figcaption><div class="scroll"><svg viewBox="0 0 930 450" width="930" height="450">
+<rect x="0" y="0" width="930" height="450" fill="var(--ground)"/>
+<rect x="10.0" y="260.0" width="385.0" height="70.0" fill="var(--street)"/>
+<text x="13.0" y="444" class="zs">장터 큰길 · 길 폭 10.0 m</text>
+<rect x="395.0" y="257.2" width="525.0" height="64.4" fill="var(--street)"/>
+<text x="398.0" y="444" class="zs">장터 뒷골목 · 길 폭 9.2 m</text>
+<rect x="10.0" y="237.6" width="910.0" height="25.2" fill="none" stroke="var(--ink)" stroke-dasharray="4 4" stroke-width=".8"/>
+<rect x="18.9" y="15.0" width="77.8" height="33.2" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="111.7" y="15.0" width="73.3" height="41.2" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="211.5" y="15.0" width="81.2" height="39.7" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="318.5" y="15.0" width="76.5" height="27.8" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="17.4" y="390.2" width="80.2" height="44.8" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="132.0" y="398.3" width="76.6" height="36.7" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="232.0" y="398.2" width="75.1" height="36.8" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="310.9" y="406.7" width="84.1" height="28.3" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="414.5" y="15.0" width="87.5" height="36.6" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="514.8" y="15.0" width="82.1" height="48.0" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="621.2" y="15.0" width="73.3" height="45.2" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="699.0" y="15.0" width="77.6" height="43.4" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="785.2" y="15.0" width="84.7" height="35.2" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="885.8" y="15.0" width="34.2" height="43.3" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="414.2" y="395.1" width="84.2" height="39.9" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="528.4" y="393.7" width="70.8" height="41.3" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="620.8" y="398.5" width="73.3" height="36.5" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="727.3" y="389.6" width="83.4" height="45.4" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="827.9" y="399.2" width="75.6" height="35.8" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="33.4" y="84.7" width="75.7" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="122.4" y="75.2" width="102.3" height="49.0" fill="#8a6f58" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>2층 시전 상점채</title></rect>
+<rect x="230.4" y="76.4" width="89.5" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="334.2" y="74.5" width="60.8" height="49.0" fill="#8a6f58" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>2층 시전 상점채</title></rect>
+<rect x="31.9" y="314.2" width="88.1" height="49.0" fill="#8a6f58" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>2층 시전 상점채</title></rect>
+<rect x="123.9" y="318.2" width="77.4" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="212.3" y="310.9" width="103.2" height="49.0" fill="#8a6f58" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>2층 시전 상점채</title></rect>
+<rect x="321.0" y="309.4" width="74.0" height="49.0" fill="#8a6f58" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>2층 시전 상점채</title></rect>
+<rect x="422.5" y="74.9" width="88.7" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="527.1" y="83.5" width="57.3" height="42.0" fill="#c9a86a" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>초가</title></rect>
+<rect x="593.9" y="76.1" width="85.5" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="695.4" y="84.9" width="57.5" height="42.0" fill="#c9a86a" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>초가</title></rect>
+<rect x="766.2" y="83.5" width="81.1" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="856.8" y="97.0" width="49.5" height="42.0" fill="#c9a86a" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>초가</title></rect>
+<rect x="418.2" y="325.4" width="103.4" height="49.0" fill="#8a6f58" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>2층 시전 상점채</title></rect>
+<rect x="530.3" y="312.8" width="77.6" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="618.6" y="321.3" width="60.1" height="42.0" fill="#c9a86a" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>초가</title></rect>
+<rect x="685.7" y="317.2" width="76.3" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="767.7" y="319.8" width="58.4" height="42.0" fill="#c9a86a" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>초가</title></rect>
+<rect x="841.0" y="319.0" width="77.2" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="10.0" y="207.5" width="7.0" height="3.5" fill="#6f6a60" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>벽타기 벽</title></rect>
+<rect x="10.0" y="207.5" width="7.0" height="3.5" fill="#6f6a60" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>벽타기 벽</title></rect>
+<rect x="17.0" y="147.5" width="49.0" height="42.0" fill="#7b8290" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>작은 기와집</title></rect>
+<text x="41.5" y="171.5" class="bl">작은 기와집</text>
+<rect x="70.5" y="145.6" width="124.4" height="42.0" fill="#646b77" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<text x="132.7" y="169.6" class="bl">긴 행랑채</text>
+<rect x="202.5" y="139.7" width="97.0" height="49.0" fill="#8a6f58" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>2층 시전 상점채</title></rect>
+<text x="251.0" y="167.2" class="bl">2층 시전 상점채</text>
+<rect x="303.2" y="144.6" width="61.6" height="42.0" fill="#7b8290" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>작은 기와집</title></rect>
+<text x="334.0" y="168.6" class="bl">작은 기와집</text>
+<rect x="372.1" y="147.5" width="22.9" height="42.0" fill="#646b77" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<rect x="10.0" y="261.5" width="94.5" height="49.0" fill="#8a6f58" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>2층 시전 상점채</title></rect>
+<text x="57.2" y="289.0" class="bl">2층 시전 상점채</text>
+<rect x="106.6" y="262.5" width="107.2" height="42.0" fill="#646b77" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<text x="160.2" y="286.5" class="bl">긴 행랑채</text>
+<rect x="241.7" y="264.0" width="34.3" height="56.0" fill="#6d7480" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<text x="258.9" y="295.0" class="bl">기와집</text>
+<rect x="276.0" y="260.0" width="42.0" height="42.0" fill="#c9a86a" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>초가</title></rect>
+<rect x="289.0" y="257.0" width="16" height="6" fill="var(--en)"/>
+<text x="297.0" y="284.0" class="bl">초가</text>
+<rect x="318.0" y="261.1" width="77.0" height="42.0" fill="#646b77" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<text x="356.5" y="285.1" class="bl">긴 행랑채</text>
+<rect x="395.0" y="150.8" width="57.9" height="42.0" fill="#c9a86a" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>초가</title></rect>
+<text x="424.0" y="174.8" class="bl">초가</text>
+<rect x="460.6" y="140.0" width="96.3" height="49.0" fill="#8a6f58" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>2층 시전 상점채</title></rect>
+<text x="508.8" y="167.5" class="bl">2층 시전 상점채</text>
+<rect x="564.8" y="149.5" width="99.6" height="42.0" fill="#646b77" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<text x="614.6" y="173.5" class="bl">긴 행랑채</text>
+<rect x="671.0" y="149.7" width="51.1" height="42.0" fill="#c9a86a" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>초가</title></rect>
+<text x="696.5" y="173.7" class="bl">초가</text>
+<rect x="749.6" y="142.1" width="102.1" height="49.0" fill="#8a6f58" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>2층 시전 상점채</title></rect>
+<text x="800.7" y="169.6" class="bl">2층 시전 상점채</text>
+<rect x="856.1" y="149.3" width="63.9" height="42.0" fill="#646b77" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<text x="888.0" y="173.3" class="bl">긴 행랑채</text>
+<rect x="395.0" y="257.7" width="42.0" height="49.0" fill="#8a6f58" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>2층 시전 상점채</title></rect>
+<text x="416.0" y="285.2" class="bl">2층 시전 상점채</text>
+<rect x="437.0" y="239.0" width="70.0" height="3.5" fill="#6f6a60" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>벽타기 벽</title></rect>
+<text x="472.0" y="243.8" class="bl">벽타기 벽</text>
+<rect x="507.0" y="259.0" width="60.3" height="42.0" fill="#7b8290" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>작은 기와집</title></rect>
+<text x="537.2" y="283.0" class="bl">작은 기와집</text>
+<rect x="569.0" y="258.8" width="86.1" height="56.0" fill="#6d7480" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<text x="612.0" y="289.8" class="bl">기와집</text>
+<rect x="660.2" y="257.2" width="55.8" height="4.9" fill="#b08b62" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>흙담</title></rect>
+<text x="688.1" y="262.6" class="bl">흙담</text>
+<rect x="721.0" y="257.6" width="90.0" height="49.0" fill="#8a6f58" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>2층 시전 상점채</title></rect>
+<text x="766.0" y="285.1" class="bl">2층 시전 상점채</text>
+<rect x="818.1" y="259.0" width="86.0" height="56.0" fill="#6d7480" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<text x="861.1" y="290.0" class="bl">기와집</text>
+<rect x="31.8" y="243.3" width="15.4" height="15.4" rx="2" fill="#e8e0cc" stroke="var(--edge)" stroke-width=".5"><title>흰 차양 좌판</title></rect>
+<rect x="71.2" y="242.6" width="15.4" height="15.4" rx="2" fill="#e8e0cc" stroke="var(--edge)" stroke-width=".5"><title>흰 차양 좌판</title></rect>
+<rect x="63.2" y="190.8" width="11.2" height="11.2" rx="2" fill="#8c6239" stroke="var(--edge)" stroke-width=".5"><title>수레</title></rect>
+<rect x="141.2" y="247.7" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="124.4" y="192.3" width="15.4" height="15.4" rx="2" fill="#d9a74a" stroke="var(--edge)" stroke-width=".5"><title>색 천 차양 좌판</title></rect>
+<rect x="322.4" y="191.6" width="8.4" height="8.4" rx="2" fill="#b89558" stroke="var(--edge)" stroke-width=".5"><title>광주리 더미</title></rect>
+<rect x="50.1" y="242.8" width="15.4" height="15.4" rx="2" fill="#d9a74a" stroke="var(--edge)" stroke-width=".5"><title>색 천 차양 좌판</title></rect>
+<rect x="376.6" y="247.9" width="9.8" height="9.8" rx="2" fill="#6b3f28" stroke="var(--edge)" stroke-width=".5"><title>항아리 무리</title></rect>
+<rect x="340.6" y="196.6" width="9.8" height="9.8" rx="2" fill="#6b3f28" stroke="var(--edge)" stroke-width=".5"><title>항아리 무리</title></rect>
+<rect x="200.9" y="190.4" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="354.2" y="199.5" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="229.9" y="201.7" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="182.4" y="191.8" width="14.0" height="14.0" rx="2" fill="#b84b4b" stroke="var(--edge)" stroke-width=".5"><title>포목 천 걸이</title></rect>
+<rect x="143.9" y="194.4" width="14.0" height="14.0" rx="2" fill="#b84b4b" stroke="var(--edge)" stroke-width=".5"><title>포목 천 걸이</title></rect>
+<rect x="211.2" y="196.6" width="14.0" height="14.0" rx="2" fill="#b84b4b" stroke="var(--edge)" stroke-width=".5"><title>포목 천 걸이</title></rect>
+<rect x="221.6" y="240.5" width="15.4" height="15.4" rx="2" fill="#d9a74a" stroke="var(--edge)" stroke-width=".5"><title>색 천 차양 좌판</title></rect>
+<rect x="242.0" y="243.3" width="14.0" height="14.0" rx="2" fill="#b84b4b" stroke="var(--edge)" stroke-width=".5"><title>포목 천 걸이</title></rect>
+<rect x="334.8" y="246.8" width="11.2" height="11.2" rx="2" fill="#8c6239" stroke="var(--edge)" stroke-width=".5"><title>수레</title></rect>
+<rect x="289.5" y="195.4" width="15.4" height="15.4" rx="2" fill="#d9a74a" stroke="var(--edge)" stroke-width=".5"><title>색 천 차양 좌판</title></rect>
+<rect x="159.4" y="245.0" width="14.0" height="14.0" rx="2" fill="#b84b4b" stroke="var(--edge)" stroke-width=".5"><title>포목 천 걸이</title></rect>
+<rect x="31.0" y="191.3" width="15.4" height="15.4" rx="2" fill="#d9a74a" stroke="var(--edge)" stroke-width=".5"><title>색 천 차양 좌판</title></rect>
+<rect x="85.3" y="192.7" width="15.4" height="15.4" rx="2" fill="#e8e0cc" stroke="var(--edge)" stroke-width=".5"><title>흰 차양 좌판</title></rect>
+<rect x="365.1" y="196.3" width="11.2" height="11.2" rx="2" fill="#8c6239" stroke="var(--edge)" stroke-width=".5"><title>수레</title></rect>
+<rect x="244.1" y="192.9" width="12.6" height="12.6" rx="2" fill="#d2b56a" stroke="var(--edge)" stroke-width=".5"><title>짚단·멍석</title></rect>
+<rect x="105.3" y="241.8" width="8.4" height="8.4" rx="2" fill="#b89558" stroke="var(--edge)" stroke-width=".5"><title>광주리 더미</title></rect>
+<rect x="362.3" y="254.7" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="123.2" y="246.5" width="11.2" height="11.2" rx="2" fill="#8c6239" stroke="var(--edge)" stroke-width=".5"><title>수레</title></rect>
+<rect x="180.2" y="246.5" width="9.8" height="9.8" rx="2" fill="#6b3f28" stroke="var(--edge)" stroke-width=".5"><title>항아리 무리</title></rect>
+<rect x="94.8" y="253.5" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="208.8" y="246.1" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="166.3" y="197.6" width="8.4" height="8.4" rx="2" fill="#b89558" stroke="var(--edge)" stroke-width=".5"><title>광주리 더미</title></rect>
+<rect x="382.3" y="196.1" width="11.2" height="11.2" rx="2" fill="#8c6239" stroke="var(--edge)" stroke-width=".5"><title>수레</title></rect>
+<rect x="361.4" y="243.0" width="11.2" height="11.2" rx="2" fill="#8c6239" stroke="var(--edge)" stroke-width=".5"><title>수레</title></rect>
+<rect x="103.0" y="192.7" width="9.8" height="9.8" rx="2" fill="#6b3f28" stroke="var(--edge)" stroke-width=".5"><title>항아리 무리</title></rect>
+<rect x="149.6" y="243.0" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="22.1" y="203.6" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="13.2" y="239.9" width="15.4" height="15.4" rx="2" fill="#d9a74a" stroke="var(--edge)" stroke-width=".5"><title>색 천 차양 좌판</title></rect>
+<rect x="90.2" y="240.1" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="270.6" y="193.9" width="16.8" height="16.8" rx="2" fill="#8a5232" stroke="var(--edge)" stroke-width=".5"><title>옹기 진열</title></rect>
+<rect x="23.5" y="193.4" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="310.3" y="197.3" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="193.7" y="242.1" width="12.6" height="12.6" rx="2" fill="#d2b56a" stroke="var(--edge)" stroke-width=".5"><title>짚단·멍석</title></rect>
+<rect x="265.8" y="251.9" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="52.9" y="202.6" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="270.3" y="245.3" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="96.2" y="247.4" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="322.8" y="253.8" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="219.7" y="190.5" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="349.0" y="245.6" width="9.8" height="9.8" rx="2" fill="#6b3f28" stroke="var(--edge)" stroke-width=".5"><title>항아리 무리</title></rect>
+<rect x="115.1" y="198.3" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="332.4" y="241.8" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="51.2" y="190.8" width="8.4" height="8.4" rx="2" fill="#b89558" stroke="var(--edge)" stroke-width=".5"><title>광주리 더미</title></rect>
+<rect x="354.6" y="192.6" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="111.3" y="251.7" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="163.7" y="191.6" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="545.1" y="243.0" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="633.9" y="243.5" width="8.4" height="8.4" rx="2" fill="#b89558" stroke="var(--edge)" stroke-width=".5"><title>광주리 더미</title></rect>
+<rect x="618.4" y="195.4" width="6.3" height="6.3" rx="2" fill="#9b7348" stroke="var(--edge)" stroke-width=".5"><title>지게</title></rect>
+<rect x="395.9" y="195.1" width="15.4" height="15.4" rx="2" fill="#e8e0cc" stroke="var(--edge)" stroke-width=".5"><title>흰 차양 좌판</title></rect>
+<rect x="712.6" y="240.1" width="15.4" height="15.4" rx="2" fill="#d9a74a" stroke="var(--edge)" stroke-width=".5"><title>색 천 차양 좌판</title></rect>
+<rect x="562.4" y="240.2" width="15.4" height="15.4" rx="2" fill="#e8e0cc" stroke="var(--edge)" stroke-width=".5"><title>흰 차양 좌판</title></rect>
+<rect x="504.3" y="198.5" width="8.4" height="8.4" rx="2" fill="#b89558" stroke="var(--edge)" stroke-width=".5"><title>광주리 더미</title></rect>
+<rect x="795.5" y="198.6" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="830.4" y="194.8" width="8.4" height="8.4" rx="2" fill="#b89558" stroke="var(--edge)" stroke-width=".5"><title>광주리 더미</title></rect>
+<rect x="644.4" y="195.1" width="9.8" height="9.8" rx="2" fill="#6b3f28" stroke="var(--edge)" stroke-width=".5"><title>항아리 무리</title></rect>
+<rect x="849.6" y="194.7" width="9.8" height="9.8" rx="2" fill="#6b3f28" stroke="var(--edge)" stroke-width=".5"><title>항아리 무리</title></rect>
+<rect x="656.7" y="246.7" width="6.3" height="6.3" rx="2" fill="#9b7348" stroke="var(--edge)" stroke-width=".5"><title>지게</title></rect>
+<rect x="887.9" y="243.8" width="12.6" height="12.6" rx="2" fill="#d2b56a" stroke="var(--edge)" stroke-width=".5"><title>짚단·멍석</title></rect>
+<rect x="872.9" y="201.8" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="761.7" y="202.0" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="621.2" y="245.0" width="8.4" height="8.4" rx="2" fill="#b89558" stroke="var(--edge)" stroke-width=".5"><title>광주리 더미</title></rect>
+<rect x="565.1" y="193.8" width="16.8" height="16.8" rx="2" fill="#8a5232" stroke="var(--edge)" stroke-width=".5"><title>옹기 진열</title></rect>
+<rect x="418.3" y="202.3" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="814.2" y="194.2" width="12.6" height="12.6" rx="2" fill="#d2b56a" stroke="var(--edge)" stroke-width=".5"><title>짚단·멍석</title></rect>
+<rect x="540.2" y="197.7" width="6.3" height="6.3" rx="2" fill="#9b7348" stroke="var(--edge)" stroke-width=".5"><title>지게</title></rect>
+<rect x="400.5" y="239.8" width="9.8" height="9.8" rx="2" fill="#6b3f28" stroke="var(--edge)" stroke-width=".5"><title>항아리 무리</title></rect>
+<rect x="693.7" y="239.5" width="8.4" height="8.4" rx="2" fill="#b89558" stroke="var(--edge)" stroke-width=".5"><title>광주리 더미</title></rect>
+<rect x="836.4" y="239.5" width="16.8" height="16.8" rx="2" fill="#8a5232" stroke="var(--edge)" stroke-width=".5"><title>옹기 진열</title></rect>
+<rect x="681.7" y="243.2" width="9.8" height="9.8" rx="2" fill="#6b3f28" stroke="var(--edge)" stroke-width=".5"><title>항아리 무리</title></rect>
+<rect x="870.2" y="244.0" width="9.8" height="9.8" rx="2" fill="#6b3f28" stroke="var(--edge)" stroke-width=".5"><title>항아리 무리</title></rect>
+<rect x="543.0" y="249.3" width="6.3" height="6.3" rx="2" fill="#9b7348" stroke="var(--edge)" stroke-width=".5"><title>지게</title></rect>
+<rect x="711.0" y="194.0" width="16.8" height="16.8" rx="2" fill="#8a5232" stroke="var(--edge)" stroke-width=".5"><title>옹기 진열</title></rect>
+<rect x="670.9" y="249.1" width="6.3" height="6.3" rx="2" fill="#9b7348" stroke="var(--edge)" stroke-width=".5"><title>지게</title></rect>
+<rect x="784.0" y="196.5" width="9.8" height="9.8" rx="2" fill="#6b3f28" stroke="var(--edge)" stroke-width=".5"><title>항아리 무리</title></rect>
+<rect x="443.1" y="199.1" width="8.4" height="8.4" rx="2" fill="#b89558" stroke="var(--edge)" stroke-width=".5"><title>광주리 더미</title></rect>
+<rect x="901.0" y="196.2" width="8.4" height="8.4" rx="2" fill="#b89558" stroke="var(--edge)" stroke-width=".5"><title>광주리 더미</title></rect>
+<rect x="766.2" y="247.4" width="6.3" height="6.3" rx="2" fill="#9b7348" stroke="var(--edge)" stroke-width=".5"><title>지게</title></rect>
+<rect x="664.4" y="200.3" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="747.1" y="197.6" width="9.8" height="9.8" rx="2" fill="#6b3f28" stroke="var(--edge)" stroke-width=".5"><title>항아리 무리</title></rect>
+<rect x="415.7" y="245.8" width="9.8" height="9.8" rx="2" fill="#6b3f28" stroke="var(--edge)" stroke-width=".5"><title>항아리 무리</title></rect>
+<rect x="606.5" y="243.6" width="8.4" height="8.4" rx="2" fill="#b89558" stroke="var(--edge)" stroke-width=".5"><title>광주리 더미</title></rect>
+<rect x="784.4" y="244.3" width="9.8" height="9.8" rx="2" fill="#6b3f28" stroke="var(--edge)" stroke-width=".5"><title>항아리 무리</title></rect>
+<rect x="427.7" y="194.5" width="12.6" height="12.6" rx="2" fill="#d2b56a" stroke="var(--edge)" stroke-width=".5"><title>짚단·멍석</title></rect>
+<rect x="523.3" y="195.6" width="8.4" height="8.4" rx="2" fill="#b89558" stroke="var(--edge)" stroke-width=".5"><title>광주리 더미</title></rect>
+<rect x="736.7" y="242.3" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="881.4" y="197.1" width="9.8" height="9.8" rx="2" fill="#6b3f28" stroke="var(--edge)" stroke-width=".5"><title>항아리 무리</title></rect>
+<rect x="739.2" y="247.3" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="814.6" y="243.7" width="9.8" height="9.8" rx="2" fill="#6b3f28" stroke="var(--edge)" stroke-width=".5"><title>항아리 무리</title></rect>
+<rect x="486.2" y="195.3" width="15.4" height="15.4" rx="2" fill="#e8e0cc" stroke="var(--edge)" stroke-width=".5"><title>흰 차양 좌판</title></rect>
+<rect x="802.7" y="195.0" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<circle cx="395.0" cy="288.0" r="21.0" fill="#5f8f4f" opacity=".85"><title>느티나무</title></circle>
+<rect x="367.0" y="172.5" width="14.0" height="14.0" rx="2" fill="#7d8a92" stroke="var(--edge)" stroke-width=".5"><title>우물</title></rect>
+<line x1="45.0" y1="237.6" x2="45.0" y2="212.4" stroke="var(--en)" stroke-width="2.4"/>
+<text x="47.0" y="207.0" class="el">36 추격(칼포졸)</text>
+<line x1="115.0" y1="237.6" x2="115.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="117.0" y="220.5" class="el">40 항아리</text>
+<line x1="185.0" y1="237.6" x2="185.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="187.0" y="234.0" class="el">44 술독</text>
+<rect x="185.0" y="295.0" width="280.0" height="28.0" fill="none" stroke="var(--fs)" stroke-width="2" stroke-dasharray="5 3"/>
+<text x="188.0" y="335.0" class="el">복선:지붕위감시 (발밑 지붕)</text>
+<line x1="255.0" y1="237.6" x2="255.0" y2="212.4" stroke="var(--en)" stroke-width="2.4"/>
+<text x="257.0" y="247.5" class="el">48 매복(칼포졸)</text>
+<line x1="325.0" y1="237.6" x2="325.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="327.0" y="207.0" class="el">52 낮은담↑</text>
+<line x1="465.0" y1="237.6" x2="465.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="467.0" y="220.5" class="el">60 벽타기</text>
+<line x1="535.0" y1="237.6" x2="535.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="537.0" y="234.0" class="el">64 차양↑</text>
+<line x1="605.0" y1="237.6" x2="605.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="607.0" y="247.5" class="el">68 항아리</text>
+<line x1="675.0" y1="237.6" x2="675.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="677.0" y="207.0" class="el">72 밧줄↑</text>
+<line x1="745.0" y1="237.6" x2="745.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="747.0" y="220.5" class="el">76 낮은담↑</text>
+<line x1="815.0" y1="237.6" x2="815.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="817.0" y="234.0" class="el">80 처마↓</text>
+<line x1="885.0" y1="237.6" x2="885.0" y2="212.4" stroke="var(--en)" stroke-width="2.4"/>
+<text x="887.0" y="247.5" class="el">84 추격(칼포졸)</text>
+<text x="45.0" y="10" class="tick">90</text>
+<text x="115.0" y="10" class="tick">100</text>
+<text x="185.0" y="10" class="tick">110</text>
+<text x="255.0" y="10" class="tick">120</text>
+<text x="325.0" y="10" class="tick">130</text>
+<text x="395.0" y="10" class="tick">140</text>
+<text x="465.0" y="10" class="tick">150</text>
+<text x="535.0" y="10" class="tick">160</text>
+<text x="605.0" y="10" class="tick">170</text>
+<text x="675.0" y="10" class="tick">180</text>
+<text x="745.0" y="10" class="tick">190</text>
+<text x="815.0" y="10" class="tick">200</text>
+<text x="885.0" y="10" class="tick">210</text>
+</svg></div></figure>
+<figure class="strip"><figcaption>2구간 끝: 양반 돌담길 · 215–270 m</figcaption><div class="scroll"><svg viewBox="0 0 405 450" width="405" height="450">
+<rect x="0" y="0" width="405" height="450" fill="var(--ground)"/>
+<rect x="10.0" y="248.8" width="385.0" height="47.6" fill="var(--street)"/>
+<text x="13.0" y="444" class="zs">양반 돌담길 · 길 폭 6.8 m</text>
+<rect x="10.0" y="237.6" width="385.0" height="25.2" fill="none" stroke="var(--ink)" stroke-dasharray="4 4" stroke-width=".8"/>
+<rect x="30.5" y="15.0" width="80.5" height="55.2" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="120.8" y="15.0" width="61.4" height="54.3" fill="#9a5a44" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>누각</title></rect>
+<rect x="206.7" y="15.0" width="70.5" height="40.7" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="306.2" y="15.0" width="58.4" height="49.4" fill="#9a5a44" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>누각</title></rect>
+<rect x="22.9" y="384.2" width="61.3" height="50.8" fill="#9a5a44" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>누각</title></rect>
+<rect x="97.4" y="389.5" width="73.7" height="45.5" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="184.6" y="396.3" width="60.7" height="38.7" fill="#9a5a44" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>누각</title></rect>
+<rect x="266.6" y="380.4" width="77.9" height="54.6" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="363.6" y="389.2" width="31.4" height="45.8" fill="#9a5a44" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>누각</title></rect>
+<rect x="20.5" y="87.5" width="74.2" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="100.4" y="89.7" width="84.8" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="199.4" y="89.8" width="81.9" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="293.6" y="94.9" width="79.2" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="17.6" y="318.8" width="81.9" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="111.7" y="305.4" width="71.7" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="198.8" y="302.0" width="90.3" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="304.1" y="311.0" width="83.9" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="10.0" y="143.1" width="77.7" height="56.0" fill="#6d7480" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<text x="48.9" y="174.1" class="bl">기와집</text>
+<rect x="95.8" y="156.0" width="53.2" height="42.0" fill="#7b8290" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>작은 기와집</title></rect>
+<text x="122.4" y="180.0" class="bl">작은 기와집</text>
+<rect x="153.5" y="194.2" width="42.3" height="7.0" fill="#8d8d88" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>돌담</title></rect>
+<text x="174.6" y="200.7" class="bl">돌담</text>
+<rect x="196.1" y="143.6" width="83.5" height="56.0" fill="#6d7480" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<text x="237.9" y="174.6" class="bl">기와집</text>
+<rect x="284.9" y="156.2" width="61.8" height="42.0" fill="#7b8290" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>작은 기와집</title></rect>
+<text x="315.8" y="180.2" class="bl">작은 기와집</text>
+<rect x="348.4" y="194.2" width="43.5" height="7.0" fill="#8d8d88" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>돌담</title></rect>
+<text x="370.1" y="200.7" class="bl">돌담</text>
+<rect x="10.0" y="248.8" width="48.8" height="7.0" fill="#8d8d88" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>돌담</title></rect>
+<text x="34.4" y="255.3" class="bl">돌담</text>
+<rect x="66.0" y="248.8" width="42.0" height="42.0" fill="#5d6470" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>솟을대문 집</title></rect>
+<rect x="79.0" y="245.8" width="16" height="6" fill="var(--en)"/>
+<text x="87.0" y="272.8" class="bl">솟을대문 집</text>
+<rect x="108.0" y="251.5" width="119.0" height="42.0" fill="#646b77" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<text x="167.5" y="275.5" class="bl">긴 행랑채</text>
+<rect x="231.5" y="249.2" width="72.8" height="56.0" fill="#6d7480" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<text x="267.9" y="280.2" class="bl">기와집</text>
+<rect x="333.5" y="248.8" width="42.1" height="7.0" fill="#8d8d88" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>돌담</title></rect>
+<text x="354.6" y="255.3" class="bl">돌담</text>
+<rect x="375.7" y="252.1" width="19.3" height="42.0" fill="#5d6470" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>솟을대문 집</title></rect>
+<circle cx="281.8" cy="251.2" r="12.2" fill="#4f7a4a" opacity=".85"><title>소나무</title></circle>
+<rect x="18.0" y="201.2" width="9.8" height="9.8" rx="2" fill="#6b3f28" stroke="var(--edge)" stroke-width=".5"><title>항아리 무리</title></rect>
+<rect x="11.0" y="239.0" width="15.4" height="15.4" rx="2" fill="#7a4a30" stroke="var(--edge)" stroke-width=".5"><title>장독대</title></rect>
+<rect x="268.4" y="195.6" width="15.4" height="15.4" rx="2" fill="#7a4a30" stroke="var(--edge)" stroke-width=".5"><title>장독대</title></rect>
+<rect x="343.1" y="239.0" width="15.4" height="15.4" rx="2" fill="#7a4a30" stroke="var(--edge)" stroke-width=".5"><title>장독대</title></rect>
+<rect x="352.4" y="195.6" width="15.4" height="15.4" rx="2" fill="#7a4a30" stroke="var(--edge)" stroke-width=".5"><title>장독대</title></rect>
+<circle cx="154.8" cy="251.2" r="12.2" fill="#4f7a4a" opacity=".85"><title>소나무</title></circle>
+<rect x="291.1" y="201.2" width="9.8" height="9.8" rx="2" fill="#6b3f28" stroke="var(--edge)" stroke-width=".5"><title>항아리 무리</title></rect>
+<rect x="378.6" y="239.0" width="15.4" height="15.4" rx="2" fill="#7a4a30" stroke="var(--edge)" stroke-width=".5"><title>장독대</title></rect>
+<circle cx="86.1" cy="198.8" r="12.2" fill="#4f7a4a" opacity=".85"><title>소나무</title></circle>
+<rect x="155.1" y="195.6" width="15.4" height="15.4" rx="2" fill="#7a4a30" stroke="var(--edge)" stroke-width=".5"><title>장독대</title></rect>
+<rect x="226.0" y="201.2" width="9.8" height="9.8" rx="2" fill="#6b3f28" stroke="var(--edge)" stroke-width=".5"><title>항아리 무리</title></rect>
+<circle cx="207.1" cy="251.2" r="12.2" fill="#4f7a4a" opacity=".85"><title>소나무</title></circle>
+<rect x="208.9" y="201.2" width="9.8" height="9.8" rx="2" fill="#6b3f28" stroke="var(--edge)" stroke-width=".5"><title>항아리 무리</title></rect>
+<rect x="130.5" y="195.6" width="15.4" height="15.4" rx="2" fill="#7a4a30" stroke="var(--edge)" stroke-width=".5"><title>장독대</title></rect>
+<circle cx="382.6" cy="198.8" r="12.2" fill="#4f7a4a" opacity=".85"><title>소나무</title></circle>
+<line x1="45.0" y1="237.6" x2="45.0" y2="212.4" stroke="var(--en)" stroke-width="2.4"/>
+<text x="47.0" y="207.0" class="el">88 매복(칼포졸)</text>
+<line x1="115.0" y1="237.6" x2="115.0" y2="212.4" stroke="var(--en)" stroke-width="2.4"/>
+<text x="117.0" y="220.5" class="el">92 전투(칼포졸)</text>
+<line x1="185.0" y1="237.6" x2="185.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="187.0" y="234.0" class="el">96 빨랫줄↓</text>
+<line x1="255.0" y1="237.6" x2="255.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="257.0" y="247.5" class="el">100 지붕오르기</text>
+<line x1="325.0" y1="237.6" x2="325.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="327.0" y="207.0" class="el">104 기와미끄럼</text>
+<text x="45.0" y="10" class="tick">220</text>
+<text x="115.0" y="10" class="tick">230</text>
+<text x="185.0" y="10" class="tick">240</text>
+<text x="255.0" y="10" class="tick">250</text>
+<text x="325.0" y="10" class="tick">260</text>
+<text x="395.0" y="10" class="tick">270</text>
+</svg></div></figure>
+<figure class="strip"><figcaption>3구간: 기와지붕 바다 + 뒷마당 · 270–440 m</figcaption><div class="scroll"><svg viewBox="0 0 1210 450" width="1210" height="450">
+<rect x="0" y="0" width="1210" height="450" fill="var(--ground)"/>
+<rect x="10.0" y="243.2" width="980.0" height="36.4" fill="var(--street)"/>
+<text x="13.0" y="444" class="zs">기와지붕 바다 · 발밑 지붕, 옆 지붕까지 2.6 m</text>
+<rect x="990.0" y="248.8" width="210.0" height="47.6" fill="var(--street)"/>
+<text x="993.0" y="444" class="zs">뒷마당 · 길 폭 6.8 m</text>
+<rect x="10.0" y="237.6" width="1190.0" height="25.2" fill="none" stroke="var(--ink)" stroke-dasharray="4 4" stroke-width=".8"/>
+<rect x="26.1" y="17.2" width="87.7" height="56.0" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="142.6" y="28.5" width="120.5" height="42.0" fill="#646b77" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<rect x="292.0" y="15.0" width="88.3" height="50.8" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="385.0" y="28.5" width="110.3" height="42.0" fill="#646b77" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<rect x="512.6" y="15.0" width="78.9" height="45.8" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="616.1" y="29.1" width="108.9" height="42.0" fill="#646b77" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<rect x="746.4" y="15.0" width="80.3" height="41.5" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="836.2" y="19.8" width="105.6" height="42.0" fill="#646b77" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<rect x="967.6" y="15.0" width="22.4" height="55.9" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="19.0" y="377.3" width="70.6" height="56.0" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="94.9" y="377.7" width="114.3" height="42.0" fill="#646b77" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<rect x="237.8" y="376.4" width="75.8" height="56.0" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="318.0" y="390.2" width="120.2" height="42.0" fill="#646b77" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<rect x="468.7" y="380.2" width="79.8" height="54.8" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="567.1" y="383.3" width="115.8" height="42.0" fill="#646b77" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<rect x="712.3" y="383.1" width="82.2" height="51.9" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="802.1" y="393.1" width="114.2" height="41.9" fill="#646b77" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<rect x="949.8" y="376.0" width="40.2" height="56.0" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="19.8" y="111.8" width="118.2" height="42.0" fill="#646b77" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<rect x="152.1" y="96.0" width="60.3" height="42.0" fill="#7b8290" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>작은 기와집</title></rect>
+<rect x="222.5" y="97.4" width="113.7" height="42.0" fill="#646b77" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<rect x="352.2" y="102.1" width="54.0" height="42.0" fill="#7b8290" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>작은 기와집</title></rect>
+<rect x="423.7" y="100.3" width="79.4" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="519.1" y="113.9" width="119.1" height="42.0" fill="#646b77" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<rect x="652.6" y="90.4" width="73.2" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="742.1" y="97.8" width="49.9" height="42.0" fill="#7b8290" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>작은 기와집</title></rect>
+<rect x="809.1" y="95.3" width="87.6" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="906.1" y="103.3" width="49.3" height="42.0" fill="#7b8290" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>작은 기와집</title></rect>
+<rect x="967.5" y="102.9" width="22.5" height="42.0" fill="#646b77" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<rect x="34.8" y="299.6" width="109.7" height="42.0" fill="#646b77" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<rect x="149.5" y="305.6" width="71.7" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="228.6" y="297.2" width="53.8" height="42.0" fill="#7b8290" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>작은 기와집</title></rect>
+<rect x="286.8" y="296.5" width="101.8" height="42.0" fill="#646b77" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<rect x="397.0" y="304.0" width="80.2" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="488.9" y="304.8" width="114.7" height="42.0" fill="#646b77" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<rect x="614.1" y="309.0" width="71.6" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="703.1" y="296.9" width="106.3" height="42.0" fill="#646b77" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<rect x="826.1" y="303.3" width="71.8" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="910.0" y="309.8" width="54.7" height="42.0" fill="#7b8290" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>작은 기와집</title></rect>
+<rect x="990.5" y="89.4" width="82.8" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="1083.0" y="89.3" width="86.5" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="1176.8" y="87.8" width="23.2" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="992.8" y="316.7" width="81.5" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="1081.0" y="302.5" width="72.6" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="1166.4" y="303.8" width="33.6" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="10.0" y="148.0" width="75.6" height="56.0" fill="#6d7480" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<text x="47.8" y="179.0" class="bl">기와집</text>
+<rect x="93.6" y="162.4" width="112.4" height="42.0" fill="#646b77" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<text x="149.9" y="186.4" class="bl">긴 행랑채</text>
+<rect x="236.4" y="161.5" width="58.4" height="42.0" fill="#7b8290" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>작은 기와집</title></rect>
+<text x="265.6" y="185.5" class="bl">작은 기와집</text>
+<rect x="300.4" y="150.4" width="80.3" height="56.0" fill="#6d7480" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<text x="340.6" y="181.4" class="bl">기와집</text>
+<rect x="383.8" y="163.4" width="113.1" height="42.0" fill="#646b77" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<text x="440.3" y="187.4" class="bl">긴 행랑채</text>
+<rect x="503.8" y="163.9" width="56.4" height="42.0" fill="#7b8290" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>작은 기와집</title></rect>
+<text x="532.0" y="187.9" class="bl">작은 기와집</text>
+<rect x="561.4" y="147.7" width="72.8" height="56.0" fill="#6d7480" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<text x="597.8" y="178.7" class="bl">기와집</text>
+<rect x="660.5" y="161.8" width="103.8" height="42.0" fill="#646b77" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<text x="712.4" y="185.8" class="bl">긴 행랑채</text>
+<rect x="764.5" y="162.3" width="49.3" height="42.0" fill="#7b8290" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>작은 기와집</title></rect>
+<text x="789.1" y="186.3" class="bl">작은 기와집</text>
+<rect x="818.9" y="149.4" width="77.8" height="56.0" fill="#6d7480" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<text x="857.8" y="180.4" class="bl">기와집</text>
+<rect x="901.8" y="161.7" width="88.2" height="42.0" fill="#646b77" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<text x="945.9" y="185.7" class="bl">긴 행랑채</text>
+<rect x="10.0" y="245.2" width="58.8" height="42.0" fill="#7b8290" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>작은 기와집</title></rect>
+<text x="39.4" y="269.2" class="bl">작은 기와집</text>
+<rect x="71.1" y="245.3" width="90.6" height="56.0" fill="#6d7480" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<text x="116.4" y="276.3" class="bl">기와집</text>
+<rect x="165.2" y="243.7" width="113.2" height="42.0" fill="#646b77" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<text x="221.8" y="267.7" class="bl">긴 행랑채</text>
+<rect x="283.6" y="243.3" width="56.3" height="42.0" fill="#7b8290" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>작은 기와집</title></rect>
+<text x="311.7" y="267.3" class="bl">작은 기와집</text>
+<rect x="340.9" y="243.3" width="75.7" height="56.0" fill="#6d7480" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<text x="378.7" y="274.3" class="bl">기와집</text>
+<rect x="424.1" y="246.5" width="116.1" height="42.0" fill="#646b77" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<text x="482.1" y="270.5" class="bl">긴 행랑채</text>
+<rect x="562.0" y="244.4" width="57.0" height="42.0" fill="#7b8290" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>작은 기와집</title></rect>
+<text x="590.5" y="268.4" class="bl">작은 기와집</text>
+<rect x="622.4" y="246.9" width="76.4" height="56.0" fill="#6d7480" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<text x="660.7" y="277.9" class="bl">기와집</text>
+<rect x="724.0" y="243.6" width="112.1" height="42.0" fill="#646b77" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<text x="780.0" y="267.6" class="bl">긴 행랑채</text>
+<rect x="840.5" y="244.2" width="60.4" height="42.0" fill="#7b8290" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>작은 기와집</title></rect>
+<text x="870.7" y="268.2" class="bl">작은 기와집</text>
+<rect x="902.8" y="245.4" width="79.1" height="56.0" fill="#6d7480" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<text x="942.4" y="276.4" class="bl">기와집</text>
+<rect x="990.0" y="194.2" width="53.3" height="7.0" fill="#8d8d88" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>돌담</title></rect>
+<text x="1016.7" y="200.7" class="bl">돌담</text>
+<rect x="1049.6" y="155.5" width="60.8" height="42.0" fill="#c9a86a" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>초가</title></rect>
+<text x="1080.0" y="179.5" class="bl">초가</text>
+<rect x="1111.2" y="194.2" width="54.4" height="7.0" fill="#8d8d88" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>돌담</title></rect>
+<text x="1138.4" y="200.7" class="bl">돌담</text>
+<rect x="1173.1" y="155.3" width="26.9" height="42.0" fill="#c9a86a" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>초가</title></rect>
+<rect x="990.0" y="248.8" width="52.0" height="7.0" fill="#8d8d88" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>돌담</title></rect>
+<text x="1016.0" y="255.3" class="bl">돌담</text>
+<rect x="1047.4" y="249.8" width="75.3" height="56.0" fill="#6d7480" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<text x="1085.1" y="280.8" class="bl">기와집</text>
+<rect x="1127.7" y="248.8" width="51.3" height="7.0" fill="#8d8d88" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>돌담</title></rect>
+<text x="1153.3" y="255.3" class="bl">돌담</text>
+<rect x="1008.7" y="199.8" width="11.2" height="11.2" rx="2" fill="#94673f" stroke="var(--edge)" stroke-width=".5"><title>장작더미</title></rect>
+<rect x="1081.8" y="239.0" width="15.4" height="15.4" rx="2" fill="#7a4a30" stroke="var(--edge)" stroke-width=".5"><title>장독대</title></rect>
+<rect x="1020.3" y="239.0" width="9.8" height="9.8" rx="2" fill="#6b3f28" stroke="var(--edge)" stroke-width=".5"><title>항아리 무리</title></rect>
+<rect x="1087.3" y="197.0" width="14.0" height="14.0" rx="2" fill="#a77b4f" stroke="var(--edge)" stroke-width=".5"><title>평상</title></rect>
+<rect x="1178.3" y="239.0" width="11.2" height="11.2" rx="2" fill="#94673f" stroke="var(--edge)" stroke-width=".5"><title>장작더미</title></rect>
+<rect x="1154.3" y="239.0" width="14.0" height="14.0" rx="2" fill="#a77b4f" stroke="var(--edge)" stroke-width=".5"><title>평상</title></rect>
+<rect x="1156.1" y="201.2" width="9.8" height="9.8" rx="2" fill="#6b3f28" stroke="var(--edge)" stroke-width=".5"><title>항아리 무리</title></rect>
+<rect x="1024.1" y="195.6" width="15.4" height="15.4" rx="2" fill="#7a4a30" stroke="var(--edge)" stroke-width=".5"><title>장독대</title></rect>
+<rect x="1184.6" y="199.8" width="11.2" height="11.2" rx="2" fill="#94673f" stroke="var(--edge)" stroke-width=".5"><title>장작더미</title></rect>
+<rect x="1170.9" y="199.8" width="11.2" height="11.2" rx="2" fill="#94673f" stroke="var(--edge)" stroke-width=".5"><title>장작더미</title></rect>
+<rect x="1033.1" y="239.0" width="9.8" height="9.8" rx="2" fill="#6b3f28" stroke="var(--edge)" stroke-width=".5"><title>항아리 무리</title></rect>
+<rect x="1100.9" y="239.0" width="15.4" height="15.4" rx="2" fill="#7a4a30" stroke="var(--edge)" stroke-width=".5"><title>장독대</title></rect>
+<line x1="80.0" y1="237.6" x2="80.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="82.0" y="207.0" class="el">112 지붕건너기</text>
+<line x1="150.0" y1="237.6" x2="150.0" y2="212.4" stroke="var(--en)" stroke-width="2.4"/>
+<text x="152.0" y="220.5" class="el">116 추격(창포졸)</text>
+<line x1="220.0" y1="237.6" x2="220.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="222.0" y="234.0" class="el">120 지붕건너기</text>
+<line x1="290.0" y1="237.6" x2="290.0" y2="212.4" stroke="var(--en)" stroke-width="2.4"/>
+<text x="292.0" y="247.5" class="el">124 추격(창포졸)</text>
+<line x1="360.0" y1="237.6" x2="360.0" y2="212.4" stroke="var(--en)" stroke-width="2.4"/>
+<text x="362.0" y="207.0" class="el">128 지붕 위 전투(창포졸)</text>
+<line x1="430.0" y1="237.6" x2="430.0" y2="212.4" stroke="var(--en)" stroke-width="2.4"/>
+<text x="432.0" y="220.5" class="el">132 매복(칼포졸)</text>
+<line x1="500.0" y1="237.6" x2="500.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="502.0" y="234.0" class="el">136 처마↓</text>
+<line x1="605.0" y1="237.6" x2="605.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="607.0" y="247.5" class="el">142 긴도약</text>
+<line x1="710.0" y1="237.6" x2="710.0" y2="212.4" stroke="var(--en)" stroke-width="2.4"/>
+<text x="712.0" y="207.0" class="el">148 추격(칼포졸)</text>
+<line x1="780.0" y1="237.6" x2="780.0" y2="212.4" stroke="var(--en)" stroke-width="2.4"/>
+<text x="782.0" y="220.5" class="el">152 지붕 위 전투(칼포졸)</text>
+<line x1="850.0" y1="237.6" x2="850.0" y2="212.4" stroke="var(--en)" stroke-width="2.4"/>
+<text x="852.0" y="234.0" class="el">156 매복(칼포졸)</text>
+<line x1="920.0" y1="237.6" x2="920.0" y2="212.4" stroke="var(--en)" stroke-width="2.4"/>
+<text x="922.0" y="247.5" class="el">160 추격(창포졸)</text>
+<line x1="990.0" y1="237.6" x2="990.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="992.0" y="207.0" class="el">164 뛰어내리기</text>
+<line x1="1060.0" y1="237.6" x2="1060.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="1062.0" y="220.5" class="el">168 항아리</text>
+<rect x="1060.0" y="295.0" width="210.0" height="28.0" fill="none" stroke="var(--fs)" stroke-width="2" stroke-dasharray="5 3"/>
+<text x="1063.0" y="335.0" class="el">복선:담넘기 (발밑 지붕)</text>
+<line x1="1130.0" y1="237.6" x2="1130.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="1132.0" y="234.0" class="el">172 낮은담↑</text>
+<text x="10.0" y="10" class="tick">270</text>
+<text x="80.0" y="10" class="tick">280</text>
+<text x="150.0" y="10" class="tick">290</text>
+<text x="220.0" y="10" class="tick">300</text>
+<text x="290.0" y="10" class="tick">310</text>
+<text x="360.0" y="10" class="tick">320</text>
+<text x="430.0" y="10" class="tick">330</text>
+<text x="500.0" y="10" class="tick">340</text>
+<text x="570.0" y="10" class="tick">350</text>
+<text x="640.0" y="10" class="tick">360</text>
+<text x="710.0" y="10" class="tick">370</text>
+<text x="780.0" y="10" class="tick">380</text>
+<text x="850.0" y="10" class="tick">390</text>
+<text x="920.0" y="10" class="tick">400</text>
+<text x="990.0" y="10" class="tick">410</text>
+<text x="1060.0" y="10" class="tick">420</text>
+<text x="1130.0" y="10" class="tick">430</text>
+<text x="1200.0" y="10" class="tick">440</text>
+</svg></div></figure>
+<figure class="strip"><figcaption>4구간: 관아 마당 (포위 전투) · 440–490 m</figcaption><div class="scroll"><svg viewBox="0 0 370 450" width="370" height="450">
+<rect x="0" y="0" width="370" height="450" fill="var(--ground)"/>
+<rect x="10.0" y="330.0" width="350.0" height="210.0" fill="var(--street)"/>
+<text x="13.0" y="444" class="zs">관아 마당 · 길 폭 30.0 m</text>
+<rect x="10.0" y="237.6" width="350.0" height="25.2" fill="none" stroke="var(--ink)" stroke-dasharray="4 4" stroke-width=".8"/>
+<rect x="23.2" y="15.0" width="82.4" height="2.0" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="130.0" y="15.0" width="80.2" height="2.0" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="234.2" y="15.0" width="79.7" height="2.0" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="329.2" y="15.0" width="30.8" height="2.0" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="25.4" y="435.0" width="88.7" height="2.0" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="132.3" y="435.0" width="75.6" height="2.0" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="217.8" y="435.0" width="76.8" height="2.0" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="317.8" y="435.0" width="42.2" height="2.0" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="18.7" y="15.0" width="70.6" height="40.3" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="95.9" y="15.0" width="71.7" height="42.4" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="184.9" y="15.0" width="72.5" height="41.4" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="261.1" y="15.0" width="85.3" height="46.8" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="17.1" y="392.5" width="80.9" height="42.5" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="106.5" y="383.2" width="88.2" height="51.8" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="203.8" y="391.8" width="75.2" height="43.2" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="283.0" y="385.1" width="76.8" height="49.9" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="10.0" y="113.0" width="46.3" height="7.0" fill="#8d8d88" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>돌담</title></rect>
+<text x="33.1" y="119.5" class="bl">돌담</text>
+<rect x="61.9" y="113.0" width="54.2" height="7.0" fill="#8d8d88" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>돌담</title></rect>
+<text x="89.0" y="119.5" class="bl">돌담</text>
+<rect x="122.6" y="113.0" width="50.8" height="7.0" fill="#8d8d88" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>돌담</title></rect>
+<text x="148.0" y="119.5" class="bl">돌담</text>
+<rect x="181.1" y="113.0" width="53.2" height="7.0" fill="#8d8d88" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>돌담</title></rect>
+<text x="207.7" y="119.5" class="bl">돌담</text>
+<rect x="235.2" y="113.0" width="55.9" height="7.0" fill="#8d8d88" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>돌담</title></rect>
+<text x="263.2" y="119.5" class="bl">돌담</text>
+<rect x="299.5" y="113.0" width="45.7" height="7.0" fill="#8d8d88" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>돌담</title></rect>
+<text x="322.3" y="119.5" class="bl">돌담</text>
+<rect x="10.0" y="330.0" width="46.7" height="7.0" fill="#8d8d88" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>돌담</title></rect>
+<text x="33.3" y="336.5" class="bl">돌담</text>
+<rect x="58.9" y="330.0" width="49.1" height="7.0" fill="#8d8d88" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>돌담</title></rect>
+<text x="83.4" y="336.5" class="bl">돌담</text>
+<rect x="112.1" y="330.0" width="49.0" height="7.0" fill="#8d8d88" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>돌담</title></rect>
+<text x="136.6" y="336.5" class="bl">돌담</text>
+<rect x="163.2" y="330.0" width="56.0" height="7.0" fill="#8d8d88" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>돌담</title></rect>
+<text x="191.2" y="336.5" class="bl">돌담</text>
+<rect x="219.7" y="330.0" width="47.7" height="7.0" fill="#8d8d88" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>돌담</title></rect>
+<text x="243.6" y="336.5" class="bl">돌담</text>
+<rect x="270.7" y="330.0" width="55.3" height="7.0" fill="#8d8d88" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>돌담</title></rect>
+<text x="298.3" y="336.5" class="bl">돌담</text>
+<rect x="332.0" y="330.0" width="28.0" height="7.0" fill="#8d8d88" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>돌담</title></rect>
+<circle cx="64.3" cy="133.6" r="21.0" fill="#5f8f4f" opacity=".85"><title>느티나무</title></circle>
+<rect x="314.8" y="119.9" width="15.4" height="15.4" rx="2" fill="#7a4a30" stroke="var(--edge)" stroke-width=".5"><title>장독대</title></rect>
+<rect x="215.9" y="299.3" width="14.0" height="14.0" rx="2" fill="#a77b4f" stroke="var(--edge)" stroke-width=".5"><title>평상</title></rect>
+<rect x="299.0" y="311.1" width="14.0" height="14.0" rx="2" fill="#a77b4f" stroke="var(--edge)" stroke-width=".5"><title>평상</title></rect>
+<rect x="321.8" y="136.0" width="14.0" height="14.0" rx="2" fill="#a77b4f" stroke="var(--edge)" stroke-width=".5"><title>평상</title></rect>
+<rect x="273.8" y="309.3" width="4.4" height="4.4" rx="2" fill="#c44" stroke="var(--edge)" stroke-width=".5"><title>깃발 장대</title></rect>
+<circle cx="142.7" cy="308.0" r="21.0" fill="#5f8f4f" opacity=".85"><title>느티나무</title></circle>
+<rect x="103.1" y="122.3" width="11.2" height="11.2" rx="2" fill="#8c6239" stroke="var(--edge)" stroke-width=".5"><title>수레</title></rect>
+<circle cx="40.6" cy="311.4" r="21.0" fill="#5f8f4f" opacity=".85"><title>느티나무</title></circle>
+<rect x="147.7" y="130.4" width="15.4" height="15.4" rx="2" fill="#7a4a30" stroke="var(--edge)" stroke-width=".5"><title>장독대</title></rect>
+<line x1="80.0" y1="237.6" x2="80.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="82.0" y="207.0" class="el">180 낮은담↑</text>
+<line x1="150.0" y1="237.6" x2="150.0" y2="212.4" stroke="var(--en)" stroke-width="2.4"/>
+<text x="152.0" y="220.5" class="el">184 포위 전투</text>
+<text x="10.0" y="10" class="tick">440</text>
+<text x="80.0" y="10" class="tick">450</text>
+<text x="150.0" y="10" class="tick">460</text>
+<text x="220.0" y="10" class="tick">470</text>
+<text x="290.0" y="10" class="tick">480</text>
+<text x="360.0" y="10" class="tick">490</text>
+</svg></div></figure>
+<figure class="strip"><figcaption>5·6구간: 궁궐 담 길 → 담 위 → 성문 누각 · 490–660 m</figcaption><div class="scroll"><svg viewBox="0 0 1210 450" width="1210" height="450">
+<rect x="0" y="0" width="1210" height="450" fill="var(--ground)"/>
+<rect x="10.0" y="254.4" width="490.0" height="58.8" fill="var(--street)"/>
+<text x="13.0" y="444" class="zs">궁궐 담 길 · 길 폭 8.4 m</text>
+<rect x="500.0" y="236.2" width="455.0" height="22.4" fill="var(--street)"/>
+<text x="503.0" y="444" class="zs">궁궐 담 위 · 지붕/담 윗면</text>
+<rect x="955.0" y="236.2" width="245.0" height="22.4" fill="var(--street)"/>
+<text x="958.0" y="444" class="zs">성문 누각 · 지붕/담 윗면</text>
+<rect x="10.0" y="237.6" width="1190.0" height="25.2" fill="none" stroke="var(--ink)" stroke-dasharray="4 4" stroke-width=".8"/>
+<rect x="30.5" y="15.0" width="171.8" height="46.9" fill="#a8473c" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>궁궐 전각</title></rect>
+<rect x="230.6" y="15.0" width="194.1" height="46.6" fill="#a8473c" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>궁궐 전각</title></rect>
+<rect x="455.4" y="15.0" width="44.6" height="37.7" fill="#a8473c" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>궁궐 전각</title></rect>
+<rect x="14.6" y="395.3" width="54.6" height="39.7" fill="#7b8290" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>작은 기와집</title></rect>
+<rect x="80.4" y="403.7" width="90.3" height="31.3" fill="#6d7480" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="177.9" y="389.4" width="105.3" height="42.0" fill="#646b77" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<rect x="298.1" y="398.8" width="50.9" height="36.2" fill="#7b8290" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>작은 기와집</title></rect>
+<rect x="355.9" y="393.6" width="123.5" height="41.4" fill="#646b77" opacity="0.45" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<rect x="13.4" y="45.7" width="201.4" height="98.0" fill="#a8473c" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>궁궐 전각</title></rect>
+<rect x="231.1" y="33.9" width="197.2" height="98.0" fill="#a8473c" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>궁궐 전각</title></rect>
+<rect x="433.7" y="42.0" width="66.3" height="98.0" fill="#a8473c" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>궁궐 전각</title></rect>
+<rect x="37.7" y="303.6" width="116.4" height="42.0" fill="#646b77" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<rect x="163.1" y="321.9" width="53.8" height="42.0" fill="#7b8290" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>작은 기와집</title></rect>
+<rect x="221.3" y="322.5" width="101.2" height="42.0" fill="#646b77" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>긴 행랑채</title></rect>
+<rect x="337.4" y="318.3" width="49.3" height="42.0" fill="#7b8290" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>작은 기와집</title></rect>
+<rect x="390.9" y="310.9" width="81.2" height="56.0" fill="#6d7480" opacity="0.7" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<rect x="10.0" y="187.2" width="67.0" height="8.4" fill="#b5654f" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>궁궐 담</title></rect>
+<text x="43.5" y="194.4" class="bl">궁궐 담</text>
+<rect x="84.0" y="187.2" width="52.0" height="8.4" fill="#b5654f" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>궁궐 담</title></rect>
+<text x="110.0" y="194.4" class="bl">궁궐 담</text>
+<rect x="157.0" y="207.5" width="70.0" height="3.5" fill="#6f6a60" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>벽타기 벽</title></rect>
+<text x="192.0" y="212.2" class="bl">벽타기 벽</text>
+<rect x="227.0" y="187.2" width="57.3" height="8.4" fill="#b5654f" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>궁궐 담</title></rect>
+<text x="255.7" y="194.4" class="bl">궁궐 담</text>
+<rect x="292.3" y="187.2" width="68.7" height="8.4" fill="#b5654f" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>궁궐 담</title></rect>
+<text x="326.6" y="194.4" class="bl">궁궐 담</text>
+<rect x="365.8" y="187.2" width="68.2" height="8.4" fill="#b5654f" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>궁궐 담</title></rect>
+<text x="399.9" y="194.4" class="bl">궁궐 담</text>
+<rect x="437.8" y="187.2" width="62.1" height="8.4" fill="#b5654f" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>궁궐 담</title></rect>
+<text x="468.9" y="194.4" class="bl">궁궐 담</text>
+<rect x="10.0" y="256.6" width="82.2" height="56.0" fill="#6d7480" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<text x="51.1" y="287.6" class="bl">기와집</text>
+<rect x="98.2" y="257.0" width="37.8" height="42.0" fill="#5d6470" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>솟을대문 집</title></rect>
+<text x="117.1" y="281.0" class="bl">솟을대문 집</text>
+<rect x="164.0" y="256.3" width="84.4" height="56.0" fill="#6d7480" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<text x="206.2" y="287.3" class="bl">기와집</text>
+<rect x="249.3" y="254.4" width="53.3" height="7.0" fill="#8d8d88" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>돌담</title></rect>
+<text x="276.0" y="260.9" class="bl">돌담</text>
+<rect x="309.5" y="257.7" width="22.5" height="42.0" fill="#5d6470" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>솟을대문 집</title></rect>
+<rect x="332.0" y="239.0" width="70.0" height="3.5" fill="#6f6a60" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>벽타기 벽</title></rect>
+<text x="367.0" y="243.8" class="bl">벽타기 벽</text>
+<rect x="402.0" y="258.0" width="78.1" height="56.0" fill="#6d7480" opacity="1" stroke="var(--edge)" stroke-width=".6"><title>기와집</title></rect>
+<text x="441.1" y="289.0" class="bl">기와집</text>
+<rect x="305.4" y="243.5" width="4.4" height="4.4" rx="2" fill="#c44" stroke="var(--edge)" stroke-width=".5"><title>깃발 장대</title></rect>
+<circle cx="471.9" cy="251.2" r="12.2" fill="#4f7a4a" opacity=".85"><title>소나무</title></circle>
+<circle cx="75.7" cy="251.2" r="12.2" fill="#4f7a4a" opacity=".85"><title>소나무</title></circle>
+<rect x="448.9" y="198.7" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="335.4" y="205.2" width="4.4" height="4.4" rx="2" fill="#c44" stroke="var(--edge)" stroke-width=".5"><title>깃발 장대</title></rect>
+<rect x="440.4" y="204.1" width="4.4" height="4.4" rx="2" fill="#c44" stroke="var(--edge)" stroke-width=".5"><title>깃발 장대</title></rect>
+<rect x="416.0" y="248.2" width="4.4" height="4.4" rx="2" fill="#c44" stroke="var(--edge)" stroke-width=".5"><title>깃발 장대</title></rect>
+<rect x="295.2" y="200.3" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="205.4" y="240.6" width="4.4" height="4.4" rx="2" fill="#c44" stroke="var(--edge)" stroke-width=".5"><title>깃발 장대</title></rect>
+<rect x="42.4" y="201.8" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="84.3" y="197.5" width="4.4" height="4.4" rx="2" fill="#c44" stroke="var(--edge)" stroke-width=".5"><title>깃발 장대</title></rect>
+<rect x="434.9" y="248.9" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="317.2" y="205.7" width="4.4" height="4.4" rx="2" fill="#d0453a" stroke="var(--edge)" stroke-width=".5"><title>청사초롱 장대</title></rect>
+<rect x="486.1" y="197.4" width="4.4" height="4.4" rx="2" fill="#c44" stroke="var(--edge)" stroke-width=".5"><title>깃발 장대</title></rect>
+<rect x="136.0" y="183.0" width="17.5" height="84.0" fill="#a8473c" stroke="var(--edge)"><title>궁궐 문</title></rect>
+<text x="144.8" y="180.0" class="bl" style="fill:var(--ink);stroke:none">궁궐 문</text>
+<line x1="45.0" y1="237.6" x2="45.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="47.0" y="207.0" class="el">198 화살</text>
+<line x1="115.0" y1="237.6" x2="115.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="117.0" y="220.5" class="el">202 닫히는대문</text>
+<line x1="185.0" y1="237.6" x2="185.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="187.0" y="234.0" class="el">206 벽타기</text>
+<line x1="255.0" y1="237.6" x2="255.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="257.0" y="247.5" class="el">210 항아리</text>
+<line x1="360.0" y1="237.6" x2="360.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="362.0" y="207.0" class="el">216 벽타기</text>
+<line x1="430.0" y1="237.6" x2="430.0" y2="212.4" stroke="var(--en)" stroke-width="2.4"/>
+<text x="432.0" y="220.5" class="el">220 돌진(칼포졸)</text>
+<line x1="500.0" y1="237.6" x2="500.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="502.0" y="234.0" class="el">224 지붕오르기</text>
+<line x1="570.0" y1="237.6" x2="570.0" y2="212.4" stroke="var(--en)" stroke-width="2.4"/>
+<text x="572.0" y="247.5" class="el">228 매복(창포졸)</text>
+<line x1="640.0" y1="237.6" x2="640.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="642.0" y="207.0" class="el">232 처마↓</text>
+<line x1="710.0" y1="237.6" x2="710.0" y2="212.4" stroke="var(--en)" stroke-width="2.4"/>
+<text x="712.0" y="220.5" class="el">236 추격(칼포졸)</text>
+<line x1="780.0" y1="237.6" x2="780.0" y2="212.4" stroke="var(--en)" stroke-width="2.4"/>
+<text x="782.0" y="234.0" class="el">240 지붕 위 전투(창포졸)</text>
+<line x1="850.0" y1="237.6" x2="850.0" y2="212.4" stroke="var(--en)" stroke-width="2.4"/>
+<text x="852.0" y="247.5" class="el">244 추격(창포졸)</text>
+<rect x="850.0" y="295.0" width="140.0" height="28.0" fill="none" stroke="var(--fs)" stroke-width="2" stroke-dasharray="5 3"/>
+<text x="853.0" y="335.0" class="el">복선:성문무사 (발밑 지붕)</text>
+<line x1="920.0" y1="237.6" x2="920.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="922.0" y="207.0" class="el">248 성문오르기</text>
+<line x1="990.0" y1="237.6" x2="990.0" y2="212.4" stroke="var(--obs)" stroke-width="2.4"/>
+<text x="992.0" y="220.5" class="el">252 깃발줄↓</text>
+<line x1="1130.0" y1="237.6" x2="1130.0" y2="212.4" stroke="var(--en)" stroke-width="2.4"/>
+<text x="1132.0" y="234.0" class="el">260 무사 결전</text>
+<text x="10.0" y="10" class="tick">490</text>
+<text x="80.0" y="10" class="tick">500</text>
+<text x="150.0" y="10" class="tick">510</text>
+<text x="220.0" y="10" class="tick">520</text>
+<text x="290.0" y="10" class="tick">530</text>
+<text x="360.0" y="10" class="tick">540</text>
+<text x="430.0" y="10" class="tick">550</text>
+<text x="500.0" y="10" class="tick">560</text>
+<text x="570.0" y="10" class="tick">570</text>
+<text x="640.0" y="10" class="tick">580</text>
+<text x="710.0" y="10" class="tick">590</text>
+<text x="780.0" y="10" class="tick">600</text>
+<text x="850.0" y="10" class="tick">610</text>
+<text x="920.0" y="10" class="tick">620</text>
+<text x="990.0" y="10" class="tick">630</text>
+<text x="1060.0" y="10" class="tick">640</text>
+<text x="1130.0" y="10" class="tick">650</text>
+<text x="1200.0" y="10" class="tick">660</text>
+</svg></div></figure>
+
+<h2>5. 규칙 자동 검사</h2>
+<div class="card"><ul class="checks"><li class="ok"><b>통과</b> 같은 건물 모델 연달아 금지 (1열, 담은 이어져도 됨) <span>연달아 붙은 같은 모델 0곳</span></li><li class="ok"><b>통과</b> 소품 밀도 (10 m당) <span>마을 어귀 2.7/3, 초가 골목 3.0/3, 장터 큰길 10.0/10, 장터 뒷골목 6.0/6, 양반 돌담길 2.9/3, 뒷마당 4.0/4, 관아 마당 2.0/2, 궁궐 담 길 2.0/2</span></li><li class="ok"><b>통과</b> 달리는 길(폭 3.6 m) 비움 <span>길 안 소품 0개</span></li><li class="ok"><b>통과</b> 사건마다 필요한 지형 (벽타기 벽·매복 대문·궁궐 문) <span>8곳 고정 배치</span></li><li class="ok"><b>통과</b> 공중에 뜬 적 없음 (복선 적 발밑 지붕) <span>복선:지붕위감시 110 m → 오른쪽 길가 지붕(1·2줄, 10~14 m) 위, 적 높이를 지붕 높이에 맞춤; 복선:담넘기 420 m → 관아 마당 담(2.6 m) 위; 복선:성문무사 610 m → 성문 누각 지붕</span></li></ul>
+<p class="sub" style="margin:8px 0 0">R03에서는 같은 검사를 EditMode 테스트로 만들어 맵을 바꿀 때마다 확인한다.</p></div>
+
+<h2>6. 먼 배경</h2>
+<div class="card"><p>지금은 코드로 그린 산·지붕 띠를 원통에 반복해서 붙여 조잡하다. 바꿀 방법:</p>
+<ul><li>VARCO 이미지로 <b>손그림 느낌 파노라마</b>를 층마다 2장씩 그린다: 먼 산(능선) · 중간(성곽·소나무 언덕) · 가까운 지붕 바다 실루엣. 6장 × 50 = 300포인트.</li>
+<li>층마다 반지름을 다르게 해(250·280·300 m) 움직일 때 시차가 생기게 하고, 같은 그림이 나란히 반복되지 않게 2장을 번갈아 다른 길이로 붙인다.</li>
+<li>40~300 m 사이는 작은 기와집 저폴리 모델을 인스턴싱한 "지붕 바다"로 채운다 (R10에서 LOD·GPU Resident Drawer로 최적화).</li></ul></div>
+
+<h2>7. 새 에셋과 포인트 견적</h2>
+<div class="card"><table><tr><th>분류</th><th>개수</th><th>목록</th></tr><tr><th>건물</th><td>8</td><td>초가집, ㄱ자 초가, 작은 기와집, 긴 행랑채, 솟을대문 집, 2층 시전 상점채, 궁궐 전각, 2층 누각</td></tr><tr><th>담·울타리</th><td>3</td><td>흙담(기와 갓), 궁궐 담, 싸리 울타리</td></tr><tr><th>장터</th><td>7</td><td>흰 차양 좌판, 색 천 차양 좌판, 옹기 진열, 포목 천 걸이, 짚단·멍석, 청사초롱 장대, 광주리 더미</td></tr><tr><th>마을 소품·나무</th><td>9</td><td>장독대, 우물, 소나무, 느티나무, 장승 한 쌍, 장작더미, 평상, 지게, 깃발 장대</td></tr><tr><th>장애물·사건 소품 (R04)</th><td>8</td><td>빨랫줄(기둥+옷), 낮은 처마, 밧줄+기둥, 굴러오는 술독, 화살, 깃발 줄, 대문 문짝, 궁궐 문틀</td></tr></table>
+<p>에셋 한 개 = 4면도 이미지 50 + 정면 이미지 50 + 3D 생성 200 = <b>300포인트</b> (T11R 방식: 4면도 검수 → 정면 한 장 → 고폴리 → 바닥 면 삭제·로우폴리·색·노멀 굽기, 굽기는 무료).</p>
+<table><tr><th>새 에셋 35개 × 300</th><td>10,500</td></tr><tr><th>배경 파노라마 6장 × 50</th><td>300</td></tr>
+<tr><th>합계 (예상)</th><td><b>10,800</b></td></tr><tr><th>다시 만들기 여유 (25%)</th><td>최대 +2,600 → 약 13,400</td></tr></table>
+<p class="sub">기존 에셋(기와집·돌담·성문·수레·항아리 등)은 그대로 쓴다. 실제 청구액은 실행 결과의 포인트로 확인해 log.md에 남긴다. 에셋을 묶어서 실행하므로 VARCO 실행 횟수 한도(45회) 안에 들어갈 것으로 본다. 넘으면 다시 묻는다.</p></div>
+
+<h2>8. 승인받을 것</h2>
+<ol class="ask"><li>장면 구성(장터 85~215 m, 관아 마당, 궁궐 담 위 등)과 배치 원칙 수치</li>
+<li>새 에셋 35개 + 배경 6장, 예상 10,800포인트 (최대 약 13,400)</li>
+<li>모퉁이 곡선(반지름 8 m): 경로 길이와 판정 박자는 그대로</li></ol>
+</main></body></html>
