@@ -606,3 +606,6 @@ VARCO MCP: 3D 생성(Generate3D)은 이미지 1장만 받고 멀티뷰 노드가
 - 기준 4 근거(로우폴리 + 노멀 맵): 정적 7개는 T11R에서 고폴리 60,000 → 1,164~4,849 삼각형으로 줄이고 색·노멀을 새 UV로 구움(T11R_StaticBakeTests: 5,000 이하·머티리얼 하나에 구운 색·노멀). 툰 머티리얼 Assets/Art/Materials/Toon/<id>.mat에 _BaseMap·_BumpMap 연결(T13_ToonMaterials_ForAllElevenAssets), 툰 셰이더가 노멀 맵으로 명암 계산.
 평가: 3회차 evaluator PASS (harness/reports/T15-eval-3.md). 빌드 안 게임 코드 DLL 17:24 > 마지막 수정 17:21 확인. 다음: T16.
 제안: 지평선 배경 지붕 띠가 반복돼 보임(사람 확인), 지붕 길·골목 담 모델도 인스턴싱하면 1구간 드로우콜(640) 더 줄일 수 있음.
+
+## T16 최종 플레이 확인 — 사용자 확인 대기 (2026-11-16)
+- 빌드: Builds/Final/RhythmActionGame.exe. 사용자가 플레이 후 연출·동작·난이도 피드백.

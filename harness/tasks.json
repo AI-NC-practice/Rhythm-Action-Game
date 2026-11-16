@@ -1347,7 +1347,7 @@
                                          "사용자에게 Builds/Final exe 경로 안내",
                                          "사용자가 플레이 후 연출·동작 자연스러움·난이도 피드백을 줌, 수정 작업은 사용자 승인 후 tasks.json에 추가"
                                      ],
-                      "status":  "pending",
+                      "status":  "needs_user",
                       "attempts":  0,
                       "max_attempts":  1,
                       "notes":  ""
