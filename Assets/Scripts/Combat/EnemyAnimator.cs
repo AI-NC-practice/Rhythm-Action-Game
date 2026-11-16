@@ -120,6 +120,31 @@ namespace RhythmActionGame
         public void OnEndGuard() { if (CurrentState == EnemyMoves.Guard) Enter(EnemyMoves.Idle, GameConfig.EnemyBody.CrossFadeSeconds); }
         public void OnPushed() { mode = Mode.Free; followLeft = -1f; Enter(EnemyMoves.Hit, GameConfig.EnemyBody.CrossFadeSeconds); followLeft = LengthOf(EnemyMoves.Hit); }
         public void OnDefeat(ExecutionKind how) { mode = Mode.Free; followLeft = -1f; Enter(EnemyMoves.DefeatState(how), GameConfig.EnemyBody.CrossFadeSeconds * 0.5f); }
+        /// <summary>작업 R18c: 앞질러 착지 동작(도약·공중·착지)을 클립 시각 t초에 맞춰 보여 준다 (박자 시계에 맞춘 되감기 가능 재생).</summary>
+        public void PlayLeap(string state, float t)
+        {
+            if (!len.ContainsKey(state)) return;
+            float L = LengthOf(state);
+            t = state == EnemyMoves.LeapFall ? Mathf.Repeat(t, L) : Mathf.Clamp(t, 0f, L - 1e-3f);
+            followLeft = -1f;
+            bool fresh = CurrentState != state || mode != Mode.Scrub;
+            scrubTime = t;
+            if (fresh)
+            {
+                mode = Mode.Scrub;
+                blendLeft = GameConfig.EnemyBody.CrossFadeSeconds;
+                Enter(state, GameConfig.EnemyBody.CrossFadeSeconds, t);
+            }
+        }
+
+        /// <summary>작업 R18c: 착지 동작을 끝내고 대기로.</summary>
+        public void EndLeap()
+        {
+            if (!CurrentState.StartsWith("Leap_")) return;
+            mode = Mode.Free;
+            Enter(EnemyMoves.Idle, GameConfig.EnemyBody.CrossFadeSeconds);
+        }
+
         public void OnReset() { mode = Mode.Free; followLeft = -1f; scrubTime = 0f; hasLastPos = false; MoveSpeed = 0f; Enter(EnemyMoves.Idle, 0f); }
 
         void LateUpdate()

@@ -1574,10 +1574,10 @@
                                          "1인칭·3인칭 미리보기 PNG",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  "Mixamo 동작 선택·다운로드는 사용자 승인 후."
+                      "notes":  "PASS 1회차. 128·152·240박 지붕 위 전투 적: 멈춤 12박 전 플레이어 뒤쪽 옆 지붕 줄(8~12 m)에 나타나 앞지르고, 2.75박 전 박차서(Running Jump) 공중(Falling Idle) 포물선, 1.25박 전 착지(Hard Landing) — 클립 시각을 포물선에 맞춤(EnemyLeapIn). 92박 땅 위 전투는 R18b 방식(숨었다 달려옴)."
                   },
                   {
                       "id":  "R18d",

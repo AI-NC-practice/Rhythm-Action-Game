@@ -819,6 +819,110 @@ namespace RhythmActionGame.EditorTools
                 approachOk++;
                 Debug.Log($"[SceneBuilder] 전투 적 숨은 자리 {a.name}: {hide.Value.pos} → {home} ({dist:0.0} m, 멈춤 {lead:0.0}박 전 알아챔)");
             }
+
+            // 작업 R18c (GDD-beta B19.3 뒷부분): 지붕 위 전투 적 — 플레이어 뒤쪽 옆 지붕 줄에서 나타나 앞지른 뒤 지붕을 넘어 전투 자리에 착지
+            int leapOk = 0, leapAll = 0;
+            foreach (var a in enemies.Normal.Where(x => x.onRoof && x.encounterBeat >= 0f))
+            {
+                leapAll++;
+                var oldLeap = a.GetComponent<EnemyLeapIn>();
+                if (oldLeap != null) Object.DestroyImmediate(oldLeap);
+                float S = a.encounterBeat, mpb = GameConfig.MetersPerBeat;
+                var home = a.transform.position;
+                float homeY = a.ArenaSurface(home);
+                if (!float.IsNaN(homeY)) home.y = homeY;
+                float tRun0 = S - GameConfig.Map.LeapRunBeats, tTake = S - GameConfig.Map.LeapTakeoffBefore;
+                float d0 = tRun0 * mpb - GameConfig.Map.LeapStartBehind;
+                float d1 = S * mpb + GameConfig.EnemySpawnMeters + GameConfig.Map.LeapTakeoffAhead;
+                int m = Mathf.Max(8, Mathf.CeilToInt((d1 - d0) / 0.5f) + 1);
+                List<Vector3> bestPts = null; float?[] bestYs = null; float bestScore = -9f, bestL = 0f, bestSide = 0f;
+                foreach (float side in new[] { 1f, -1f })
+                    for (float L = GameConfig.Map.LeapLateralMin; L <= GameConfig.Map.LeapLateralMax + 1e-3f; L += 1f)
+                    {
+                        var raw = new List<Vector3>();
+                        Vector3 last = Vector3.zero;
+                        for (int i = 0; i < m; i++)
+                        {
+                            var pt = MapLayout.PointAt(Mathf.Lerp(d0, d1, i / (float)(m - 1)), out var fwd);
+                            var q = pt + MapLayout.RightOf(fwd) * (side * L); q.y = 0f;
+                            if (raw.Count > 0 && Vector3.Dot(q - last, fwd) < 0.05f) continue;
+                            raw.Add(q); last = q;
+                        }
+                        if (raw.Count < 2) continue;
+                        float len = 0f;
+                        for (int i = 1; i < raw.Count; i++) len += Vector3.Distance(raw[i - 1], raw[i]);
+                        float stretch = len / Mathf.Max(1f, d1 - d0);
+                        var pts = Resample(raw, m);
+                        var ys = new float?[m];
+                        int hits = 0;
+                        for (int i = 0; i < m; i++) { ys[i] = FarSurface(pts[i]); if (ys[i].HasValue) hits++; }
+                        // 박차는 자리(끝)는 면이 있어야 함
+                        if (!ys[m - 1].HasValue) continue;
+                        float score = hits / (float)m - (stretch > GameConfig.Map.ChaseFarMaxStretch ? 1f : 0f) - Mathf.Abs(ys[m - 1].Value - home.y) * 0.02f;
+                        if (score > bestScore + 1e-3f) { bestScore = score; bestPts = pts; bestYs = ys; bestL = L; bestSide = side; }
+                    }
+                if (bestPts == null) { Debug.LogWarning($"[SceneBuilder] 앞질러 착지 줄 없음 {a.name}"); continue; }
+                // 발 높이: 면이 없는 칸은 앞뒤를 잇고 뛰어넘음, 1 m 넘게 바뀌는 곳은 앞뒤 3칸에 걸쳐 뛰어 오르내림 (R18 먼 줄과 같음)
+                var fy = new float[m]; var fg = new bool[m];
+                for (int i = 0; i < m; i++)
+                {
+                    if (bestYs[i].HasValue) { fy[i] = bestYs[i].Value; continue; }
+                    fg[i] = true;
+                    int lo = i - 1; while (lo >= 0 && !bestYs[lo].HasValue) lo--;
+                    int hi = i + 1; while (hi < m && !bestYs[hi].HasValue) hi++;
+                    fy[i] = lo >= 0 && hi < m ? Mathf.Lerp(bestYs[lo].Value, bestYs[hi].Value, (i - lo) / (float)(hi - lo)) : lo >= 0 ? bestYs[lo].Value : hi < m ? bestYs[hi].Value : home.y;
+                }
+                for (int i = 0; i < m; i++)
+                {
+                    if (!fg[i]) continue;
+                    int lo = i; while (lo > 0 && fg[lo - 1]) lo--;
+                    int hi = i; while (hi < m - 1 && fg[hi + 1]) hi++;
+                    float k = (i - lo + 1) / (float)(hi - lo + 2);
+                    fy[i] += Mathf.Min(1.5f, (hi - lo + 2) * 0.5f * 0.35f) * 4f * k * (1f - k);
+                }
+                for (int i = 0; i < m - 1; i++)
+                {
+                    if (Mathf.Abs(fy[i + 1] - fy[i]) <= 1f) continue;
+                    int lo = Mathf.Max(0, i - 3), hi = Mathf.Min(m - 1, i + 4);
+                    float y0 = fy[lo], y1 = fy[hi];
+                    for (int j = lo + 1; j < hi; j++)
+                    {
+                        float k = (j - lo) / (float)(hi - lo);
+                        fy[j] = Mathf.Max(fy[j], Mathf.Lerp(y0, y1, k) + 0.6f * 4f * k * (1f - k));
+                        fg[j] = true;
+                    }
+                    i = hi - 1;
+                }
+                // 날아가는 포물선: 사이 지붕·담 위 여유 (가운데에서 다 주고 양 끝으로 줄임)
+                var take = new Vector3(bestPts[m - 1].x, fy[m - 1], bestPts[m - 1].z);
+                float arcH = 1.0f;
+                for (int s2 = 1; s2 < 24; s2++)
+                {
+                    float k = s2 / 24f;
+                    var q = Vector3.Lerp(take, home, k);
+                    var hs = HeightsAt(q).Where(h => h.y < 14f && !IsNotGround(Owner(h.owner))).ToList();
+                    if (hs.Count == 0) continue;
+                    float need = hs.Max(h => h.y) + 0.6f * Mathf.Clamp01(k * (1f - k) * 8f) - q.y;
+                    if (need > 0f) arcH = Mathf.Max(arcH, need / (4f * k * (1f - k)));
+                }
+                if (arcH > GameConfig.Map.LeapMaxArc) { Debug.LogWarning($"[SceneBuilder] 앞질러 착지 포물선이 너무 높음 {a.name} ({arcH:0.0} m)"); continue; }
+                var lp = a.gameObject.AddComponent<EnemyLeapIn>();
+                lp.actor = a;
+                lp.stopBeat = S;
+                lp.runFromBeat = tRun0;
+                lp.takeoffBeat = tTake;
+                lp.contactBeat = S - GameConfig.Map.LeapContactBefore;
+                lp.runX = bestPts.Select(p => p.x).ToArray();
+                lp.runZ = bestPts.Select(p => p.z).ToArray();
+                lp.runY = fy;
+                lp.runGap = fg;
+                lp.homePos = home;
+                lp.homeRot = a.transform.rotation;
+                lp.arc = arcH;
+                leapOk++;
+                Debug.Log($"[SceneBuilder] 앞질러 착지 {a.name}: {(bestSide > 0 ? "오른쪽" : "왼쪽")} {bestL:0} m 줄, 면 {bestYs.Count(y => y.HasValue)}/{m}, 박차는 자리 {take} → 착지 {home} ({Vector3.Distance(take, home):0.0} m, 포물선 {arcH:0.0} m)");
+            }
+            Debug.Log($"[SceneBuilder] 앞질러 착지: {leapOk}/{leapAll}");
             Physics.queriesHitBackfaces = oldBack;
             Object.DestroyImmediate(rayRoot);
             Debug.Log($"[SceneBuilder] 숨은 자리: 매복 {ambushOk}/{ambushAll}, 전투 적 {approachOk}/{approachAll}");

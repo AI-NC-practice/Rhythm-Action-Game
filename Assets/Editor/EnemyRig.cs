@@ -66,6 +66,9 @@ namespace RhythmActionGame.EditorTools
                 (EnemyMoves.Hit, Clip(model, EnemyMoves.HitClip(model))),
                 (EnemyMoves.Run, Clip(EnemyMoves.RunClipModel(model), EnemyMoves.RunClip)),   // 작업 R07
                 (EnemyMoves.Walk, Clip(model, EnemyMoves.WalkClip)),   // 작업 R18 후속
+                (EnemyMoves.LeapJump, Clip(model, EnemyMoves.LeapJumpClip)),   // 작업 R18c
+                (EnemyMoves.LeapFall, Clip(model, EnemyMoves.LeapFallClip)),
+                (EnemyMoves.LeapLand, Clip(model, EnemyMoves.LeapLandClip)),
             };
             foreach (var a in EnemyMoves.Attacks) states.Add((EnemyMoves.AttackState(a), Clip(model, EnemyMoves.AttackClip(model, a))));
             foreach (var d in EnemyMoves.Defeats) states.Add((EnemyMoves.DefeatState(d), Clip(model, EnemyMoves.DefeatClip(model, d))));
@@ -101,6 +104,39 @@ namespace RhythmActionGame.EditorTools
                 a.runtimeAnimatorController = ctrl;
                 a.applyRootMotion = false;
                 var log = new System.Text.StringBuilder();
+                // 작업 R18c: 도약은 두 발이 모두 땅(클립 최저 높이 + 12 cm)에서 처음 떨어지는 순간, 착지는 공중 뒤 처음 닿는 순간
+                var footL = a.GetBoneTransform(HumanBodyBones.LeftFoot);
+                var footR = a.GetBoneTransform(HumanBodyBones.RightFoot);
+                for (int k = 0; k < names.Length; k++)
+                {
+                    if (names[k] != EnemyMoves.LeapJump && names[k] != EnemyMoves.LeapLand) continue;
+                    var clip = (AnimationClip)ctrl.layers[0].stateMachine.states.First(x => x.state.name == names[k]).state.motion;
+                    if (clip == null) continue;
+                    const float st = 1f / 60f;
+                    var ys = new List<float>();
+                    for (float t = 0f; t <= lengths[k] + 1e-4f; t += st) { clip.SampleAnimation(go, t); ys.Add(Mathf.Min(footL.position.y, footR.position.y)); }
+                    float ground = ys.Min();
+                    int i0 = 0;
+                    if (names[k] == EnemyMoves.LeapJump)
+                    {
+                        // 가장 긴 공중 구간(두 발이 모두 땅 + 12 cm 위)의 시작 = 박차는 순간 (달리기 걸음의 짧은 뜀은 무시)
+                        int bestStart = 0, bestLen = 0, runStart = -1;
+                        for (int j = 0; j <= ys.Count; j++)
+                        {
+                            bool air = j < ys.Count && ys[j] > ground + 0.12f;
+                            if (air && runStart < 0) runStart = j;
+                            if (!air && runStart >= 0) { if (j - runStart > bestLen) { bestLen = j - runStart; bestStart = runStart; } runStart = -1; }
+                        }
+                        i0 = bestStart;
+                    }
+                    else
+                    {
+                        while (i0 < ys.Count && ys[i0] <= ground + 0.12f) i0++;              // 시작이 땅이면 지나감
+                        while (i0 < ys.Count && ys[i0] > ground + 0.03f) i0++;               // 공중 → 처음 닿음
+                    }
+                    hits[k] = Mathf.Min(i0, ys.Count - 1) * st;
+                    Debug.Log($"[EnemyRig] {model} {names[k]} 열쇠 시각 {hits[k]:0.00}s / {lengths[k]:0.00}s (발 최저 {ground:0.00} m)");
+                }
                 for (int k = 0; k < names.Length; k++)
                 {
                     if (!names[k].StartsWith("Attack_")) continue;

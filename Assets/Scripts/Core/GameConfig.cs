@@ -1056,6 +1056,21 @@ namespace RhythmActionGame
             public const float HideEyeHeight = 1.6f;
             public const float HideCheckBeats = 16f;
 
+            // ----- 작업 R18c (GDD-beta B19.3 뒷부분): 앞질러 지붕을 넘어 착지하는 지붕 위 전투 적 -----
+            /// <summary>멈춤 몇 박 전에 옆 지붕 줄에 나타나 달리기 시작하는지, 지붕을 박차는 박, 전투 자리에 발이 닿는 박, 대기로 돌아오는 박 (멈춤 기준).</summary>
+            public const float LeapRunBeats = 12f;
+            public const float LeapTakeoffBefore = 2.75f;
+            public const float LeapContactBefore = 1.25f;
+            public const float LeapIdleBefore = 0.4f;
+            /// <summary>옆 지붕 줄의 옆 거리 범위 (m)와 간격, 나타나는 자리(플레이어 뒤 m), 박차는 자리(전투 자리보다 앞 m).</summary>
+            public const float LeapLateralMin = 6f;
+            public const float LeapLateralMax = 12f;
+            public const float LeapStartBehind = 5f;
+            public const float LeapTakeoffAhead = 1f;
+            /// <summary>박찬 뒤 도약 클립을 이어 보여 주는 시간 (초), 그다음 공중 자세. 날아가는 포물선 높이 상한 (m).</summary>
+            public const float LeapJumpAirSeconds = 0.25f;
+            public const float LeapMaxArc = 7f;
+
             /// <summary>먼 배경 파노라마 (R02 그림 6장을 이어 붙인 한 장, 둘레를 한 번만 돈다).</summary>
             public const float BackdropTopFade = 0.55f;
 

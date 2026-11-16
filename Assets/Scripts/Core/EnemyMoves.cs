@@ -16,6 +16,12 @@ namespace RhythmActionGame
         /// <summary>걷기 (작업 R18 후속, 사용자 승인 2026-11-17 Mixamo "Standard Walk", In Place): 느리게 움직일 때. 반복.</summary>
         public const string Walk = "Walk";
         public const string WalkClip = MixamoPrefix + "walk";
+        /// <summary>
+        /// 작업 R18c (GDD-beta B19.3): 앞질러 지붕을 넘어 착지 — 도약(Mixamo Running Jump), 공중(Falling Idle, 반복), 착지(Hard Landing).
+        /// 사용자 승인 2026-11-17. 열쇠 시각(EnemyAnimator.HitSecondsOf): 도약 = 발이 지붕을 떠나는 순간, 착지 = 발이 땅에 닿는 순간.
+        /// </summary>
+        public const string LeapJump = "Leap_Jump", LeapFall = "Leap_Fall", LeapLand = "Leap_Land";
+        public const string LeapJumpClip = MixamoPrefix + "running_jump", LeapFallClip = MixamoPrefix + "falling_idle", LeapLandClip = MixamoPrefix + "hard_landing";
         /// <summary>달리기 클립을 가진 모델 (무사는 달리기 동작이 없어 칼 포졸 것을 Humanoid로 옮겨 씀).</summary>
         public static string RunClipModel(string model) => model == "boss" ? "enemy_sword" : model;
         public static readonly string[] Attacks = { "horizontal", "overhead", "upward", "thrust" };

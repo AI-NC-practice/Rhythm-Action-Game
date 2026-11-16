@@ -167,7 +167,8 @@ namespace RhythmActionGame.Tests
                     if (a == null || !a.isActiveAndEnabled || a.actor == null || !a.actor.gameObject.activeInHierarchy) continue;
                     var st = Get(stats, "E:" + a.actor.name);
                     Count(st, a.MoveSpeed, a.CurrentState == EnemyMoves.Run, a.CurrentState == EnemyMoves.Idle);
-                    if (!a.CurrentState.StartsWith("Defeat_") && a.CurrentState != EnemyMoves.Hit && Near(a.actor.transform)) CountFoot(st, a.actor.transform);
+                    var leap = a.actor.GetComponent<EnemyLeapIn>();   // 작업 R18c: 지붕을 뛰어넘거나 날아가는 중·나타나기 전은 뺌
+                    if (!a.CurrentState.StartsWith("Defeat_") && a.CurrentState != EnemyMoves.Hit && (leap == null || (!leap.Hopping && leap.Phase != "Waiting")) && Near(a.actor.transform)) CountFoot(st, a.actor.transform);
                 }
                 foreach (var f in figs)
                 {
