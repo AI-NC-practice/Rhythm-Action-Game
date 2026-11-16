@@ -835,6 +835,32 @@ namespace RhythmActionGame
         /// <summary>적 모델·전투 애니메이션 (작업 T14).</summary>
         public static class EnemyBody
         {
+            // ----- 작업 R07: 적 달리기 (사용자 피드백 4·7번, GDD에 없음) -----
+            /// <summary>이 속도(m/s, 수평) 넘게 움직이면 달리기, RunStopSpeed 아래로 떨어지면 대기 (되돌이 여유).</summary>
+            public const float RunStartSpeed = 0.8f;
+            public const float RunStopSpeed = 0.4f;
+            /// <summary>달리기 클립 원래 속도로 보이는 이동 속도 (m/s). 이동 속도 / 이 값 = 재생 배율.</summary>
+            public const float RunClipSpeed = 4.5f;
+            /// <summary>달리기 재생 배율 범위.</summary>
+            public const float RunRateMin = 0.6f;
+            public const float RunRateMax = 1.8f;
+            /// <summary>이동 속도 부드럽게 (1/초).</summary>
+            public const float SpeedSmoothing = 12f;
+            /// <summary>한 프레임 이동이 이 속도(m/s)를 넘으면 순간이동(되감기·배치)으로 보고 무시.</summary>
+            public const float TeleportSpeed = 25f;
+
+            // ----- 작업 R07: 지붕 발차기 낙하 -----
+            /// <summary>차여 날아가는 방향: 플레이어 반대쪽에서 지붕 가장자리 쪽으로 이 각도(도)만큼 돌림 (길 따라 날아가면 지붕에 남으므로).</summary>
+            public const float KickOffRoofSideAngle = 80f;
+            /// <summary>날아가는 수평 거리 (m, 지붕 반폭 4 m를 넘김)와 그 시간 (초).</summary>
+            public const float KickOffRoofDistance = 7.5f;
+            public const float KickOffRoofFlightSeconds = 1.0f;
+            /// <summary>처음 위로 튀는 속도 (m/s)와 중력 (m/s²).</summary>
+            public const float KickOffRoofLift = 2.5f;
+            public const float Gravity = 9.8f;
+            /// <summary>떨어지는 것을 카메라가 따라보는 시간 (초)과 최대 고개 각도 (도, CameraFx 한도 35°).</summary>
+            public const float KickFallLookSeconds = 1.4f;
+            public const float KickFallLookMaxYaw = 35f;
             /// <summary>칼·창 길이 (m, 회색 상자와 같은 값).</summary>
             public const float SwordLength = 1.0f;
             public const float SpearLength = 2.2f;
@@ -965,6 +991,10 @@ namespace RhythmActionGame
             /// <summary>추격 적이 나란히 달리는 옆 거리 (m). 길 위 지붕에서는 지붕 반폭 − RoofRunnerInset 이하 (지붕 가장자리 밖으로 나가지 않게).</summary>
             public const float ChaseLateral = 3.5f;
             public const float RoofRunnerInset = 1.5f;
+            /// <summary>작업 R07: 추격 적 옆 거리 하한 (m) — 면이 97% 넘게 이어지는 옆 거리를 찾을 때 여기까지 줄인다.</summary>
+            public const float ChaseMinLateral = 1.25f;
+            /// <summary>작업 R07: 추격 적이 집과 집 사이 틈을 뛰어넘을 때 최대 높이 (m).</summary>
+            public const float ChaseHopMax = 0.8f;
 
             /// <summary>먼 배경 파노라마 (R02 그림 6장을 이어 붙인 한 장, 둘레를 한 번만 돈다).</summary>
             public const float BackdropTopFade = 0.55f;

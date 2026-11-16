@@ -7,6 +7,7 @@
 | disarm.fbx | True | True | 52 | mixamo.com | 1.70 | True |
 | dodge_right.fbx | True | True | 52 | mixamo.com | 1.43 | True |
 | duck.fbx | True | True | 52 | mixamo.com | 1.53 | True |
+| flying_back.fbx | True | True | 52 | mixamo.com | 3.03 | True |
 | hit_obstacle.fbx | True | True | 52 | mixamo.com | 1.80 | True |
 | kick.fbx | True | True | 52 | mixamo.com | 1.60 | True |
 | slide.fbx | True | True | 52 | mixamo.com | 1.53 | True |

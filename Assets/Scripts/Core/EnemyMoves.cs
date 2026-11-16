@@ -10,6 +10,11 @@ namespace RhythmActionGame
         public const string Idle = "Idle";
         public const string Guard = "Guard";
         public const string Hit = "Hit";
+        /// <summary>달리기 (작업 R07): 이동 속도가 있을 때. 반복.</summary>
+        public const string Run = "Run";
+        public const string RunClip = "forward_run_1";
+        /// <summary>달리기 클립을 가진 모델 (무사는 달리기 동작이 없어 칼 포졸 것을 Humanoid로 옮겨 씀).</summary>
+        public static string RunClipModel(string model) => model == "boss" ? "enemy_sword" : model;
         public static readonly string[] Attacks = { "horizontal", "overhead", "upward", "thrust" };
         public static readonly ExecutionKind[] Defeats =
             { ExecutionKind.KickOffRoof, ExecutionKind.DisarmSlash, ExecutionKind.StabWithOwnSword, ExecutionKind.PushDown, ExecutionKind.Windmill };
@@ -39,13 +44,18 @@ namespace RhythmActionGame
             }
         }
 
+        /// <summary>Mixamo 동작(Assets/Art/Animations/Mixamo/)을 쓰는 클립 이름 앞에 붙는다 (Humanoid로 옮겨 씀).</summary>
+        public const string MixamoPrefix = "mixamo/";
+        /// <summary>지붕 위 발차기 낙하 (작업 R07): Mixamo "Flying Back Death".</summary>
+        public const string KickFallClip = "flying_back";
+
         /// <summary>쓰러지는 동작: 지붕에서 떨어짐·칼 뺏김·찔림·밀려 쓰러짐·윈드밀에 날아감.</summary>
         public static string DefeatClip(string model, ExecutionKind how)
         {
             bool boss = model == "boss";
             switch (how)
             {
-                case ExecutionKind.KickOffRoof: return "hit_fall";
+                case ExecutionKind.KickOffRoof: return MixamoPrefix + KickFallClip;   // 작업 R07: 차여서 뒤로 날아감 (사용자 승인 2026-11-17)
                 case ExecutionKind.DisarmSlash: return boss ? "hit_fall" : "struggle_fall";
                 case ExecutionKind.Windmill: return boss ? "heavy_hit_back" : "light_hit_back";
                 default: return "hit_fall";

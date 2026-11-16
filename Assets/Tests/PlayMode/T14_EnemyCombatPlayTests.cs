@@ -159,7 +159,8 @@ namespace RhythmActionGame.Tests
             Assert.AreEqual(actor.anim.StateStartBeat, body.ExecStartBeat, 1e-9, "같은 박에 시작");
             float y0 = actor.transform.position.y;
             realTime += 0.5f; dir.slowMotion.Tick();                       // 처형 슬로모션 끝
-            yield return new WaitForSecondsRealtime(1.1f);                 // 떨어지는 궤적은 실제 시간으로 진행
+            // 떨어지는 궤적은 실제 시간으로 진행. 작업 R07: 옆집 지붕들을 넘는 포물선이라 고정 1.1초 대신 땅에 닿을 때까지 (최대 4초)
+            for (float until = Time.realtimeSinceStartup + 4f; !actor.KickLanded && Time.realtimeSinceStartup < until;) yield return null;
             Assert.Less(actor.transform.position.y, y0 - 2f, "지붕 아래로 떨어짐");
         }
 

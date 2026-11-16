@@ -36,6 +36,13 @@ namespace RhythmActionGame.EditorTools
 
         static AnimationClip Clip(string model, string clip)
         {
+            if (clip.StartsWith(EnemyMoves.MixamoPrefix))   // 작업 R07: Mixamo 동작 (Humanoid)
+            {
+                string mp = $"{HumanoidImport.MixamoRoot}/{clip.Substring(EnemyMoves.MixamoPrefix.Length)}.fbx";
+                var mc = AssetDatabase.LoadAllAssetsAtPath(mp).OfType<AnimationClip>().FirstOrDefault(x => !x.name.StartsWith("__preview__"));
+                if (mc == null) Debug.LogError($"[EnemyRig] 클립 없음: {mp}");
+                return mc;
+            }
             var c = AssetDatabase.LoadAllAssetsAtPath(FbxPath(model, clip)).OfType<AnimationClip>().FirstOrDefault(x => !x.name.StartsWith("__preview__"));
             if (c == null) Debug.LogError($"[EnemyRig] 클립 없음: {FbxPath(model, clip)}");
             return c;
@@ -57,6 +64,7 @@ namespace RhythmActionGame.EditorTools
                 (EnemyMoves.Idle, Clip(model, EnemyMoves.IdleClip(model))),
                 (EnemyMoves.Guard, Clip(model, EnemyMoves.GuardClip(model))),
                 (EnemyMoves.Hit, Clip(model, EnemyMoves.HitClip(model))),
+                (EnemyMoves.Run, Clip(EnemyMoves.RunClipModel(model), EnemyMoves.RunClip)),   // 작업 R07
             };
             foreach (var a in EnemyMoves.Attacks) states.Add((EnemyMoves.AttackState(a), Clip(model, EnemyMoves.AttackClip(model, a))));
             foreach (var d in EnemyMoves.Defeats) states.Add((EnemyMoves.DefeatState(d), Clip(model, EnemyMoves.DefeatClip(model, d))));
@@ -147,7 +155,9 @@ namespace RhythmActionGame.EditorTools
             root.transform.SetParent(parent, false);
             root.transform.localPosition = feetLocal;
             root.transform.localRotation = Quaternion.Euler(0, 180f, 0);   // 플레이어 쪽을 봄
-            BuildModel(root, "sword", 1.75f, out _, out _);
+            var an = BuildModel(root, "sword", 1.75f, out _, out _);
+            var run = root.AddComponent<EnemyFigureRun>();   // 작업 R07: 움직이면 달리기 (돌진·매복·추격)
+            run.animator = an;
             return root.transform;
         }
 

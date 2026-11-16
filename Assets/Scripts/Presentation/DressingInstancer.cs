@@ -35,6 +35,37 @@ namespace RhythmActionGame
 
         void Update() => Draw();
 
+        static readonly List<DressingInstancer> all = new List<DressingInstancer>();
+        void OnEnable() { if (!all.Contains(this)) all.Add(this); }
+        void OnDisable() => all.Remove(this);
+
+        /// <summary>
+        /// 작업 R07: 인스턴싱 장식은 충돌체가 없으므로, (x, z)를 덮는 장식(집·담 등)의 경계 상자 윗면 중 maxY 이하의 가장 높은 값.
+        /// 없으면 −무한대. 지붕에서 떨어지는 적이 집 속으로 빠지지 않게 쓴다.
+        /// </summary>
+        public static float TopBelow(Vector3 p, float maxY)
+        {
+            float best = float.NegativeInfinity;
+            foreach (var inst in all)
+                foreach (var g in inst.groups)
+                {
+                    if (g.subMesh != 0 || g.mesh == null || g.matrices == null) continue;
+                    if (g.bounds.size != Vector3.zero && (p.x < g.bounds.min.x || p.x > g.bounds.max.x || p.z < g.bounds.min.z || p.z > g.bounds.max.z)) continue;
+                    var mb = g.mesh.bounds;
+                    foreach (var m in g.matrices)
+                    {
+                        var c = m.MultiplyPoint3x4(mb.center);
+                        var e = mb.extents;
+                        var ax = m.MultiplyVector(new Vector3(e.x, 0, 0)); var ay = m.MultiplyVector(new Vector3(0, e.y, 0)); var az = m.MultiplyVector(new Vector3(0, 0, e.z));
+                        var ext = new Vector3(Mathf.Abs(ax.x) + Mathf.Abs(ay.x) + Mathf.Abs(az.x), Mathf.Abs(ax.y) + Mathf.Abs(ay.y) + Mathf.Abs(az.y), Mathf.Abs(ax.z) + Mathf.Abs(ay.z) + Mathf.Abs(az.z));
+                        if (Mathf.Abs(p.x - c.x) > ext.x || Mathf.Abs(p.z - c.z) > ext.z) continue;
+                        float top = c.y + ext.y;
+                        if (top <= maxY && top > best) best = top;
+                    }
+                }
+            return best;
+        }
+
         /// <summary>이번 프레임에 그릴 인스턴스를 넣는다 (에디터 미리보기에서도 카메라 렌더 전에 부른다).</summary>
         public void Draw()
         {

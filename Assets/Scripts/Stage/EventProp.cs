@@ -28,9 +28,28 @@ namespace RhythmActionGame
         /// <summary>함께 나오는 적 (없으면 null).</summary>
         public Transform enemy;
 
+        /// <summary>
+        /// 작업 R07: 추격 적이 달리는 자리의 발밑 높이·옆 거리 (빌드 때 보이는 메시로 잼). 경로 거리 chaseD0부터 chaseStep(m) 간격.
+        /// 실제 경로(모퉁이 곡선·높이)를 따라 달리고 발을 지붕 비탈·땅에 붙인다. 비어 있으면 예전처럼 로컬 직선.
+        /// </summary>
+        public float chaseD0;
+        public float chaseStep = 0.5f;
+        public float[] chaseY = new float[0];
+        public float[] chaseX = new float[0];
+        /// <summary>그 자리에 면이 없어 뛰어넘거나(집과 집 사이 틈) 담·지붕을 오르내리는 중인지 (테스트용).</summary>
+        public bool[] chaseGap = new bool[0];
+
+        /// <summary>작업 R07: 매복 적이 튀어나온 끝자리(길 쪽 1 m)의 발 높이 (로컬). 지붕 비탈에서 발이 지붕 속으로 묻히지 않게. NaN이면 집 높이.</summary>
+        public float ambushEndY = float.NaN;
+
+        /// <summary>추격 적 프로필 범위 (사건 시작 기준 박자): 소품이 움직이는 범위 전체.</summary>
+        public const float ChaseBeatsBefore = 31f, ChaseBeatsAfter = 10f;   // EventPropDirector가 앞 30박·뒤 8박 동안 움직인다
+
         /// <summary>회색 상자 상태 이름: Idle, Active, Done, Enemy_Down 등 (테스트용).</summary>
         public string State { get; private set; } = "Idle";
         public bool EnemyDown { get; private set; }
+        /// <summary>추격 적이 집 사이 틈을 뛰어넘는 중 (작업 R07, 테스트용).</summary>
+        public bool ChaseHopping { get; private set; }
 
         Vector3[] homePos;
         Quaternion[] homeRot;
@@ -144,6 +163,31 @@ namespace RhythmActionGame
             if (enemy != null) AnimateEnemy(t, run, SlotZ, playerZ);
         }
 
+        /// <summary>
+        /// 작업 R07: 추격 적을 실제 경로를 따라 플레이어 2 m 앞, 빌드 때 잰 옆 거리·발밑 높이에 놓는다 (공중에 뜨지 않게).
+        /// 프로필이 없거나 범위 밖이면 false (예전 방식).
+        /// </summary>
+        bool ChaseOnPath(double t, float cs, float u, Judgement? r)
+        {
+            if (chaseY == null || chaseY.Length < 2 || chaseX == null || chaseX.Length != chaseY.Length) return false;
+            float d = M(runBeat + t) + 2f;
+            float f = (d - chaseD0) / chaseStep;
+            if (f < 0f || f > chaseY.Length - 1) return false;
+            int i = Mathf.Min((int)f, chaseY.Length - 2);
+            float k = f - i;
+            float y = Mathf.Lerp(chaseY[i], chaseY[i + 1], k);
+            float lat = Mathf.Lerp(chaseX[i], chaseX[i + 1], k);
+            ChaseHopping = chaseGap != null && chaseGap.Length == chaseY.Length && (chaseGap[i] || chaseGap[i + 1]);
+            var pt = MapLayout.PointAt(d, out var fwd);
+            var w = pt + MapLayout.RightOf(fwd) * (cs * lat);
+            w.y = y;
+            enemy.position = w;
+            var rot = Quaternion.LookRotation(fwd, Vector3.up);   // 달리는 방향을 봄
+            if (u > 0 && r == Judgement.Perfect) { rot = rot * Quaternion.Euler(0, 0, -cs * Mathf.Min(90f, u * 180f)); EnemyDown = true; }
+            enemy.rotation = rot;
+            return true;
+        }
+
         void AnimateEnemy(double t, StageDirector.ObstacleRun run, System.Func<int, float> slotZ, float playerZ)
         {
             string how = companion != "" ? companion : kind;
@@ -167,14 +211,16 @@ namespace RhythmActionGame
                     // 키 반대쪽 담 뒤에서 판정 1박 전에 튀어나옴
                     float side = slotSides.Length > 0 ? slotSides[0] : 1f;
                     float pop = Mathf.Clamp01((float)(t - (hitT - 1.0)));
-                    p = new Vector3(-side * Mathf.Lerp(3.2f, 1.0f, pop), enemyHome.y, slotZ(0));
+                    p = new Vector3(-side * Mathf.Lerp(3.2f, 1.0f, pop), float.IsNaN(ambushEndY) ? enemyHome.y : Mathf.Lerp(enemyHome.y, ambushEndY, pop), slotZ(0));
                     if (u > 0 && r == Judgement.Perfect) { q = enemyHomeRot * Quaternion.Euler(0, 0, side * Mathf.Min(90f, u * 180f)); EnemyDown = true; }
                     break;
                 case EventCatalog.Chase:
                     // 옆 지붕에서 나란히 달림 (플레이어보다 2 m 앞)
                     float cs = slotSides.Length > 0 ? -slotSides[0] : 1f;
+                    if (ChaseOnPath(t, cs, u, r)) { if (EnemyDown) State = "Enemy_Down"; return; }
                     p = new Vector3(cs * chaseLateral, enemyHome.y, playerZ + 2f);
-                    if (u > 0 && r == Judgement.Perfect) { q = enemyHomeRot * Quaternion.Euler(0, 0, cs * Mathf.Min(90f, u * 180f)); EnemyDown = true; }
+                    q = enemyHomeRot * Quaternion.Euler(0, 180f, 0);   // 작업 R07: 플레이어 쪽이 아니라 달리는 방향을 봄 (뒷걸음질로 달리지 않게)
+                    if (u > 0 && r == Judgement.Perfect) { q = q * Quaternion.Euler(0, 0, -cs * Mathf.Min(90f, u * 180f)); EnemyDown = true; }
                     break;
             }
             enemy.localPosition = p;

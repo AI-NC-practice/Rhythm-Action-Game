@@ -233,6 +233,7 @@ namespace RhythmActionGame
                     break;
                 case ExecutionKind.KickOffRoof:
                     Play(NoSlow(GameConfig.Fx.ExecutionKick), 1f, targets, pos);
+                    LookAtKickFall(enc);
                     break;
                 case ExecutionKind.DisarmSlash:
                 case ExecutionKind.StabWithOwnSword:
@@ -243,6 +244,28 @@ namespace RhythmActionGame
                     break;
             }
         }
+
+        /// <summary>
+        /// 작업 R07: 지붕에서 차여 떨어지는 적을 카메라가 고개를 돌려 따라본다 (CameraFx 처형 주인, 최대 35°).
+        /// 적이 날아가는 방향은 EnemyActor가 정한다(지붕 가장자리 쪽).
+        /// </summary>
+        void LookAtKickFall(StageDirector.Encounter enc)
+        {
+            if (presentation == null || !presentation.Enabled || presentation.cameraFx == null || player == null || enc.Actors == null) return;
+            foreach (var a in enc.Actors)
+            {
+                if (a == null || a.KickDirection == Vector3.zero) continue;
+                var target = a.transform.position + a.KickDirection * (GameConfig.EnemyBody.KickOffRoofDistance * 0.7f) - player.transform.position;
+                float yaw = Vector3.SignedAngle(player.transform.forward, Vector3.ProjectOnPlane(target, Vector3.up), Vector3.up);
+                yaw = Mathf.Clamp(yaw, -GameConfig.EnemyBody.KickFallLookMaxYaw, GameConfig.EnemyBody.KickFallLookMaxYaw);
+                presentation.cameraFx.RequestYaw(CameraOwner.Execution, yaw, GameConfig.EnemyBody.KickFallLookSeconds);   // 연출 기록(Log)에는 남기지 않음: 처형 연출 이름이 마지막이어야 함 (B07)
+                LastKickLookYaw = yaw;
+                return;
+            }
+        }
+
+        /// <summary>마지막 지붕 발차기 따라보기 각도 (테스트용).</summary>
+        public float LastKickLookYaw { get; private set; }
 
         // ---------------- G 파쿠르·사건 ----------------
         void OnSlotJudged(StageDirector.ObstacleRun run, int slot, Judgement r)

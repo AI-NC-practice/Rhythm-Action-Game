@@ -262,6 +262,128 @@ namespace RhythmActionGame.EditorTools
             foreach (var a in enemies.Normal) Add(a.transform, "enemy");
             foreach (var a in enemies.Surround) Add(a.transform, "enemy");
             if (enemies.Boss != null) Add(enemies.Boss.transform, "enemy");
+
+            // 작업 R07: 추격 적 달리는 자리 프로필 — 실제 경로를 따라 0.5 m마다, 경로 높이 −3.5 m ~ +0.6 m 안의 가장 높은 보이는 면
+            // (나무·등·깃발 등 빼고). 옆 거리는 사건 하나에 하나: 지붕 가장자리 안쪽부터 줄여 가며 85% 넘는 자리에서 면이 있는 가장 먼 값.
+            // 면이 없는 자리(기와집 이음매 골 등)는 앞뒤 면 높이를 이어 준다.
+            float? Surface(Vector3 q, float pathY)
+            {
+                float top = pathY < 0.3f ? pathY + 0.15f : pathY + 0.6f;   // 땅 길에서는 땅만 (집 기단 위로 달리지 않게)
+                var hs = HeightsAt(q).Where(h => h.y >= pathY - 3.5f && h.y <= top && !IsNotGround(Owner(h.owner))).ToList();
+                return hs.Count == 0 ? (float?)null : hs.Max(h => h.y);
+            }
+            foreach (var prop in eventProps.GetComponentsInChildren<EventProp>(true))
+            {
+                string how = prop.companion != "" ? prop.companion : prop.kind;
+                if (how != EventCatalog.Chase || prop.enemy == null) continue;
+                float side = prop.slotSides.Length > 0 ? -prop.slotSides[0] : 1f;
+                float step = 0.5f;
+                float d0 = Mathf.Max(0f, (prop.runBeat - EventProp.ChaseBeatsBefore) * GameConfig.MetersPerBeat + 2f);
+                float d1 = (prop.runBeat + prop.beats + EventProp.ChaseBeatsAfter) * GameConfig.MetersPerBeat + 2f;
+                int n = Mathf.FloorToInt((d1 - d0) / step) + 1;
+                float bestLat = 0.8f; float?[] best = null; int bestHits = -1;
+                for (float l = prop.chaseLateral; l >= GameConfig.Map.ChaseMinLateral - 1e-3f; l -= 0.25f)
+                {
+                    var col = new float?[n];
+                    int hits = 0;
+                    for (int i = 0; i < n; i++)
+                    {
+                        var pt = MapLayout.PointAt(d0 + i * step, out var fwd);
+                        col[i] = Surface(pt + MapLayout.RightOf(fwd) * (side * l), pt.y);
+                        if (col[i].HasValue) hits++;
+                    }
+                    if (hits > bestHits) { bestHits = hits; best = col; bestLat = l; }
+                    if (hits >= n * 0.97f) break;
+                }
+                var ys = new float[n];
+                var gap = new bool[n];
+                for (int i = 0; i < n; i++)
+                {
+                    if (best[i].HasValue) { ys[i] = best[i].Value; continue; }
+                    gap[i] = true;
+                    int a = i - 1; while (a >= 0 && !best[a].HasValue) a--;
+                    int b = i + 1; while (b < n && !best[b].HasValue) b++;
+                    float pathY = MapLayout.PointAt(d0 + i * step).y;
+                    ys[i] = a >= 0 && b < n ? Mathf.Lerp(best[a].Value, best[b].Value, (i - a) / (float)(b - a)) : a >= 0 ? best[a].Value : b < n ? best[b].Value : pathY;
+                }
+                prop.chaseD0 = d0;
+                prop.chaseStep = step;
+                prop.chaseY = ys;
+                prop.chaseX = Enumerable.Repeat(bestLat, n).ToArray();
+                // 면이 없는 틈(집과 집 사이)은 뛰어넘는다: 틈 길이에 맞춘 포물선으로 발을 들어 올림
+                for (int i = 0; i < n; i++)
+                {
+                    if (!gap[i]) continue;
+                    int a = i; while (a > 0 && gap[a - 1]) a--;
+                    int b = i; while (b < n - 1 && gap[b + 1]) b++;
+                    float len = (b - a + 2) * step;
+                    float k = (i - a + 1) / (float)(b - a + 2);
+                    ys[i] += Mathf.Min(GameConfig.Map.ChaseHopMax, len * 0.35f) * 4f * k * (1f - k);
+                }
+                // 높이가 1 m 넘게 갑자기 바뀌는 곳(담·지붕 오르내리기)은 플레이어 경로가 오르내리는 구간에 맞춰 함께 오른다
+                var py = new float[n];
+                for (int i = 0; i < n; i++) py[i] = MapLayout.PointAt(d0 + i * step).y;
+                for (int i = 0; i < n - 1; i++)
+                {
+                    if (gap[i] || gap[i + 1] || Mathf.Abs(ys[i + 1] - ys[i]) <= 1f) continue;
+                    int a = i, b = i + 1;
+                    while (a > 0 && Mathf.Abs(py[a - 1] - py[a]) > 1e-3f) a--;
+                    while (b < n - 1 && Mathf.Abs(py[b + 1] - py[b]) > 1e-3f) b++;
+                    if (b - a < 4) { a = Mathf.Max(0, i - 3); b = Mathf.Min(n - 1, i + 4); }
+                    float y0 = ys[a], y1 = ys[b];
+                    for (int j = a + 1; j < b; j++)
+                    {
+                        float t = Mathf.Abs(py[b] - py[a]) > 0.1f ? (py[j] - py[a]) / (py[b] - py[a]) : (j - a) / (float)(b - a);
+                        ys[j] = Mathf.Lerp(y0, y1, Mathf.Clamp01(t));
+                        gap[j] = true;
+                    }
+                    i = b - 1;
+                }
+                prop.chaseGap = gap;
+                Debug.Log($"[SceneBuilder] 추격 프로필 {prop.name}: {n}점, 옆 거리 {bestLat:0.00} m, 면 있음 {bestHits}/{n}");
+            }
+
+            // 작업 R07: 지붕 위 적이 PERFECT 발차기에 떨어질 자리 — 플레이어 반대쪽에서 옆으로 돌린 여러 방향·거리 중 보이는 면이 가장 낮은 곳 (같으면 앞쪽)
+            foreach (var a in enemies.Normal)
+            {
+                if (!a.onRoof) continue;
+                var pos = a.transform.position;
+                var away = -a.transform.forward; away.y = 0f; away.Normalize();   // 적은 플레이어를 본다
+                float bestY = float.PositiveInfinity; Vector3 best = pos;
+                foreach (float sd in new[] { 1f, -1f })
+                    foreach (float ang in new[] { 50f, 65f, 80f, 95f, 110f })   // 앞쪽(1인칭 카메라에 보이는 쪽)부터
+                        foreach (float dd in new[] { 7.5f, 9.5f, 6f, 12f })
+                        {
+                            var q = pos + Quaternion.AngleAxis(sd * ang, Vector3.up) * away * dd;
+                            var hs = HeightsAt(q).Where(h => h.y <= pos.y - 0.3f && !IsNotGround(Owner(h.owner))).ToList();
+                            float y = hs.Count > 0 ? hs.Max(h => h.y) : 0f;
+                            if (y < bestY - 0.3f) { bestY = y; best = new Vector3(q.x, y, q.z); }
+                        }
+                a.hasKickLanding = true;
+                a.kickLanding = best;
+                Debug.Log($"[SceneBuilder] 지붕 발차기 착지 {a.name}: {pos} → {best} (낙차 {pos.y - best.y:0.0} m)");
+            }
+
+            // 작업 R07: 매복 적은 옆(3.2 m)에서 길 쪽(1 m)으로 튀어나온다 — 지붕 비탈에서는 들어올수록 면이 높아지므로 끝자리 면 높이를 잰다
+            foreach (var prop in eventProps.GetComponentsInChildren<EventProp>(true))
+            {
+                string how = prop.companion != "" ? prop.companion : prop.kind;
+                if (how != EventCatalog.Ambush || prop.enemy == null) continue;
+                float side = prop.slotSides.Length > 0 ? prop.slotSides[0] : 1f;
+                float z = (float)((prop.slotOffsets.Length > 0 ? prop.slotOffsets[0] : 2f) - prop.beats * 0.5f) * GameConfig.MetersPerBeat;
+                float homeY = prop.enemy.position.y;
+                var q = prop.transform.TransformPoint(new Vector3(-side * 1.0f, 0f, z));
+                var hs = HeightsAt(q).Where(h => Mathf.Abs(h.y - homeY) < 1.5f && !IsNotGround(Owner(h.owner))).ToList();
+                prop.ambushEndY = hs.Count > 0 ? hs.OrderBy(h => Mathf.Abs(h.y - homeY)).First().y - prop.transform.position.y : prop.enemy.localPosition.y;
+            }
+        }
+
+        /// <summary>달리는 발판으로 쓰지 않는 장식 (나무 꼭대기·등·깃발·빨랫줄 등).</summary>
+        static bool IsNotGround(string owner)
+        {
+            foreach (var k in new[] { "pine", "zelkova", "lantern", "banner", "clothes", "rope", "jangseung", "cloth_rack", "straw", "jige", "firewood", "basket" })
+                if (owner.Contains(k)) return true;
+            return false;
         }
 
         /// <summary>

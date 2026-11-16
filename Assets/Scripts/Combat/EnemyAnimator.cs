@@ -46,6 +46,12 @@ namespace RhythmActionGame
         float blendLeft;
         float followLeft = -1f;
         double lastNow = double.NaN;
+        Vector3 lastPos;
+        bool hasLastPos;
+        /// <summary>수평 이동 속도 (m/s, 박자 시계 시간, 부드럽게). 작업 R07.</summary>
+        public float MoveSpeed { get; private set; }
+        /// <summary>달리기 재생 배율 (테스트용).</summary>
+        public float RunRate { get; private set; } = 1f;
 
         void Awake()
         {
@@ -114,7 +120,7 @@ namespace RhythmActionGame
         public void OnEndGuard() { if (CurrentState == EnemyMoves.Guard) Enter(EnemyMoves.Idle, GameConfig.EnemyBody.CrossFadeSeconds); }
         public void OnPushed() { mode = Mode.Free; followLeft = -1f; Enter(EnemyMoves.Hit, GameConfig.EnemyBody.CrossFadeSeconds); followLeft = LengthOf(EnemyMoves.Hit); }
         public void OnDefeat(ExecutionKind how) { mode = Mode.Free; followLeft = -1f; Enter(EnemyMoves.DefeatState(how), GameConfig.EnemyBody.CrossFadeSeconds * 0.5f); }
-        public void OnReset() { mode = Mode.Free; followLeft = -1f; scrubTime = 0f; Enter(EnemyMoves.Idle, 0f); }
+        public void OnReset() { mode = Mode.Free; followLeft = -1f; scrubTime = 0f; hasLastPos = false; MoveSpeed = 0f; Enter(EnemyMoves.Idle, 0f); }
 
         void LateUpdate()
         {
@@ -126,6 +132,8 @@ namespace RhythmActionGame
             float speed = clock == null ? 1f : clock.IsPaused ? 0f : clock.IsRunning ? clock.SpeedMultiplier : 1f;
             if (actor != null && actor.Frozen) speed = 0f;
             float dt = (float)dtd * speed;
+            TrackSpeed(dt);
+            UpdateRun();
 
             if (mode == Mode.Scrub)
             {
@@ -142,13 +150,39 @@ namespace RhythmActionGame
                 }
                 return;
             }
-            animator.Update(dt);
+            animator.Update(CurrentState == EnemyMoves.Run ? dt * RunRate : dt);
             if (followLeft >= 0f)
             {
                 followLeft -= dt;
                 if (followLeft < 0f && (CurrentState.StartsWith("Attack_") || CurrentState == EnemyMoves.Hit))
                     Enter(EnemyMoves.Idle, GameConfig.EnemyBody.CrossFadeSeconds);
             }
+        }
+
+        /// <summary>
+        /// 작업 R07: 이동 속도 재기. 돌진·결투 원 이동·포위 둘레 돌기 등 누가 옮기든 실제 위치 변화로 잰다.
+        /// 한 프레임에 너무 멀리 가면(되감기·배치) 순간이동으로 보고 무시한다.
+        /// </summary>
+        void TrackSpeed(float dt)
+        {
+            var p = transform.position;
+            if (!hasLastPos || dt <= 0f) { if (!hasLastPos) { lastPos = p; hasLastPos = true; } return; }
+            var d = p - lastPos; d.y = 0f;
+            lastPos = p;
+            float v = d.magnitude / dt;
+            if (v > GameConfig.EnemyBody.TeleportSpeed) v = 0f;
+            MoveSpeed = Mathf.Lerp(MoveSpeed, v, 1f - Mathf.Exp(-GameConfig.EnemyBody.SpeedSmoothing * dt));
+        }
+
+        /// <summary>대기 ↔ 달리기 (공격·막기·밀림·쓰러짐 중에는 그대로). 달리기는 이동 속도에 맞춘 배율로 재생한다.</summary>
+        void UpdateRun()
+        {
+            RunRate = Mathf.Clamp(MoveSpeed / GameConfig.EnemyBody.RunClipSpeed, GameConfig.EnemyBody.RunRateMin, GameConfig.EnemyBody.RunRateMax);
+            if (mode != Mode.Free || (actor != null && actor.Frozen)) return;
+            if (CurrentState == EnemyMoves.Idle && MoveSpeed > GameConfig.EnemyBody.RunStartSpeed && len.ContainsKey(EnemyMoves.Run))
+                Enter(EnemyMoves.Run, GameConfig.EnemyBody.CrossFadeSeconds);
+            else if (CurrentState == EnemyMoves.Run && MoveSpeed < GameConfig.EnemyBody.RunStopSpeed)
+                Enter(EnemyMoves.Idle, GameConfig.EnemyBody.CrossFadeSeconds);
         }
     }
 }

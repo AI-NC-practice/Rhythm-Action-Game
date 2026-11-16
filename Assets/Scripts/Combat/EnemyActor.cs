@@ -23,6 +23,9 @@ namespace RhythmActionGame
 
         public string kind = "sword";
         public bool onRoof;
+        /// <summary>작업 R07: 지붕 위 적이 발차기에 떨어질 자리 (빌드 때 보이는 메시로 고른 가장 낮은 면: 골목·마당·낮은 지붕). hasKickLanding이 false면 실행 중에 고른다.</summary>
+        public bool hasKickLanding;
+        public Vector3 kickLanding;
         /// <summary>무기 회전 축 (어깨 위치).</summary>
         public Transform weaponPivot;
         /// <summary>무기 끝 (판정 원과 카메라가 따라가는 점).</summary>
@@ -259,8 +262,111 @@ namespace RhythmActionGame
             }
         }
 
+        /// <summary>지붕 발차기로 날아가는 수평 방향 (작업 R07, 카메라가 따라봄). 처형 전이면 zero.</summary>
+        public Vector3 KickDirection { get; private set; }
+        /// <summary>지붕 발차기로 떨어져 땅(아래 충돌면)에 닿았는지 (테스트용).</summary>
+        public bool KickLanded { get; private set; }
+
+        /// <summary>
+        /// 작업 R07: 지붕 위 PERFECT 발차기 — 플레이어 반대쪽에서 지붕 가장자리 쪽으로 돌린 방향으로 뒤로 날아가(Mixamo Flying Back Death)
+        /// 위로 조금 튄 뒤 중력으로 아래 면(땅·낮은 지붕)까지 떨어진다. 클립이 몸을 뒤로 넘기므로 코드 회전은 하지 않는다.
+        /// </summary>
+        IEnumerator KickOffRoofRoutine(Vector3 away)
+        {
+            var flat = away; flat.y = 0f;
+            if (flat.sqrMagnitude < 1e-6f) flat = transform.forward * -1f;
+            flat.Normalize();
+            float side = KickSide();
+            var start = transform.position;
+            float landY = float.NaN;
+            if (hasKickLanding)
+            {
+                var to = kickLanding - start; to.y = 0f;
+                if (to.sqrMagnitude > 1f) { flat = to.normalized; landY = kickLanding.y; }
+            }
+            // 떨어질 자리 고르기 (빌드 때 고른 자리가 없을 때만): 지붕 가장자리 쪽 여러 방향·거리 중 가장 낮은 착지면(골목·마당). 같으면 기본 방향.
+            var dir = Quaternion.AngleAxis(side * GameConfig.EnemyBody.KickOffRoofSideAngle, Vector3.up) * flat;
+            float dist = GameConfig.EnemyBody.KickOffRoofDistance;
+            float bestFloor = FloorBelow(start + dir * dist + Vector3.up * 0.5f, start.y) - 0.3f;   // 기본 방향을 조금 우대
+            if (!float.IsNaN(landY)) { dir = flat; dist = new Vector2(kickLanding.x - start.x, kickLanding.z - start.z).magnitude; }
+            else foreach (float sd in new[] { side, -side })
+                foreach (float ang in new[] { 80f, 65f, 95f, 50f, 110f })
+                    foreach (float dd in new[] { 7.5f, 9.5f, 6f })
+                    {
+                        var cand = Quaternion.AngleAxis(sd * ang, Vector3.up) * flat;
+                        float f = FloorBelow(start + cand * dd + Vector3.up * 0.5f, start.y);
+                        if (f < bestFloor - 0.5f) { bestFloor = f; dir = cand; dist = dd; }
+                    }
+            KickDirection = dir;
+            KickLanded = false;
+            transform.rotation = Quaternion.LookRotation(-dir, Vector3.up);   // 등 쪽으로 날아감
+            float T = GameConfig.EnemyBody.KickOffRoofFlightSeconds;
+            float vy = float.IsNaN(landY) ? GameConfig.EnemyBody.KickOffRoofLift : LiftToClear(start, dir, dist, T);
+            float y = start.y, t = 0f;
+            while (t < 4f)
+            {
+                float dt = Frozen ? 0f : Time.deltaTime;
+                t += dt;
+                float k = Mathf.Clamp01(t / T);
+                // 빌드 때 고른 자리로는 곧게(지붕들을 넘는 포물선), 아니면 처음에 빠르게
+                var p = start + dir * (dist * (float.IsNaN(landY) ? 1f - (1f - k) * (1f - k) : k));
+                vy -= GameConfig.EnemyBody.Gravity * dt;
+                y += vy * dt;
+                float floor = !float.IsNaN(landY) && k >= 1f ? landY : FloorBelow(new Vector3(p.x, Mathf.Max(y, start.y) + 0.5f, p.z), y, float.IsNaN(landY));
+                if (vy < 0f && y <= floor) { y = floor; KickLanded = true; }
+                transform.position = new Vector3(p.x, y, p.z);
+                if (KickLanded && k >= 1f) yield break;
+                yield return null;
+            }
+        }
+
+        /// <summary>
+        /// 떨어질 자리까지 가는 길에 있는 지붕(충돌면·길 옆 장식 윗면)을 모두 0.3 m 넘게 넘는 처음 위 속도 (m/s).
+        /// 수평은 T초 동안 고르게 간다. 막 떠난 지붕(1.5 m 안)과 떨어질 자리 앞 1 m는 빼고 잰다.
+        /// </summary>
+        float LiftToClear(Vector3 start, Vector3 dir, float dist, float T)
+        {
+            float g = GameConfig.EnemyBody.Gravity, vy = GameConfig.EnemyBody.KickOffRoofLift;
+            for (int i = 1; i < 24; i++)
+            {
+                float f = i / 24f, along = dist * f;
+                if (along < 1.5f || dist - along < 1f) continue;
+                var q = start + dir * along;
+                float top = DressingInstancer.TopBelow(q, 999f);
+                foreach (var h in Physics.RaycastAll(q + Vector3.up * 40f, Vector3.down, 80f, ~0, QueryTriggerInteraction.Ignore))
+                    if (!h.transform.IsChildOf(transform)) top = Mathf.Max(top, h.point.y);
+                if (float.IsNegativeInfinity(top)) continue;
+                float ti = f * T;
+                vy = Mathf.Max(vy, (top + 0.3f - start.y + 0.5f * g * ti * ti) / ti);
+            }
+            return vy;
+        }
+
+        /// <summary>지붕 가장자리 쪽: 길 가운데에서 이 적이 벗어난 쪽 (가운데면 오른쪽).</summary>
+        float KickSide()
+        {
+            var player = GameBootstrap.Instance != null ? GameBootstrap.Instance.player : null;
+            if (player == null) return 1f;
+            float lat = Vector3.Dot(transform.position - player.transform.position, player.transform.right);
+            return lat < -0.2f ? -1f : 1f;
+        }
+
+        /// <summary>발 아래 면 높이: 충돌면(자기 자신 제외)과 길 옆 장식의 윗면 중 높은 것. 없으면 맵 땅 높이 0.</summary>
+        float FloorBelow(Vector3 from, float currentY, bool dressing = true)
+        {
+            float best = 0f;
+            foreach (var h in Physics.RaycastAll(from, Vector3.down, 80f, ~0, QueryTriggerInteraction.Ignore))
+            {
+                if (h.transform.IsChildOf(transform)) continue;
+                if (h.point.y > currentY + 0.6f) continue;   // 위에 있는 면(막 떠난 지붕)은 무시
+                best = Mathf.Max(best, h.point.y);
+            }
+            return dressing ? Mathf.Max(best, DressingInstancer.TopBelow(from, currentY + 0.6f)) : best;   // 충돌체 없는 길 옆 집·담 지붕 (경계 상자 윗면, 대략)
+        }
+
         IEnumerator DefeatRoutine(ExecutionKind how, Vector3 away)
         {
+            if (how == ExecutionKind.KickOffRoof) { yield return KickOffRoofRoutine(away); yield break; }
             var start = transform.position;
             var startRot = transform.rotation;
             if (how == ExecutionKind.DisarmSlash && weaponPivot != null) weaponPivot.gameObject.SetActive(false); // 칼을 빼앗김
