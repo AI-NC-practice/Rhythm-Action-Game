@@ -2,31 +2,89 @@ using UnityEngine;
 
 namespace RhythmActionGame
 {
-    /// <summary>점수·콤보·판정 수·최고 속도 (GDD 4.7). 순수 C#.</summary>
+    /// <summary>
+    /// 점수·콤보·판정 수·최고 속도 (GDD 4.7, 작업 R25 = GDD-beta B20에서 바꿈). 순수 C#.
+    /// - 장구(쿵·덕): PERFECT 50 / NORMAL 20 + 장구 콤보 보너스(5↑ +10, 10↑ +20, 20↑ +30, 50↑ +50). 장구 FAIL만 콤보를 끊는다.
+    /// - 방향키(사건·전투): PERFECT 100 / NORMAL 50, 콤보와 무관.
+    /// - 되감기 패널티: 기억해 둔 점수(전투 초입·챕터 시작)로 돌아가고 1,000점을 뺀다(0 아래로 안 감). 콤보는 그대로.
+    /// - 랭크: 만점 대비 점수 비율로 SSS SS S A B C D F.
+    /// </summary>
     public class ScoreBoard
     {
         public int Perfect { get; private set; }
         public int Normal { get; private set; }
         public int Fail { get; private set; }
         public int Score { get; private set; }
+        /// <summary>장구 콤보 (방향키는 세지 않음).</summary>
         public int Combo { get; private set; }
         public int MaxCombo { get; private set; }
         public float MaxSpeed { get; private set; } = GameConfig.SpeedStart;
+        /// <summary>되감기 패널티를 받은 횟수.</summary>
+        public int Rewinds { get; private set; }
+        /// <summary>이 스테이지 만점 (ScoreKeeper가 차트에서 계산해 넣는다). 0이면 랭크 계산 불가 → 판정 비율로 대신.</summary>
+        public int MaxScore { get; set; }
 
         public int Total => Perfect + Normal + Fail;
         public float PerfectRatio => Total == 0 ? 0f : Perfect / (float)Total;
 
         public event System.Action Changed;
 
-        public void Add(Judgement j)
+        /// <summary>장구 콤보 보너스 (이 판정을 더한 뒤의 콤보 수 기준).</summary>
+        public static int JangdanBonus(int combo)
+        {
+            int bonus = 0;
+            for (int i = 0; i < GameConfig.JangdanComboBonusAt.Length; i++)
+                if (combo >= GameConfig.JangdanComboBonusAt[i]) bonus = GameConfig.JangdanComboBonus[i];
+            return bonus;
+        }
+
+        public static bool IsJangdan(ArrowKey k) => k == ArrowKey.Kung || k == ArrowKey.Deok;
+
+        /// <summary>방향키 판정 (콤보와 무관).</summary>
+        public void Add(Judgement j) => Add(j, false);
+
+        public void Add(Judgement j, bool jangdan)
         {
             switch (j)
             {
-                case Judgement.Perfect: Perfect++; Score += GameConfig.ScorePerfect; Combo++; break;
-                case Judgement.Normal: Normal++; Score += GameConfig.ScoreNormal; Combo++; break;
-                default: Fail++; Score += GameConfig.ScoreFail; Combo = 0; break;
+                case Judgement.Perfect: Perfect++; break;
+                case Judgement.Normal: Normal++; break;
+                default: Fail++; break;
             }
-            if (Combo > MaxCombo) MaxCombo = Combo;
+            if (jangdan)
+            {
+                if (j == Judgement.Fail) Combo = 0;
+                else
+                {
+                    Combo++;
+                    Score += (j == Judgement.Perfect ? GameConfig.ScoreJangdanPerfect : GameConfig.ScoreJangdanNormal) + JangdanBonus(Combo);
+                }
+                if (Combo > MaxCombo) MaxCombo = Combo;
+            }
+            else if (j != Judgement.Fail)
+                Score += j == Judgement.Perfect ? GameConfig.ScoreArrowPerfect : GameConfig.ScoreArrowNormal;
+            Changed?.Invoke();
+        }
+
+        /// <summary>장구 jangdan개·방향키 arrows개를 모두 PERFECT로 쳤을 때 (장구 콤보가 처음부터 이어짐).</summary>
+        public static int MaxScoreFor(int jangdan, int arrows)
+        {
+            int s = arrows * GameConfig.ScoreArrowPerfect;
+            for (int c = 1; c <= jangdan; c++) s += GameConfig.ScoreJangdanPerfect + JangdanBonus(c);
+            return s;
+        }
+
+        // ---------------- 되감기 패널티 ----------------
+        public struct Checkpoint { public int Score, Perfect, Normal, Fail; public bool Valid; }
+
+        public Checkpoint Save() => new Checkpoint { Score = Score, Perfect = Perfect, Normal = Normal, Fail = Fail, Valid = true };
+
+        /// <summary>기억한 점수·판정 수로 돌아가고 패널티를 뺀다 (0 아래로 안 감). 콤보는 그대로.</summary>
+        public void RewindTo(Checkpoint cp)
+        {
+            if (cp.Valid) { Score = cp.Score; Perfect = cp.Perfect; Normal = cp.Normal; Fail = cp.Fail; }
+            Score = Mathf.Max(0, Score - GameConfig.RewindScorePenalty);
+            Rewinds++;
             Changed?.Invoke();
         }
 
@@ -37,32 +95,25 @@ namespace RhythmActionGame
 
         public void Reset()
         {
-            Perfect = Normal = Fail = Score = Combo = MaxCombo = 0;
-            Rewound = false;
+            Perfect = Normal = Fail = Score = Combo = MaxCombo = Rewinds = 0;
             MaxSpeed = GameConfig.SpeedStart;
             Changed?.Invoke();
         }
 
-        /// <summary>랭크 (클리어했을 때만). S ≥ 90% 그리고 FAIL 0 / A ≥ 75% / B ≥ 50% / C, 게임 오버면 "-".</summary>
-        public static string Rank(bool cleared, int perfect, int normal, int fail)
+        /// <summary>점수 비율로 랭크 (만점 대비). 게임 오버면 "-".</summary>
+        public static string Rank(bool cleared, int score, int maxScore)
         {
             if (!cleared) return "-";
-            int total = perfect + normal + fail;
-            float r = total == 0 ? 0f : perfect / (float)total;
+            float r = maxScore <= 0 ? 0f : score / (float)maxScore;
             const float eps = 1e-6f;
-            if (r + eps >= GameConfig.RankSRatio && fail == 0) return "S";
-            if (r + eps >= GameConfig.RankARatio) return "A";
-            if (r + eps >= GameConfig.RankBRatio) return "B";
-            return "C";
+            for (int i = 0; i < GameConfig.RankRatios.Length; i++)
+                if (r + eps >= GameConfig.RankRatios[i]) return GameConfig.RankNames[i];
+            return GameConfig.RankNames[GameConfig.RankNames.Length - 1];
         }
 
-        /// <summary>체력 0으로 챕터 처음으로 되감은 적이 있는지 (GDD-beta B9.3). 있으면 클리어해도 랭크 "-".</summary>
-        public bool Rewound { get; set; }
-
-        public string Rank(bool cleared) => Rewound ? "-" : Rank(cleared, Perfect, Normal, Fail);
+        public string Rank(bool cleared) => Rank(cleared, Score, MaxScore);
     }
 
-    /// <summary>화면 문구 (GDD 4.8). 테스트가 문구를 그대로 비교한다.</summary>
     public static class UiText
     {
         public const string Title = "Rhythm-Action-Game";

@@ -6,17 +6,17 @@ namespace RhythmActionGame.Tests
     public class T08_ScoreAndTextTests
     {
         [Test]
-        public void T08_Score_300_100_0_AndCombo()
+        public void T08_Score_And_JangdanCombo()   // 작업 R25: 장구만 콤보
         {
             var b = new ScoreBoard();
-            b.Add(Judgement.Perfect);
-            b.Add(Judgement.Normal);
-            b.Add(Judgement.Perfect);
-            Assert.AreEqual(700, b.Score);
+            b.Add(Judgement.Perfect, true);
+            b.Add(Judgement.Normal, true);
+            b.Add(Judgement.Perfect, true);
+            Assert.AreEqual(120, b.Score, "장구 50 + 20 + 50");
             Assert.AreEqual(3, b.Combo);
-            b.Add(Judgement.Fail);
-            Assert.AreEqual(700, b.Score, "FAIL 0점");
-            Assert.AreEqual(0, b.Combo, "FAIL이면 콤보 끊김");
+            b.Add(Judgement.Fail, true);
+            Assert.AreEqual(120, b.Score, "FAIL 0점");
+            Assert.AreEqual(0, b.Combo, "장구 FAIL이면 콤보 끊김");
             Assert.AreEqual(3, b.MaxCombo);
             Assert.AreEqual(2, b.Perfect); Assert.AreEqual(1, b.Normal); Assert.AreEqual(1, b.Fail);
             b.ObserveSpeed(1.25f); b.ObserveSpeed(1.1f);
@@ -24,16 +24,18 @@ namespace RhythmActionGame.Tests
         }
 
         [Test]
-        public void T08_Rank_Thresholds()
+        public void T08_Rank_Thresholds()   // 작업 R25: 만점 대비 점수 비율 8단계
         {
-            Assert.AreEqual("S", ScoreBoard.Rank(true, 9, 1, 0), "90% 그리고 FAIL 0");
-            Assert.AreEqual("A", ScoreBoard.Rank(true, 18, 0, 2), "90%여도 FAIL 있으면 S 아님");
-            Assert.AreEqual("A", ScoreBoard.Rank(true, 8, 2, 0), "80%");
-            Assert.AreEqual("A", ScoreBoard.Rank(true, 3, 1, 0), "75%");
-            Assert.AreEqual("B", ScoreBoard.Rank(true, 7, 3, 0), "70%");
-            Assert.AreEqual("B", ScoreBoard.Rank(true, 1, 1, 0), "50%");
-            Assert.AreEqual("C", ScoreBoard.Rank(true, 4, 5, 1), "40%");
-            Assert.AreEqual("-", ScoreBoard.Rank(false, 10, 0, 0), "게임 오버");
+            Assert.AreEqual("SSS", ScoreBoard.Rank(true, 970, 1000));
+            Assert.AreEqual("SS", ScoreBoard.Rank(true, 969, 1000));
+            Assert.AreEqual("SS", ScoreBoard.Rank(true, 930, 1000));
+            Assert.AreEqual("S", ScoreBoard.Rank(true, 880, 1000));
+            Assert.AreEqual("A", ScoreBoard.Rank(true, 800, 1000));
+            Assert.AreEqual("B", ScoreBoard.Rank(true, 700, 1000));
+            Assert.AreEqual("C", ScoreBoard.Rank(true, 600, 1000));
+            Assert.AreEqual("D", ScoreBoard.Rank(true, 500, 1000));
+            Assert.AreEqual("F", ScoreBoard.Rank(true, 499, 1000));
+            Assert.AreEqual("-", ScoreBoard.Rank(false, 1000, 1000), "게임 오버");
         }
 
         [Test]

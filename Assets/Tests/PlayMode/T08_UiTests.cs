@@ -124,17 +124,17 @@ namespace RhythmActionGame.Tests
             Assert.AreEqual("0", hud.ScoreText.text);
             Assert.IsFalse(hud.ComboText.enabled, "콤보 0은 숨김");
 
-            boot.judge.Schedule(4, ArrowKey.Up);
-            boot.judge.Schedule(6, ArrowKey.Up);
-            now = 2.0; boot.judge.Tick(); boot.judge.Submit(ArrowKey.Up, now);
+            boot.judge.Schedule(4, ArrowKey.Kung);   // 작업 R25: 콤보는 장구만
+            boot.judge.Schedule(6, ArrowKey.Kung);
+            now = 2.0; boot.judge.Tick(); boot.judge.Submit(ArrowKey.Kung, now);
             yield return null;
             Assert.IsFalse(hud.ComboText.enabled, "콤보 1은 숨김");
             Assert.AreEqual("x1.05", hud.SpeedText.text);
-            now = boot.clock.TimeOfBeat(6); boot.judge.Submit(ArrowKey.Up, now);
+            now = boot.clock.TimeOfBeat(6); boot.judge.Submit(ArrowKey.Kung, now);
             yield return null;
             Assert.IsTrue(hud.ComboText.enabled);
             Assert.AreEqual("콤보 2", hud.ComboText.text);
-            Assert.AreEqual("600", hud.ScoreText.text);
+            Assert.AreEqual("100", hud.ScoreText.text, "장구 PERFECT 50 × 2 (R25)");
             Assert.AreEqual("x1.10", hud.SpeedText.text);
 
             boot.director.Health.Damage();
@@ -194,8 +194,9 @@ namespace RhythmActionGame.Tests
             Assert.AreEqual("NORMAL 5", r.NormalText.text);
             Assert.AreEqual("FAIL 2", r.FailText.text);
             Assert.AreEqual("최고 속도 x1.30", r.MaxSpeedText.text);
-            Assert.AreEqual("점수 5900", r.ScoreText.text);
-            Assert.AreEqual("랭크 B", r.RankText.text, "18/25 = 72% → B (50% 이상 75% 미만)");
+            Assert.AreEqual("점수 2050", r.ScoreText.text, "방향키 100×18 + 50×5 (R25)");
+            Assert.AreEqual("랭크 " + ScoreBoard.Rank(true, 2050, board.MaxScore), r.RankText.text, "만점 대비 비율 (R25)");
+            Assert.AreEqual("랭크 F", r.RankText.text, "2050 / 만점 33100 → F");
             var texts = Texts(r.Panel);
             CollectionAssert.Contains(texts, "다시 하기");
             CollectionAssert.Contains(texts, "타이틀로");

@@ -1905,6 +1905,48 @@
                       "attempts":  0,
                       "max_attempts":  3,
                       "notes":  "VARCO Sound 사용 가능(사용자, 2026-11-16)."
+                  },
+                  {
+                      "id":  "R25",
+                      "title":  "점수·콤보·랭크·되감기 패널티 개편 (GDD-beta B20)",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "R15"
+                                     ],
+                      "acceptance":  [
+                                         "장구: PERFECT 50 / NORMAL 20, 장구 콤보 5·10·20·50 이상이면 칠 때마다 +10·+20·+30·+50 (NORMAL 포함), 장구 FAIL만 콤보를 끊음",
+                                         "방향키(사건·전투): PERFECT 100 / NORMAL 50, 콤보에 넣지 않고 콤보와 무관",
+                                         "무사 결투·포위(윈드밀) 전투 초입 점수를 기억하고 그 전투 FAIL 되감기 때 그 점수 − 1000 (0 아래 없음, 체력은 그대로, 장구 콤보 유지). 체력 0 챕터 되감기는 챕터 시작 점수 − 1000",
+                                         "랭크: 만점(장구·방향키 모두 PERFECT, 장구 콤보 처음부터) 대비 점수 비율 SSS ≥97% · SS ≥93% · S ≥88% · A ≥80% · B ≥70% · C ≥60% · D ≥50% · F",
+                                         "EditMode·PlayMode 테스트로 위 규칙 확인",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "done",
+                      "attempts":  1,
+                      "max_attempts":  3,
+                      "notes":  "사용자 결정 2026-11-17 (점수·실패 의논). 챕터 되감기 패널티와 랭크 경계값은 Claude 제안 — 사용자 확인 필요."
+                  },
+                  {
+                      "id":  "R26",
+                      "title":  "장구 콤보 단계별 이펙트 (5·10·20·50)",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "R25",
+                                         "R10"
+                                     ],
+                      "acceptance":  [
+                                         "장구 콤보가 보너스 단계(5·10·20·50)를 넘을 때마다 콤보 표시·이펙트가 단계별로 다르게 (색·크기·연출, 높은 단계일수록 화려하게)",
+                                         "단계를 처음 넘는 순간 짧은 강조 연출",
+                                         "방법은 시작 전에 사용자와 확인",
+                                         "PlayMode 테스트: 콤보 단계별로 다른 이펙트 상태",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  "사용자 요청 2026-11-17: 지금 목표·빌드를 끝낸 뒤 버그 잡고 추가."
                   }
               ]
 }

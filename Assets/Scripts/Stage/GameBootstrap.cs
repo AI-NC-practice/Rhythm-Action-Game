@@ -42,11 +42,10 @@ namespace RhythmActionGame
             if (director != null) { director.clock = clock; director.judge = judge; director.player = player; director.ChapterRewindRequested += OnChapterRewind; }
         }
 
-        /// <summary>체력 0 → 챕터 처음으로 되감기 (GDD-beta B9.3): 점수는 이어 가고, 랭크는 "-"로 남긴다.</summary>
+        /// <summary>체력 0 → 챕터 처음으로 되감기 (GDD-beta B9.3, 점수는 R25 = B20).</summary>
         void OnChapterRewind(double runBeat)
         {
-            StartRun(runBeat, keepScore: true);
-            if (score != null) score.Board.Rewound = true;
+            StartRun(runBeat, keepScore: true);   // 점수 패널티(챕터 시작 점수 − 1000)는 ScoreKeeper가 되감기 시작 때 (작업 R25)
         }
 
         void OnDestroy()
@@ -74,7 +73,7 @@ namespace RhythmActionGame
         {
             Time.timeScale = 1f;
             AudioListener.volume = GameSettings.Volume / 100f;
-            if (score != null && !keepScore) score.Board.Reset();
+            if (score != null && !keepScore) score.ResetRun();
             if (presentation != null) presentation.ResetAll();
             player.ResetTo(runBeat);
             clock.ResetSpeed();

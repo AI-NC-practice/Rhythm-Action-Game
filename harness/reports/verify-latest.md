@@ -1,7 +1,7 @@
 ﻿# Unity verify report
-time: 2026-11-17 05:58:02
+time: 2026-11-17 06:13:26
 
-## EditMode : total=204 passed=204 failed=0 skipped=0 result=Passed
+## EditMode : total=208 passed=208 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Config_MatchGddBetaB1
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_LabelPose_PopThenRise_045s
@@ -120,6 +120,10 @@ time: 2026-11-17 05:58:02
   - [Passed] RhythmActionGame.Tests.R07_EnemyClipTests.R07_EventFigureEnemies_HaveRunComponent
   - [Passed] RhythmActionGame.Tests.R18_ChaseRedesignTests.R18_ChargeSpeed_WalkRampSprint
   - [Passed] RhythmActionGame.Tests.R18_ChaseRedesignTests.R18_Chart_Unchanged
+  - [Passed] RhythmActionGame.Tests.R25_ScoreRulesTests.R25_Arrow_100_50_NoCombo
+  - [Passed] RhythmActionGame.Tests.R25_ScoreRulesTests.R25_JangdanComboBonus_Thresholds
+  - [Passed] RhythmActionGame.Tests.R25_ScoreRulesTests.R25_MaxScore_Stage1
+  - [Passed] RhythmActionGame.Tests.R25_ScoreRulesTests.R25_RewindPenalty_BackToCheckpointMinus1000_ComboKept
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_BeatAndSpeed_MatchGdd41
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_Judge_MatchGdd42
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_ObstacleAndCombat_MatchGdd44To46
@@ -189,7 +193,7 @@ time: 2026-11-17 05:58:02
   - [Passed] RhythmActionGame.Tests.T07_PatternTests.T07_Surround_Phase2_ThreeSimultaneous_OneCueEach
   - [Passed] RhythmActionGame.Tests.T07_PatternTests.T07_Surround_Phase3_FourArrowsHalfBeatApart
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_Rank_Thresholds
-  - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_Score_300_100_0_AndCombo
+  - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_Score_And_JangdanCombo
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_Settings_SaveAndLoad
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_SpeedFx_Intensity
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_Texts_MatchGdd48
@@ -207,7 +211,7 @@ time: 2026-11-17 05:58:02
   - [Passed] RhythmActionGame.Tests.T14_EnemyRigTests.T14_GameScene_EveryEnemy_HasModel_WeaponOnHandBone_NoCapsule
   - [Passed] RhythmActionGame.Tests.T14_EnemyRigTests.T14_PlayerController_HasExecutionAndHitStates
 
-## PlayMode : total=196 passed=195 failed=0 skipped=1 result=Passed
+## PlayMode : total=198 passed=197 failed=0 skipped=1 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -361,6 +365,8 @@ time: 2026-11-17 05:58:02
   - [Passed] RhythmActionGame.Tests.R19_GateBodyPlayTests.R20_R23_FirstPersonPreviews_FlatRoofPalace
   - [Passed] RhythmActionGame.Tests.R19_GateBodyPlayTests.R20_SkyBand_BeforeAfter_SameFrame
   - [Passed] RhythmActionGame.Tests.R19_GateBodyPlayTests.R23_PathEdgeLines_BeforeAfter_SameFrame
+  - [Passed] RhythmActionGame.Tests.R25_ScorePlayTests.R25_DuelFail_ScoreBackToEntryMinus1000_ComboKept
+  - [Passed] RhythmActionGame.Tests.R25_ScorePlayTests.R25_RealRun_JangdanAndArrowPoints_MaxScoreSet
   - [Skipped] RhythmActionGame.Tests.Review_StageWalkthroughPlayTests.Review_Stage1_Walkthrough_Shots
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Font_HasJudgeGlyphs
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Fx_GrayAndZoom_EnterAndExit

@@ -136,15 +136,22 @@ namespace RhythmActionGame
         public const float SurroundCameraTurnSeconds = 0.2f;
 
         // ---------------- GDD 4.7 승리 / 패배 ----------------
-        public const int ScorePerfect = 300;
-        public const int ScoreNormal = 100;
+        // 작업 R25 (GDD-beta B20, 2026-11-17 사용자 결정): 장구와 방향키 점수를 나누고, 콤보는 장구만
+        /// <summary>장구(쿵·덕) 점수. 콤보 보너스는 따로.</summary>
+        public const int ScoreJangdanPerfect = 50;
+        public const int ScoreJangdanNormal = 20;
+        /// <summary>방향키(사건·전투) 점수, 콤보와 무관.</summary>
+        public const int ScoreArrowPerfect = 100;
+        public const int ScoreArrowNormal = 50;
         public const int ScoreFail = 0;
-        /// <summary>랭크 S: PERFECT 비율 이상 (그리고 FAIL 0).</summary>
-        public const float RankSRatio = 0.90f;
-        /// <summary>랭크 A: PERFECT 비율 이상.</summary>
-        public const float RankARatio = 0.75f;
-        /// <summary>랭크 B: PERFECT 비율 이상.</summary>
-        public const float RankBRatio = 0.50f;
+        /// <summary>장구 콤보가 이 수 이상이면 장구 한 번 칠 때마다 더하는 점수 (PERFECT·NORMAL 모두).</summary>
+        public static readonly int[] JangdanComboBonusAt = { 5, 10, 20, 50 };
+        public static readonly int[] JangdanComboBonus = { 10, 20, 30, 50 };
+        /// <summary>되감기 패널티: 기억한 점수(무사 결투·포위 전투 초입, 체력 0이면 챕터 시작)에서 빼는 점수.</summary>
+        public const int RewindScorePenalty = 1000;
+        /// <summary>랭크: 만점 대비 점수 비율 이상 (위에서부터). 마지막(F)은 그 아래 전부.</summary>
+        public static readonly string[] RankNames = { "SSS", "SS", "S", "A", "B", "C", "D", "F" };
+        public static readonly float[] RankRatios = { 0.97f, 0.93f, 0.88f, 0.80f, 0.70f, 0.60f, 0.50f };
 
         // ---------------- GDD 4.8 화면 ----------------
         /// <summary>콤보 표시를 시작하는 최소 콤보 수.</summary>

@@ -84,12 +84,14 @@ namespace RhythmActionGame.Tests
         [Test]
         public void T01_ScoreUiMap_MatchGdd47To49()
         {
-            Assert.AreEqual(300, GameConfig.ScorePerfect);
-            Assert.AreEqual(100, GameConfig.ScoreNormal);
+            // 작업 R25 (GDD-beta B20): 장구 50/20 + 콤보 보너스, 방향키 100/50, 랭크 8단계
+            Assert.AreEqual(50, GameConfig.ScoreJangdanPerfect);
+            Assert.AreEqual(20, GameConfig.ScoreJangdanNormal);
+            Assert.AreEqual(100, GameConfig.ScoreArrowPerfect);
+            Assert.AreEqual(50, GameConfig.ScoreArrowNormal);
             Assert.AreEqual(0, GameConfig.ScoreFail);
-            Assert.AreEqual(0.90f, GameConfig.RankSRatio, Eps);
-            Assert.AreEqual(0.75f, GameConfig.RankARatio, Eps);
-            Assert.AreEqual(0.50f, GameConfig.RankBRatio, Eps);
+            Assert.AreEqual(1000, GameConfig.RewindScorePenalty);
+            CollectionAssert.AreEqual(new[] { "SSS", "SS", "S", "A", "B", "C", "D", "F" }, GameConfig.RankNames);
 
             Assert.AreEqual(2, GameConfig.ComboShowMin);
             Assert.AreEqual(0, GameConfig.VolumeMin);

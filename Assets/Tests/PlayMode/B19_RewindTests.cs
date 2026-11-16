@@ -146,9 +146,10 @@ namespace RhythmActionGame.Tests
             Assert.AreEqual(56.0, boot.player.RunBeat, 0.1, "2구간 시작 지점");
             Assert.AreEqual(3, dir.Health.Hp, "체력 3");
             Assert.AreEqual(StageState.Running, dir.State);
-            Assert.GreaterOrEqual(board.Score, scoreBefore, "점수 이어 감");
-            Assert.IsTrue(board.Rewound);
-            Assert.AreEqual("-", board.Rank(true), "되감은 적이 있으면 클리어해도 랭크 -");
+            // 작업 R25: 챕터에 들어선 뒤 번 점수는 사라지고 챕터 시작 점수(0) − 1000, 0 아래로 안 감
+            Assert.Greater(scoreBefore, 0);
+            Assert.AreEqual(0, board.Score, "챕터 시작 점수 − 1000 (0 아래 없음)");
+            Assert.AreEqual(1, board.Rewinds, "되감기 패널티 1번");
         }
 
         [UnityTest]

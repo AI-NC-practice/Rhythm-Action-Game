@@ -32,6 +32,8 @@ namespace RhythmActionGame
         public event Action<StageState> StateChanged;
         /// <summary>판정 하나가 끝날 때마다 (장애물·전투 모두). 점수·콤보 집계용.</summary>
         public event Action<Judgement> AnyJudged;
+        /// <summary>판정 하나 (원 포함, 작업 R25: 장구·방향키 점수를 나누려고).</summary>
+        public event Action<JudgeCue, Judgement> AnyCueJudged;
 
         /// <summary>진행 중인 사건 하나 (GDD-beta B2.1). 장애물·새 사건·안 멈추는 적 모두.</summary>
         public class ObstacleRun
@@ -237,6 +239,7 @@ namespace RhythmActionGame
         void OnCueJudged(JudgeCue cue, Judgement r)
         {
             AnyJudged?.Invoke(r);
+            AnyCueJudged?.Invoke(cue, r);
             if (cue.Tag is ObstacleRun run)
             {
                 int slot = run.Cues.IndexOf(cue);
