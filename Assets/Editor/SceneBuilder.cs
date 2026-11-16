@@ -138,17 +138,17 @@ namespace RhythmActionGame.EditorTools
             follower.clock = clock;
             // 1인칭 전신 모델 (작업 T13): player FBX(Humanoid) + 툰 머티리얼 + Animator. 원래 메시는 그림자만, 머리 뺀 복사본을 화면에 (PlayerBody).
             var playerBody = BuildPlayerModel(player.transform, out var bodyRenderer);
-            // 칼 막대 (1인칭에서는 그림자만, 무사 결투 3인칭 컷에서 보임 — GDD-beta B11.5)
-            var sword = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            sword.name = "Sword";
-            Object.DestroyImmediate(sword.GetComponent<Collider>());
-            sword.transform.SetParent(player.transform, false);
-            sword.transform.localPosition = new Vector3(0.35f, 1.1f, 0.35f);
-            sword.transform.localRotation = Quaternion.Euler(-35f, 0f, 0f);
-            sword.transform.localScale = new Vector3(0.05f, 0.05f, 0.9f);
-            var swordRenderer = sword.GetComponent<MeshRenderer>();
-            swordRenderer.sharedMaterial = Mat("PlayerSword", new Color(0.75f, 0.75f, 0.78f));
-            swordRenderer.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
+            // 칼 (1인칭에서는 그림자만, 무사 결투 3인칭 컷에서 보임 — GDD-beta B11.5). 작업 R04: 회색 막대 → 환도 모델(weapon_sword)
+            var sword = new GameObject("Sword").transform;
+            sword.SetParent(player.transform, false);
+            sword.localPosition = new Vector3(0.35f, 1.1f, 0.35f);
+            sword.localRotation = Quaternion.Euler(-35f, 0f, 0f);
+            var swordAxis = new GameObject("SwordAxis").transform;   // 모델 긴 축(x)을 칼 방향(z)으로
+            swordAxis.SetParent(sword, false);
+            swordAxis.localRotation = Quaternion.Euler(0f, -90f, 0f);
+            FitModelCentered(swordAxis, "weapon_sword", new Vector3(0.9f, 0.12f, 0.08f));
+            var swordRenderer = sword.GetComponentInChildren<MeshRenderer>();
+            foreach (var r in sword.GetComponentsInChildren<MeshRenderer>()) r.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
             var rig = new GameObject("CameraRig");
             rig.transform.SetParent(player.transform, false);
             rig.transform.localPosition = new Vector3(0, GameConfig.EyeHeight, GameConfig.Body.EyeForward);
@@ -399,11 +399,17 @@ namespace RhythmActionGame.EditorTools
                     case "low_wall": FitIntoBox(LocalBox(root, "Prop_wall_stone", new Vector3(0, 0.5f, 0), new Vector3(3.2f, 1.0f, 0.5f), Mat("LowWall", new Color(0.6f, 0.6f, 0.58f))).transform, "wall_stone"); break;
                     case "clothesline":
                         var cl = Mat("Clothesline", new Color(0.85f, 0.85f, 0.8f));
-                        LocalBox(root, "Prop_clothesline_PostL", new Vector3(-1.7f, 1.0f, 0), new Vector3(0.1f, 2.0f, 0.1f), cl);
-                        LocalBox(root, "Prop_clothesline_PostR", new Vector3(1.7f, 1.0f, 0), new Vector3(0.1f, 2.0f, 0.1f), cl);
-                        LocalBox(root, "Prop_clothesline", new Vector3(0, 1.4f, 0), new Vector3(3.4f, 0.4f, 0.05f), cl);
+                        // 작업 R04: 상자(충돌)는 그대로 두고 그리기만 끈 뒤 빨랫줄 모델 (기둥 2개 + 옷)
+                        ReplaceBoxes(root, "clothesline", new Vector3(0, 1.1f, 0), new Vector3(4.2f, 2.2f, 0.6f),
+                            LocalBox(root, "Prop_clothesline_PostL", new Vector3(-1.7f, 1.0f, 0), new Vector3(0.1f, 2.0f, 0.1f), cl).transform,
+                            LocalBox(root, "Prop_clothesline_PostR", new Vector3(1.7f, 1.0f, 0), new Vector3(0.1f, 2.0f, 0.1f), cl).transform,
+                            LocalBox(root, "Prop_clothesline", new Vector3(0, 1.4f, 0), new Vector3(3.4f, 0.4f, 0.05f), cl).transform);
                         break;
-                    case "eave": LocalBox(root, "Prop_eave", new Vector3(0, 1.4f, 0), new Vector3(3.4f, 0.3f, 1.0f), Mat("Eave", new Color(0.3f, 0.3f, 0.33f))); break;
+                    case "eave":
+                        // 작업 R04: 낮은 처마 모델 (기둥 2개 위 기와 처마, 처마 밑 약 1.25 m)
+                        ReplaceBoxes(root, "eave_low", new Vector3(0, 0.78f, 0), new Vector3(4.0f, 1.55f, 1.2f),
+                            LocalBox(root, "Prop_eave", new Vector3(0, 1.4f, 0), new Vector3(3.4f, 0.3f, 1.0f), Mat("Eave", new Color(0.3f, 0.3f, 0.33f))).transform);
+                        break;
                     case "wall_run": TileIntoBox(LocalBox(root, "Prop_wall_stone", new Vector3(side * 2.0f, 1.75f, 0), new Vector3(0.5f, 3.5f, 8f), Mat("WallRun", new Color(0.66f, 0.64f, 0.6f))).transform, "wall_stone"); break;
                     default: break; // roof_climb, roof_jump, drop_down, gate_climb: 지붕 덩어리가 장애물이다
                 }
@@ -419,8 +425,9 @@ namespace RhythmActionGame.EditorTools
                 if (EventProps.Needs(e))
                 {
                     EventProps.FigureOverride = EnemyRig.Figure;   // 소품 적도 모델 (작업 T14)
+                    EventProps.ModelOverride = FitModelCentered;   // 사건 소품도 모델 (작업 R04)
                     try { EventProps.Build(e, parent, Mat); }
-                    finally { EventProps.FigureOverride = null; }
+                    finally { EventProps.FigureOverride = null; EventProps.ModelOverride = null; }
                 }
             return parent;
         }

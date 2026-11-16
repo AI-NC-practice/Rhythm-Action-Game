@@ -707,3 +707,11 @@ VARCO MCP: 3D 생성(Generate3D)은 이미지 1장만 받고 멀티뷰 노드가
 - 사용자 결정(2026-11-16): 드로우콜 +26%(290 → 약 365)는 "크게 문제가 없으면 받아들임" → T15 테스트 기준 +25% → +30%.
 - 제안: 발 IK(지붕 비탈·기와에 발바닥을 맞추기)는 지금 없음 — 별도 작업 후보 (아래 R03 답변 참고).
 평가: evaluator PASS (harness/reports/R03-eval-1.md, 단서: 드로우콜 +27평가: evaluator PASS (harness/reports/R03-eval-1.md, 단서: 드로우콜 +27% 사용자 승인, T14 기존 실패 — R05). 다음: R04 (회색 상자 장애물·사건 소품을 모델로).
+
+## R04 회색 상자 장애물·사건 소품 → 모델 — 진행 중 (2026-11-16)
+- 장애물: 빨랫줄(기둥 2·줄 상자) → clothesline 모델, 낮은 처마 → eave_low 모델. 상자는 충돌 그대로, 그리기만 끔 (SceneBuilder.ReplaceBoxes).
+- 사건 소품: EventProps.ModelOverride(에디터) — 부품 이름·위치의 빈 축 아래 모델을 가운데 맞춤(FitModelCentered, 정적 아님)으로 사건 동작 그대로. 기와 미끄럼·긴 도약 가장자리 → eave_low 조각, 밧줄 → rope_swing, 술독 → rolling_jar, 차양 → stall_b(출렁임은 좌판째), 닫히는 대문 → gate_door 2짝(오른쪽 뒤집음) + palace_gate 문틀, 화살 → arrow(날아오는 쪽으로 촉), 깃발 줄 → banner_flag. 실행 중 시험 차트는 예전처럼 회색 도형 (B03 테스트 그대로).
+- 칼 막대 → weapon_sword 모델 (1인칭 그림자만, 3인칭 결투 컷 playerBody 렌더러 연결).
+- 테스트 R04_NoGrayShapesPlayTests: Game 씬에 그리는 기본 도형(상자·공·캡슐·원통) 없음(땅·길 띠 제외), 장애물 충돌 상자 유지·모델 대신 보임, 사건 부품 모두 모델, 칼 모델. 미리보기 harness/reports/R04/*.png, 모음 all_props.png.
+- unity-verify: EditMode 200/200, PlayMode 167/168 (실패 T14 기존 — R05).
+평가: evaluator PASS (harness/reports/R04-eval-1.md, 단서: T14 기존 실패 — R05). 다음: R05 (T14 실패 원인 찾아 고치기).

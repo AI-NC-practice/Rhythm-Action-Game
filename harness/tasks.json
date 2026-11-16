@@ -1432,10 +1432,10 @@
                                          "미리보기 PNG",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  "피드백 3번(철봉·허들), 5번(경단)."
+                      "notes":  "evaluator PASS (1회차, 2026-11-16, harness/reports/R04-eval-1.md). 빨랫줄·처마·사건 소품 10종·칼을 R02 모델로, 회색 도형 없음. 단서: T14 기존 실패(R05)."
                   },
                   {
                       "id":  "R05",

@@ -57,6 +57,30 @@ namespace RhythmActionGame.EditorTools
             return new Wrapped { Go = root, Size = shape.size };
         }
 
+        /// <summary>
+        /// 축(pivot) 가운데에 모델을 size 크기로 맞춰 붙인다 (작업 R04: 사건 소품·장애물). 모델 긴 수평축 = 축의 x.
+        /// 움직이는 부품이 많아 정적 배칭에서 뺀다.
+        /// </summary>
+        public static Transform FitModelCentered(Transform pivot, string id, Vector3 size)
+        {
+            var w = Wrap(id, pivot, $"Model_{id}");
+            w.Go.transform.localRotation = Quaternion.identity;
+            w.Go.transform.localPosition = new Vector3(0f, -size.y * 0.5f, 0f);
+            w.Go.transform.localScale = new Vector3(size.x / w.Size.x, size.y / w.Size.y, size.z / w.Size.z);
+            foreach (var t in w.Go.GetComponentsInChildren<Transform>(true)) t.gameObject.isStatic = false;
+            return w.Go.transform;
+        }
+
+        /// <summary>회색 상자들 대신 모델 하나 (장애물): 상자는 충돌만 남기고 그리기를 끄고, 축 가운데에 모델.</summary>
+        static void ReplaceBoxes(Transform root, string id, Vector3 localCenter, Vector3 size, params Transform[] boxes)
+        {
+            foreach (var b in boxes) { var r = b.GetComponent<MeshRenderer>(); if (r != null) r.enabled = false; }
+            var pivot = new GameObject($"ModelPivot_{id}").transform;
+            pivot.SetParent(root, false);
+            pivot.localPosition = localCenter;
+            FitModelCentered(pivot, id, size);
+        }
+
         /// <summary>상자 자리에 모델을 꽉 맞춘다(크기·방향). 상자는 충돌만 남기고 그리기를 끈다.</summary>
         static void FitIntoBox(Transform box, string id, int tiles = 1, string centerId = null, int centerIndex = -1)
         {
