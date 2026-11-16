@@ -1368,10 +1368,10 @@
                                          "새 에셋 목록(맵 + 회색 상자 장애물: 빨랫줄·처마·밧줄 + 사건 소품: 항아리·화살·깃발·문짝 등)과 VARCO 예상 포인트",
                                          "사용자가 배치 안과 포인트를 승인함"
                                      ],
-                      "status":  "needs_user",
+                      "status":  "done",
                       "attempts":  0,
                       "max_attempts":  1,
-                      "notes":  "2026-11-16 배치 안 작성: docs/proposals/map-redesign.html (실제 차트 사건 위치 기준 자동 배치·규칙 검사 통과, 생성기 harness/scripts/map/). 새 에셋 35개 + 배경 6장, 예상 10,800포인트(여유 포함 최대 약 13,400). 사용자 승인 대기."
+                      "notes":  "2026-11-16 사용자 승인: 배치 안 docs/proposals/map-redesign.html + 새 에셋 35개·배경 6장, 예상 10,800포인트(최대 약 13,400)."
                   },
                   {
                       "id":  "R02",
