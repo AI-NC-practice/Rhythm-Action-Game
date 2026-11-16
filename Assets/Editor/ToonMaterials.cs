@@ -21,6 +21,22 @@ namespace RhythmActionGame.EditorTools
         public const string ControllerPath = "Assets/Art/Animations/Player.controller";
         public static readonly string[] Statics = { "house_giwa", "wall_stone", "gate", "cart", "jars", "weapon_sword", "weapon_spear" };
 
+        /// <summary>작업 R02: 맵·장애물·사건 소품 새 에셋 35개 (Assets/Art/Models/&lt;id&gt;/&lt;id&gt;.glb).</summary>
+        public static readonly string[] MapAssets = {
+            "choga", "choga_L", "giwa_s", "giwa_long", "giwa_gate", "sijeon", "palace_hall", "pavilion",
+            "wall_earth", "wall_palace", "fence",
+            "stall_a", "stall_b", "stall_pot", "cloth_rack", "straw", "lantern", "basket",
+            "jangdok", "well", "pine", "zelkova", "jangseung", "firewood", "pyeongsang", "jige", "banner_pole",
+            "clothesline", "eave_low", "rope_swing", "rolling_jar", "arrow", "banner_flag", "gate_door", "palace_gate",
+        };
+
+        /// <summary>정적 에셋 GLB 경로: R02 에셋은 폴더 안, 기존 7종은 Models 바로 아래.</summary>
+        public static string StaticPath(string id)
+        {
+            string inFolder = $"Assets/Art/Models/{id}/{id}.glb";
+            return File.Exists(inFolder) ? inFolder : $"Assets/Art/Models/{id}.glb";
+        }
+
         public static Shader Shader => Shader.Find(ShaderName);
 
         /// <summary>툰 값(단계·어두운 밝기·외곽선)을 머티리얼에 넣는다.</summary>
@@ -65,7 +81,7 @@ namespace RhythmActionGame.EditorTools
         /// <summary>정적 에셋 툰 머티리얼 (GLB 안 텍스처: 이름에 base_color / normal).</summary>
         public static Material Static(string id)
         {
-            var texs = AssetDatabase.LoadAllAssetsAtPath($"Assets/Art/Models/{id}.glb").OfType<Texture2D>().ToList();
+            var texs = AssetDatabase.LoadAllAssetsAtPath(StaticPath(id)).OfType<Texture2D>().ToList();
             var m = Load(id);
             m.SetTexture("_BaseMap", texs.FirstOrDefault(t => t.name.Contains("base_color")) ?? texs.FirstOrDefault(t => !t.name.Contains("normal")));
             m.SetTexture("_BumpMap", texs.FirstOrDefault(t => t.name.Contains("normal")));
@@ -79,6 +95,7 @@ namespace RhythmActionGame.EditorTools
         {
             foreach (var id in HumanoidImport.Characters) Character(id);
             foreach (var id in Statics) Static(id);
+            foreach (var id in MapAssets) Static(id);
             BuildPlayerController(out _, out _);
             AssetDatabase.SaveAssets();
         }

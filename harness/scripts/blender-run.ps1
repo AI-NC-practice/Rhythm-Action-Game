@@ -42,8 +42,11 @@ if (-not (Test-Path $py)) { Write-Output "INVALID: $py 가 없다."; exit 1 }
 $log = Join-Path $root 'harness\reports\blender.log'
 Push-Location $root
 try {
+    # Blender가 stderr에 경고(DeprecationWarning 등)를 쓰면 PowerShell 5.1이 오류로 바꿔 'Stop'에서 멈춘다 → 이 호출만 Continue
+    $ErrorActionPreference = 'Continue'
     & $blender --background --factory-startup --python $py -- @ScriptArgs *> $log
     $code = $LASTEXITCODE
+    $ErrorActionPreference = 'Stop'
 } finally { Pop-Location }
 $out = Get-Content $log -Encoding UTF8 | Where-Object { $_ -match '^\[(OK|FAIL|INFO)\]|Traceback|Error' }
 $out | ForEach-Object { Write-Output $_ }

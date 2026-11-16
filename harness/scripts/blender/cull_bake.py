@@ -1,5 +1,5 @@
 """고폴리 → 안 보이는 바닥 면 삭제 → 로우폴리 → 새 UV에 색·노멀 굽기 → GLB (작업 T11R, 정적 에셋).
-Usage (via blender-run.ps1): --in <high.glb> --out <low.glb> --max-tris 5000 --tex 2048 [--cull-bottom 1]
+Usage (via blender-run.ps1): --in <high.glb> --out <low.glb> --max-tris 5000 --tex 2048 [--cull-bottom 1] [--voxel 0.01] [--cage 0.01 --ray 0.04]
 - 바닥 면: 아래를 보고(normal.z < -0.7) 모델 높이의 아래 3% 안에 있는 면 = 땅에 닿아 보이지 않는 면. 처마 밑처럼 높이 있는 아랫면은 남긴다.
 - 굽기: Cycles "선택한 것에서 활성으로" — 고폴리의 기본 색(조명 없이)과 탄젠트 노멀을 로우폴리 새 UV로.
 """
@@ -16,6 +16,7 @@ src, dst = a.get("in"), a.get("out")
 max_tris = int(a.get("max-tris", "5000"))
 tex = int(a.get("tex", "2048"))
 cull = a.get("cull-bottom", "1") == "1"
+voxel = float(a.get("voxel", "0"))   # 0이면 끔. 예: 0.01 = 가장 긴 변의 1% 크기 복셀
 if not src or not dst:
     fail("need --in, --out")
 
@@ -58,11 +59,26 @@ bpy.ops.object.select_all(action="DESELECT")
 low.select_set(True)
 bpy.context.view_layer.objects.active = low
 before = triangle_count([low])
-if before > max_tris:
+if voxel > 0:
+    # 가닥이 따로 떨어진 모델(짚단): 줄이기 전에 복셀로 한 덩어리 표면을 다시 만든다. 색·노멀은 아래에서 고폴리에서 굽는다.
+    dims = low.dimensions
+    r = low.modifiers.new("vox", "REMESH")
+    r.mode = "VOXEL"
+    r.voxel_size = max(dims.x, dims.y, dims.z) * voxel
+    bpy.ops.object.modifier_apply(modifier=r.name)
+    before = triangle_count([low])
+    info(f"voxel remesh ({voxel}) -> {before} triangles")
+after = before
+# 조각이 많은 모델(짚단 등)은 한 번에 목표까지 안 줄어든다 → 목표 이하가 될 때까지 몇 번 더 (작업 R02)
+for _ in range(6):
+    if after <= max_tris:
+        break
     m = low.modifiers.new("dec", "DECIMATE")
-    m.ratio = max_tris / before * 0.97
+    m.ratio = max_tris / after * 0.97
     bpy.ops.object.modifier_apply(modifier=m.name)
-after = triangle_count([low])
+    after = triangle_count([low])
+if after > max_tris:
+    fail(f"could not reduce to {max_tris} triangles (got {after})")
 info(f"triangles {before} -> {after}")
 
 # 새 UV
@@ -96,8 +112,8 @@ scn.cycles.samples = 4
 bake = scn.render.bake
 bake.use_selected_to_active = True
 bake.use_cage = False
-bake.cage_extrusion = 0.01 * height
-bake.max_ray_distance = 0.04 * height
+bake.cage_extrusion = float(a.get("cage", "0.01")) * height   # 잎 덩어리처럼 많이 줄어든 모델은 더 크게 (R02)
+bake.max_ray_distance = float(a.get("ray", "0.04")) * height
 bake.margin = 8
 
 def bake_into(image_node, kind):

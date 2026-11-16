@@ -78,3 +78,7 @@ __pycache__/
 harness/reports/varco/*_raw/
 harness/reports/varco/v2_high/
 harness/reports/varco/test/
+
+# R02: VARCO 고폴리 원본(각 약 10 MB, 다시 받기: asset_specs nodes.mesh → get_output_downloads)과 이미지 원본
+harness/reports/varco/r02/high/
+harness/reports/varco/r02/*.png

@@ -636,3 +636,60 @@ VARCO MCP: 3D 생성(Generate3D)은 이미지 1장만 받고 멀티뷰 노드가
 - 견적: 새 에셋 35개(건물 8·담 3·장터 7·마을 소품 9·장애물/사건 소품 8) × 300(4면도 50 + 정면 50 + 3D 200) = 10,500 + 배경 파노라마 6장 300 = 10,800, 다시 만들기 여유 포함 최대 약 13,400.
 - 다음: 사용자 승인 → R02.
 - 2026-11-16 사용자 승인("승인, R02 시작") → R01 done. R02는 이 컴퓨터에 VARCO MCP(varco-3d)가 연결돼 있지 않아 연결을 기다린다.
+
+## R02 맵·장애물·사건 소품 새 에셋 생성 (VARCO) — 진행 중 (2026-11-16)
+- VARCO MCP 인증(사용자, /mcp) 후 연결 확인: CREATOR 등급.
+- asset_specs.json에 R02 명세 41개 추가(에셋 35 + 배경 6, group "R02"). 정적 에셋은 고폴리 60,000 → max_triangles(600~5,000)로 cull_bake. defaults에 sheet_suffix·front_suffix 추가.
+- 4면도 35장 + 배경 6장 노드(y 10400~26400) 1회 실행: 2,050포인트 (run_flow 15/45).
+- 4면도 검수: 35장 모두 디자인 일관·물체 하나·단순 배경. 배경 6장 확인(하늘 포함 완성 그림 — 반투명 층이 필요하면 R03에서 잘라 씀).
+- 정면 한 장 35장(4면도를 reference로 연결) 1회 실행: 1,750포인트 (run_flow 16/45).
+- 정면 35장 검수: 모두 4면도와 일치. 3D 35개(60,000·텍스처 2048) 1회 실행: 7,000포인트 (run_flow 17/45). R02 누계 10,800.
+- 3D 35개 모두 성공. 고폴리 원본 harness/reports/varco/r02/high/(git 제외, nodes.mesh로 다시 받기). cull_bake → Assets/Art/Models/<id>/<id>.glb.
+- 도구 수정: blender-run.ps1(Blender가 stderr에 경고를 쓰면 PS 5.1이 'Stop'으로 멈추던 문제 → 그 호출만 Continue), cull_bake.py(목표까지 여러 번 줄이기, --voxel, --cage/--ray 옵션).
+- 예외 처리: 짚단 --voxel 0.012 --cull-bottom 0(가닥이 떨어져 6,000 아래로 안 줄어듦), 술독·화살 --cull-bottom 0(굴러가고 날아감), 느티나무·광주리·초가 --cage 0.03 --ray 0.1(굽기 누락 검은 얼룩).
+- 검사: 고폴리 35개 경계 변 0·비다양체 0. 로우폴리 비다양체 0, 경계 변은 지운 바닥 면 테두리(기존 house_giwa 187과 같은 성격). 미리보기 harness/reports/preview/r02/<id>.png, 모음 harness/reports/preview/r02_p1~p3.png.
+- 툰 머티리얼: ToonMaterials.MapAssets 35개 + StaticPath(폴더 안 GLB) → Assets/Art/Materials/Toon/<id>.mat (_BaseMap·_BumpMap). 배경 6장 Assets/Art/Backdrops/.
+- 테스트: 새 R02_MapAssetTests 4개 통과(명세 35+6, 삼각형 상한·15 MB·구운 색·노멀, 툰 머티리얼, 배경).
+- unity-verify: EditMode 193/193, PlayMode 162/163. 실패 1건 T14_Enemy_Model_WeaponInHand…(다음 공격 상태 Attack_overhead 기대, 실제 Attack_horizontal). R02 변경을 stash로 빼고 돌려도 같은 실패 → R02와 무관한 기존 문제(세션 시작 때 이미 커밋 안 된 씬·애니메이터 변경 있음, SceneBuilder.BuildAll로 다시 만들어도 같음).
+
+| ID | 삼각형 | MB | 4면도/이미지/3D |
+|---|---|---|---|
+| choga | 4846 | 9.91 | 1/1/1 |
+| choga_L | 4850 | 8.79 | 1/1/1 |
+| giwa_s | 4850 | 8.87 | 1/1/1 |
+| giwa_long | 4847 | 8.67 | 1/1/1 |
+| giwa_gate | 4843 | 8.73 | 1/1/1 |
+| sijeon | 4850 | 9.01 | 1/1/1 |
+| palace_hall | 4847 | 9.07 | 1/1/1 |
+| pavilion | 4835 | 8.99 | 1/1/1 |
+| wall_earth | 1938 | 3.21 | 1/1/1 |
+| wall_palace | 2424 | 2.95 | 1/1/1 |
+| fence | 1454 | 3.3 | 1/1/1 |
+| stall_a | 2908 | 3.52 | 1/1/1 |
+| stall_b | 2908 | 3.36 | 1/1/1 |
+| stall_pot | 2910 | 2.97 | 1/1/1 |
+| cloth_rack | 2425 | 2.6 | 1/1/1 |
+| straw | 1940 | 3.41 | 1/1/1 |
+| lantern | 1455 | 2.25 | 1/1/1 |
+| basket | 1937 | 3.61 | 1/1/1 |
+| jangdok | 2909 | 2.77 | 1/1/1 |
+| well | 2425 | 3.19 | 1/1/1 |
+| pine | 3880 | 7.49 | 1/1/1 |
+| zelkova | 3873 | 8.37 | 1/1/1 |
+| jangseung | 2424 | 2.81 | 1/1/1 |
+| firewood | 1922 | 3.53 | 1/1/1 |
+| pyeongsang | 1455 | 2.39 | 1/1/1 |
+| jige | 1455 | 3.26 | 1/1/1 |
+| banner_pole | 1939 | 2.34 | 1/1/1 |
+| clothesline | 2424 | 3.2 | 1/1/1 |
+| eave_low | 2424 | 2.99 | 1/1/1 |
+| rope_swing | 1940 | 2.09 | 1/1/1 |
+| rolling_jar | 1454 | 1.8 | 1/1/1 |
+| arrow | 582 | 1.27 | 1/1/1 |
+| banner_flag | 1940 | 2.99 | 1/1/1 |
+| gate_door | 1454 | 2.64 | 1/1/1 |
+| palace_gate | 2909 | 3.44 | 1/1/1 |
+
+- 실제 포인트: 4면도+배경 2,050 + 정면 1,750 + 3D 7,000 = 10,800 (승인 10,800 / 최대 13,400). run_flow 17/45.
+
+평가: evaluator PASS (harness/reports/R02-eval-1.md, 단서: T14 PlayMode 1건은 기존 실패 — R05). 다음: R03 (맵 다시 짓기). 제안: R02_MapAssetTests에 경계 변·조각 수 검사 추가(R03).

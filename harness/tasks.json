@@ -1388,10 +1388,10 @@
                                          "Assets/Art/Models/\u003cid\u003e/에 저장, 툰 머티리얼 연결",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  "피드백 8·3·5번 에셋을 한 번에 만든다."
+                      "notes":  "evaluator PASS (1회차, 2026-11-16, harness/reports/R02-eval-1.md). 에셋 35 + 배경 6, 10,800포인트. 단서: PlayMode T14_Enemy_Model_WeaponInHand 1건 실패는 R02와 무관한 기존 실패(R05에서 처리)."
                   },
                   {
                       "id":  "R03",
