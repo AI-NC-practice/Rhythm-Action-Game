@@ -32,6 +32,8 @@ namespace RhythmActionGame
         public string Attack;           // horizontal | overhead | thrust | upward | finisher | windmill
         public int[] Attackers = { 0 }; // 공격하는 적 번호 (동시 공격은 여러 명)
         public int Phase;               // 포위 전투 단계 (1~3), 일반 적은 0
+        /// <summary>회피 슬로모션 판정 (GDD-beta B17.4): 1박 전부터 박자 시계·음악·화면이 함께 느려진다.</summary>
+        public bool BulletTime;
     }
 
     /// <summary>전투 규칙 (GDD 4.5). 순수 함수.</summary>

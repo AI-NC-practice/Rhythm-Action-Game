@@ -43,10 +43,15 @@ namespace RhythmActionGame
 
         public double Now => TimeSource();
         public double CurrentBeat => timeline.BeatAt(Now);
-        /// <summary>지금 실제로 적용 중인 속도 배율 (박자 시계·이동·음악). 판정으로 바뀐 값은 다음 마디 첫 박에 들어온다 (GDD-beta B15.2).</summary>
+        /// <summary>지금 실제로 적용 중인 속도 배율 (박자 시계·이동·음악). 판정으로 바뀐 값은 다음 마디 첫 박에 들어온다 (GDD-beta B15.2). 회피 슬로모션 배율(SlowFactor)이 곱해져 있다 (B17.4).</summary>
         public float SpeedMultiplier => timeline.Speed;
         /// <summary>판정으로 정해진 속도 배율 (HUD가 바로 보여 준다). 다음 마디 첫 박에 SpeedMultiplier가 된다.</summary>
         public float TargetSpeed => Speed.Speed;
+        /// <summary>판정 속도 배율 중 지금 적용된 값 (회피 슬로모션 배율을 빼고, HUD·최고 속도용).</summary>
+        public float AppliedSpeed => applied;
+        /// <summary>회피 슬로모션 배율 (GDD-beta B17.4): 1이면 평소, 0.4면 박자 시계·음악이 0.4배. 음 높이 보정은 이 배율만큼 빼서 음악이 낮아진다.</summary>
+        public float SlowFactor { get; private set; } = 1f;
+        float applied = 1f;
         /// <summary>목표 속도를 적용할 마디 첫 박 (없으면 NaN).</summary>
         public double PendingSpeedBeat { get; private set; } = double.NaN;
         public bool IsRunning => timeline.IsRunning;
@@ -120,8 +125,9 @@ namespace RhythmActionGame
 
         void SetApplied(float s, double at)
         {
-            bool changed = !Mathf.Approximately(timeline.Speed, s);
-            timeline.SetSpeed(s, at);
+            bool changed = !Mathf.Approximately(applied, s);
+            applied = s;
+            timeline.SetSpeed(s * SlowFactor, at);
             ApplyPitch();
             if (changed) SpeedChanged?.Invoke(s);
         }
@@ -140,6 +146,7 @@ namespace RhythmActionGame
         /// <summary>startBeat 박자부터 시계를 시작한다. 음악이 있으면 같은 순간부터 재생한다.</summary>
         public void StartClock(double startBeat = 0)
         {
+            SlowFactor = 1f;
             timeline.Start(Now, startBeat);
             PendingSpeedBeat = double.NaN;
             SetApplied(Speed.Speed, Now);
@@ -186,6 +193,7 @@ namespace RhythmActionGame
         /// </summary>
         public void RestartAt(double beat)
         {
+            SlowFactor = 1f;
             timeline.Start(Now, beat);
             PendingSpeedBeat = double.NaN;   // 되감기는 그 순간의 속도 배율로 바로 시작 (B15.2)
             SetApplied(Speed.Speed, Now);
@@ -230,15 +238,27 @@ namespace RhythmActionGame
             TargetSpeedChanged?.Invoke(Speed.Speed);
         }
 
+        /// <summary>
+        /// 회피 슬로모션 배율을 at 시각부터 바꾼다 (GDD-beta B17.4). 지금까지의 박자는 그대로 이어지고, 음악 재생 속도도 같이 바뀌어
+        /// 곡 위치와 박자의 관계는 그대로다. 음 높이 보정은 판정 속도만 되돌리므로 음악은 f만큼 낮아진다.
+        /// </summary>
+        public void SetSlowFactor(float f, double at)
+        {
+            f = Mathf.Clamp(f, 0.05f, 1f);
+            if (Mathf.Approximately(f, SlowFactor)) return;
+            SlowFactor = f;
+            if (IsRunning) timeline.SetSpeed(applied * f, at);
+            ApplyPitch();
+        }
+
         /// <summary>beat 박자가 오는 dsp 시각.</summary>
         public double TimeOfBeat(double beat) => timeline.TimeOfBeat(beat, Now);
 
         void ApplyPitch()
         {
-            // 음악 재생 속도 = s, 음 높이는 1/s로 되돌린다 (GDD 4.1, GDD-beta B15.1)
-            float s = SpeedMultiplier;
-            if (music != null) music.pitch = s;
-            if (pitchCorrector != null) pitchCorrector.SetSpeed(s);
+            // 음악 재생 속도 = s × 슬로 배율, 음 높이는 판정 속도 s만 1/s로 되돌린다 (GDD 4.1, GDD-beta B15.1·B17.4)
+            if (music != null) music.pitch = applied * SlowFactor;
+            if (pitchCorrector != null) pitchCorrector.SetSpeed(applied);
         }
     }
 }

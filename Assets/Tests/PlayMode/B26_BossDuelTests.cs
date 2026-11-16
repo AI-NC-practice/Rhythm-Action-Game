@@ -38,6 +38,7 @@ namespace RhythmActionGame.Tests
             // Hit Stop(TimeFx)은 실제 시간 + 가짜 시계로 흐른다. 실제 시간만 쓰면 빠른 PC에서 가짜 시계가 몇 박 가는 동안
             // 멈춤이 안 풀려 무사가 막기를 못 하고, 가짜 시계만 쓰면 WaitForSecondsRealtime 동안 멈춤이 안 풀린다.
             pd.timeFx.RealTime = () => Time.realtimeSinceStartup + (float)now;
+            if (boot.bulletTime != null) boot.bulletTime.enabled = false;   // 일정한 빠르기로 입력 시각을 미리 계산하는 테스트 (회피 슬로모션은 B47 테스트)
             boot.StartRun(start);
             yield return null;
         }

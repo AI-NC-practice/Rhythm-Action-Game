@@ -81,7 +81,7 @@ namespace RhythmActionGame
             var list = new List<CombatStep>();
             foreach (var (t, k, key) in Table)
             {
-                var s = new CombatStep { OffsetBeats = t, Key = key, Phase = PhaseOf(t), Attackers = new[] { 0 } };
+                var s = new CombatStep { OffsetBeats = t, Key = key, Phase = PhaseOf(t), Attackers = new[] { 0 }, BulletTime = System.Array.IndexOf(GameConfig.BulletTime.BossBeats, t) >= 0 };   // 회피 슬로모션 (B17.4)
                 switch (k)
                 {
                     case 'A': s.Kind = CombatStepKind.Attack; s.Attack = AttackFor(key); break;

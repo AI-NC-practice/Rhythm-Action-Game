@@ -46,7 +46,7 @@ namespace RhythmActionGame
             for (int i = 0; i < GameConfig.SurroundSimultaneousCount; i++)
             {
                 var s = Simultaneous[i % Simultaneous.Length];
-                steps.Add(new CombatStep { Kind = CombatStepKind.Attack, Phase = 2, OffsetBeats = t, Key = s.key, Attack = s.attack, Attackers = s.who });
+                steps.Add(new CombatStep { Kind = CombatStepKind.Attack, Phase = 2, OffsetBeats = t, Key = s.key, Attack = s.attack, Attackers = s.who, BulletTime = i == GameConfig.SurroundSimultaneousCount - 1 });   // 마지막 동시 공격은 회피 슬로모션 (B17.4)
                 t += SimultaneousIntervalBeats;
             }
             t += PhaseGapBeats - SimultaneousIntervalBeats;

@@ -686,6 +686,35 @@ namespace RhythmActionGame
             public const float RunBlendPerSecond = 4f;
         }
 
+        // ---------------- B47 아슬아슬 회피 슬로모션 (GDD-beta B17.4) ----------------
+        /// <summary>
+        /// 회피 슬로모션 (GDD-beta B17.4, 2026-11-16 사용자 승인). 정해진 판정 1박 전부터 박자 시계·음악·화면이 함께 느려지고,
+        /// 판정이 나면 원래 속도로 돌아온다. 곡도 같은 배율로 느려지므로 곡과 판정 박의 관계는 그대로다.
+        /// </summary>
+        public static class BulletTime
+        {
+            /// <summary>느려지는 배율 (박자 시계·음악·Time.timeScale).</summary>
+            public const float Factor = 0.4f;
+            /// <summary>판정 목표 몇 박 전부터 느려지는지.</summary>
+            public const float LeadBeats = 1f;
+            /// <summary>느려지는 데 걸리는 박 (시계 박).</summary>
+            public const float RampInBeats = 0.25f;
+            /// <summary>판정 뒤 원래 속도로 돌아오는 시간 (실제 초).</summary>
+            public const float ReleaseSeconds = 0.15f;
+            /// <summary>먹먹함: 저역 통과 주파수 (Hz) — 평소 / 가장 먹먹할 때.</summary>
+            public const float LowPassOpenHz = 22000f;
+            public const float LowPassMuffledHz = 700f;
+            /// <summary>가장 먹먹할 때 음악 음량 배율.</summary>
+            public const float MusicGain = 0.6f;
+            /// <summary>회피 슬로모션 판정: 무사 결투 받아치기, 3단계 난타 마지막 무사 공격 (O 기준 박).</summary>
+            public static readonly double[] BossBeats = { 37.5, 66 };
+            /// <summary>
+            /// B4 2·3번(사건·전투 PERFECT 뒤 0.4초 슬로모션)을 쓰는지. GDD-beta B17.4로 없앰(false).
+            /// 처형·윈드밀 마무리(SlowMoMode.Always)는 그대로.
+            /// </summary>
+            public const bool PerfectCandidateSlowMo = false;
+        }
+
         // ---------------- B10 배경 음악 (GDD 1장 사운드: 국악 퓨전, BPM 고정, 보컬 없음) ----------------
         /// <summary>
         /// 배경 음악 "스테이지 1" — 퓨전 국악 액션, 120 BPM, 101마디(404박, 3분 22초). harness/scripts/music/make-song.py가

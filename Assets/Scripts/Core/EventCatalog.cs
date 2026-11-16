@@ -23,6 +23,8 @@ namespace RhythmActionGame
         public ObstacleCategory? Category;
         /// <summary>PERFECT일 때 슬로모션 후보인 판정 번호 (GDD-beta B4의 2·3번). 없으면 −1.</summary>
         public int SlowMoSlot = -1;
+        /// <summary>회피 슬로모션 판정 번호 (GDD-beta B17.4). 없으면 −1.</summary>
+        public int BulletSlot = -1;
         /// <summary>안 멈추는 적(돌진·매복·추격)인지.</summary>
         public bool IsEnemy;
     }
@@ -58,7 +60,7 @@ namespace RhythmActionGame
             // GDD-beta B16.1: 쿵-따닥 당김 (+1, +1.5, +2.5)
             Add(new EventDef { Kind = "rolling_jars", Beats = 4, Slots = new[] { new EventSlot(1), new EventSlot(1.5), new EventSlot(2.5) }, HpCapOne = true });
             Add(new EventDef { Kind = "awning_bounce", Beats = 4, Slots = new[] { new EventSlot(2, ArrowKey.Up) } });
-            Add(new EventDef { Kind = "closing_gate", Beats = 4, Slots = new[] { new EventSlot(2, ArrowKey.Down) }, SlowMoSlot = 0 });
+            Add(new EventDef { Kind = "closing_gate", Beats = 4, Slots = new[] { new EventSlot(2, ArrowKey.Down) }, SlowMoSlot = 0, BulletSlot = 0 });   // 회피 슬로모션 (B17.4)
             Add(new EventDef { Kind = "arrow_volley", Beats = 4, Slots = new[] { new EventSlot(1.5), new EventSlot(2), new EventSlot(2.5), new EventSlot(3) }, HpCapOne = true });
             Add(new EventDef { Kind = "long_jump", Beats = 6, Slots = new[] { new EventSlot(2, ArrowKey.Up), new EventSlot(4, ArrowKey.Down) }, SlowMoSlot = 0 });
             Add(new EventDef { Kind = "banner_slide", Beats = 4, Slots = new[] { new EventSlot(2, ArrowKey.Down) } });

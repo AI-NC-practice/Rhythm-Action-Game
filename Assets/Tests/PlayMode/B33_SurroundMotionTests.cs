@@ -27,6 +27,7 @@ namespace RhythmActionGame.Tests
             boot.judge.OffsetSource = () => 0f;
             dir.MotionDeltaTime = () => Dt;
             dir.AllowEventSlowMotion = false;
+            if (boot.bulletTime != null) boot.bulletTime.enabled = false;   // 일정한 빠르기로 입력 시각을 미리 계산하는 테스트 (회피 슬로모션은 B47 테스트)
             boot.StartRun(start);
             yield return null;
         }

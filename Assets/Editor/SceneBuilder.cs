@@ -261,6 +261,17 @@ namespace RhythmActionGame.EditorTools
             cueTicks.clock = clock;
             cueTicks.judge = judge;
 
+            // 아슬아슬 회피 슬로모션 (GDD-beta B17.4): 음악 저역 통과(먹먹함) + 박자 시계·음악·화면 함께 느리게
+            var lowPass = systems.AddComponent<AudioLowPassFilter>();
+            lowPass.cutoffFrequency = GameConfig.BulletTime.LowPassOpenHz;
+            var bullet = systems.AddComponent<BulletTimeFx>();
+            bullet.clock = clock;
+            bullet.judge = judge;
+            bullet.director = director;
+            bullet.slowMotion = director.slowMotion;
+            bullet.sfx = sfx;
+            bullet.lowPass = lowPass;
+
             var boot = new GameObject("GameBootstrap").AddComponent<GameBootstrap>();
             boot.director = director;
             boot.clock = clock;
@@ -275,6 +286,7 @@ namespace RhythmActionGame.EditorTools
             boot.jangdanLane = lane;
             boot.beatFx = beatFx;
             boot.cueTicks = cueTicks;
+            boot.bulletTime = bullet;
 
             BuildGameExtra(boot, chart);
             EditorSceneManager.SaveScene(scene, GameScenePath);

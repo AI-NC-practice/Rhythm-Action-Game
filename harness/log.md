@@ -412,3 +412,27 @@ BuildGray와 smoke-test를 통과했다(Builds/Gray/RhythmActionGame.exe). 사�
 - 수치는 GameConfig.BeatFx. 테스트 B45 EditMode 5·PlayMode 3. unity-verify EditMode 170/170, PlayMode 147/147. BuildGray + smoke-test 통과.
 평가: evaluator PASS (1회차, harness/reports/B45-eval-1.md). 다음: 사용자 테스트 빌드 확인 후 B46.
 - 제안: 발걸음 소리(아주 작은 "툭")를 박마다 넣으면 귀로도 박이 느껴질 수 있다. 곡과 겹칠 수 있어 넣지 않았다.
+
+## B46 [beta] 멈춤 패턴 "합" 주고받기 (2026-11-16) — 1회차 평가 FAIL(사용자 확인 대기)
+사용자: B45 괜찮음, B46 진행.
+- 차트 새 사건 call_response(kind "hap") 6개: 챕터 1은 끝(56박), 챕터 2~6은 마지막 큰 전투 바로 앞(92·152·184·240·260박, 같은 자리에서 전투보다 먼저 — StageChart.Load를 안정 정렬로 바꾸고 "합"을 앞에).
+- 흐름(StageDirector.CallResponse): 도착하면 멈춤 → 시작 박 O(도착 후 가장 가까운 박)에서 곡을 멈춤(BeatClock.HoldMusic) → O~O+4 숨 고르기(심장박동) → O+4~O+8 부르기(화면 위 화살표 줄이 리듬대로 켜지며 장구 덩·덕) → O+8~O+12 받기(같은 리듬 판정) → O+12 곡이 멈춘 자리부터 다시(ReleaseMusic: MusicBeatOffset −12, 3마디라 곡 마디 그대로) → 같은 프레임에 다음 사건(큰 전투) 시작. 다 맞추면 "쾅"(FxPreset CallBurst: 북·저음·징 + 섬광·붓획·충격파). 실패는 체력 −1(한 번만), 되감기 없음.
+- 곡은 멈춘 동안 진행하지 않으므로 곡·판정 타임라인을 다시 만들지 않았다(이 컴퓨터에는 Python이 없음). 장단 노드도 그대로(RhythmNotes가 "합"을 멈춤 자리로 세지 않음).
+- 패턴: GameConfig.CallResponse.Patterns (챕터마다 3~4개, 반 박 포함). 챕터 시작 자리의 "합"은 앞 챕터 것이라 챕터 이동·되감기 때 건너뜀, "합" 중 체력 0이면 그 "합"의 챕터로 되감기.
+- 예전 전투 테스트(B19·B26·B30·B34·T06·T07)는 전투 규칙만 보도록 director.CallResponseEnabled = false. B04·T04·B50 차트 규칙 테스트에 "합" 예외(같은 자리·챕터 끝) 반영. 새 테스트 B46 EditMode 3·PlayMode 2.
+- unity-verify EditMode 173/173, PlayMode 149/149. BuildGray + smoke-test 통과. 전체 오토플레이: 판정 366개(344 + "합" 22) 모두 PERFECT, 클리어.
+평가: 1회차 FAIL (harness/reports/B46-eval-1.md) — 코드·테스트 기준은 모두 PASS, "테스트 빌드로 사용자 확인"이 없어서. 사용자 확인 뒤 재평가.
+- 메모: B45 평가는 같은 기준을 HUMAN으로 빼고 PASS를 줬다. 평가자마다 사용자 확인 항목 처리가 다르다.
+
+### 2026-11-16 B46 취소 — 사용자 결정
+사용자: "합은 필요 없는 것 같다, 슬로모션 쪽을 신경 써 달라." B46 코드·테스트·씬 변경을 git stash("B46 합 주고받기 (2026-11-16 사용자 결정으로 취소, 보관용)")에 넣어 되돌렸다(씬은 B45 커밋 상태). 예고음 dsp 시각 예약 수정(CueTickPlayer)만 남겼다. tasks.json B46 → blocked(취소), B47 의존을 B45로. GDD-beta B17.3에 취소 표시.
+사용자 요청(슬로모션): 5챕터 성문 닫히는 구간, 4챕터 포위 전투 일부 공격, 마지막 무사 일부 공격에서 "아슬아슬하게 피하는" 슬로모션 — 음악과 게임이 함께 느려지고 물속처럼 먹먹했다가, 피하면 음악·게임 속도가 돌아오는 느낌. 지금 슬로모션(PERFECT 뒤 0.4초, 화면만 0.3배, 박자 시계·음악 그대로)과 다르다 → B47을 이 방향으로 다시 설계해 사용자 승인 대기.
+
+## B47 [beta] 아슬아슬 회피 슬로모션 (2026-11-16) — done (evaluator PASS)
+사용자 승인 설계(GDD-beta B17.4 새로 씀): 정해진 판정 1박 전부터 박자 시계·음악·화면이 함께 느려졌다가, 피하면(판정이 나면) 돌아온다. 사용자: Python 설치 완료, 성공·실패 연출 차이는 나중에.
+- BeatClock.SetSlowFactor: 판정 속도(AppliedSpeed) × 슬로 배율로 타임라인 속도를 바꾸고, 음악 pitch도 같은 배율 — 음 높이 보정은 판정 속도만 되돌려 음악이 0.4배 낮아짐(테이프 늘어짐). 곡과 박자 관계 그대로라 곡을 다시 만들지 않음. StartClock·RestartAt은 배율 1로.
+- BulletTimeFx: 회피 판정(CombatStep.BulletTime, EventDef.BulletSlot) 목표 1박 전부터 0.25박 동안 1 → 0.4, Time.timeScale도 같은 값. 판정(PERFECT·NORMAL·FAIL) 뒤 0.15초에 1로. 음악은 AudioLowPassFilter 22 kHz → 700 Hz, 음량 ×0.6(SfxPlayer.MusicFxGain). 처형·윈드밀 슬로모션(GDD 4.2) 동안에도 먹먹하게. 되감기·다시 시작이면 바로 1로.
+- 자리: closing_gate ↓(5챕터), 포위 2단계 마지막 동시 공격, 무사 A37.5(받아치기)·A66(난타 마지막 무사 공격).
+- B4 2·3번(PERFECT 뒤 0.4초 슬로모션)을 없앰(GameConfig.BulletTime.PerfectCandidateSlowMo = false, TimeFx·StageDirector). 해당 테스트(B02·B05·B07)를 새 규칙으로 고침. 입력 시각을 일정한 빠르기로 미리 계산하는 전투 테스트(B07·B11·B26·B27·B33·B34·T07)는 bulletTime을 끄고 돌림.
+- 새 테스트 B47 EditMode 3·PlayMode 2. unity-verify EditMode 173/173, PlayMode 149/149. BuildGray + smoke-test 통과, 전체 오토플레이 344판정 모두 PERFECT·클리어, 회피 슬로모션 4번 걸림(시계 227·251·356.5·385박).
+평가: evaluator PASS (harness/reports/B47-eval-1.md). 다음: 사용자 테스트 빌드 확인 → B48(전투 소리 실제 녹음, 다운로드 승인 필요).

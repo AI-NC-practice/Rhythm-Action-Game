@@ -1078,27 +1078,28 @@
                                          "GDD-beta B17.3: call_response 사건(부르기 1마디 → 받기 1마디), 챕터마다 한 번, 곡이 그 자리에서 멈췄다 다시 터짐 — 테스트",
                                          "unity-verify 통과, 테스트 빌드로 사용자 확인"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "blocked",
+                      "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "2026-11-16 사용자 결정으로 취소(\"합은 필요 없는 것 같다\"). 구현은 git stash에 보관(\"B46 합 주고받기 ... 보관용\"). 1회차 evaluator FAIL은 사용자 확인 미완 때문이었음."
                   },
                   {
                       "id":  "B47",
-                      "title":  "[beta] 슬로모션 체감: 음악 먹먹하게 + 심장박동 (GDD-beta B17.4)",
+                      "title":  "[beta] 아슬아슬 회피 슬로모션: 음악·게임이 함께 느려짐 (GDD-beta B17.4)",
                       "type":  "unity",
                       "skill":  "unity-feature",
                       "depends_on":  [
-                                         "B46"
+                                         "B45"
                                      ],
                       "acceptance":  [
-                                         "GDD-beta B17.4 — 테스트",
-                                         "unity-verify 통과"
+                                         "GDD-beta B17.4: 회피 슬로모션 4곳(대문·포위 동시 공격 마지막·무사 A37.5·A66), 1박 전부터 박자 시계·음악·화면 0.4배, 음악 낮고 먹먹하게, 판정 뒤 0.15초에 복귀, 곡과 판정 박 관계 그대로 — 테스트",
+                                         "B4 2·3번 PERFECT 뒤 슬로모션 없앰, 처형·윈드밀 마무리 슬로모션은 그대로 + 음악 먹먹하게 — 테스트",
+                                         "unity-verify 통과, 테스트 빌드로 사용자 확인"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "2026-11-16 evaluator PASS (1회차). 회피 슬로모션 4곳(대문 251·포위 마지막 동시 공격 227·무사 A37.5·A66, 오토플레이 시계 박), 1박 전부터 0.25박에 걸쳐 시계·음악·화면 0.4배 + 저역 통과·음량 0.6, 판정 뒤 0.15초 복귀. PERFECT 뒤 슬로모션 없앰. 성공·실패 연출 차이는 나중에(사용자). 사용자 테스트 빌드 확인은 다음 피드백으로."
                   },
                   {
                       "id":  "B48",

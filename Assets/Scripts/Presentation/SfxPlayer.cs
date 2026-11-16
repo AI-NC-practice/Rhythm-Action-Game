@@ -41,6 +41,8 @@ namespace RhythmActionGame
         public int PoolSize => voices.Count;
         /// <summary>지금 덕킹 배율 (1 = 그대로).</summary>
         public float DuckFactor { get; private set; } = 1f;
+        /// <summary>슬로모션 먹먹함이 곱하는 음악 음량 배율 (GDD-beta B17.4, BulletTimeFx가 정함).</summary>
+        public float MusicFxGain { get; set; } = 1f;
 
         void Awake() => Build();
 
@@ -133,7 +135,7 @@ namespace RhythmActionGame
             {
                 if (s == null) continue;
                 if (!musicBase.ContainsKey(s)) musicBase[s] = s.volume;
-                s.volume = musicBase[s] * musicGroupVolume * DuckFactor;   // 음량만 (time·pitch는 그대로)
+                s.volume = musicBase[s] * musicGroupVolume * DuckFactor * MusicFxGain;   // 음량만 (time·pitch는 그대로)
             }
         }
 

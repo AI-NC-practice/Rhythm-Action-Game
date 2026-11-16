@@ -25,6 +25,8 @@ namespace RhythmActionGame
         public BeatFx beatFx;
         /// <summary>판정 예고음 (GDD-beta B17.2).</summary>
         public CueTickPlayer cueTicks;
+        /// <summary>회피 슬로모션 (GDD-beta B17.4).</summary>
+        public BulletTimeFx bulletTime;
         public bool autoStart = true;
 
         public static GameBootstrap Instance { get; private set; }

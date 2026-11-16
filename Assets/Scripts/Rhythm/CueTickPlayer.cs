@@ -78,7 +78,7 @@ namespace RhythmActionGame
                     if (at - nowTime > GameConfig.BeatFx.TickLookAheadSeconds) continue;
                     done.Add(k);
                     if (ClashesWithJudge(b)) continue;
-                    Play(at, b, b >= cue.TargetBeat - 1.0 - 1e-6);
+                    Play(AudioSettings.dspTime + System.Math.Max(0.0, at - nowTime), b, b >= cue.TargetBeat - 1.0 - 1e-6);   // 시계 시각 → dsp 시각
                 }
             }
         }

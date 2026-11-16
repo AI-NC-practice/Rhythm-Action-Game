@@ -58,6 +58,7 @@ namespace RhythmActionGame
         public bool RequestSlowMotion(SlowMoMode mode)
         {
             if (mode == SlowMoMode.None) return false;
+            if (mode == SlowMoMode.Candidate && !GameConfig.BulletTime.PerfectCandidateSlowMo) return false;   // GDD-beta B17.4: PERFECT 뒤 슬로모션 없앰 (회피 슬로모션으로 바꿈)
             double beat = clock != null ? clock.CurrentBeat : 0;
             if (mode == SlowMoMode.Candidate && beat - lastSlowBeat < GameConfig.Fx.SlowMoMinGapBeats) return false;
             if (slowMotion != null) slowMotion.Trigger();

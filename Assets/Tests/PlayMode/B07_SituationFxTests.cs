@@ -36,6 +36,7 @@ namespace RhythmActionGame.Tests
             played.Clear();
             pd.Played += e => played.Add(e.Preset);
             if (chart != null) dir.UseChart(chart);
+            if (boot.bulletTime != null) boot.bulletTime.enabled = false;   // 일정한 빠르기로 입력 시각을 미리 계산하는 테스트 (회피 슬로모션은 B47 테스트)
             boot.StartRun(startRunBeat);
             yield return null;
         }
@@ -161,7 +162,7 @@ namespace RhythmActionGame.Tests
             foreach (var c in p2) yield return Hit(c, 0.0);
             Assert.AreEqual(3, played.Count(p => p.Name == "Simultaneous" && p.Fov == 6f && p.Pitch == -8f), "동시 공격마다 FOV +6°, 위로 8°");
             Assert.AreEqual(3, hooks.Log.Count(n => n == "SimultaneousPerfect"));
-            Assert.AreEqual(slowStart + 1, pd.timeFx.SlowMotionCount, "동시 공격 PERFECT 3번 중 첫 번째만 (16박 제한)");
+            Assert.AreEqual(slowStart, pd.timeFx.SlowMotionCount, "동시 공격 PERFECT 뒤 슬로모션 없음 (GDD-beta B17.4: 회피 슬로모션으로 바꿈)");
             dir.slowMotion.Cancel(); Time.timeScale = 1f;
             // 3단계: 윈드밀 화살표마다 FOV +2° (최대 +8°)
             pd.cameraFx.ClearAll();
@@ -179,7 +180,7 @@ namespace RhythmActionGame.Tests
             }
             Assert.AreEqual(4, hooks.Log.Count(n => n == "WindmillArrow"));
             Assert.IsTrue(hooks.Log.Contains("WindmillFinish"), "윈드밀 마무리");
-            Assert.AreEqual(slowStart + 2, pd.timeFx.SlowMotionCount, "윈드밀 슬로모션 (항상)");
+            Assert.AreEqual(slowStart + 1, pd.timeFx.SlowMotionCount, "윈드밀 슬로모션 (항상)");
             Assert.AreEqual(VfxKind.InkX, pd.vfxPool.ActiveFlash, "먹 X");
             var ring = pd.vfxPool.LastShockwave;
             pd.vfxPool.Step(0.2f);
@@ -243,15 +244,15 @@ namespace RhythmActionGame.Tests
             Assert.IsTrue(hooks.Log.Contains("LandPerfect"), "G: 착지 PERFECT");
             Assert.AreEqual(s0, pd.timeFx.SlowMotionCount, "일반 장애물은 슬로모션 없음");
             yield return RunAll(0.0, 19);
-            Assert.IsTrue(hooks.Log.Contains("EventPerfectSlow"), "밧줄 넘기 PERFECT 슬로모션 연출");
-            Assert.AreEqual(s0 + 1, pd.timeFx.SlowMotionCount);
+            Assert.IsFalse(hooks.Log.Contains("EventPerfectSlow"), "밧줄 넘기 PERFECT 뒤 슬로모션 없음 (GDD-beta B17.4)");
+            Assert.AreEqual(s0, pd.timeFx.SlowMotionCount);
             dir.slowMotion.Cancel(); Time.timeScale = 1f;
             yield return RunAll(null, 25);                        // 낮은 담 FAIL
             Assert.IsTrue(hooks.Log.Contains("ParkourFail"), "G: FAIL");
             pd.screenFx.Step(0f);
             yield return RunAll(0.0, 33);                         // 기와 미끄러짐: 첫 판정에 기왓장 파편
             Assert.IsTrue(hooks.Log.Contains("TileDebris"), "기왓장이 빠짐");
-            Assert.AreEqual(s0 + 1, pd.timeFx.SlowMotionCount, "기와 미끄러짐 PERFECT는 밧줄과 16박 안이라 거절");
+            Assert.AreEqual(s0, pd.timeFx.SlowMotionCount, "기와 미끄러짐 PERFECT 뒤 슬로모션 없음 (B17.4)");
         }
 
         [UnityTest]

@@ -268,7 +268,7 @@ namespace RhythmActionGame
             if (!AllowEventSlowMotion || State != StageState.Running) return;
             bool accepted;
             if (presentation != null) accepted = presentation.RequestSlowMotion(SlowMoMode.Candidate);   // 16박 빈도 제한 (B05)
-            else { if (slowMotion != null) slowMotion.Trigger(); accepted = true; }
+            else { accepted = GameConfig.BulletTime.PerfectCandidateSlowMo; if (accepted && slowMotion != null) slowMotion.Trigger(); }   // B17.4: PERFECT 뒤 슬로모션 없앰
             if (accepted) { player.BeginRemap(run.EndBeat, clock.SpeedMultiplier); EventSlowMotionStarted?.Invoke(run); }
         }
 

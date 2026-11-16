@@ -159,7 +159,7 @@ namespace RhythmActionGame.Tests
         }
 
         [UnityTest]
-        public IEnumerator B02_RunningSlowMotion_RemapsVisual_ExactAtEventEnd()
+        public IEnumerator B02_RunningPerfect_NoSlowMotion_B17_4()
         {
             yield return Load(Chart(new ChartEvent { runBeat = 8, type = "obstacle", kind = "rope_swing" }));
             int requests = 0;
@@ -167,31 +167,12 @@ namespace RhythmActionGame.Tests
             var press = Presser(0.0);
             double target = boot.clock.TimeOfBeat(10);
             yield return AdvanceTo(target + 0.005, 0.005, t => press(t));
-            Assert.AreEqual(1, requests, "PERFECT → 슬로모션 요청");
-            Assert.IsTrue(dir.slowMotion.IsActive);
-            Assert.AreEqual(GameConfig.SlowMotionTimeScale, Time.timeScale, 1e-4f);
-            Assert.IsTrue(boot.player.Remap.HasValue, "이동 시간 재배치");
-
-            double clockBefore = boot.clock.CurrentBeat;
-            double tBefore = now;
-            yield return AdvanceTo(now + 0.2, 0.01);
-            Assert.AreEqual(clockBefore + (now - tBefore) * 2 * boot.clock.SpeedMultiplier, boot.clock.CurrentBeat, 1e-6, "박자 시계 그대로");
-            Assert.Less(boot.player.VisualRunBeat, boot.player.RunBeat - 0.05, "보이는 위치가 늦어짐");
-            Assert.Less(Vector3.Distance(MapLayout.PointAt(boot.player.VisualDistance), boot.player.transform.position), 0.01f, "화면 위치 = 보이는 위치");
-
-            // 사건 끝(12박) 직전·직후
-            float runBeforeEnd = 0, visBeforeEnd = 0;
-            while (boot.player.RunBeat < 12.0)
-            {
-                runBeforeEnd = (float)boot.player.RunBeat;
-                visBeforeEnd = (float)boot.player.VisualRunBeat;
-                now += 0.005;
-                yield return null;
-            }
-            Assert.LessOrEqual(Mathf.Abs(runBeforeEnd - visBeforeEnd) * GameConfig.MetersPerBeat, 0.05f, "사건 끝에서 위치 오차 0.05 m 이하");
-            Assert.AreEqual(boot.player.RunBeat, boot.player.VisualRunBeat, 1e-9, "끝난 뒤 일치");
-            var expected = MapLayout.PointAt(boot.player.Distance);
-            Assert.Less(Vector3.Distance(expected, boot.player.transform.position), 0.05f);
+            Assert.AreEqual(1, requests, "PERFECT → 슬로모션 후보 알림은 그대로");
+            // GDD-beta B17.4: PERFECT 뒤 슬로모션(B4 2번)은 없앰 — 화면·이동은 그대로
+            Assert.IsFalse(dir.slowMotion.IsActive, "PERFECT 뒤 슬로모션 없음 (B17.4)");
+            Assert.AreEqual(1f, Time.timeScale, 1e-4f);
+            Assert.IsFalse(boot.player.Remap.HasValue, "이동 시간 재배치 없음");
+            yield return null;
         }
     }
 }

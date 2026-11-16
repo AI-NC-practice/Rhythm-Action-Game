@@ -33,6 +33,7 @@ namespace RhythmActionGame.Tests
             dir.RewindRealTime = () => real;
             dir.FailHitSeconds = 0f;   // beta1-1: 피격 연출(GDD-beta B12.2)은 B30 테스트에서 따로 본다. 여기서는 바로 되감기
             dir.slowMotion.RealTime = () => real;
+            if (boot.bulletTime != null) boot.bulletTime.enabled = false;   // 일정한 빠르기로 입력 시각을 미리 계산하는 테스트 (회피 슬로모션은 B47 테스트)
             boot.StartRun(start);
             yield return null;
         }

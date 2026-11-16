@@ -170,23 +170,21 @@ namespace RhythmActionGame.Tests
         [UnityTest]
         public IEnumerator B05_SlowMotion_FrequencyLimit16Beats()
         {
-            Assert.IsTrue(pd.RequestSlowMotion(SlowMoMode.Candidate), "처음은 받음");
-            slow.Cancel();
-            now = 7.9 * 0.5;                                     // 7.9박
-            Assert.IsFalse(pd.RequestSlowMotion(SlowMoMode.Candidate), "16박 안 → 거절");
+            // GDD-beta B17.4: PERFECT 뒤 슬로모션 후보(B4 2·3번)는 없앴다. 처형·윈드밀(Always)만 남는다.
+            Assert.IsFalse(pd.RequestSlowMotion(SlowMoMode.Candidate), "후보는 항상 거절 (B17.4)");
+            now = 7.9 * 0.5;
             Assert.IsTrue(pd.RequestSlowMotion(SlowMoMode.Always), "처형·윈드밀은 항상");
             slow.Cancel();
-            now = (7.9 + 15.9) * 0.5;
-            Assert.IsFalse(pd.RequestSlowMotion(SlowMoMode.Candidate), "Always도 직전 슬로모션으로 센다");
             now = (7.9 + 16.01) * 0.5;
-            Assert.IsTrue(pd.RequestSlowMotion(SlowMoMode.Candidate), "16박 뒤 → 받음");
-            Assert.AreEqual(3, time.SlowMotionCount);
+            Assert.IsFalse(pd.RequestSlowMotion(SlowMoMode.Candidate), "16박 뒤에도 후보는 거절");
+            Assert.IsTrue(pd.RequestSlowMotion(SlowMoMode.Always), "처형은 16박 안이어도 항상");
+            Assert.AreEqual(2, time.SlowMotionCount);
 
             // 일반 PERFECT 연출은 남는다
             slow.Cancel();
             now += 1.0;
             bool accepted = pd.Play(GameConfig.Fx.ParryPerfectFinale);
-            Assert.IsFalse(accepted, "빈도 제한으로 슬로모션 거절");
+            Assert.IsFalse(accepted, "PERFECT 뒤 슬로모션 없음 (B17.4)");
             Assert.AreEqual("ParryPerfectFinale", pd.LastPlayed, "대신 일반 PERFECT 연출");
             Assert.IsTrue(time.HitStopActive, "Hit Stop은 걸림");
             yield return null;
@@ -295,8 +293,8 @@ namespace RhythmActionGame.Tests
                 yield return null;
                 if (boot.player.Remap.HasValue && (remaps.Count == 0 || remaps[remaps.Count - 1] != boot.player.Remap.Value.Start)) remaps.Add(boot.player.Remap.Value.Start);
             }
-            Assert.AreEqual(2, remaps.Count, "10박 밧줄: 받음 / 16박 대문: 16박 안이라 거절 / 32박 밧줄: 받음");
-            Assert.AreEqual(2, boot.presentation.timeFx.SlowMotionCount);
+            Assert.AreEqual(0, remaps.Count, "GDD-beta B17.4: 사건 PERFECT 뒤 슬로모션(이동 재배치) 없음");
+            Assert.AreEqual(0, boot.presentation.timeFx.SlowMotionCount);
             dir.slowMotion.Cancel();
             Time.timeScale = 1f;
         }
