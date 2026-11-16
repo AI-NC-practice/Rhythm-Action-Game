@@ -855,6 +855,14 @@ namespace RhythmActionGame
             public const float SpeedSmoothing = 12f;
             /// <summary>한 프레임 이동이 이 속도(m/s)를 넘으면 순간이동(되감기·배치)으로 보고 무시.</summary>
             public const float TeleportSpeed = 25f;
+            // ----- 작업 R18 후속: 걷기 (사건 소품 적, 돌진 적이 다가오기 시작할 때) -----
+            /// <summary>이 속도(m/s)보다 느리게 움직이면 걷기, WalkToRunSpeed를 넘으면 달리기 (되돌이 여유 RunToWalkSpeed).</summary>
+            public const float WalkToRunSpeed = 2.6f;
+            public const float RunToWalkSpeed = 2.1f;
+            /// <summary>걷기 클립 원래 속도로 보이는 이동 속도 (m/s, Mixamo Standard Walk 약 1.5). 이동 속도 / 이 값 = 재생 배율.</summary>
+            public const float WalkClipSpeed = 1.5f;
+            public const float WalkRateMin = 0.7f;
+            public const float WalkRateMax = 1.5f;
 
             // ----- 작업 R07: 지붕 발차기 낙하 -----
             /// <summary>차여 날아가는 방향: 플레이어 반대쪽에서 지붕 가장자리 쪽으로 이 각도(도)만큼 돌림 (길 따라 날아가면 지붕에 남으므로).</summary>

@@ -65,6 +65,7 @@ namespace RhythmActionGame.EditorTools
                 (EnemyMoves.Guard, Clip(model, EnemyMoves.GuardClip(model))),
                 (EnemyMoves.Hit, Clip(model, EnemyMoves.HitClip(model))),
                 (EnemyMoves.Run, Clip(EnemyMoves.RunClipModel(model), EnemyMoves.RunClip)),   // 작업 R07
+                (EnemyMoves.Walk, Clip(model, EnemyMoves.WalkClip)),   // 작업 R18 후속
             };
             foreach (var a in EnemyMoves.Attacks) states.Add((EnemyMoves.AttackState(a), Clip(model, EnemyMoves.AttackClip(model, a))));
             foreach (var d in EnemyMoves.Defeats) states.Add((EnemyMoves.DefeatState(d), Clip(model, EnemyMoves.DefeatClip(model, d))));

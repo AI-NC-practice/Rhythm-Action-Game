@@ -13,6 +13,9 @@ namespace RhythmActionGame
         /// <summary>달리기 (작업 R07): 이동 속도가 있을 때. 반복.</summary>
         public const string Run = "Run";
         public const string RunClip = "forward_run_1";
+        /// <summary>걷기 (작업 R18 후속, 사용자 승인 2026-11-17 Mixamo "Standard Walk", In Place): 느리게 움직일 때. 반복.</summary>
+        public const string Walk = "Walk";
+        public const string WalkClip = MixamoPrefix + "walk";
         /// <summary>달리기 클립을 가진 모델 (무사는 달리기 동작이 없어 칼 포졸 것을 Humanoid로 옮겨 씀).</summary>
         public static string RunClipModel(string model) => model == "boss" ? "enemy_sword" : model;
         public static readonly string[] Attacks = { "horizontal", "overhead", "upward", "thrust" };

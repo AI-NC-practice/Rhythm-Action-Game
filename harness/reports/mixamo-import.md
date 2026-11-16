@@ -14,5 +14,6 @@
 | stab.fbx | True | True | 52 | mixamo.com | 2.37 | True |
 | stumble.fbx | True | True | 52 | mixamo.com | 1.17 | True |
 | vault.fbx | True | True | 52 | mixamo.com | 1.17 | True |
+| walk.fbx | True | True | 52 | mixamo.com | 1.17 | True |
 | wall_run.fbx | True | True | 52 | mixamo.com | 0.93 | True |
 | windmill.fbx | True | True | 52 | mixamo.com | 3.17 | True |

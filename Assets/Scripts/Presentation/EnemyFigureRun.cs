@@ -12,12 +12,19 @@ namespace RhythmActionGame
 
         public float MoveSpeed { get; private set; }
         public bool Running { get; private set; }
+        /// <summary>작업 R18 후속: 걷는 중 (느리게 움직임).</summary>
+        public bool Walking { get; private set; }
+        /// <summary>달리거나 걷는 중.</summary>
+        public bool Moving => Running || Walking;
 
         Vector3 lastPos;
         bool hasLast;
         double lastNow;
 
-        void OnEnable() { hasLast = false; MoveSpeed = 0f; }
+        void OnEnable() { hasLast = false; MoveSpeed = 0f; Running = false; Walking = false; }
+
+        bool hasWalk, checkedWalk;
+        void Go(string state) => animator.CrossFadeInFixedTime(state, GameConfig.EnemyBody.CrossFadeSeconds, 0);
 
         void LateUpdate()
         {
@@ -34,9 +41,20 @@ namespace RhythmActionGame
             float v = d.magnitude / dt;
             if (v > GameConfig.EnemyBody.TeleportSpeed) v = 0f;
             MoveSpeed = Mathf.Lerp(MoveSpeed, v, 1f - Mathf.Exp(-GameConfig.EnemyBody.SpeedSmoothing * dt));
-            if (!Running && MoveSpeed > GameConfig.EnemyBody.RunStartSpeed) { Running = true; animator.CrossFadeInFixedTime(EnemyMoves.Run, GameConfig.EnemyBody.CrossFadeSeconds, 0); }
-            else if (Running && MoveSpeed < GameConfig.EnemyBody.RunStopSpeed) { Running = false; animator.CrossFadeInFixedTime(EnemyMoves.Idle, GameConfig.EnemyBody.CrossFadeSeconds, 0); }
-            animator.speed = Running ? Mathf.Clamp(MoveSpeed / GameConfig.EnemyBody.RunClipSpeed, GameConfig.EnemyBody.RunRateMin, GameConfig.EnemyBody.RunRateMax) : 1f;
+            if (!checkedWalk) { checkedWalk = true; hasWalk = animator.HasState(0, Animator.StringToHash(EnemyMoves.Walk)); }
+            var b = GameConfig.EnemyBody.RunStartSpeed;
+            // 대기 ↔ 걷기 ↔ 달리기 (작업 R18 후속: 느리면 걷기, 걷기 상태가 없으면 예전처럼 달리기)
+            bool moving = Running || Walking;
+            if (!moving && MoveSpeed > b)
+            {
+                if (hasWalk && MoveSpeed < GameConfig.EnemyBody.WalkToRunSpeed) { Walking = true; Go(EnemyMoves.Walk); }
+                else { Running = true; Go(EnemyMoves.Run); }
+            }
+            else if (moving && MoveSpeed < GameConfig.EnemyBody.RunStopSpeed) { Running = false; Walking = false; Go(EnemyMoves.Idle); }
+            else if (Walking && MoveSpeed > GameConfig.EnemyBody.WalkToRunSpeed) { Walking = false; Running = true; Go(EnemyMoves.Run); }
+            else if (Running && hasWalk && MoveSpeed < GameConfig.EnemyBody.RunToWalkSpeed) { Running = false; Walking = true; Go(EnemyMoves.Walk); }
+            animator.speed = Running ? Mathf.Clamp(MoveSpeed / GameConfig.EnemyBody.RunClipSpeed, GameConfig.EnemyBody.RunRateMin, GameConfig.EnemyBody.RunRateMax)
+                : Walking ? Mathf.Clamp(MoveSpeed / GameConfig.EnemyBody.WalkClipSpeed, GameConfig.EnemyBody.WalkRateMin, GameConfig.EnemyBody.WalkRateMax) : 1f;
         }
     }
 }

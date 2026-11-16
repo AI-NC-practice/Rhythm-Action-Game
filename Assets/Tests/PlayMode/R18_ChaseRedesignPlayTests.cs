@@ -202,6 +202,7 @@ namespace RhythmActionGame.Tests
                 var last = new Dictionary<EventProp, (Vector3 pos, double beat)>();
                 var speeds = new Dictionary<EventProp, List<(float rem, float v)>>();
                 var hitErr = new Dictionary<EventProp, float>();
+                var walkFrames = new Dictionary<EventProp, (int walk, int all)>();
                 var shotWalk = new HashSet<EventProp>(); var shotSprint = new HashSet<EventProp>();
                 int frames = 0;
                 while (boot.player.RunBeat < end && frames < 10000)
@@ -222,6 +223,12 @@ namespace RhythmActionGame.Tests
                             hitErr[p] = hitErr.TryGetValue(p, out var old) ? Mathf.Min(old, along) : along;
                         }
                         if (rem > 16f || rem < 0.05f) { last.Remove(p); continue; }
+                        if (rem > 7f && rem < GameConfig.Map.ChargeStartBeats - 1f)
+                        {
+                            var fig = p.enemy.GetComponentInChildren<EnemyFigureRun>();
+                            walkFrames.TryGetValue(p, out var wf);
+                            walkFrames[p] = (wf.walk + (fig != null && fig.Walking ? 1 : 0), wf.all + 1);
+                        }
                         if (last.TryGetValue(p, out var l) && v - l.beat >= 0.25)
                         {
                             var d = e - l.pos; d.y = 0f;
@@ -250,6 +257,9 @@ namespace RhythmActionGame.Tests
                     Assert.IsTrue(hitErr.ContainsKey(kv.Key), $"{kv.Key.name}: 판정 순간을 잼");
                     lines.Add($"{kv.Key.name}: 판정 순간 길 방향 오차 {hitErr[kv.Key]:0.00} m");
                     Assert.Less(hitErr[kv.Key], 0.5f, $"{kv.Key.name}: 판정 순간 판정 자리에 있음");
+                    walkFrames.TryGetValue(kv.Key, out var w);
+                    lines.Add($"{kv.Key.name}: 걷기 동작 {w.walk}/{w.all}프레임");
+                    Assert.Greater(w.walk, w.all * 0.9f, $"{kv.Key.name}: 걷는 동안 걷기 동작 (Mixamo Standard Walk)");
                     Assert.Less(maxJump, 1.0f, $"{kv.Key.name}: 속도가 갑자기 튀지 않음 (0.25박마다 변화 m/박) ({lines.Last()})");
                 }
             }

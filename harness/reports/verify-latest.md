@@ -1,5 +1,5 @@
 ﻿# Unity verify report
-time: 2026-11-17 02:28:30
+time: 2026-11-17 02:49:23
 
 ## EditMode : total=204 passed=204 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
@@ -207,7 +207,7 @@ time: 2026-11-17 02:28:30
   - [Passed] RhythmActionGame.Tests.T14_EnemyRigTests.T14_GameScene_EveryEnemy_HasModel_WeaponOnHandBone_NoCapsule
   - [Passed] RhythmActionGame.Tests.T14_EnemyRigTests.T14_PlayerController_HasExecutionAndHitStates
 
-## PlayMode : total=180 passed=180 failed=0 skipped=0 result=Passed
+## PlayMode : total=181 passed=180 failed=0 skipped=1 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -346,6 +346,7 @@ time: 2026-11-17 02:28:30
   - [Passed] RhythmActionGame.Tests.R07_EnemyRunPlayTests.R07_RoofKick_FliesOffRoofEdge_LandsBelow_CameraFollows
   - [Passed] RhythmActionGame.Tests.R18_ChaseRedesignPlayTests.R18_ChargeEnemies_WalkThenSprint
   - [Passed] RhythmActionGame.Tests.R18_ChaseRedesignPlayTests.R18_ChaseEnemies_FarRoofLine_LeapIn_FallBehind
+  - [Skipped] RhythmActionGame.Tests.Review_StageWalkthroughPlayTests.Review_Stage1_Walkthrough_Shots
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Font_HasJudgeGlyphs
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Fx_GrayAndZoom_EnterAndExit
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Label_ShownFor0_45Seconds_GddBeta

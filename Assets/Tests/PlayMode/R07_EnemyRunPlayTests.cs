@@ -173,7 +173,7 @@ namespace RhythmActionGame.Tests
                 {
                     if (f == null || !f.isActiveAndEnabled) continue;
                     var st = Get(stats, "F:" + f.transform.parent.name + "/" + f.name);
-                    Count(st, f.MoveSpeed, f.Running, !f.Running);
+                    Count(st, f.MoveSpeed, f.Moving, !f.Moving);   // 작업 R18 후속: 걷기도 이동 동작
                     var prop = f.GetComponentInParent<EventProp>();
                     if ((prop == null || (!prop.EnemyDown && !prop.ChaseHopping)) && Near(f.transform)) CountFoot(st, f.transform);   // 집 사이 틈을 뛰어넘는 중은 제외
                 }
