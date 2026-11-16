@@ -1531,10 +1531,10 @@
                                          "1인칭·3인칭 미리보기 PNG (추격 적 옆 지붕, 뛰어들기, 돌진 적)",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  2,
                       "max_attempts":  3,
-                      "notes":  "EventProp chaseY/chaseX/chaseGap 프로필을 옆 지붕 줄 거리로 다시 계산(SceneBuilder.Map.CheckSupports)."
+                      "notes":  "PASS 2회차. 추격 적 8명 모두 옆 8 m 줄(골목·지붕)을 달리다 공격 2박 전 포물선(1.4~8 m)으로 뛰어들고 공격 뒤 뒤처짐(PERFECT는 그 자리에 쓰러짐). 돌진 적 서 있음→걷기 0.8 m/박→4박 동안 가속→질주 4 m/박. 걷기는 전용 클립이 없어 달리기 클립을 느리게 재생(0.6배)."
                   },
                   {
                       "id":  "R18b",

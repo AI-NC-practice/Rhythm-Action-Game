@@ -38,6 +38,14 @@ namespace RhythmActionGame
         public float[] chaseX = new float[0];
         /// <summary>그 자리에 면이 없어 뛰어넘거나(집과 집 사이 틈) 담·지붕을 오르내리는 중인지 (테스트용).</summary>
         public bool[] chaseGap = new bool[0];
+        /// <summary>
+        /// 작업 R18 (GDD-beta B19.2): 추격 적의 월드 XZ 자리 (chaseY와 같은 칸). 비어 있으면 경로 + 옆 거리(chaseX).
+        /// 공격 2박 전까지는 옆 지붕 줄(8~20 m), 그다음 2박은 플레이어 쪽으로 뛰어드는 포물선, 공격 뒤는 플레이어 곁.
+        /// </summary>
+        public float[] chaseWX = new float[0];
+        public float[] chaseWZ = new float[0];
+        /// <summary>작업 R18: 뛰어들기 시작·공격 자리의 경로 거리 (m, 테스트용).</summary>
+        public float chaseLeapD, chaseHitD;
 
         /// <summary>작업 R07: 매복 적이 튀어나온 끝자리(길 쪽 1 m)의 발 높이 (로컬). 지붕 비탈에서 발이 지붕 속으로 묻히지 않게. NaN이면 집 높이.</summary>
         public float ambushEndY = float.NaN;
@@ -171,6 +179,13 @@ namespace RhythmActionGame
         {
             if (chaseY == null || chaseY.Length < 2 || chaseX == null || chaseX.Length != chaseY.Length) return false;
             float d = M(runBeat + t) + 2f;
+            bool world = chaseWX != null && chaseWX.Length == chaseY.Length && chaseWZ != null && chaseWZ.Length == chaseY.Length;
+            // 작업 R18: 공격 뒤에는 플레이어보다 느리게 달려 뒤처진다 (PERFECT는 그 자리에 쓰러짐) — 나란히 달리지 않게
+            if (world && u > 0f)
+            {
+                float dHit = M(runBeat + (t - u)) + 2f;
+                d = r == Judgement.Perfect ? dHit : dHit + M(u) * GameConfig.Map.ChaseFallBehindRate;
+            }
             float f = (d - chaseD0) / chaseStep;
             if (f < 0f || f > chaseY.Length - 1) return false;
             int i = Mathf.Min((int)f, chaseY.Length - 2);
@@ -180,6 +195,14 @@ namespace RhythmActionGame
             ChaseHopping = chaseGap != null && chaseGap.Length == chaseY.Length && (chaseGap[i] || chaseGap[i + 1]);
             var pt = MapLayout.PointAt(d, out var fwd);
             var w = pt + MapLayout.RightOf(fwd) * (cs * lat);
+            if (world)
+            {
+                w = new Vector3(Mathf.Lerp(chaseWX[i], chaseWX[i + 1], k), 0f, Mathf.Lerp(chaseWZ[i], chaseWZ[i + 1], k));
+                // 달리는 방향 = 앞뒤 칸의 방향 (뛰어드는 동안은 플레이어 쪽으로 비스듬히)
+                int a = Mathf.Max(0, i - 1), b = Mathf.Min(chaseY.Length - 1, i + 2);
+                var dir = new Vector3(chaseWX[b] - chaseWX[a], 0f, chaseWZ[b] - chaseWZ[a]);
+                if (dir.sqrMagnitude > 1e-4f) fwd = dir.normalized;
+            }
             w.y = y;
             enemy.position = w;
             var rot = Quaternion.LookRotation(fwd, Vector3.up);   // 달리는 방향을 봄
@@ -213,6 +236,28 @@ namespace RhythmActionGame
             return true;
         }
 
+        /// <summary>
+        /// 작업 R18: 돌진 적이 판정 rem박 전에 판정 자리보다 얼마나 앞(m)에 있는지. 속도(m/박)는 질주 구간 ChargeSprintSpeed,
+        /// 그 앞 ChargeRampBeats 동안 걷기 속도에서 질주 속도로 부드럽게, 그 앞은 ChargeStartBeats까지 걷기, 그보다 전은 서 있음.
+        /// </summary>
+        public static float ChargeAhead(float rem)
+        {
+            if (rem <= 0f) return 0f;
+            const int steps = 48;
+            float r = Mathf.Min(rem, GameConfig.Map.ChargeStartBeats), sum = 0f, h = r / steps;
+            for (int i = 0; i < steps; i++) sum += ChargeSpeed((i + 0.5f) * h) * h;
+            return sum;
+        }
+
+        /// <summary>작업 R18: 판정 rem박 전 돌진 적의 속도 (m/박).</summary>
+        public static float ChargeSpeed(float rem)
+        {
+            float sprint = GameConfig.Map.ChargeSprintBeats, ramp = GameConfig.Map.ChargeRampBeats;
+            if (rem <= sprint) return GameConfig.Map.ChargeSprintSpeed;
+            if (rem <= sprint + ramp) return Mathf.Lerp(GameConfig.Map.ChargeSprintSpeed, GameConfig.Map.ChargeWalkSpeed, Mathf.SmoothStep(0f, 1f, (rem - sprint) / ramp));
+            return rem <= GameConfig.Map.ChargeStartBeats ? GameConfig.Map.ChargeWalkSpeed : 0f;
+        }
+
         void AnimateEnemy(double t, StageDirector.ObstacleRun run, System.Func<int, float> slotZ, float playerZ)
         {
             string how = companion != "" ? companion : kind;
@@ -225,7 +270,8 @@ namespace RhythmActionGame
             {
                 case EventCatalog.Charge:
                     // 앞에서 달려와 판정 시점에 플레이어와 만남. PERFECT 쓰러짐, NORMAL 스쳐 지나감, FAIL 그 자리
-                    p.z = slotZ(0) + Mathf.Max(0f, (float)(hitT - t)) * 4f;
+                    // 작업 R18 (GDD-beta B19.4): 멀리서 대기 → 걷기 → 점점 빨라져 판정 2박 전부터 질주 (갑자기 튀어나오지 않게)
+                    p.z = slotZ(0) + ChargeAhead((float)(hitT - t));
                     if (u > 0 && r.HasValue)
                     {
                         if (r == Judgement.Perfect) { q = enemyHomeRot * Quaternion.Euler(-Mathf.Min(90f, u * 180f), 0, 0); EnemyDown = true; }

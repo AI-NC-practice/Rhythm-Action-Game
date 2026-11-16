@@ -1003,6 +1003,30 @@ namespace RhythmActionGame
             /// <summary>작업 R07: 추격 적이 집과 집 사이 틈을 뛰어넘을 때 최대 높이 (m).</summary>
             public const float ChaseHopMax = 0.8f;
 
+            // ----- 작업 R18 (GDD-beta B19.2, B19.4): 옆 건물에서 쫓아오는 추격 적, 걷다가 질주하는 돌진 적 -----
+            /// <summary>추격 적이 공격 전까지 달리는 옆 거리 범위 (m, 옆 지붕 줄·골목). 작은 값부터 찾는다.</summary>
+            public const float ChaseFarLateralMin = 8f;
+            public const float ChaseFarLateralMax = 20f;
+            /// <summary>옆 거리 후보 간격 (m).</summary>
+            public const float ChaseFarLateralStep = 1f;
+            /// <summary>먼 줄 경로 길이 / 플레이어 경로 길이 상한 (바깥 모퉁이에서 너무 빨리 달리지 않게).</summary>
+            public const float ChaseFarMaxStretch = 1.6f;
+            /// <summary>공격 몇 박 전에 플레이어 쪽으로 뛰어드는지 (박).</summary>
+            public const float ChaseLeapBeats = 2f;
+            /// <summary>뛰어들 때 지나는 지붕·담 위 여유 (m)와 최소 포물선 높이 (m).</summary>
+            public const float ChaseLeapClearance = 0.6f;
+            public const float ChaseLeapMinArc = 1.0f;
+            /// <summary>뛰어들기 포물선 높이 상한 (m, 성문·높은 지붕을 넘을 때).</summary>
+            public const float ChaseLeapMaxArc = 8f;
+            /// <summary>공격 뒤(PERFECT 아님) 플레이어 속도에 대한 추격 적 속도 비율 — 점점 뒤처진다.</summary>
+            public const float ChaseFallBehindRate = 0.35f;
+            /// <summary>돌진 적: 판정 몇 박 전부터 움직이는지, 걷는 속도·질주 속도 (m/박), 걷기에서 질주로 올라가는 박 수, 질주 박 수.</summary>
+            public const float ChargeStartBeats = 12f;
+            public const float ChargeWalkSpeed = 0.8f;
+            public const float ChargeSprintSpeed = 4f;
+            public const float ChargeRampBeats = 4f;
+            public const float ChargeSprintBeats = 2f;
+
             /// <summary>먼 배경 파노라마 (R02 그림 6장을 이어 붙인 한 장, 둘레를 한 번만 돈다).</summary>
             public const float BackdropTopFade = 0.55f;
 

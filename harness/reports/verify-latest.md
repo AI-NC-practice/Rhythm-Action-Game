@@ -1,7 +1,7 @@
 ﻿# Unity verify report
-time: 2026-11-17 01:52:17
+time: 2026-11-17 02:28:30
 
-## EditMode : total=202 passed=202 failed=0 skipped=0 result=Passed
+## EditMode : total=204 passed=204 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Config_MatchGddBetaB1
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_LabelPose_PopThenRise_045s
@@ -118,6 +118,8 @@ time: 2026-11-17 01:52:17
   - [Passed] RhythmActionGame.Tests.R03_MapPlanTests.R03_Plan_SameBuildingNeverTwiceInARow_RotationAndScaleVary
   - [Passed] RhythmActionGame.Tests.R07_EnemyClipTests.R07_EnemyControllers_HaveRun_AndKickFallFromMixamo
   - [Passed] RhythmActionGame.Tests.R07_EnemyClipTests.R07_EventFigureEnemies_HaveRunComponent
+  - [Passed] RhythmActionGame.Tests.R18_ChaseRedesignTests.R18_ChargeSpeed_WalkRampSprint
+  - [Passed] RhythmActionGame.Tests.R18_ChaseRedesignTests.R18_Chart_Unchanged
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_BeatAndSpeed_MatchGdd41
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_Judge_MatchGdd42
   - [Passed] RhythmActionGame.Tests.T01_GameConfigTests.T01_ObstacleAndCombat_MatchGdd44To46
@@ -205,7 +207,7 @@ time: 2026-11-17 01:52:17
   - [Passed] RhythmActionGame.Tests.T14_EnemyRigTests.T14_GameScene_EveryEnemy_HasModel_WeaponOnHandBone_NoCapsule
   - [Passed] RhythmActionGame.Tests.T14_EnemyRigTests.T14_PlayerController_HasExecutionAndHitStates
 
-## PlayMode : total=178 passed=178 failed=0 skipped=0 result=Passed
+## PlayMode : total=180 passed=180 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -342,6 +344,8 @@ time: 2026-11-17 01:52:17
   - [Passed] RhythmActionGame.Tests.R07_EnemyRunPlayTests.R07_CombatEnemies_RunWhenMoving_NotInPlace
   - [Passed] RhythmActionGame.Tests.R07_EnemyRunPlayTests.R07_EventFigures_RunWhileMoving_NoGlide
   - [Passed] RhythmActionGame.Tests.R07_EnemyRunPlayTests.R07_RoofKick_FliesOffRoofEdge_LandsBelow_CameraFollows
+  - [Passed] RhythmActionGame.Tests.R18_ChaseRedesignPlayTests.R18_ChargeEnemies_WalkThenSprint
+  - [Passed] RhythmActionGame.Tests.R18_ChaseRedesignPlayTests.R18_ChaseEnemies_FarRoofLine_LeapIn_FallBehind
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Font_HasJudgeGlyphs
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Fx_GrayAndZoom_EnterAndExit
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Label_ShownFor0_45Seconds_GddBeta

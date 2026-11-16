@@ -347,6 +347,137 @@ namespace RhythmActionGame.EditorTools
                 }
                 prop.chaseGap = gap;
                 Debug.Log($"[SceneBuilder] 추격 프로필 {prop.name}: {n}점, 옆 거리 {bestLat:0.00} m, 면 있음 {bestHits}/{n}");
+                FarChase(prop, side, d0, step, n, bestLat);
+            }
+
+            // 작업 R18 (GDD-beta B19.2): 추격 적은 공격 ChaseLeapBeats박 전까지 옆 지붕 줄·골목(8~20 m)을 달리고, 그다음 플레이어 곁(위에서 잰 가까운 줄)으로
+            // 뛰어든다. 먼 줄: 옆 거리 하나를 골라(면이 이어지고 바깥 모퉁이에서 너무 늘어나지 않는 가장 가까운 값) 경로를 옮긴 선을 접힘 없이 잇고
+            // 길이를 고르게 나눠(일정한 속도) 보이는 가장 높은 면(지붕·담·땅, 머리 위 여유)에 발을 둔다. 뛰어드는 동안은 사이 지붕·담을 넘는 포물선.
+            float? FarSurface(Vector3 q)
+            {
+                var all = HeightsAt(q);
+                var hs = all.Where(h => h.y > -0.5f && h.y < 12f && !IsNotGround(Owner(h.owner))).ToList();
+                if (hs.Count == 0) return null;
+                float y = hs.Max(h => h.y);
+                if (all.Any(h => h.y > y + 0.3f && h.y < y + 2.0f)) return null;
+                return y;
+            }
+            void FarChase(EventProp prop, float side, float d0, float step, int n, float nearLat)
+            {
+                float mpb = GameConfig.MetersPerBeat;
+                float hitBeat = prop.runBeat + (prop.slotOffsets.Length > 0 ? prop.slotOffsets[0] : 2f);
+                float dHit = hitBeat * mpb + 2f;
+                float dLeap = dHit - GameConfig.Map.ChaseLeapBeats * mpb;
+                int iLeap = Mathf.Clamp(Mathf.RoundToInt((dLeap - d0) / step), 2, n - 2);
+                int iHit = Mathf.Clamp(Mathf.RoundToInt((dHit - d0) / step), iLeap + 1, n - 1);
+                int m = iLeap + 1;   // 먼 줄 칸 수 (0..iLeap)
+
+                // 옆 거리 고르기
+                List<Vector3> bestPts = null; float?[] bestYs = null; float bestL = 0f, bestScore = -9f;
+                for (float L = GameConfig.Map.ChaseFarLateralMin; L <= GameConfig.Map.ChaseFarLateralMax + 1e-3f; L += GameConfig.Map.ChaseFarLateralStep)
+                {
+                    // 경로를 옮긴 선 (안쪽 모퉁이에서 뒤로 가는 점은 버림)
+                    var raw = new List<Vector3>();
+                    Vector3 last = Vector3.zero;
+                    for (int i = 0; i < m; i++)
+                    {
+                        var pt = MapLayout.PointAt(d0 + i * step, out var fwd);
+                        var q = pt + MapLayout.RightOf(fwd) * (side * L); q.y = 0f;
+                        if (raw.Count > 0 && Vector3.Dot(q - last, fwd) < 0.05f) continue;
+                        raw.Add(q); last = q;
+                    }
+                    if (raw.Count < 2) continue;
+                    float len = 0f;
+                    for (int i = 1; i < raw.Count; i++) len += Vector3.Distance(raw[i - 1], raw[i]);
+                    float stretch = len / Mathf.Max(1f, (m - 1) * step);
+                    var pts = Resample(raw, m);   // 길이를 고르게 m칸으로 (일정한 속도)
+                    var ys = new float?[m];
+                    int hits = 0;
+                    for (int i = 0; i < m; i++) { ys[i] = FarSurface(pts[i]); if (ys[i].HasValue) hits++; }
+                    float cover = hits / (float)m;
+                    float score = cover - (stretch > GameConfig.Map.ChaseFarMaxStretch ? 1f : 0f);
+                    if (score > bestScore + 1e-3f) { bestScore = score; bestPts = pts; bestYs = ys; bestL = L; }
+                    if (cover >= 0.9f && stretch <= GameConfig.Map.ChaseFarMaxStretch) break;
+                }
+                if (bestPts == null) return;
+
+                var wx = new float[n]; var wz = new float[n]; var lat = new float[n];
+                var ysOut = (float[])prop.chaseY.Clone();
+                var gapOut = (bool[])prop.chaseGap.Clone();
+                // 먼 줄 높이: 면이 없는 칸은 앞뒤를 잇고 뛰어넘음
+                var fy = new float[m]; var fg = new bool[m];
+                for (int i = 0; i < m; i++)
+                {
+                    if (bestYs[i].HasValue) { fy[i] = bestYs[i].Value; continue; }
+                    fg[i] = true;
+                    int a = i - 1; while (a >= 0 && !bestYs[a].HasValue) a--;
+                    int b = i + 1; while (b < m && !bestYs[b].HasValue) b++;
+                    fy[i] = a >= 0 && b < m ? Mathf.Lerp(bestYs[a].Value, bestYs[b].Value, (i - a) / (float)(b - a)) : a >= 0 ? bestYs[a].Value : b < m ? bestYs[b].Value : 0f;
+                }
+                for (int i = 0; i < m; i++)
+                {
+                    if (!fg[i]) continue;
+                    int a = i; while (a > 0 && fg[a - 1]) a--;
+                    int b = i; while (b < m - 1 && fg[b + 1]) b++;
+                    float glen = (b - a + 2) * step;
+                    float k = (i - a + 1) / (float)(b - a + 2);
+                    fy[i] += Mathf.Min(1.5f, glen * 0.35f) * 4f * k * (1f - k);
+                }
+                // 높이가 1 m 넘게 바뀌는 곳(지붕 ↔ 골목)은 앞뒤 3칸에 걸쳐 뛰어 오르내림
+                for (int i = 0; i < m - 1; i++)
+                {
+                    if (Mathf.Abs(fy[i + 1] - fy[i]) <= 1f) continue;
+                    int a = Mathf.Max(0, i - 3), b = Mathf.Min(m - 1, i + 4);
+                    float y0 = fy[a], y1 = fy[b];
+                    for (int j = a + 1; j < b; j++)
+                    {
+                        float k = (j - a) / (float)(b - a);
+                        fy[j] = Mathf.Max(fy[j], Mathf.Lerp(y0, y1, k) + 0.6f * 4f * k * (1f - k));
+                        fg[j] = true;
+                    }
+                    i = b - 1;
+                }
+                for (int i = 0; i < m; i++)
+                {
+                    wx[i] = bestPts[i].x; wz[i] = bestPts[i].z; ysOut[i] = fy[i]; gapOut[i] = fg[i];
+                    var pt = MapLayout.PointAt(d0 + i * step, out var fwd);
+                    lat[i] = Mathf.Abs(Vector3.Dot(bestPts[i] - new Vector3(pt.x, 0f, pt.z), MapLayout.RightOf(fwd)));
+                }
+                // 공격 뒤: 플레이어 곁 (가까운 줄, 높이는 위에서 잰 그대로)
+                for (int i = iHit; i < n; i++)
+                {
+                    var pt = MapLayout.PointAt(d0 + i * step, out var fwd);
+                    var q = pt + MapLayout.RightOf(fwd) * (side * nearLat);
+                    wx[i] = q.x; wz[i] = q.z; lat[i] = nearLat;
+                }
+                // 뛰어들기: 먼 줄 끝 → 공격 자리, 사이 면을 넘는 포물선
+                var from = new Vector3(wx[iLeap], ysOut[iLeap], wz[iLeap]);
+                var to = new Vector3(wx[iHit], ysOut[iHit], wz[iHit]);
+                float arc = GameConfig.Map.ChaseLeapMinArc;
+                for (int s2 = 1; s2 < 24; s2++)
+                {
+                    float k = s2 / 24f;
+                    var q = Vector3.Lerp(from, to, k);
+                    var hs = HeightsAt(q).Where(h => h.y < 12f && !IsNotGround(Owner(h.owner))).ToList();
+                    if (hs.Count == 0) continue;
+                    // 여유는 가운데에서 다 주고 뛰는 자리·내리는 자리 쪽으로 줄인다 (발 딛은 지붕 자체를 넘으려고 포물선이 커지지 않게)
+                    float need = hs.Max(h => h.y) + GameConfig.Map.ChaseLeapClearance * Mathf.Clamp01(k * (1f - k) * 8f) - q.y;
+                    if (need > 0f) arc = Mathf.Max(arc, need / (4f * k * (1f - k)));
+                }
+                arc = Mathf.Min(arc, GameConfig.Map.ChaseLeapMaxArc);
+                for (int i = iLeap + 1; i < iHit; i++)
+                {
+                    float k = (i - iLeap) / (float)(iHit - iLeap);
+                    var q = Vector3.Lerp(from, to, k);
+                    wx[i] = q.x; wz[i] = q.z;
+                    ysOut[i] = q.y + arc * 4f * k * (1f - k);
+                    gapOut[i] = true;
+                    var pt = MapLayout.PointAt(d0 + i * step, out var fwd);
+                    lat[i] = Mathf.Abs(Vector3.Dot(new Vector3(q.x - pt.x, 0f, q.z - pt.z), MapLayout.RightOf(fwd)));
+                }
+                prop.chaseWX = wx; prop.chaseWZ = wz; prop.chaseX = lat; prop.chaseY = ysOut; prop.chaseGap = gapOut;
+                prop.chaseLeapD = d0 + iLeap * step; prop.chaseHitD = d0 + iHit * step;
+                Debug.Log($"[SceneBuilder] 추격 먼 줄 {prop.name}: 옆 {bestL:0} m, 면 {bestYs.Count(y => y.HasValue)}/{m}, 뛰어들기 {iLeap}→{iHit}, 포물선 {arc:0.0} m");
             }
 
             // 작업 R07 후속: 돌진 적 — 옆 거리는 집 자리 그대로, 길을 따라 보이는 면 높이 (모자란 칸은 앞뒤를 잇고, 높이가 갑자기 바뀌면 플레이어 경로에 맞춰 오름)
@@ -457,6 +588,23 @@ namespace RhythmActionGame.EditorTools
                 var hs = HeightsAt(q).Where(h => Mathf.Abs(h.y - homeY) < 1.5f && !IsNotGround(Owner(h.owner))).ToList();
                 prop.ambushEndY = hs.Count > 0 ? hs.OrderBy(h => Mathf.Abs(h.y - homeY)).First().y - prop.transform.position.y : prop.enemy.localPosition.y;
             }
+        }
+
+        /// <summary>작업 R18: 꺾인 선을 길이가 고른 count개 점으로 다시 나눈다.</summary>
+        static List<Vector3> Resample(List<Vector3> pts, int count)
+        {
+            var cum = new float[pts.Count];
+            for (int i = 1; i < pts.Count; i++) cum[i] = cum[i - 1] + Vector3.Distance(pts[i - 1], pts[i]);
+            var o = new List<Vector3>(count);
+            int j = 0;
+            for (int i = 0; i < count; i++)
+            {
+                float s = cum[cum.Length - 1] * i / Mathf.Max(1, count - 1);
+                while (j < pts.Count - 2 && cum[j + 1] < s) j++;
+                float seg = cum[j + 1] - cum[j];
+                o.Add(Vector3.Lerp(pts[j], pts[j + 1], seg > 1e-5f ? (s - cum[j]) / seg : 0f));
+            }
+            return o;
         }
 
         /// <summary>달리는 발판으로 쓰지 않는 장식 (나무 꼭대기·등·깃발·빨랫줄 등).</summary>
