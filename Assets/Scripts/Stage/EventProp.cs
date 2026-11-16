@@ -49,6 +49,17 @@ namespace RhythmActionGame
 
         /// <summary>작업 R07: 매복 적이 튀어나온 끝자리(길 쪽 1 m)의 발 높이 (로컬). 지붕 비탈에서 발이 지붕 속으로 묻히지 않게. NaN이면 집 높이.</summary>
         public float ambushEndY = float.NaN;
+        /// <summary>
+        /// 작업 R18b (GDD-beta B19.4): 매복 적이 판정 ChargeSprint(2)박 전까지 숨어 있는 자리 (로컬, 빌드 때 보이는 메시로 고름: 담·집 모퉁이 너머)와
+        /// 숨은 자리 → 튀어나온 끝자리 길의 발 높이 (로컬, 고른 간격). hasAmbushHide가 false면 예전처럼 옆 3.2 m에서 튀어나옴.
+        /// </summary>
+        public bool hasAmbushHide;
+        public Vector3 ambushHide;
+        public float[] ambushPathY = new float[0];
+        /// <summary>작업 R18b: 숨은 자리가 아래(골목·담 밑)라 처마·담을 넘어 뛰어오름 (발이 면에서 떨어짐 — ChaseHopping으로 알림).</summary>
+        public bool ambushJump;
+        /// <summary>작업 R18b: 매복 적의 지금 단계 (테스트용): Hidden, Out.</summary>
+        public string AmbushPhase { get; private set; } = "";
 
         /// <summary>추격 적 프로필 범위 (사건 시작 기준 박자): 소품이 움직이는 범위 전체.</summary>
         public const float ChaseBeatsBefore = 31f, ChaseBeatsAfter = 10f;   // EventPropDirector가 앞 30박·뒤 8박 동안 움직인다
@@ -283,6 +294,29 @@ namespace RhythmActionGame
                 case EventCatalog.Ambush:
                     // 키 반대쪽 담 뒤에서 판정 1박 전에 튀어나옴
                     float side = slotSides.Length > 0 ? slotSides[0] : 1f;
+                    if (hasAmbushHide)
+                    {
+                        // 작업 R18b: 판정 AmbushOutBeats박 전까지 숨은 자리에서 길 반대쪽을 보고 있다가, 뛰쳐나와 판정 순간 끝자리 (길 쪽 1 m)
+                        var end = new Vector3(-side * 1.0f, float.IsNaN(ambushEndY) ? enemyHome.y : ambushEndY, slotZ(0));
+                        float outT = GameConfig.Map.AmbushOutBeats;
+                        float k = Mathf.Clamp01((float)((t - (hitT - outT)) / (outT - 0.25f)));
+                        AmbushPhase = k <= 0f ? "Hidden" : "Out";
+                        ChaseHopping = ambushJump && k > 0f && k < 1f;   // 뛰어오르는 중 (발밑 검사에서 뺌)
+                        float sk = k * k * (3f - 2f * k) * 0.3f + k * 0.7f;
+                        p = Vector3.Lerp(ambushHide, end, sk);
+                        if (ambushPathY != null && ambushPathY.Length > 1)
+                        {
+                            float f = sk * (ambushPathY.Length - 1);
+                            int i = Mathf.Min((int)f, ambushPathY.Length - 2);
+                            p.y = Mathf.Lerp(ambushPathY[i], ambushPathY[i + 1], f - i);
+                        }
+                        var runDir = end - ambushHide; runDir.y = 0f;
+                        var toPath = new Vector3(0f, 0f, slotZ(0)) - p; toPath.y = 0f;
+                        var lookDir = k <= 0f ? -runDir : k < 0.8f ? runDir : Vector3.Lerp(runDir.normalized, toPath.normalized, (k - 0.8f) / 0.2f);
+                        q = lookDir.sqrMagnitude > 1e-4f ? Quaternion.LookRotation(lookDir.normalized) : enemyHomeRot;
+                        if (u > 0 && r == Judgement.Perfect) { q = q * Quaternion.Euler(0, 0, side * Mathf.Min(90f, u * 180f)); EnemyDown = true; }
+                        break;
+                    }
                     float pop = Mathf.Clamp01((float)(t - (hitT - 1.0)));
                     p = new Vector3(-side * Mathf.Lerp(3.2f, 1.0f, pop), float.IsNaN(ambushEndY) ? enemyHome.y : Mathf.Lerp(enemyHome.y, ambushEndY, pop), slotZ(0));
                     if (u > 0 && r == Judgement.Perfect) { q = enemyHomeRot * Quaternion.Euler(0, 0, side * Mathf.Min(90f, u * 180f)); EnemyDown = true; }

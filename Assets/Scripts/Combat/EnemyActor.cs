@@ -23,6 +23,8 @@ namespace RhythmActionGame
 
         public string kind = "sword";
         public bool onRoof;
+        /// <summary>작업 R18b: 이 적과 싸우는 전투 사건의 달리기 박 (플레이어가 멈추는 박). 모르면 −1.</summary>
+        public float encounterBeat = -1f;
         /// <summary>작업 R07: 지붕 위 적이 발차기에 떨어질 자리 (빌드 때 보이는 메시로 고른 가장 낮은 면: 골목·마당·낮은 지붕). hasKickLanding이 false면 실행 중에 고른다.</summary>
         public bool hasKickLanding;
         public Vector3 kickLanding;

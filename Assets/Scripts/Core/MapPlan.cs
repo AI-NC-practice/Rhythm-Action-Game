@@ -90,6 +90,14 @@ namespace RhythmActionGame
                     int side = ks == 0 ? 1 : -ks;   // 적은 키 반대쪽 담 뒤에서 나온다 (EventProps)
                     res.Fixed.Add(new Fixed { D0 = d + 3f, D1 = d + 9f, Side = side, Module = "door", Why = "매복 포졸이 나오는 대문" });
                 }
+                // 작업 R18b: 궁궐 담 위(560~625 m) 매복 — 담 밑에 기와집 한 채, 끝자리 바로 앞에서 끝남 (포졸이 집 앞쪽 모퉁이 너머에 숨었다가 담 위로 뛰어오름)
+                if (e.IsEnemy && e.approach == EventCatalog.Ambush && d >= 560f && d < 625f)
+                {
+                    var slots = EventCatalog.SlotsFor(e);
+                    int ks = slots.Count > 0 && slots[0].Key.HasValue ? KeySide(slots[0].Key.Value) : 1;
+                    int side = ks == 0 ? 1 : -ks;
+                    res.Fixed.Add(new Fixed { D0 = d - 3f, D1 = d + 6f, Side = side, Module = "giwa_s", Why = "매복 포졸이 숨는 집 (궁궐 담 밑, 포졸은 집 앞쪽 모퉁이 너머)" });
+                }
                 if (e.IsObstacle && e.kind == "closing_gate")
                     res.Fixed.Add(new Fixed { D0 = d + 3f, D1 = d + 7f, Side = 0, Module = "palace_gate", Why = "길을 가로지르는 궁궐 문" });
                 if (e.IsForeshadow)
@@ -115,7 +123,13 @@ namespace RhythmActionGame
                 foreach (int side in new[] { -1, 1 })
                 {
                     var pal = side < 0 ? z.Left : z.Right;
-                    if (pal.Length == 0) continue;
+                    if (pal.Length == 0)
+                    {
+                        // 작업 R18b: 길가 건물 줄이 없는 구간(궁궐 담 위)에도 사건이 요구한 집은 놓는다 (담 밑, 길에서 HideHouseOffset m)
+                        foreach (var f in res.Fixed.Where(f => f.Module == "giwa_s" && f.Side == side && f.D0 >= z.Start && f.D0 < z.End))
+                            res.Items.Add(new Placement { Kind = Kind.Building, Id = f.Module, S0 = f.D0, S1 = f.D1, Side = side, Off = GameConfig.Map.HideHouseOffset, Row = 1, Door = false, Support = true });
+                        continue;
+                    }
                     float s = z.Start;
                     var h = hist[side];
                     while (s < z.End - 2f)
@@ -124,7 +138,7 @@ namespace RhythmActionGame
                         if (f != null && s >= f.D0 - 0.01f)
                         {
                             if (f.Module == "wall_run") { s = f.D1; h.Add("fixed"); continue; }
-                            if (f.Module == "door" || f.Module == "sijeon" || f.Module == "wall_stone")
+                            if (f.Module == "door" || f.Module == "sijeon" || f.Module == "wall_stone" || f.Module == "giwa_s")
                             {
                                 string did = f.Module == "door"
                                     ? (z.Start >= 140f ? new[] { "giwa_gate", "giwa_s" } : new[] { "choga", "choga_L" }).First(m => h.Count == 0 || h[h.Count - 1] != m)

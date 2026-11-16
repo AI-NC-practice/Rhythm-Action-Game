@@ -70,9 +70,12 @@ namespace RhythmActionGame.Tests
             Assert.AreEqual(5, dir.surroundEnemies.Length);
             Assert.AreEqual(3, dir.surroundEnemies.Count(e => e.kind == "sword"), "칼 3");
             Assert.AreEqual(2, dir.surroundEnemies.Count(e => e.kind == "spear"), "창 2");
+            // 작업 R18b: 적은 숨은 자리에서 달려와 멈춤 박에 전투 자리에 선다 → 전투 자리(EnemyApproach.homePos)가 반지름 4 m
             foreach (var e in dir.surroundEnemies)
             {
-                var d = e.transform.position - stop; d.y = 0;
+                var ap = e.GetComponent<EnemyApproach>();
+                var home = ap != null ? ap.homePos : e.transform.position;
+                var d = home - stop; d.y = 0;
                 Assert.AreEqual(4f, d.magnitude, 0.01f, "반지름 4 m");
             }
         }

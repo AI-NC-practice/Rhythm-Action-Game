@@ -1035,6 +1035,27 @@ namespace RhythmActionGame
             public const float ChargeRampBeats = 4f;
             public const float ChargeSprintBeats = 2f;
 
+            // ----- 작업 R18b (GDD-beta B19.3·B19.4): 숨어 있다가 나오는 적 -----
+            /// <summary>매복 적이 판정 몇 박 전에 숨은 자리에서 뛰쳐나오는지 (박).</summary>
+            public const float AmbushOutBeats = 2f;
+            /// <summary>매복 적 숨은 자리 ↔ 끝자리 거리 범위 (m).</summary>
+            public const float AmbushHideMin = 2.5f;
+            public const float AmbushHideMax = 7.5f;
+            /// <summary>뛰어오르는 매복(지붕·담 밑에서)의 숨은 자리 거리 상한 (m).</summary>
+            public const float AmbushHideMaxJump = 11f;
+            /// <summary>궁궐 담 위 매복 포졸이 숨는 집의 앞면 거리 (m, 길 가운데에서). 담 반폭 + 여유.</summary>
+            public const float HideHouseOffset = 3.0f;
+            /// <summary>땅 위 전투 적: 플레이어가 멈추기 몇 박 전에 알아채는지 (기본, 멀면 늘림), 알아채는 동작 길이(박), 멈춤 몇 박 전에 전투 자리에 도착하는지.</summary>
+            public const float ApproachNoticeLead = 4f;
+            public const float ApproachNoticeBeats = 0.5f;
+            public const float ApproachArriveBefore = 0.25f;
+            /// <summary>전투 적이 숨은 자리에서 달려오는 속도 상한 (m/박)과 알아채기 박 상한 (먼 숨은 자리).</summary>
+            public const float ApproachRunSpeed = 3.6f;
+            public const float ApproachNoticeLeadMax = 7f;
+            /// <summary>숨은 자리를 찾을 때 플레이어 눈 높이 (m)와 시야를 확인하는 범위 (멈춤·판정 몇 박 전부터).</summary>
+            public const float HideEyeHeight = 1.6f;
+            public const float HideCheckBeats = 16f;
+
             /// <summary>먼 배경 파노라마 (R02 그림 6장을 이어 붙인 한 장, 둘레를 한 번만 돈다).</summary>
             public const float BackdropTopFade = 0.55f;
 

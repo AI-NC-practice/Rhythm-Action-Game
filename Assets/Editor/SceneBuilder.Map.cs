@@ -588,6 +588,240 @@ namespace RhythmActionGame.EditorTools
                 var hs = HeightsAt(q).Where(h => Mathf.Abs(h.y - homeY) < 1.5f && !IsNotGround(Owner(h.owner))).ToList();
                 prop.ambushEndY = hs.Count > 0 ? hs.OrderBy(h => Mathf.Abs(h.y - homeY)).First().y - prop.transform.position.y : prop.enemy.localPosition.y;
             }
+
+            // 작업 R18b (GDD-beta B19.3·B19.4): 매복 적·땅 위 전투 적이 숨어 있을 자리 — 플레이어 눈(경로 + 1.6 m)에서 보이는 메시에 가려지고,
+            // 나올 자리까지 막힘 없이 달려갈 수 있는 가장 가까운 곳. 보이는 메시로 임시 충돌체를 만들어 시선을 쏜다.
+            string hideFail = "";
+            var rayRoot = new GameObject("R18b_HideRays");
+            const int rayLayer = 30;
+            foreach (var s in surfaces)
+            {
+                var m = new Mesh { indexFormat = s.v.Length > 65000 ? IndexFormat.UInt32 : IndexFormat.UInt16 };
+                m.vertices = s.v; m.triangles = s.tri;
+                var go = new GameObject("ray") { layer = rayLayer };
+                go.transform.SetParent(rayRoot.transform, false);
+                go.AddComponent<MeshCollider>().sharedMesh = m;
+            }
+            bool oldBack = Physics.queriesHitBackfaces;
+            Physics.queriesHitBackfaces = true;
+            Physics.SyncTransforms();
+            int mask = 1 << rayLayer;
+            bool Blocked(Vector3 a, Vector3 b) => Physics.Linecast(a, b, mask, QueryTriggerInteraction.Ignore);
+            // 발 높이: 기준 높이 근처(−3 ~ +1.5 m)의 가장 가까운 보이는 면 (나무·등 빼고), 머리 위 2 m 여유
+            float? Ground(Vector3 q, float refY)
+            {
+                var all = HeightsAt(q);
+                var hs = all.Where(h => h.y >= refY - 3f && h.y <= refY + 1.5f && !IsNotGround(Owner(h.owner))).ToList();
+                if (hs.Count == 0) return null;
+                float y = hs.OrderBy(h => Mathf.Abs(h.y - refY)).First().y;
+                if (all.Any(h => h.y > y + 0.3f && h.y < y + 2.0f)) return null;
+                return y;
+            }
+            // 숨은 자리 → 나올 자리 길: 0.5 m마다 발 높이가 있고 0.6 m 넘게 갑자기 바뀌지 않으며, 무릎·가슴 높이에 막힌 것이 없음
+            float[] ClearPath(Vector3 from, Vector3 to)
+            {
+                float len = new Vector2(to.x - from.x, to.z - from.z).magnitude;
+                int n = Mathf.Max(2, Mathf.CeilToInt(len / 0.5f) + 1);
+                var ys = new float[n];
+                for (int i = 0; i < n; i++)
+                {
+                    float k = i / (float)(n - 1);
+                    var q = Vector3.Lerp(from, to, k);
+                    var g = Ground(q, i == 0 ? from.y : ys[i - 1]);
+                    if (!g.HasValue) return null;
+                    ys[i] = g.Value;
+                    if (i > 0 && Mathf.Abs(ys[i] - ys[i - 1]) > 0.6f) return null;
+                }
+                ys[0] = from.y; ys[n - 1] = to.y;
+                for (int i = 1; i < n; i++)
+                {
+                    var a = Vector3.Lerp(from, to, (i - 1) / (float)(n - 1)); a.y = ys[i - 1];
+                    var b = Vector3.Lerp(from, to, i / (float)(n - 1)); b.y = ys[i];
+                    foreach (float h in new[] { 0.6f, 1.4f })
+                        if (Blocked(a + Vector3.up * h, b + Vector3.up * h) || Blocked(b + Vector3.up * h, a + Vector3.up * h)) return null;
+                }
+                return ys;
+            }
+            // 플레이어 눈 자리들 (경로 beat0~beat1, 0.5박 간격) 중 이 자리가 보이는 수: 화각(앞 ±55°) 안이고 70 m 안에서 몸 다섯 점 중 하나라도 안 가려짐
+            List<(Vector3 eye, Vector3 fwd)> Eyes(float beat0, float beat1)
+            {
+                var list = new List<(Vector3, Vector3)>();
+                for (float b = Mathf.Max(0f, beat0); b <= beat1 + 1e-3f; b += 0.5f)
+                {
+                    var pt = MapLayout.PointAt(b * GameConfig.MetersPerBeat, out var fwd);
+                    list.Add((pt + Vector3.up * GameConfig.Map.HideEyeHeight, fwd));
+                }
+                return list;
+            }
+            int SeenCount(Vector3 foot, List<(Vector3 eye, Vector3 fwd)> eyes)
+            {
+                int seen = 0;
+                foreach (var (eye, fwd) in eyes)
+                {
+                    var to = foot + Vector3.up * 1.1f - eye;
+                    if (to.magnitude > 70f || Vector3.Angle(Vector3.ProjectOnPlane(to, Vector3.up), fwd) > 55f) continue;
+                    var side = Vector3.Cross(Vector3.up, to).normalized * 0.3f;
+                    var eyeSide = Vector3.Cross(Vector3.up, fwd).normalized * 0.6f;
+                    bool any = false;
+                    // 눈 자리 여럿 (카메라 높이·옆 흔들림·오르내리는 동작 여유): 하나라도 보이면 보임
+                    foreach (var e2 in new[] { eye, eye + Vector3.up * 0.6f, eye - Vector3.up * 0.6f, eye + eyeSide, eye - eyeSide })
+                    {
+                        foreach (var t in new[] { foot + Vector3.up * 0.5f, foot + Vector3.up * 1.1f, foot + Vector3.up * 1.7f, foot + Vector3.up * 1.2f + side, foot + Vector3.up * 1.2f - side })
+                            if (!Blocked(e2, t)) { any = true; break; }
+                        if (any) break;
+                    }
+                    if (any) seen++;
+                }
+                return seen;
+            }
+            // 뛰어 넘는 길 (작업 R18b 둘째 방법): 골목·담 뒤에서 처마·담을 넘어 뛰어오름. 사이 면을 넘는 포물선, 몸(발·가슴·머리)이 막히지 않음
+            float[] JumpPath(Vector3 from, Vector3 to)
+            {
+                const int n = 16;
+                float arc = 0.6f;
+                for (int i = 1; i < n; i++)
+                {
+                    float k = i / (float)n;
+                    var q = Vector3.Lerp(from, to, k);
+                    var hs = HeightsAt(q).Where(h => h.y < q.y + 8f && !IsNotGround(Owner(h.owner))).ToList();
+                    if (hs.Count == 0) continue;
+                    float need = hs.Max(h => h.y) + 0.4f - q.y;
+                    if (need > 0f) arc = Mathf.Max(arc, need / (4f * k * (1f - k)));
+                }
+                if (arc > 7f) return null;
+                var ys = new float[n + 1];
+                for (int i = 0; i <= n; i++) { float k = i / (float)n; ys[i] = Mathf.Lerp(from.y, to.y, k) + arc * 4f * k * (1f - k); }
+                for (int i = 1; i <= n; i++)
+                {
+                    var a = Vector3.Lerp(from, to, (i - 1) / (float)n); a.y = ys[i - 1];
+                    var b = Vector3.Lerp(from, to, i / (float)n); b.y = ys[i];
+                    foreach (float h in new[] { 0.3f, 1.0f, 1.6f })
+                        if (Blocked(a + Vector3.up * h, b + Vector3.up * h) || Blocked(b + Vector3.up * h, a + Vector3.up * h)) return null;
+                }
+                return ys;
+            }
+            // 나오는 모습이 화면에 들어옴: revealEyes 중 하나에서 나오는 길 40~85% 자리의 몸(가슴)이 화각(앞 ±35°, 위아래 ±25°) 안이고 가려지지 않음
+            bool Revealed(Vector3 from, Vector3 to, float[] ys, List<(Vector3 eye, Vector3 fwd)> revealEyes, float enemySide)
+            {
+                if (revealEyes == null) return true;
+                foreach (var (eye, fwd) in revealEyes)
+                    foreach (float k in new[] { 0.15f, 0.3f, 0.45f, 0.6f, 0.75f, 0.85f })
+                    {
+                        var q = Vector3.Lerp(from, to, k);
+                        float f = k * (ys.Length - 1); int i = Mathf.Min((int)f, ys.Length - 2);
+                        q.y = Mathf.Lerp(ys[i], ys[i + 1], f - i) + 1.1f;
+                        var d = q - eye;
+                        if (Vector3.Angle(Vector3.ProjectOnPlane(d, Vector3.up), fwd) > 35f || Mathf.Abs(Vector3.SignedAngle(Vector3.ProjectOnPlane(d, Vector3.up), d, Vector3.Cross(d, Vector3.up))) > 25f) continue;   // 카메라가 길 앞을 미리 보며 20°쯤 돌고 10°쯤 숙이므로 좁게
+                        if (!Blocked(eye, q) && !Blocked(eye - Vector3.up * 0.8f, q)) return true;   // 낮은 눈(뛰어내리는 중)에서도 보여야 함
+                    }
+                return false;
+            }
+            (Vector3 pos, float[] ys, bool jump)? FindHide(Vector3 end, Vector3 fwd, float sideSign, float minD, float maxD, List<(Vector3 eye, Vector3 fwd)> eyes, bool anyDirection, bool allowJump = false, List<(Vector3 eye, Vector3 fwd)> revealEyes = null)
+            {
+                var r1 = FindHideOnce(end, fwd, sideSign, minD, maxD, eyes, anyDirection, false, revealEyes);
+                if (r1.HasValue || !allowJump) return r1;
+                return FindHideOnce(end, fwd, sideSign, minD, Mathf.Max(maxD, GameConfig.Map.AmbushHideMaxJump), eyes, anyDirection, true, revealEyes);
+            }
+            (Vector3 pos, float[] ys, bool jump)? FindHideOnce(Vector3 end, Vector3 fwd, float sideSign, float minD, float maxD, List<(Vector3 eye, Vector3 fwd)> eyes, bool anyDirection, bool jump, List<(Vector3 eye, Vector3 fwd)> revealEyes)
+            {
+                int noGround = 0, seenN = 0, blockedN = 0, hiddenOut = 0;
+                var right = Vector3.Cross(Vector3.up, fwd).normalized;
+                var cands = new List<Vector3>();
+                if (anyDirection)
+                    for (float r = minD; r <= maxD + 1e-3f; r += 1f)
+                        for (float a = 0f; a < 360f; a += 15f)
+                            cands.Add(end + Quaternion.AngleAxis(a, Vector3.up) * fwd * r);
+                else
+                    for (float l = 1.5f; l <= maxD + 1e-3f; l += 0.75f)
+                        for (float z = 1f; z <= 8f; z += 1f)   // 끝자리보다 앞 (플레이어 쪽으로 달려 나와 화면에 들어옴)
+                            cands.Add(end + right * (sideSign * l) + fwd * z);
+                // 매복(나오는 모습을 봐야 함)은 판정 2박 전 눈에서 가장 앞쪽(화각 가운데에 가까운) 자리부터, 전투 적은 가장 가까운 자리부터
+                var eye0 = revealEyes != null && revealEyes.Count > 0 ? revealEyes[0] : (end, fwd);
+                IEnumerable<Vector3> ordered = revealEyes != null
+                    ? cands.OrderBy(c => Mathf.Round(Vector3.Angle(Vector3.ProjectOnPlane(c - eye0.Item1, Vector3.up), eye0.Item2) / 5f)).ThenBy(c => (c - end).sqrMagnitude)
+                    : cands.OrderBy(c => (c - end).sqrMagnitude);
+                foreach (var c in ordered)
+                {
+                    float d = new Vector2(c.x - end.x, c.z - end.z).magnitude;
+                    if (d < minD || d > maxD) continue;
+                    float? g;
+                    if (!jump) g = Ground(c, end.y);
+                    else
+                    {
+                        // 아래(골목·담 밑)나 담 너머의 면
+                        var all = HeightsAt(c);
+                        var hs = all.Where(h => h.y >= Mathf.Max(end.y - 7f, -0.05f) && h.y <= end.y + 0.5f && !IsNotGround(Owner(h.owner))).ToList();
+                        g = hs.Count > 0 ? hs.Min(h => h.y) : (float?)null;   // 가장 낮은 면 (지붕 위면 골목, 땅이면 담 너머 마당)
+                        if (g.HasValue && all.Any(h => h.y > g.Value + 0.3f && (h.y < g.Value + 2.0f || (h.y < g.Value + 8.0f && h.y < end.y - 0.5f)))) g = null;   // 머리 위가 트임 (집 안이 아님). 뛰어오를 지붕·담의 처마 밑은 됨
+                    }
+                    if (!g.HasValue) { noGround++; continue; }
+                    var foot = new Vector3(c.x, g.Value, c.z);
+                    if (SeenCount(foot, eyes) > 1) { seenN++; continue; }
+                    var ys = jump ? JumpPath(foot, end) : ClearPath(foot, end);
+                    if (ys == null) { blockedN++; continue; }
+                    if (!Revealed(foot, end, ys, revealEyes, sideSign)) { hiddenOut++; continue; }
+                    return (foot, ys, jump);
+                }
+                hideFail = $"{(jump ? "뛰기" : "걷기")}: 면 없음 {noGround}, 보임 {seenN}, 길 막힘 {blockedN}, 나오는 모습 안 보임 {hiddenOut}";
+                return null;
+            }
+
+            int ambushOk = 0, ambushAll = 0;
+            foreach (var prop in eventProps.GetComponentsInChildren<EventProp>(true))
+            {
+                string how = prop.companion != "" ? prop.companion : prop.kind;
+                if (how != EventCatalog.Ambush || prop.enemy == null) continue;
+                ambushAll++;
+                float side = prop.slotSides.Length > 0 ? prop.slotSides[0] : 1f;
+                float slot = prop.slotOffsets.Length > 0 ? prop.slotOffsets[0] : 2f;
+                float z = (slot - prop.beats * 0.5f) * GameConfig.MetersPerBeat;
+                var endLocal = new Vector3(-side * 1.0f, float.IsNaN(prop.ambushEndY) ? prop.enemy.localPosition.y : prop.ambushEndY, z);
+                var end = prop.transform.TransformPoint(endLocal);
+                float hitBeat = prop.runBeat + slot;
+                var eyes = Eyes(hitBeat - GameConfig.Map.HideCheckBeats, hitBeat - GameConfig.Map.AmbushOutBeats);
+                var reveal = Eyes(hitBeat - 1.75f, hitBeat - 0.75f);
+                var hide = FindHide(end, prop.transform.forward, -side, GameConfig.Map.AmbushHideMin, GameConfig.Map.AmbushHideMax, eyes, false, true, reveal);
+                if (!hide.HasValue) { prop.hasAmbushHide = false; Debug.LogWarning($"[SceneBuilder] 매복 숨을 자리 없음 {prop.name} (끝자리 {end}) — {hideFail}"); continue; }
+                ambushOk++;
+                prop.hasAmbushHide = true;
+                prop.ambushHide = prop.transform.InverseTransformPoint(hide.Value.pos);
+                float baseY = prop.transform.position.y;
+                prop.ambushPathY = hide.Value.ys.Select(y => y - baseY).ToArray();
+                prop.ambushJump = hide.Value.jump;
+                prop.enemy.localPosition = prop.ambushHide;   // 처음 자리 = 숨은 자리 (불러온 순간에도 보이지 않게)
+                Debug.Log($"[SceneBuilder] 매복 숨은 자리 {prop.name}: {hide.Value.pos} → 끝자리 {end} ({Vector3.Distance(hide.Value.pos, end):0.0} m{(hide.Value.jump ? $", 뛰어오름 최고 {hide.Value.ys.Max() - Mathf.Max(hide.Value.pos.y, end.y):0.0} m" : "")})");
+            }
+
+            int approachOk = 0, approachAll = 0;
+            foreach (var a in enemies.Normal.Where(x => !x.onRoof).Concat(enemies.Surround))
+            {
+                if (a.encounterBeat < 0f) continue;
+                approachAll++;
+                var home = a.transform.position;
+                var eyes = Eyes(a.encounterBeat - GameConfig.Map.HideCheckBeats, a.encounterBeat - GameConfig.Map.ApproachNoticeLead);
+                float maxD = GameConfig.Map.ApproachRunSpeed * (GameConfig.Map.ApproachNoticeLeadMax - GameConfig.Map.ApproachNoticeBeats - GameConfig.Map.ApproachArriveBefore);
+                MapLayout.PointAt(a.encounterBeat * GameConfig.MetersPerBeat, out var fwd);
+                var hide = FindHide(home, fwd, 1f, 3f, maxD, eyes, true);
+                var old = a.GetComponent<EnemyApproach>();
+                if (old != null) Object.DestroyImmediate(old);
+                if (!hide.HasValue) { Debug.LogWarning($"[SceneBuilder] 전투 적 숨을 자리 없음 {a.name} (자리 {home})"); continue; }
+                float dist = new Vector2(hide.Value.pos.x - home.x, hide.Value.pos.z - home.z).magnitude;
+                float lead = Mathf.Clamp(dist / GameConfig.Map.ApproachRunSpeed + GameConfig.Map.ApproachNoticeBeats + GameConfig.Map.ApproachArriveBefore, GameConfig.Map.ApproachNoticeLead, GameConfig.Map.ApproachNoticeLeadMax);
+                // 알아채는 박이 늦어지면 그만큼 숨어 있는 범위도 다시 확인 (lead가 기본보다 크면 더 이른 박까지만 숨어 있으면 됨 — 이미 확인한 범위 안)
+                var ap = a.gameObject.AddComponent<EnemyApproach>();
+                ap.actor = a;
+                ap.stopBeat = a.encounterBeat;
+                ap.hidePos = hide.Value.pos;
+                ap.pathY = hide.Value.ys;   // 숨은 자리 → 전투 자리 순서
+                ap.homePos = home;
+                ap.homeRot = a.transform.rotation;
+                ap.noticeLead = lead;
+                approachOk++;
+                Debug.Log($"[SceneBuilder] 전투 적 숨은 자리 {a.name}: {hide.Value.pos} → {home} ({dist:0.0} m, 멈춤 {lead:0.0}박 전 알아챔)");
+            }
+            Physics.queriesHitBackfaces = oldBack;
+            Object.DestroyImmediate(rayRoot);
+            Debug.Log($"[SceneBuilder] 숨은 자리: 매복 {ambushOk}/{ambushAll}, 전투 적 {approachOk}/{approachAll}");
         }
 
         /// <summary>작업 R18: 꺾인 선을 길이가 고른 count개 점으로 다시 나눈다.</summary>

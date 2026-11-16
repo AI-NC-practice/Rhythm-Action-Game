@@ -461,12 +461,13 @@ namespace RhythmActionGame.EditorTools
                         float ang = k * 360f / GameConfig.SurroundEnemyCount;
                         var dir = Quaternion.AngleAxis(ang, Vector3.up) * fwd;
                         set.Surround.Add(Enemy(ring, $"Enemy_Surround_{k}_{(sword ? "sword" : "spear")}", sword ? "sword" : "spear", false, stop + dir * GameConfig.SurroundRadius, -dir, 1.75f, sword ? EnemyColorSword : EnemyColorSpear));
+                        set.Surround[set.Surround.Count - 1].encounterBeat = e.runBeat;   // 작업 R18b
                     }
                     continue;
                 }
                 var pos = MapLayout.PointAt(e.Distance + GameConfig.EnemySpawnMeters);   // GDD-beta B13.2: 5 m 앞에서 돌진
                 if (e.IsBoss) set.Boss = Enemy(parent, "Enemy_Boss", "boss", e.onRoof, pos, -fwd, 1.85f, new Color(0.45f, 0.08f, 0.08f));
-                else set.Normal.Add(Enemy(parent, $"Enemy_{i++:00}_{e.kind}", e.kind, e.onRoof, pos, -fwd, 1.75f, e.kind == "spear" ? EnemyColorSpear : EnemyColorSword));
+                else { set.Normal.Add(Enemy(parent, $"Enemy_{i++:00}_{e.kind}", e.kind, e.onRoof, pos, -fwd, 1.75f, e.kind == "spear" ? EnemyColorSpear : EnemyColorSword)); set.Normal[set.Normal.Count - 1].encounterBeat = e.runBeat; }   // 작업 R18b: 전투 박
             }
             return set;
         }
