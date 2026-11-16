@@ -1248,10 +1248,10 @@
                                          "모든 클립이 Humanoid로 임포트되고 player 아바타에 리타깃됨 (임포트 로그로 확인)",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  "사용자 결정(2026-11-11): Mixamo 다운로드는 Claude가 브라우저로 진행하고 로그인만 사용자가 한다. varco3d-asset 9번의 \u0027사용자가 받는다\u0027 규칙보다 우선."
+                      "notes":  "완료(2026-11-16): Mixamo 11개 Without Skin·30fps, Humanoid·player 리타깃 확인. 칼 뺏기는 Standing Disarm Underarm으로 대체. 사용자 결정(2026-11-11): Mixamo 다운로드는 Claude가 브라우저로 진행하고 로그인만 사용자가 한다. varco3d-asset 9번의 \u0027사용자가 받는다\u0027 규칙보다 우선."
                   },
                   {
                       "id":  "T13",

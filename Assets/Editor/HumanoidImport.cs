@@ -71,6 +71,51 @@ namespace RhythmActionGame.EditorTools
             Directory.CreateDirectory("harness/reports");
             File.WriteAllText("harness/reports/humanoid-import.md", report.ToString(), new UTF8Encoding(false));
             AssetDatabase.SaveAssets();
+            ConfigureMixamo();
+        }
+
+        public const string MixamoRoot = "Assets/Art/Animations/Mixamo";
+
+        /// <summary>Mixamo 동작 FBX (작업 T12, Without Skin). 이름순.</summary>
+        public static List<string> MixamoFbx() =>
+            Directory.Exists(MixamoRoot)
+                ? Directory.GetFiles(MixamoRoot, "*.fbx").Select(p => p.Replace('\\', '/')).OrderBy(p => p, System.StringComparer.Ordinal).ToList()
+                : new List<string>();
+
+        /// <summary>
+        /// Mixamo 동작(뼈+동작만)을 Humanoid로 들인다 (작업 T12). 파일마다 아바타를 만들고(mixamorig 뼈),
+        /// Humanoid 근육 공간으로 player(VARCO) 아바타에 리타기팅된다. 한 번짜리 동작이라 반복 없음, 뿌리 고정.
+        /// 결과: "[MixamoImport] ..." 로그와 harness/reports/mixamo-import.md.
+        /// 실행: harness/scripts/unity-exec.ps1 -Method RhythmActionGame.EditorTools.HumanoidImport.ConfigureMixamo
+        /// </summary>
+        [MenuItem("RhythmActionGame/Configure Mixamo Clips")]
+        public static void ConfigureMixamo()
+        {
+            var player = AssetDatabase.LoadAllAssetsAtPath($"{Root}/player/player_forward_run_1.fbx").OfType<Avatar>().FirstOrDefault();
+            var report = new StringBuilder("# Mixamo import report (T12)\n\n");
+            report.Append($"리타깃 대상: player 아바타 valid={(player != null && player.isValid)} human={(player != null && player.isHuman)}\n\n");
+            report.Append("| FBX | avatar valid | human | 뼈 | 클립 | 길이(초) | humanMotion |\n|---|---|---|---|---|---|---|\n");
+            foreach (var path in MixamoFbx())
+            {
+                var imp = (ModelImporter)AssetImporter.GetAtPath(path);
+                imp.animationType = ModelImporterAnimationType.Human;
+                imp.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
+                imp.materialImportMode = ModelImporterMaterialImportMode.None;
+                var clips = imp.defaultClipAnimations;
+                foreach (var c in clips) { c.loopTime = false; c.lockRootRotation = true; c.lockRootHeightY = true; c.lockRootPositionXZ = true; }
+                imp.clipAnimations = clips;
+                imp.SaveAndReimport();
+                var assets = AssetDatabase.LoadAllAssetsAtPath(path);
+                var avatar = assets.OfType<Avatar>().FirstOrDefault();
+                var clip = assets.OfType<AnimationClip>().FirstOrDefault(c => !c.name.StartsWith("__preview__"));
+                bool valid = avatar != null && avatar.isValid, human = avatar != null && avatar.isHuman;
+                int bones = human ? avatar.humanDescription.human.Length : 0;
+                Debug.Log($"[MixamoImport] {Path.GetFileName(path)} avatar valid={valid.ToString().ToLowerInvariant()} human={human.ToString().ToLowerInvariant()} bones={bones} clip={(clip != null ? clip.name : "-")} length={(clip != null ? clip.length : 0f):0.00}s humanMotion={(clip != null && clip.humanMotion).ToString().ToLowerInvariant()} retarget=player");
+                report.Append($"| {Path.GetFileName(path)} | {valid} | {human} | {bones} | {(clip != null ? clip.name : "-")} | {(clip != null ? clip.length : 0f):0.00} | {clip != null && clip.humanMotion} |\n");
+            }
+            Directory.CreateDirectory("harness/reports");
+            File.WriteAllText("harness/reports/mixamo-import.md", report.ToString(), new UTF8Encoding(false));
+            AssetDatabase.SaveAssets();
         }
     }
 }

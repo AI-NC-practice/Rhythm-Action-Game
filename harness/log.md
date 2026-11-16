@@ -549,3 +549,20 @@ VARCO MCP: 3D 생성(Generate3D)은 이미지 1장만 받고 멀티뷰 노드가
 - T11R 포인트 합계: 4면도 550 + 생성용 한 장 550 + 3D 2,200 + 기와집 이미지 50 + 기와집 3D 200 = 3,550. VARCO 누적 6,600. 호출 v2: 에셋마다 4면도 1·이미지 1·3D 1 (기와집은 이미지 2·3D 2).
 평가: evaluator PASS (harness/reports/T11R-eval-1.md). 참고: B19_RewindTests 1건이 한 번 실패 후 재실행 통과(flaky 의심). 다음: T12 (Mixamo — 로그인은 사용자).
 제안: B19_RewindPresentation_PausedClock_FxSoundStreak 타이밍 불안정 확인.
+- 2026-11-16 사용자 Mixamo 로그인 확인 → 후보 11개 표를 보여 주고 사용자 승인("다운로드") 후 Claude가 앱 브라우저로 받음. 설정 FBX Binary, Without Skin, 30fps, 키프레임 줄이기 없음.
+  | 파일 | Mixamo 동작(설명) |
+  |---|---|
+  | vault | Jumping (Male Jumping Over An Obstacle With 1 Hand Planted) |
+  | slide | Running Slide |
+  | wall_run | Wall Run (Wall Run To Jump Pose) |
+  | stumble | Jogging Stumble |
+  | hit_obstacle | Run To Stop (Run To Stop Against Object) |
+  | duck | Ducking (Ducking For Cover From Standing Idle) |
+  | dodge_right | Dodging Right (In Place) — 왼쪽은 Unity에서 Mirror |
+  | stab | Stabbing (Knife Stab With Lead Hand And Fore Grip) |
+  | disarm | Standing Disarm Underarm — 남의 칼을 빼앗는 동작이 Mixamo에 없어 가장 가까운 것 |
+  | kick | Kicking (Front Snap Kick With The Lead Foot) |
+  | windmill | Standing Melee Attack 360 High |
+  처음 slide는 사용자가 누른 "With Skin"(2.1 MB)으로 받혀서 Without Skin(0.4 MB)으로 다시 받음. 11개 합 4.6 MB.
+- HumanoidImport.ConfigureMixamo(ConfigureAll 끝에서도 호출): 11개 모두 avatar valid·human, humanMotion, 뼈 52(mixamorig), 길이 0.93~3.17초 → harness/reports/mixamo-import.md. 테스트 T12_MixamoImportTests: Humanoid·메시 없음, player 모델에 샘플링하면 팔·다리 뼈가 움직임(리타기팅). unity-verify EditMode 181/181, PlayMode 154/154.
+평가: evaluator PASS (harness/reports/T12-eval-1.md). 다음: T13.

@@ -1,7 +1,7 @@
 ﻿# Unity verify report
-time: 2026-11-16 14:58:41
+time: 2026-11-16 15:23:56
 
-## EditMode : total=179 passed=179 failed=0 skipped=0 result=Passed
+## EditMode : total=181 passed=181 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Config_MatchGddBetaB1
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_LabelPose_PopThenRise_045s
@@ -181,6 +181,8 @@ time: 2026-11-16 14:58:41
   - [Passed] RhythmActionGame.Tests.T11_CharacterImportTests.T11_EachAnimation_HasHumanoidFbx_ValidAvatar_AndClip
   - [Passed] RhythmActionGame.Tests.T11_CharacterImportTests.T11_MeshFbx_HasTexturesNextToIt_AndFingersOnPlayer
   - [Passed] RhythmActionGame.Tests.T11R_StaticBakeTests.T11R_StaticGlb_LowPoly_Under15MB_WithBakedColorAndNormal
+  - [Passed] RhythmActionGame.Tests.T12_MixamoImportTests.T12_EachMixamoClip_IsHumanoid_NoMesh
+  - [Passed] RhythmActionGame.Tests.T12_MixamoImportTests.T12_MixamoClips_RetargetOntoPlayer
 
 ## PlayMode : total=154 passed=154 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
