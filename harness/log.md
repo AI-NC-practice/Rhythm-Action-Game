@@ -722,3 +722,6 @@ VARCO MCP: 3D 생성(Generate3D)은 이미지 1장만 받고 멀티뷰 노드가
 - 수정: T14 테스트에서 TimeFx.RealTime도 같은 주입 시간을 따르게 함 (검사 항목은 그대로: 다음 공격 상태·크로스페이드).
 - unity-verify 전체 두 번 연속 통과: EditMode 200/200, PlayMode 168/168 (harness/reports/R05-verify-1.md, R05-verify-2.md).
 평가: evaluator PASS (harness/reports/R05-eval-1.md). 다음: tasks.json의 다음 pending 작업.
+
+## 인계 문서 갱신 (2026-11-16)
+- docs/HANDOFF.md: R01~R05 결과, 다음 순서(R06 → R07 → R08 → R09 → R10 → R11 → R12, B40은 R12로 미뤄짐), 새 도구·함정, VARCO 누적 약 17,400 포인트.

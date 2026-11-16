@@ -1,10 +1,10 @@
 # 작업 인계 문서 (beta1-1)
 
-- 작성: 2026-11-16 (회사 컴퓨터 → 집 컴퓨터로 옮기기 전 정리)
+- 작성: 2026-11-16 (마지막 갱신: R05 끝난 뒤, 커밋 `c07ed3e` 다음)
 - 브랜치: **`beta1-1`** (GitHub `AI-NC-practice/Rhythm-Action-Game`, 비공개). `main`에는 개발자 모드까지만 들어가 있다.
 - 작업 목록의 진실은 언제나 `harness/tasks.json`이다. 작업별 기록은 `harness/log.md`, 평가 보고서는 `harness/reports/`에 있다.
-- 마지막 전체 검증(T15): EditMode 189/189, PlayMode 163/163 통과. 최종 빌드(`BuildFinal`) + smoke-test 통과.
-- **지금 상태 한 줄:** 구현 작업(T10~T15)은 모두 끝났다. 사용자가 최종 빌드를 처음 쳐 보고 문제 9가지를 짚었다(3장). **다음 세션은 3장 문제를 작업으로 나누는 것부터** 한다 — tasks.json에 넣기 전에 사용자 승인을 받는다.
+- 마지막 전체 검증(R05): **EditMode 200/200, PlayMode 168/168 — 두 번 연속 전부 통과** (`harness/reports/R05-verify-1.md`, `-2.md`). 최종 빌드는 T15 때 것이 마지막이다(R10에서 다시 빌드).
+- **지금 상태 한 줄:** 첫 플레이 피드백(3장)을 R01~R12로 나눴고 **R01~R05는 끝났다**(맵 재설계·새 에셋·회색 상자 교체·T14 테스트). **다음은 R06(1인칭 카메라·동작 정리)** 부터 — 2장 참고.
 
 ---
 
@@ -58,21 +58,33 @@
 
 ### 이 컴퓨터에만 있고 git에 없는 것 (집에서 없어도 진행 가능)
 - `harness/reports/varco/*_raw/`(동작 FBX 원본 38개, 약 340 MB), `harness/reports/varco/v2_high/`(고폴리 GLB) — 용량 때문에 `.gitignore`. 게임에 쓰는 결과물(`Assets/Art/Models/`)은 git에 있다. 다시 필요하면 VARCO 플로우에서 다시 받는다(`harness/reports/varco/t11-<id>.txt`에 동작별 해시가 있다. URL은 `https://3d.varco.ai/api/objects/<해시>.fbx`, 만료됐으면 `get_output_downloads`로 다시 얻는다).
+- R02 고폴리 GLB 35개(`harness/reports/varco/r02/high/`, 각 약 10 MB)와 VARCO 이미지 원본(`r02/*.png`) — git 제외. 다시 필요하면 VARCO에서 다시 받는다.
 - `git stash`에 B46("합" 주고받기, 사용자가 취소) 구현이 보관돼 있다. 취소된 작업이라 집에서는 필요 없다.
 - `Builds/Final` 빌드. 집에서 5번으로 다시 만든다.
 
 ## 2. 지금 멈춘 곳
 
-- 마지막 커밋: `c00de7c` (T16을 `needs_user`로 표시). 그 뒤 이 문서와 log.md 피드백 기록을 올렸다.
-- tasks.json 상태: done 66, needs_user 2(B10, T16), blocked 1(B46 취소), pending 1(B40).
-  - **T16(최종 플레이 확인):** 사용자가 쳐 보고 3장 문제를 냈다. 문제를 고친 뒤 다시 확인받으면 done.
-  - **B10(음악):** 사용자가 곡을 승인했으나 상태가 `needs_user`로 남아 있다. done으로 바꿀지 한 번 확인한다.
-  - **B40(실제 효과음):** B48에서 Mixkit 녹음 8개로 대부분 바꿨다. 남은 것이 있는지 사용자와 정리한 뒤 done 또는 범위 조정.
-  - **B46:** 사용자 결정으로 취소(blocked).
+- 마지막 작업 커밋: `c07ed3e` (R05). 그 뒤 이 문서를 갱신해 올렸다.
+- tasks.json 상태: done 71, pending 8(B40, R06~R12), needs_user 2(B10, T16), blocked 1(B46 취소).
+- **다음에 할 일 (순서대로, 시작 전에 사용자에게 한 번 확인):**
+  1. **R06** 1인칭 카메라·동작 정리 — 실패 때 머리 없는 몸, 벽타기 45° 기울기, 미끄러지기 화면 가림 (피드백 2·6·7번)
+  2. **R07** 적 달리기 동작(`forward_run_1`) + 지붕 위 PERFECT 발차기 낙하(Mixamo 동작은 사용자 승인 → 사용자 로그인, Claude 다운로드). "공중에 뜬 적"은 R03에서 대부분 해결(아래 4장) — R07에서는 PlayMode 검사만 확인
+  3. **R08** 슬로모션 성공/실패 차이 + 리듬감 2 다듬기 (사용자와 다듬을 점을 먼저 정함)
+  4. **R09** 전투 동작·테스트 다듬기 (창 two_hand_attack 클립 정리, 칼 뺏기 동작 교체, 찌르기 처형 테스트)
+  5. **R10** 최적화: LOD·임포스터·GPU Resident Drawer + 최종 빌드. **R03에서 드로우콜이 290 → 약 369로 늘었다(사용자 승인)** — 여기서 줄인다
+  6. **R11** [사용자] 다시 플레이 확인 → 통과하면 T16도 done
+  7. **R12** 효과음·환경음(VARCO Sound) — 사용자 결정(2026-11-16) "효과음은 나중에". 시작 전 범위·포인트 승인. 끝나면 B40도 done
+- `/run-tasks`는 tasks.json 순서대로 가므로 **B40을 먼저 집는다.** B40은 R12로 미뤄졌으니 B40은 건너뛰고 R06부터 하자고 사용자에게 확인한다.
+- B10(음악): 사용자가 곡을 승인했으나 `needs_user`로 남아 있다 — done으로 바꿀지 확인. B46: 사용자 결정으로 취소(blocked).
+- 발 IK(지붕 비탈에 발바닥 맞추기)는 **지금 없음**. 사용자에게 장단점을 설명했고(멈춰 싸우는 적·무사만, 서 있을 때만 하는 것이 비용 대비 낫다) 별도 작업 후보로 log.md에 적어 둠. 넣을지는 사용자가 정한다.
 
 ## 3. 사용자 피드백 (2026-11-16 첫 플레이) — 다음에 할 일
 
-사용자가 `Builds/Final`을 쳐 보고 낸 문제와 진단. **아직 tasks.json에 넣지 않았다.** 사용자에게 우선순위를 확인하고 작업으로 나눈다. 원인은 코드를 다시 확인하지 않은 추정이 섞여 있으니 고치기 전에 확인한다.
+사용자가 `Builds/Final`을 쳐 보고 낸 문제와 진단. **R01~R12로 나눠 tasks.json에 넣었다(사용자 승인).** 처리 상태:
+- 1번(공중에 뜬 적): **R03에서 해결** — 복선 적은 실제 지붕·담 위, 적 발밑 지지면을 빌드 때 재서 검사(R07에서 확인만)
+- 3번(철봉·허들), 5번(경단): **R04에서 해결** — 모델로 교체
+- 8번(맵): **R03에서 해결** — 챕터별 직접 배치, 장터 거리, 모퉁이 곡선. 9번 일부(배경 반복)도 R03
+- 2·6·7번 → R06, 4번 → R07, 9번 나머지(LOD 등) → R10
 
 | # | 사용자 말 | 원인 (진단) | 고칠 방향 |
 |---|---|---|---|
@@ -120,8 +132,13 @@
 | T13 | 툰 셰이더(3단계 + 뒤집은 외곽선), 1인칭 전신 플레이어(머리 뺀 복사본, 머리 뼈 추적 카메라, 결과별 Animator 18 상태) | e1d3c1f |
 | T14 | 적 3종 모델 + 손 뼈 무기, 타격 순간(오른손 최고 속도) = 판정 목표 박, 크로스페이드, 처형 같은 박 시작·정렬, 피격·쓰러짐 | 9111c35 |
 | T15 | 맵 모델 교체(상자는 충돌만), 챕터별 장식, 외곽 그림 원통, 해 질 녘·안개, 드로우콜 778 → 290 (3회차 PASS) | 42d8e15 |
+| R01 | 맵 재설계 안 + 새 에셋·포인트 견적 (docs/proposals/map-redesign.html), 사용자 승인 | 746300b |
+| R02 | VARCO 새 에셋 35개(건물·담·장터·마을 소품·장애물) + 배경 그림 6장. 4면도 → 정면 → 고폴리 → cull_bake. 10,800 포인트 | d6dacb5 |
+| R03 | 맵 다시 짓기: MapPlan 직접 배치(구역 11개·건물 3줄·소품 밀도), 장터 거리, 모퉁이 곡선, 적 발밑 지지면(MapSupportReport), 배경 파노라마 한 장, 지붕 상자 방향 버그 수정. 드로우콜 290 → 약 369(사용자 승인) | b43657a |
+| R04 | 빨랫줄·처마·사건 소품 10종·칼 막대를 모델로, 게임 화면에 회색 도형 없음 | 8acaa4f |
+| R05 | T14 실패 원인: 테스트가 Hit Stop 시계(실제 시간)를 주입하지 않음 → 테스트 수정, 전체 두 번 연속 통과 | c07ed3e |
 
-VARCO 포인트 누적 약 6,600 (T10 2,050 + T11 1,000 + T11R 3,550). 플로우 ID는 `harness/asset_specs.json`의 `defaults.flow_id` = `7c1eec5d-c366-4ce4-8713-0b6adb6fc1da`.
+VARCO 포인트 누적 약 17,400 (T10 2,050 + T11 1,000 + T11R 3,550 + R02 10,800). run_flow 사용 17/45회(`harness/varco-usage.log`, 한도는 asset_specs `defaults.max_run_flow_calls`). 플로우 ID는 `harness/asset_specs.json`의 `defaults.flow_id` = `7c1eec5d-c366-4ce4-8713-0b6adb6fc1da`.
 
 ## 5. 이번 세션에 생긴 도구와 구조 (다음 작업에서 알아야 할 것)
 
@@ -130,11 +147,13 @@ VARCO 포인트 누적 약 6,600 (T10 2,050 + T11 1,000 + T11R 3,550). 플로우
   - 4면도(16:9) → 4면도를 참조(GenerateImage의 `reference` 포트)로 만든 정면 한 장 → Generate3D(이미지 1장만 받음).
   - 캐릭터: Generate3D(tPose) → Remesh → Rig → Animate(동작마다 노드). 노드 ID는 asset_specs의 `nodes`.
   - `python -I harness/scripts/varco/spec-set.py <id> <필드> '<json>'` — asset_specs.json 형식 그대로 한 필드만 고침(있는 필드만).
-- **Blender 스크립트** (`harness/scripts/blender/`, Bash에서 `blender.exe --background --factory-startup --python <스크립트> -- <인자>`로 실행. ps1 래퍼는 stderr 때문에 실패로 보고함):
-  - `cull_bake.py --in --out --max-tris --tex --cull-bottom 1` — 바닥 면 삭제 → 로우폴리 → 색·노멀 굽기 → GLB
+- **Blender 스크립트** (`harness/scripts/blender/`, `powershell -NoProfile -ExecutionPolicy Bypass -File harness/scripts/blender-run.ps1 -Script <이름> --in ...`. R02에서 래퍼의 stderr 문제를 고쳐 이제 래퍼를 써도 된다):
+  - `cull_bake.py --in --out --max-tris --tex --cull-bottom 1 [--voxel 0.012] [--cage 0.03 --ray 0.1]` — 바닥 면 삭제 → 로우폴리(목표까지 여러 번) → 색·노멀 굽기 → GLB. 가닥이 따로 떨어진 모델(짚단)은 `--voxel`, 굽기 누락(검은 얼룩)은 `--cage/--ray`를 키운다. 굴러가거나 날아가는 것은 `--cull-bottom 0`
   - `mesh_check.py --in` — 삼각형·구멍(경계 변)·비다양체·조각 수
   - `render_preview.py`, `render_closeup.py --part hand|head` — 미리보기
   - `strip_mesh_fbx.py` — 동작 FBX에서 메시 빼고 뼈+동작만
+- **R02 에셋 위치:** `Assets/Art/Models/<id>/<id>.glb`(기존 11개는 `Assets/Art/Models/<id>.glb`), 툰 머티리얼 `Assets/Art/Materials/Toon/<id>.mat`(`ToonMaterials.MapAssets`, `StaticPath`). 고폴리 원본·이미지 원본은 git 제외(`harness/reports/varco/r02/high/`, `r02/*.png`) — asset_specs의 `nodes.mesh`로 다시 받는다. 검수 모음은 `harness/reports/varco/r02/contact/`, `harness/reports/preview/r02_p*.png`.
+- **배경 파노라마:** `python harness/scripts/map/make-backdrop.py`(Pillow) → `Assets/Art/Backdrops/panorama.png` (R02 그림 6장을 이어 붙임).
 - **Unity 임포트:** `HumanoidImport.ConfigureAll`(캐릭터 38개 + Mixamo 11개). 클립은 앞뒤·좌우 이동과 방향을 루트로 빼서 버리고(제자리) 높이만 자세에 남김, 몸 방향 기준. player 메시 FBX만 Read/Write 켬(머리 삼각형 빼기).
 
 ### 런타임 구조
@@ -142,11 +161,19 @@ VARCO 포인트 누적 약 6,600 (T10 2,050 + T11 1,000 + T11R 3,550). 플로우
 - `PlayerBody` — 플레이어 Animator를 **박자 시계 시간으로 직접 진행**, 머리 뺀 복사본, 카메라 받침 머리 따라가기(LateUpdate), 사건 결과·처형·피격 상태
 - `BodyMoves`, `EnemyMoves` — 상태 이름·클립 표 (Core, 테스트 가능)
 - `EnemyAnimator` — 적 Animator, 공격은 (타격 − 2박) → 타격으로 클립 시간을 맞춰 원래 속도로 휘두름
-- `DressingInstancer` — 길 옆 장식 GPU 인스턴싱
+- `DressingInstancer` — 길 옆 장식 GPU 인스턴싱. R03: (메시, 칸)마다 묶고 경계로 컬링(건물 320 m 칸, 작은 소품 40 m 칸·70 m 밖 안 그림, 그림자는 건물·큰 나무만)
+- `MapPlan`(Core) — R01 배치 안을 옮긴 순수 배치기(GameConfig.Map의 Zones·Modules·Props). `MapLayout.FlatPointAt`은 모퉁이 앞뒤 8 m가 베지어 곡선, 곧은 상자는 `VertexPointAt`
+- `MapSupportReport` — 빌드 때 잰 적·복선 발밑 지지면(보이는 메시와 수직선 교차)
+- `EventProps.ModelOverride` — 에디터에서 사건 소품 부품을 모델로(빈 축 + 가운데 맞춘 모델). 실행 중 시험 차트는 회색 도형 그대로
 - 에디터: `ToonMaterials`(툰 머티리얼·Player.controller), `EnemyRig`(적 모델·무기·컨트롤러·타격 순간), `SceneBuilder.Map.cs`(맵 모델·장식·배경·분위기), `PreviewCapture.CaptureT13/T14/T15`(미리보기 PNG), `DrawCallReport`(드로우콜 비교용 Game_NoBatch 씬)
+- `unity-verify.ps1 -Platform PlayMode -Filter 'R03_|T15_'` — 작업 중 일부 테스트만 빠르게 (끝낼 때는 필터 없이 전체).
 - 드로우콜 측정은 PlayMode `T15_DrawCallTests`가 하고 `harness/reports/drawcalls.md`에 씀. Unity 6에는 "Batches Count" 카운터가 없어 Standard·SRP Batcher·BRG Draw Calls를 더한다. 배치 모드에서는 RenderTexture에 직접 그려야 잡힌다.
 
 ### 알아 둔 함정
+- PlayMode 테스트에서 시간을 주입할 때는 **박자 시계, 슬로모션, Hit Stop(TimeFx.RealTime)을 모두** 주입해야 한다 (R05: Hit Stop만 실제 시계여서 기계 속도에 따라 T14가 실패).
+- 미리보기·측정 카메라는 자세를 정한 **같은 프레임에** 렌더한다. 한 프레임 지나면 카메라 연출 스크립트가 방향을 되돌린다(R03).
+- 빌드 중 새로 붙인 MeshCollider가 광선에 안 잡힌 일이 있었다(R03) → 발밑 검사는 메시 삼각형 직접 계산으로.
+- 길 위 지붕은 기와집을 이어 붙여 이음매마다 골이 있다 → 적 자리에 이음매가 오지 않게 조각 수를 고른다(`TileIntoBox avoid`).
 - 배치 모드에서 컴파일 오류가 나면 `unity-exec`가 끝나지 않고 멈출 수 있다 → 고친 뒤 다시 실행.
 - 에디터 모드에서 Humanoid 자세 미리보기는 `Animator.Rebind/Play/Update(0)`가 씬 오브젝트에서만 잘 된다. 새로 만든 인스턴스에는 `clip.SampleAnimation`(몸 방향은 다를 수 있음).
 - PlayMode 테스트는 시간을 주입한다. 실제 프레임 시간(`unscaledDeltaTime`, `Time.deltaTime`)을 쓰는 연출은 씬이 무거워지면 결과가 흔들린다 → 테스트에서 고정 시간을 넣거나, 검사 시점을 프레임 끝으로(B28처럼).
@@ -192,6 +219,7 @@ VARCO 포인트 누적 약 6,600 (T10 2,050 + T11 1,000 + T11R 3,550). 플로우
 - 리듬감을 중시한다. 노드는 "누르는 느낌"이 있어야 한다(노드에 슬로를 걸지 말 것).
 - 슬로모션은 "칼이 머리를 스치는", "문이 닫히는 걸 간신히 피하는" 아슬아슬한 느낌.
 - 추임새 기합 소리는 싫다. 노드가 화면 여러 곳에 동시에 나오면 따라가기 어렵다.
+- 드로우콜은 "크게 문제가 없으면" 조금 늘어도 받아들인다(R03, +26%). 맵·연출 품질을 우선.
 - 맵: 챕터 컨셉에 맞춘 배치, 먼 곳은 이미지 착시(안 되면 실제 오브젝트), 하이폴리는 로우폴리 + 노멀 맵, 같은 머티리얼은 묶어서 드로우콜 줄이기. LOD·ISM 같은 최적화에 관심이 많다.
 - 에셋 품질에 민감하다(손가락 갈라짐·빈 공간을 바로 짚음). 포인트는 "많이 써도 된다"고 했지만 쓰기 전에는 항상 예상 포인트를 알리고 승인받는다.
 - 비용(VARCO 포인트, 유료 결제), 다운로드(파일명·출처·용량), 공개 범위 변경은 사용자 승인 후에만 한다. Mixamo 로그인은 사용자, 다운로드는 Claude(앱 브라우저).
