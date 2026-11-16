@@ -70,6 +70,9 @@ namespace RhythmActionGame
             if (hooked || director == null) return;
             director.EventSlotJudged += OnSlotJudged;
             director.StageReset += OnReset;
+            director.EnemyDefeated += OnEnemyDefeated;
+            director.PlayerHit += OnPlayerHit;
+            if (director.judge != null) director.judge.CueJudged += OnCueJudged;
             hooked = true;
         }
 
@@ -78,6 +81,9 @@ namespace RhythmActionGame
             if (!hooked || director == null) return;
             director.EventSlotJudged -= OnSlotJudged;
             director.StageReset -= OnReset;
+            director.EnemyDefeated -= OnEnemyDefeated;
+            director.PlayerHit -= OnPlayerHit;
+            if (director.judge != null) director.judge.CueJudged -= OnCueJudged;
             hooked = false;
         }
 
@@ -88,6 +94,30 @@ namespace RhythmActionGame
         }
 
         void OnReset() => PlayRun();
+
+        /// <summary>처형이 시작된 박 (박자 시계, 테스트용). 적의 쓰러짐 동작과 같은 박이다.</summary>
+        public double ExecStartBeat { get; private set; } = double.NaN;
+
+        void OnEnemyDefeated(StageDirector.Encounter e, ExecutionKind how) => PlayOneShot(BodyMoves.ExecState(how));
+
+        void OnPlayerHit(RewindKind k) => PlayOneShot(BodyMoves.Hit);
+
+        /// <summary>적 공격을 못 막음 (FAIL) = 맞음.</summary>
+        void OnCueJudged(JudgeCue cue, Judgement r)
+        {
+            if (r == Judgement.Fail && cue.Tag is CombatStep s && s.Kind == CombatStepKind.Attack) PlayOneShot(BodyMoves.Hit);
+        }
+
+        /// <summary>원래 속도로 한 번 재생하고 Run으로 (처형·피격).</summary>
+        public void PlayOneShot(string state)
+        {
+            LastState = state;
+            LastMirror = false;
+            if (state.StartsWith("Exec_")) ExecStartBeat = clock != null ? clock.CurrentBeat : double.NaN;
+            if (animator == null || animator.runtimeAnimatorController == null) return;
+            animator.SetBool(MirrorParam, false);
+            animator.CrossFadeInFixedTime(state, GameConfig.Body.CrossFadeSeconds, 0);
+        }
 
         /// <summary>판정 결과 하나에 맞는 동작을 재생한다.</summary>
         public void Play(ObstacleCategory? category, ArrowKey key, Judgement r)

@@ -804,5 +804,23 @@ namespace RhythmActionGame
             /// <summary>외곽선 두께 (화면 높이 대비, 뒤집은 메시).</summary>
             public const float OutlineWidth = 0.0025f;
         }
+
+        /// <summary>적 모델·전투 애니메이션 (작업 T14).</summary>
+        public static class EnemyBody
+        {
+            /// <summary>칼·창 길이 (m, 회색 상자와 같은 값).</summary>
+            public const float SwordLength = 1.0f;
+            public const float SpearLength = 2.2f;
+            /// <summary>동작 사이 크로스페이드 (초, GDD 6 "0.1~0.15초").</summary>
+            public const float CrossFadeSeconds = 0.12f;
+            /// <summary>타격 순간 뒤 휘두르기를 마저 보여 주는 시간 (초) → 그다음 대기 자세로.</summary>
+            public const float FollowThroughSeconds = 0.35f;
+            /// <summary>타격 순간 찾기: 클립 앞에서 이 시간 안의 오른손 속도 최고점 (긴 클립은 첫 공격만).</summary>
+            public const float HitSearchSeconds = 8f;
+            /// <summary>타격 순간 찾기에서 빼는 클립 앞부분 비율 (준비 동작).</summary>
+            public const float HitSearchSkip = 0.12f;
+            /// <summary>처형 시작 때 적이 서는 거리 (m, 플레이어 발 기준). 발차기·칼 뺏기·찌르기.</summary>
+            public const float ExecutionDistance = 1.2f;
+        }
     }
 }

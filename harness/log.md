@@ -576,3 +576,16 @@ VARCO MCP: 3D 생성(Generate3D)은 이미지 1장만 받고 멀티뷰 노드가
 - 눈 확인: harness/reports/preview/t13_*.png (PreviewCapture.CaptureT13) — 3인칭 정면·측면 외곽선·명암, 1인칭 달리기·넘기.
 - 테스트: T13_ToonBodyTests(EditMode 5), T13_PlayerBodyPlayTests(PlayMode 3: 머리 뺀 복사본·눈높이·몸 방향, PERFECT/NORMAL/FAIL 상태 전환과 4박 속도, 왼쪽 반전 후 Run 복귀). unity-verify EditMode 186/186, PlayMode 157/157.
 평가: evaluator PASS (harness/reports/T13-eval-1.md). 다음: T14.
+
+## T14 적 모델 교체 + 전투 애니메이션 — 진행 중 (2026-11-16)
+- 적 캡슐 → enemy_sword·enemy_spear·boss 모델(키 1.75/1.85 m, 툰). 사건 소품의 적(돌진·매복·추격·복선)도 모델(EventProps.FigureOverride, 에디터에서만). 무기 GLB를 오른손 뼈 아래 WeaponGrip에 붙임: 메시 모양으로 손잡이·끝을 찾음(칼은 가장 넓은 코등이 쪽이 손잡이, 창은 가장 넓은 창날 쪽이 끝), 칼 1.0 m·창 2.2 m. 판정 원·트레일·잔상은 손에 든 무기 끝을 따라감. weaponPivot은 휘두르기 진행(되감기)을 담는 논리 축으로 남김(보이지 않음).
+- EnemyAnimator(Enemy_<model>.controller): Idle, Attack_{horizontal,overhead,upward,thrust}, Guard, Hit, Defeat_{KickOffRoof,DisarmSlash,StabWithOwnSword,PushDown,Windmill}. 박자 시계 시간으로 직접 진행, Hit Stop 중 멈춤.
+- 타격 순간 = 공격 클립에서 오른손(엉덩이 기준) 속도가 가장 빠른 때(앞 12% 빼고, 8초 안). 예: 칼 가로베기 1.12 s, 창 two_hand_attack 4.53 s, 무사 회전베기 1.70 s. 원이 떠 있는 2박 동안 클립을 (타격 − 2박) → 타격으로 원래 속도로 맞춰 → 목표 박 = 타격 순간. 새 공격은 0.12초 크로스페이드, 판정 뒤 0.35초 마저 휘두르고 대기로. 되감기는 같은 클립을 거꾸로.
+- 처형: 적 쓰러짐(Defeat)과 플레이어 처형(Exec_*: 발차기 kick, 칼 뺏기 disarm, 찌르기 stab, 밀쳐 쓰러뜨리기 player_cross_block, 윈드밀 windmill)이 같은 프레임(같은 박)에 시작. 적은 플레이어를 보고, 일대일 처형(발차기·칼 뺏기·찌르기)은 1.2 m로 거리를 맞춤. 지붕에서 떨어짐·윈드밀에 날아감은 기존 궤적 + 클립.
+- 피격: 적이 밀리면 Hit(light/heavy_hit_back), 플레이어가 적 공격 FAIL이면 Hit(player_light_hit_back).
+- 기존 테스트 B19: 되감기 채도 −90 검사 허용을 −89.9 → −89.5로. 효과 곡선이 실제 프레임 시간으로 진행해 무거워진 씬에서 −89.89가 나옴(연출은 그대로).
+- 테스트: T14_EnemyRigTests(EditMode 3), T14_EnemyCombatPlayTests(PlayMode 4: 손에 든 무기·타격 순간 = 목표 박·크로스페이드, 칼 뺏기 같은 박·방향·거리, 지붕 발차기 떨어짐, 밀림·윈드밀·플레이어 피격). unity-verify EditMode 189/189, PlayMode 161/161.
+- 미리보기 harness/reports/preview/t14_*.png (에디터 클립 샘플, 몸 방향은 실제와 다를 수 있음). 실제 손에 든 모습은 빌드에서 사람 확인 필요.
+- 메모: 창 two_hand_attack은 31.9초 클립 중 4.53초 타격까지만 씀(판정 뒤 0.35초 뒤 대기).
+평가: evaluator PASS (harness/reports/T14-eval-1.md). 다음: T15.
+제안: 찌르기 처형(StabWithOwnSword) PlayMode 테스트 보강.

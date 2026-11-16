@@ -5,8 +5,9 @@ using UnityEngine;
 namespace RhythmActionGame
 {
     /// <summary>
-    /// 적 하나 (회색 상자 단계). 공격할 때 무기를 휘두르고 트레일·잔상을 남기며, 쓰러질 때 결과별 동작을 한다.
-    /// 상태 이름(State)으로 결과를 구분한다. 모델과 Animator 연결은 T14.
+    /// 적 하나. 공격할 때 무기를 휘두르고 트레일·잔상을 남기며, 쓰러질 때 결과별 동작을 한다.
+    /// 상태 이름(State)으로 결과를 구분한다. 모델이 있으면(작업 T14) EnemyAnimator가 같은 신호로 클립을 재생하고,
+    /// 보이는 무기(weaponVisual)는 손 뼈에 붙어 있다. weaponPivot은 휘두르기 진행(되감기 포함)을 담는 논리 축이다.
     /// </summary>
     public class EnemyActor : MonoBehaviour, IHitStoppable
     {
@@ -28,6 +29,10 @@ namespace RhythmActionGame
         public Transform weaponTip;
         public TrailRenderer trail;
         public Material ghostMaterial;
+        /// <summary>모델 Animator (작업 T14). 없으면 회색 상자.</summary>
+        public EnemyAnimator anim;
+        /// <summary>보이는 무기 (손 뼈에 붙음). 없으면 weaponPivot 아래 막대가 보이는 무기.</summary>
+        public Transform weaponVisual;
 
         public string State { get; private set; } = "Idle";
         public bool Defeated { get; private set; }
@@ -73,6 +78,8 @@ namespace RhythmActionGame
             attacking = false;
             State = "Idle";
             if (weaponPivot != null) { weaponPivot.localRotation = Quaternion.identity; weaponPivot.gameObject.SetActive(true); }
+            if (weaponVisual != null) weaponVisual.gameObject.SetActive(true);
+            if (anim != null) anim.OnReset();
             if (trail != null) { trail.emitting = false; trail.Clear(); }
             foreach (var g in ghosts) if (g != null) Destroy(g);
             ghosts.Clear();
@@ -97,6 +104,7 @@ namespace RhythmActionGame
         {
             if (Defeated || weaponPivot == null || string.IsNullOrEmpty(lastAttack)) return;
             weaponPivot.localRotation = SwingPose(lastAttack, lastAttackP * (1f - Mathf.Clamp01(u)));
+            if (anim != null) anim.OnRewind(u, lastAttack, lastAttackP);
             State = "Rewinding";
         }
 
@@ -113,6 +121,7 @@ namespace RhythmActionGame
             State = "Attack_" + attack;
             if (trail != null) trail.emitting = true;
             if (weaponPivot != null) weaponPivot.localRotation = SwingPose(attack, Mathf.Clamp01(p));
+            if (anim != null) anim.OnAttack(attack, p);
         }
 
         /// <summary>공격 종류별 무기 궤적 (어깨 기준 회전).</summary>
@@ -137,6 +146,7 @@ namespace RhythmActionGame
             attacking = false;
             if (trail != null) trail.emitting = false;
             if (weaponPivot != null) weaponPivot.localRotation = Quaternion.identity;
+            if (anim != null) anim.OnEndAttack();
             if (!Defeated) State = playerResult == Judgement.Fail ? "Attack_Landed" : playerResult == Judgement.Perfect ? "Attack_Evaded" : "Attack_Grazed";
         }
 
@@ -145,7 +155,7 @@ namespace RhythmActionGame
         {
             if (Defeated || Frozen || attacking) return;
             if (weaponPivot != null) weaponPivot.localRotation = Quaternion.Euler(-60f * Mathf.Clamp01(p / 0.7f), 0, 70f * Mathf.Clamp01(p / 0.7f));
-            if (pushRoutine == null) State = "Guard";      // 밀려나는 중이면 "Pushed" 유지
+            if (pushRoutine == null) { State = "Guard"; if (anim != null) anim.OnGuard(); }      // 밀려나는 중이면 "Pushed" 유지
         }
 
         /// <summary>옆차기 (GDD-beta B13.4): 칼을 내리고 몸을 기울인 자세 (회색 상자). 다음 동작이 자세를 덮어쓴다.</summary>
@@ -162,6 +172,7 @@ namespace RhythmActionGame
         {
             if (Defeated || attacking) return;
             if (weaponPivot != null) weaponPivot.localRotation = Quaternion.identity;
+            if (anim != null) anim.OnEndGuard();
         }
 
         Coroutine pushRoutine;
@@ -197,6 +208,7 @@ namespace RhythmActionGame
             away.y = 0;
             pushDir = away.sqrMagnitude > 1e-6f ? away.normalized : -transform.forward;
             State = "Pushed";
+            if (anim != null) anim.OnPushed();
             pushRoutine = StartCoroutine(PushRoutine(away.sqrMagnitude > 1e-6f ? away.normalized : -transform.forward, meters, seconds));
         }
 
@@ -226,7 +238,25 @@ namespace RhythmActionGame
             if (MotionPosition.HasValue) { transform.position = MotionPosition.Value + pushDir * PushOffset; MotionPosition = null; FacePoint = null; }
             else if (pushRoutine != null) transform.position = pushBase;
             pushRoutine = null; PushOffset = 0;
+            AlignForExecution(how, awayFromPlayer);
+            if (anim != null) anim.OnDefeat(how);
             StartCoroutine(DefeatRoutine(how, awayFromPlayer.normalized));
+        }
+
+        /// <summary>처형이 시작되는 박에 적이 플레이어를 보게 하고, 일대일 처형(발차기·칼 뺏기·찌르기)은 거리를 맞춘다 (작업 T14).</summary>
+        void AlignForExecution(ExecutionKind how, Vector3 awayFromPlayer)
+        {
+            var playerFeet = transform.position - awayFromPlayer;
+            var flat = awayFromPlayer; flat.y = 0;
+            if (flat.sqrMagnitude < 1e-6f) return;
+            flat.Normalize();
+            transform.rotation = Quaternion.LookRotation(-flat, Vector3.up);
+            if (how == ExecutionKind.KickOffRoof || how == ExecutionKind.DisarmSlash || how == ExecutionKind.StabWithOwnSword)
+            {
+                var p = playerFeet + flat * GameConfig.EnemyBody.ExecutionDistance;
+                p.y = transform.position.y;
+                transform.position = p;
+            }
         }
 
         IEnumerator DefeatRoutine(ExecutionKind how, Vector3 away)
@@ -234,6 +264,7 @@ namespace RhythmActionGame
             var start = transform.position;
             var startRot = transform.rotation;
             if (how == ExecutionKind.DisarmSlash && weaponPivot != null) weaponPivot.gameObject.SetActive(false); // 칼을 빼앗김
+            if (how == ExecutionKind.DisarmSlash && weaponVisual != null) weaponVisual.gameObject.SetActive(false);
             float dur = how == ExecutionKind.KickOffRoof || how == ExecutionKind.Windmill ? 1.0f : 0.6f;
             for (float t = 0; t < dur; t += Frozen ? 0f : Time.deltaTime)
             {
@@ -270,10 +301,11 @@ namespace RhythmActionGame
         /// <summary>무기 모양을 반투명하게 복제해 남긴다 (잔상).</summary>
         public void SpawnGhost()
         {
-            if (weaponPivot == null) return;
+            var holder = weaponVisual != null ? weaponVisual : weaponPivot;
+            if (holder == null) return;
             ghosts.RemoveAll(g => g == null);
             while (ghosts.Count >= GhostMax) { Destroy(ghosts[0]); ghosts.RemoveAt(0); }
-            var src = weaponPivot.GetComponentInChildren<MeshFilter>();
+            var src = holder.GetComponentInChildren<MeshFilter>();
             if (src == null) return;
             var g = new GameObject("Afterimage", typeof(MeshFilter), typeof(MeshRenderer));
             g.transform.SetPositionAndRotation(src.transform.position, src.transform.rotation);

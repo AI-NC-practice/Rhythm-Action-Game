@@ -64,6 +64,36 @@ namespace RhythmActionGame.EditorTools
             Debug.Log("[PreviewCapture] T13 미리보기 저장");
         }
 
+        /// <summary>적 3종: 대기 자세와 공격 타격 순간 (작업 T14). 결과: harness/reports/preview/t14_*.png</summary>
+        public static void CaptureT14()
+        {
+            EditorSceneManager.OpenScene(SceneBuilder.GameScenePath, OpenSceneMode.Single);
+            var cam = GameObject.Find("PlayerCamera").GetComponent<Camera>();
+            cam.transform.SetParent(null, true);
+            Directory.CreateDirectory(OutDir);
+            var actors = Object.FindObjectsByType<EnemyActor>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var kind in new[] { "sword", "spear", "boss" })
+            {
+                var a = actors.FirstOrDefault(x => x.kind == kind && !x.onRoof) ?? actors.First(x => x.kind == kind);
+                var an = a.anim.animator;
+                var t = a.transform;
+                var ctrl = (AnimatorController)an.runtimeAnimatorController;
+                void Pose(string state, float seconds)
+                {
+                    var clip = (AnimationClip)ctrl.layers[0].stateMachine.states.First(x => x.state.name == state).state.motion;
+                    clip.SampleAnimation(an.gameObject, seconds);   // 에디터 미리보기: 클립 직접 샘플 (몸 방향은 실제와 다를 수 있음)
+                }
+                foreach (var (tag, state, sec) in new[] { ("idle", EnemyMoves.Idle, 0.5f), ("hit", EnemyMoves.AttackState("horizontal"), a.anim.HitSecondsOf(EnemyMoves.AttackState("horizontal"))), ("windup", EnemyMoves.AttackState("overhead"), a.anim.ClipTimeFor(EnemyMoves.AttackState("overhead"), 0.5f)) })
+                {
+                    Pose(state, sec);
+                    cam.transform.position = t.position + t.forward * 3.2f + t.right * 1.2f + Vector3.up * 1.5f;
+                    cam.transform.LookAt(t.position + Vector3.up * 1.1f);
+                    Shot(cam, $"{OutDir}/t14_{kind}_{tag}.png");
+                }
+                Debug.Log($"[PreviewCapture] {kind} {a.name} tip={a.weaponTip.position - t.position}");
+            }
+        }
+
         static void Shot(Camera cam, string path)
         {
             var rt = new RenderTexture(1280, 720, 24);

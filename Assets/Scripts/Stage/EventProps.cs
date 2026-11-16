@@ -164,9 +164,13 @@ namespace RhythmActionGame
             return go.transform;
         }
 
-        /// <summary>회색 상자 적: 발 위치 루트 + 몸 캡슐 + 칼 막대.</summary>
+        /// <summary>에디터(SceneBuilder)가 넣는 적 모델 만들기 (작업 T14). 없으면(실행 중 시험 차트) 회색 상자.</summary>
+        public static Func<Transform, string, Vector3, Transform> FigureOverride;
+
+        /// <summary>적: 모델(FigureOverride) 또는 회색 상자(발 위치 루트 + 몸 캡슐 + 칼 막대).</summary>
         static Transform EnemyFigure(Transform parent, string name, Vector3 feetLocal, Material m)
         {
+            if (FigureOverride != null) return FigureOverride(parent, name, feetLocal);
             var root = new GameObject(name).transform;
             root.SetParent(parent, false);
             root.localPosition = feetLocal;

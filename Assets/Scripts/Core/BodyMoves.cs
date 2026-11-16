@@ -58,6 +58,27 @@ namespace RhythmActionGame
 
         public const string RunClip = "player_forward_run_1";
 
+        /// <summary>내가 맞음 (작업 T14).</summary>
+        public const string Hit = "Hit";
+        public const string HitClip = "player_light_hit_back";
+
+        /// <summary>처형 상태 (작업 T14): 적의 쓰러짐 동작과 같은 박에 시작한다.</summary>
+        public static string ExecState(ExecutionKind how) => "Exec_" + how;
+
+        public static readonly ExecutionKind[] Executions = EnemyMoves.Defeats;
+
+        public static string ExecClip(ExecutionKind how)
+        {
+            switch (how)
+            {
+                case ExecutionKind.KickOffRoof: return "kick";
+                case ExecutionKind.DisarmSlash: return "disarm";
+                case ExecutionKind.StabWithOwnSword: return "stab";
+                case ExecutionKind.Windmill: return "windmill";
+                default: return "player_cross_block";        // 밀쳐 쓰러뜨리기
+            }
+        }
+
         /// <summary>클립을 beats 박 길이에 맞추는 재생 속도.</summary>
         public static float SpeedToFit(float clipSeconds, float beats, float secondsPerBeat) =>
             beats <= 0f || secondsPerBeat <= 0f ? 1f : clipSeconds / (beats * secondsPerBeat);

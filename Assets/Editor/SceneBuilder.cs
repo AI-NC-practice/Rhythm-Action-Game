@@ -25,6 +25,7 @@ namespace RhythmActionGame.EditorTools
         {
             Directory.CreateDirectory(ScenesDir);
             Directory.CreateDirectory(MaterialsDir);
+            EnemyRig.ClearCache();
             MusicTool.ApplyImportSettings();
             AudioProjectSettings.Apply();
             BuildTitle();
@@ -401,7 +402,12 @@ namespace RhythmActionGame.EditorTools
             var parent = new GameObject("EventProps").transform;
             parent.SetParent(map);
             foreach (var e in chart.events)
-                if (EventProps.Needs(e)) EventProps.Build(e, parent, Mat);
+                if (EventProps.Needs(e))
+                {
+                    EventProps.FigureOverride = EnemyRig.Figure;   // 소품 적도 모델 (작업 T14)
+                    try { EventProps.Build(e, parent, Mat); }
+                    finally { EventProps.FigureOverride = null; }
+                }
             return parent;
         }
 
@@ -449,34 +455,18 @@ namespace RhythmActionGame.EditorTools
         /// <summary>T07이 포위 전투·무사 참조를 연결하는 자리.</summary>
         static partial void BuildDirectorExtra(StageDirector director, EnemySet enemies);
 
-        /// <summary>적 하나: 발 위치 루트(EnemyActor) + 몸 캡슐 + 어깨 축 + 무기 + 무기 끝(트레일).</summary>
-        static EnemyActor Enemy(Transform parent, string name, string kind, bool onRoof, Vector3 feet, Vector3 facing, float height, Color color)
+        /// <summary>적 하나: 발 위치 루트(EnemyActor) + 모델(EnemyAnimator) + 손에 든 무기 + 무기 끝(트레일) + 논리 어깨 축 (작업 T14).</summary>
+        static EnemyActor Enemy(Transform parent, string name, string kind, bool onRoof, Vector3 feet, Vector3 facing, float height, Color color)   // color: 회색 상자 시절 값 (모델 툰 머티리얼이 대신함)
         {
             var root = new GameObject(name);
             root.transform.SetParent(parent);
             root.transform.SetPositionAndRotation(feet, Quaternion.LookRotation(new Vector3(facing.x, 0, facing.z)));
 
-            var body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            body.name = "Body";
-            body.transform.SetParent(root.transform, false);
-            body.transform.localPosition = Vector3.up * height * 0.5f;
-            body.transform.localScale = new Vector3(0.6f, height * 0.5f, 0.6f);
-            body.GetComponent<MeshRenderer>().sharedMaterial = Mat("Enemy_" + ColorUtility.ToHtmlStringRGB(color), color);
-
+            // 모델 (작업 T14): VARCO 캐릭터 + Animator + 오른손 무기. weaponPivot은 휘두르기 진행을 담는 논리 축(보이지 않음).
+            var ea = EnemyRig.Build(root, kind, height, out var weaponVisual, out var tip);
             var pivot = new GameObject("WeaponPivot").transform;
             pivot.SetParent(root.transform, false);
             pivot.localPosition = new Vector3(0.35f, height * 0.78f, 0.1f);
-            float len = kind == "spear" ? 2.2f : 1.0f;
-            var weapon = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            weapon.name = kind == "spear" ? "Prop_weapon_spear" : "Prop_weapon_sword";
-            Object.DestroyImmediate(weapon.GetComponent<Collider>());
-            weapon.transform.SetParent(pivot, false);
-            weapon.transform.localPosition = new Vector3(0, 0, len * 0.5f);
-            weapon.transform.localScale = new Vector3(0.06f, 0.06f, len);
-            weapon.GetComponent<MeshRenderer>().sharedMaterial = Mat("Weapon", new Color(0.85f, 0.87f, 0.9f));
-            var tip = new GameObject("WeaponTip").transform;
-            tip.SetParent(pivot, false);
-            tip.localPosition = new Vector3(0, 0, len);
 
             var ghost = GhostMat();
             var trail = tip.gameObject.AddComponent<TrailRenderer>();
@@ -492,6 +482,9 @@ namespace RhythmActionGame.EditorTools
             actor.onRoof = onRoof;
             actor.weaponPivot = pivot;
             actor.weaponTip = tip;
+            actor.weaponVisual = weaponVisual;
+            actor.anim = ea;
+            ea.actor = actor;
             actor.trail = trail;
             actor.ghostMaterial = ghost;
             return actor;

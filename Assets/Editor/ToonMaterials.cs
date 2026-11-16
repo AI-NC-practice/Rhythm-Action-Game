@@ -136,6 +136,22 @@ namespace RhythmActionGame.EditorTools
                 }
                 row++;
             }
+            // 처형·피격 (작업 T14): 원래 속도로 한 번, 끝나면 Run
+            var extra = BodyMoves.Executions.Select(h => (BodyMoves.ExecState(h), BodyMoves.ExecClip(h))).ToList();
+            extra.Add((BodyMoves.Hit, BodyMoves.HitClip));
+            int ex = 0;
+            foreach (var (name, clipName) in extra)
+            {
+                var clip = ClipOf(clipName);
+                var st = sm.AddState(name, new Vector3(ex++ * 220, 120 + row * 70, 0));
+                st.motion = clip;
+                var back = st.AddTransition(run);
+                back.hasExitTime = true;
+                back.exitTime = 0.95f;
+                back.hasFixedDuration = true;
+                back.duration = GameConfig.Body.CrossFadeSeconds;
+                n.Add(name); s.Add(clip != null ? clip.length : 1f);
+            }
             EditorUtility.SetDirty(ctrl);
             AssetDatabase.SaveAssets();
             names = n.ToArray();

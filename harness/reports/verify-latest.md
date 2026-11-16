@@ -1,7 +1,7 @@
 ﻿# Unity verify report
-time: 2026-11-16 15:49:51
+time: 2026-11-16 16:20:12
 
-## EditMode : total=186 passed=186 failed=0 skipped=0 result=Passed
+## EditMode : total=189 passed=189 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Config_MatchGddBetaB1
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_LabelPose_PopThenRise_045s
@@ -188,8 +188,11 @@ time: 2026-11-16 15:49:51
   - [Passed] RhythmActionGame.Tests.T13_ToonBodyTests.T13_PlayerController_RunPlusActionResultStates_WithClips
   - [Passed] RhythmActionGame.Tests.T13_ToonBodyTests.T13_ToonMaterials_ForAllElevenAssets
   - [Passed] RhythmActionGame.Tests.T13_ToonBodyTests.T13_ToonShader_HasForwardOutlineShadowPasses
+  - [Passed] RhythmActionGame.Tests.T14_EnemyRigTests.T14_EnemyControllers_AllStates_HitMomentInsideClip
+  - [Passed] RhythmActionGame.Tests.T14_EnemyRigTests.T14_GameScene_EveryEnemy_HasModel_WeaponOnHandBone_NoCapsule
+  - [Passed] RhythmActionGame.Tests.T14_EnemyRigTests.T14_PlayerController_HasExecutionAndHitStates
 
-## PlayMode : total=157 passed=157 failed=0 skipped=0 result=Passed
+## PlayMode : total=161 passed=161 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -347,5 +350,9 @@ time: 2026-11-16 15:49:51
   - [Passed] RhythmActionGame.Tests.T13_PlayerBodyPlayTests.T13_DodgeLeft_Mirrored_ThenBackToRun
   - [Passed] RhythmActionGame.Tests.T13_PlayerBodyPlayTests.T13_ObstacleResults_DriveAnimatorStates_FitFourBeats
   - [Passed] RhythmActionGame.Tests.T13_PlayerBodyPlayTests.T13_PlayerModel_HeadlessVisible_ShadowOnlyOriginal_CameraAtEye
+  - [Passed] RhythmActionGame.Tests.T14_EnemyCombatPlayTests.T14_Disarm_PlayerAndEnemyStartSameBeat_Aligned
+  - [Passed] RhythmActionGame.Tests.T14_EnemyCombatPlayTests.T14_Enemy_Model_WeaponInHand_ImpactOnTargetBeat_CrossfadeBetweenAttacks
+  - [Passed] RhythmActionGame.Tests.T14_EnemyCombatPlayTests.T14_HitPushback_Windmill_PlayerHit_States
+  - [Passed] RhythmActionGame.Tests.T14_EnemyCombatPlayTests.T14_RoofKick_EnemyFallsOffRoof_PlayerKicks
 
 OVERALL: PASS
