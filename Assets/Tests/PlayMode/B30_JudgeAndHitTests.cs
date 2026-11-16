@@ -144,7 +144,7 @@ namespace RhythmActionGame.Tests
             Assert.IsTrue(hooks.Log.Contains("BloodHit"), "맞는 연출");
             Assert.IsTrue(hooks.Log.Contains("BloodDrops"), "피 방울");
             Assert.AreEqual(VfxKind.BloodSplatter, pd.vfxPool.ActiveFlash, "화면 핏자국");
-            CollectionAssert.Contains(pd.sfx.History, SfxKind.BodyHit);
+            CollectionAssert.Contains(pd.sfx.History, SfxKind.Slash, "피격: 베임 (B17.5 녹음)");
             pd.screenFx.Step(0f);
             Assert.Greater(pd.screenFx.VignetteIntensity, 0.4f, "붉은 테두리");
             pd.cameraFx.Step(0.05f);

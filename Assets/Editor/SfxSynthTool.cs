@@ -15,6 +15,8 @@ namespace RhythmActionGame.EditorTools
         public const string Dir = "Assets/Audio/Sfx";
 
         public static string PathOf(SfxKind k) => $"{Dir}/Sfx_{k}.wav";
+        /// <summary>실제 녹음 (GDD-beta B17.5, harness/scripts/sfx/prep-mixkit.py가 만듦). 있으면 합성음 대신 쓴다.</summary>
+        public static string RecordedPathOf(SfxKind k) => $"{Dir}/Rec_{k}.wav";
 
         [MenuItem("RhythmActionGame/Generate Sfx")]
         public static void GenerateAll() => Generate();
@@ -29,7 +31,7 @@ namespace RhythmActionGame.EditorTools
             var clips = new List<AudioClip>();
             foreach (SfxKind k in System.Enum.GetValues(typeof(SfxKind)))
             {
-                var path = PathOf(k);
+                var path = File.Exists(RecordedPathOf(k)) ? RecordedPathOf(k) : PathOf(k);
                 var imp = AssetImporter.GetAtPath(path) as AudioImporter;
                 if (imp != null)
                 {

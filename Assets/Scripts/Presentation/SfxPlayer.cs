@@ -51,7 +51,7 @@ namespace RhythmActionGame
             if (built) return;
             built = true;
             foreach (var c in clips)
-                if (c != null && System.Enum.TryParse(c.name.Replace("Sfx_", ""), out SfxKind k)) byKind[k] = c;
+                if (c != null && System.Enum.TryParse(c.name.Replace("Sfx_", "").Replace("Rec_", ""), out SfxKind k)) byKind[k] = c;   // Rec_ = 실제 녹음 (B17.5)
             for (int i = 0; i < GameConfig.Fx.SfxPoolSize; i++)
             {
                 var src = gameObject.AddComponent<AudioSource>();

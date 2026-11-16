@@ -1134,10 +1134,10 @@
                                          "GDD-beta B17.5: 판정 반 박 전 쉭, 판정 박 챙/퍽 — 테스트",
                                          "unity-verify 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "2026-11-16 evaluator PASS (1회차). 사용자 승인(\"받아도 됨\")으로 Mixkit 8개 받음 → Rec_*.wav. 적 공격 판정 반 박 전 \"쉭\" 예약, 막기 챙·맞음 퍽·처형 베임+쓰러짐·옆차기 녹음. 사용자 테스트 빌드 확인은 다음 피드백으로."
                   },
                   {
                       "id":  "B49",

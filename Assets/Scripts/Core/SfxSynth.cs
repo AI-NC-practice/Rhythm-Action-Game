@@ -24,6 +24,15 @@ namespace RhythmActionGame
         HitNormal,    // 히트사운드 "딱" — 채편
         HitFail,      // 히트사운드 "턱" — 둔한 소리
         HitEmpty,     // 히트사운드 "틱" — 원 없는 입력 (아주 작게)
+        // ---- 실제 녹음 (GDD-beta B17.5, Mixkit — docs/CREDITS.md). 녹음이 없으면 Fallback의 합성음 ----
+        SwordWhoosh,  // 적 칼 휘두름 "쉭" (판정 반 박 전)
+        SwordSwish,   // 내 칼 휘두름
+        ParryClang,   // 막기 PERFECT "챙"
+        BlockClang,   // 막기 NORMAL (둔한 "챙")
+        Slash,        // 베임·처형
+        Punch,        // 맞음 "퍽"
+        Kick,         // 발차기
+        BodyFall,     // 쓰러짐
     }
 
     /// <summary>
@@ -36,8 +45,22 @@ namespace RhythmActionGame
         public const int SampleRate = 44100;
         const float Peak = 0.9f;
 
+        /// <summary>실제 녹음 종류(B17.5)의 합성 대체음. 그 밖의 종류는 그대로.</summary>
+        public static SfxKind Fallback(SfxKind k)
+        {
+            switch (k)
+            {
+                case SfxKind.SwordWhoosh: case SfxKind.SwordSwish: return SfxKind.Whoosh;
+                case SfxKind.ParryClang: return SfxKind.MetalClang;
+                case SfxKind.BlockClang: return SfxKind.DullClank;
+                case SfxKind.Slash: case SfxKind.Punch: case SfxKind.Kick: case SfxKind.BodyFall: return SfxKind.BodyHit;
+                default: return k;
+            }
+        }
+
         public static float Seconds(SfxKind k)
         {
+            k = Fallback(k);
             switch (k)
             {
                 case SfxKind.MetalClang: return 0.8f;
@@ -72,6 +95,7 @@ namespace RhythmActionGame
 
         public static float[] Create(SfxKind k)
         {
+            k = Fallback(k);
             int n = Mathf.RoundToInt(Seconds(k) * SampleRate);
             var d = new float[n];
             var rnd = new System.Random(17 + (int)k * 31);

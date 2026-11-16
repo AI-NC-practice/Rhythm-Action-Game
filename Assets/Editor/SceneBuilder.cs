@@ -277,6 +277,15 @@ namespace RhythmActionGame.EditorTools
             bullet.playerBody = new Renderer[] { bodyRenderer, swordRenderer };
             bullet.presentation = presentation;
 
+            // 박에 맞춘 적 칼 휘두름 "쉭" (GDD-beta B17.5)
+            var swingGo = new GameObject("CombatSwing");
+            swingGo.transform.SetParent(systems.transform, false);
+            var swing = swingGo.AddComponent<CombatSwingSounds>();
+            swing.clock = clock;
+            swing.judge = judge;
+            swing.sfx = sfx;
+            swing.presentation = presentation;
+
             var boot = new GameObject("GameBootstrap").AddComponent<GameBootstrap>();
             boot.director = director;
             boot.clock = clock;
@@ -292,6 +301,7 @@ namespace RhythmActionGame.EditorTools
             boot.beatFx = beatFx;
             boot.cueTicks = cueTicks;
             boot.bulletTime = bullet;
+            boot.combatSwing = swing;
 
             BuildGameExtra(boot, chart);
             EditorSceneManager.SaveScene(scene, GameScenePath);

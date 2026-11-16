@@ -27,6 +27,8 @@ namespace RhythmActionGame
         public CueTickPlayer cueTicks;
         /// <summary>회피 슬로모션 (GDD-beta B17.4).</summary>
         public BulletTimeFx bulletTime;
+        /// <summary>박에 맞춘 적 칼 휘두름 (GDD-beta B17.5).</summary>
+        public CombatSwingSounds combatSwing;
         public bool autoStart = true;
 
         public static GameBootstrap Instance { get; private set; }

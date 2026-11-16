@@ -91,11 +91,11 @@ namespace RhythmActionGame.Tests
                 Assert.AreEqual(sec, t, 1e-4f, p.Name + " 덕킹 초");
             }
             Check(GameConfig.Fx.AttackWarn, new[] { SfxKind.Glint }, 0, 0);                                         // A "칭"
-            Check(GameConfig.Fx.ParryPerfect, new[] { SfxKind.MetalClang, SfxKind.LowBoom }, -4f, 0.15f);           // B
-            Check(GameConfig.Fx.DefendNormal, new[] { SfxKind.DullClank }, 0, 0);                                   // C "탕"
-            Check(GameConfig.Fx.Hit, new[] { SfxKind.BodyHit, SfxKind.LowBoom, SfxKind.EarRing }, -8f, 0.3f);       // D
-            Check(GameConfig.Fx.Execution, new[] { SfxKind.BodyHit, SfxKind.LowBoom, SfxKind.Jing }, -6f, 0.5f);    // E
-            Check(GameConfig.Fx.WindmillFinish, new[] { SfxKind.Whoosh, SfxKind.LowBoom }, -6f, 0.5f);              // F3
+            Check(GameConfig.Fx.ParryPerfect, new[] { SfxKind.ParryClang, SfxKind.LowBoom }, -4f, 0.15f);           // B (B17.5: 실제 칼 녹음)
+            Check(GameConfig.Fx.DefendNormal, new[] { SfxKind.BlockClang }, 0, 0);                                  // C (B17.5)
+            Check(GameConfig.Fx.Hit, new[] { SfxKind.Punch, SfxKind.LowBoom, SfxKind.EarRing }, -8f, 0.3f);         // D (B17.5 "퍽")
+            Check(GameConfig.Fx.Execution, new[] { SfxKind.Slash, SfxKind.BodyFall, SfxKind.LowBoom, SfxKind.Jing }, -6f, 0.5f);   // E (B17.5)
+            Check(GameConfig.Fx.WindmillFinish, new[] { SfxKind.SwordSwish, SfxKind.LowBoom }, -6f, 0.5f);          // F3 (B17.5)
             Check(GameConfig.Fx.LandNormal, new[] { SfxKind.DustPuff }, 0, 0);                                     // G
         }
 

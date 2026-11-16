@@ -727,6 +727,18 @@ namespace RhythmActionGame
             public const bool PerfectCandidateSlowMo = false;
         }
 
+        // ---------------- B48 전투 소리 실제 녹음 (GDD-beta B17.5) ----------------
+        /// <summary>전투 소리를 박에 맞춤 (GDD-beta B17.5): 적 공격은 판정 반 박 전에 칼 휘두름 "쉭", 판정 박에 "챙"/"퍽". 음량은 GDD에 없음, Claude가 정함.</summary>
+        public static class CombatSound
+        {
+            /// <summary>적 칼 휘두름 "쉭"을 판정 목표 몇 박 전에 내는지.</summary>
+            public const double SwingLeadBeats = 0.5;
+            /// <summary>휘두름 음량.</summary>
+            public const float SwingVolume = 0.8f;
+            /// <summary>휘두름을 이만큼(초) 미리 예약한다.</summary>
+            public const double LookAheadSeconds = 0.1;
+        }
+
         // ---------------- B10 배경 음악 (GDD 1장 사운드: 국악 퓨전, BPM 고정, 보컬 없음) ----------------
         /// <summary>
         /// 배경 음악 "스테이지 1" — 퓨전 국악 액션, 120 BPM, 101마디(404박, 3분 22초). harness/scripts/music/make-song.py가

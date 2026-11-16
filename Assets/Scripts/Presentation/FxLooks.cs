@@ -121,27 +121,30 @@ namespace RhythmActionGame
             duckDb = 0f; duckSeconds = 0f;
             switch (preset)
             {
-                case "AttackWarn": sfx.Add(SfxKind.Glint); sfx.Add(SfxKind.Whoosh); break;                     // A: "칭" + 바람
-                case "StrikePerfect":
+                case "AttackWarn": sfx.Add(SfxKind.Glint); break;                                              // A: "칭" (휘두름 "쉭"은 판정 반 박 전에 CombatSwingSounds가 냄, B17.5)
+                case "StrikePerfect":                                                                           // 내 공격 PERFECT: 휘두름 + "챙" (B17.5)
+                    sfx.Add(SfxKind.SwordSwish); sfx.Add(SfxKind.ParryClang); sfx.Add(SfxKind.LowBoom);
+                    duckDb = GameConfig.Fx.DuckParryDb; duckSeconds = GameConfig.Fx.DuckParrySeconds; break;
                 case "ParryPerfect":
                 case "ParryPerfectFinale":                                                                      // B: 높은 "챙" + 저음 "쿵", −4 dB 0.15초
-                    sfx.Add(SfxKind.MetalClang); sfx.Add(SfxKind.LowBoom);
+                    sfx.Add(SfxKind.ParryClang); sfx.Add(SfxKind.LowBoom);   // B17.5: 실제 칼 "챙"
                     duckDb = GameConfig.Fx.DuckParryDb; duckSeconds = GameConfig.Fx.DuckParrySeconds; break;
-                case "DodgePerfect": sfx.Add(SfxKind.Whoosh); break;                                            // B 회피: 바람
-                case "StrikeNormal":
-                case "DefendNormal": sfx.Add(SfxKind.DullClank); break;                                         // C: 둔한 "탕"
+                case "DodgePerfect": sfx.Add(SfxKind.SwordWhoosh); break;                                       // B 회피: 칼이 스쳐 감 (B17.5)
+                case "StrikeNormal": sfx.Add(SfxKind.SwordSwish); sfx.Add(SfxKind.BlockClang); break;            // 내 공격 NORMAL (B17.5)
+                case "DefendNormal": sfx.Add(SfxKind.BlockClang); break;                                        // C: 둔한 "챙" (B17.5 녹음)
                 case "Hit":                                                                                     // D: 타격 + 저음 + 귀 울림, −8 dB 0.3초
-                    sfx.Add(SfxKind.BodyHit); sfx.Add(SfxKind.LowBoom); sfx.Add(SfxKind.EarRing);
+                    sfx.Add(SfxKind.Punch); sfx.Add(SfxKind.LowBoom); sfx.Add(SfxKind.EarRing);   // B17.5: "퍽"
                     duckDb = GameConfig.Fx.DuckHitDb; duckSeconds = GameConfig.Fx.DuckHitSeconds; break;
                 case "Execution":
                 case "ExecutionKick":                                                                           // E: 무거운 타격 + 깊은 저음 + 잔향(징), −6 dB 0.5초
-                    sfx.Add(SfxKind.BodyHit); sfx.Add(SfxKind.LowBoom); sfx.Add(SfxKind.Jing);
+                    sfx.Add(SfxKind.Slash); sfx.Add(SfxKind.BodyFall); sfx.Add(SfxKind.LowBoom); sfx.Add(SfxKind.Jing);   // B17.5: 베임 + 쓰러짐
                     duckDb = GameConfig.Fx.DuckExecutionDb; duckSeconds = GameConfig.Fx.DuckExecutionSeconds; break;
-                case "SurroundTurn": case "Simultaneous": sfx.Add(SfxKind.Whoosh); break;                       // F: 칼이 지나가는 바람
-                case "SimultaneousPerfect": sfx.Add(SfxKind.Whoosh); sfx.Add(SfxKind.MetalClang); break;
+                case "SurroundTurn": sfx.Add(SfxKind.Whoosh); break;                                            // F: 몸을 돌리는 바람
+                case "Simultaneous": sfx.Add(SfxKind.Glint); break;                                             // F: 여러 칼을 드는 "칭" (휘두름 "쉭"은 판정 반 박 전, B17.5)
+                case "SimultaneousPerfect": sfx.Add(SfxKind.ParryClang); break;                                 // B17.5: "쉭"은 반 박 전에 이미 남
                 case "WindmillArrow": sfx.Add(SfxKind.Buk); break;                                              // F3: 화살표마다 북
                 case "WindmillFinish":                                                                          // F3: 바람 상승 → 초저음 "쿵" + 넓은 잔향
-                    sfx.Add(SfxKind.Whoosh); sfx.Add(SfxKind.LowBoom); sfx.Add(SfxKind.Jing);
+                    sfx.Add(SfxKind.SwordSwish); sfx.Add(SfxKind.Slash); sfx.Add(SfxKind.BodyFall); sfx.Add(SfxKind.LowBoom); sfx.Add(SfxKind.Jing);   // B17.5: 휘둘러 베고 쓰러짐 + 초저음
                     duckDb = GameConfig.Fx.DuckExecutionDb; duckSeconds = GameConfig.Fx.DuckExecutionSeconds; break;
                 case "JumpPerfect": sfx.Add(SfxKind.Whoosh); break;                                             // G: 도약 바람
                 case "LandPerfect": case "LandNormal": sfx.Add(SfxKind.DustPuff); break;                        // G: 착지 먼지
@@ -149,11 +152,11 @@ namespace RhythmActionGame
                 case "EventPerfectSlow": sfx.Add(SfxKind.Whoosh); sfx.Add(SfxKind.Buk); break;
                 case "Rewind": sfx.Add(SfxKind.TapeRewind); break;                                               // B9.4 되감기 소리
                 case "Standoff": sfx.Add(SfxKind.Glint); break;                                                  // B10.2 대치: 칼 드는 소리
-                case "KickHit": sfx.Add(SfxKind.BodyHit); sfx.Add(SfxKind.LowBoom); sfx.Add(SfxKind.DustPuff); break;          // B13.4 옆차기
+                case "KickHit": sfx.Add(SfxKind.Kick); sfx.Add(SfxKind.LowBoom); sfx.Add(SfxKind.DustPuff); break;             // B13.4 옆차기 (B17.5 녹음)
                 case "BloodHit":                                                                                // B12.2: 베임 + 저음 + 귀 울림, −8 dB
-                    sfx.Add(SfxKind.BodyHit); sfx.Add(SfxKind.LowBoom); sfx.Add(SfxKind.EarRing);
+                    sfx.Add(SfxKind.Slash); sfx.Add(SfxKind.LowBoom); sfx.Add(SfxKind.EarRing);   // B17.5: 베임
                     duckDb = GameConfig.Fx.DuckHitDb; duckSeconds = GameConfig.FailHitSeconds; break;
-                case "PostureBreak": sfx.Add(SfxKind.MetalClang); sfx.Add(SfxKind.Jing); break;                  // B11.3 자세 무너짐
+                case "PostureBreak": sfx.Add(SfxKind.ParryClang); sfx.Add(SfxKind.Jing); break;                  // B11.3 자세 무너짐
             }
         }
     }

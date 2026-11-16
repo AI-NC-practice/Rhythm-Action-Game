@@ -446,3 +446,12 @@ BuildGray와 smoke-test를 통과했다(Builds/Gray/RhythmActionGame.exe). 사�
 - 테스트: B47 EditMode 설정 값을 2차로, PlayMode 2개를 새 동작으로 다시 씀, B45 원 펄스 단언 변경. unity-verify EditMode 173/173, PlayMode 149/149. BuildGray + smoke-test 통과, 전체 오토플레이 344판정 모두 PERFECT·클리어, 슬로는 피한 박(시계 228·252·357.5·386)에서 시작.
 평가: evaluator PASS (harness/reports/B52-eval-1.md). 다음: 사용자 테스트 빌드 확인 → B48.
 - 제안: 슬로 동안 칼날·문짝에 잔상이나 바람 줄기 이펙트를 더하면 "스쳐 감"이 더 잘 보일 수 있다(에셋 단계).
+- 2026-11-16 사용자: B52 "일단 좋아, 지금 맘에 드는 건 아닌데 나중에 다 손보자." → 회피 슬로모션 연출(성공·실패 차이 포함)은 나중에 다시 다듬기. 다음: B48.
+
+## B48 [beta] 전투 소리 실제 녹음 + 박에 맞춘 쉭·챙 (2026-11-16) — done (evaluator PASS)
+- 재료: Mixkit 무료 효과음 8개. 사용자에게 파일 이름·출처·용량(합계 약 2.2 MB)을 보여 주고 **"받아도 됨" 승인(2026-11-16 채팅)** 뒤 받음. 원본 harness/sfx-src/mixkit/, 출처 docs/CREDITS.md.
+- harness/scripts/sfx/prep-mixkit.py(표준 라이브러리만): 모노, 앞 무음 자르기, 길이 줄이기, 끝 페이드, 최고값 0.9 → Assets/Audio/Sfx/Rec_<종류>.wav. SfxSynthTool은 Rec_ 파일이 있으면 합성음 대신 쓰고, 없으면 SfxSynth.Fallback 합성음.
+- 새 SfxKind 8개(SwordWhoosh·SwordSwish·ParryClang·BlockClang·Slash·Punch·Kick·BodyFall). 연출 소리(FxLooks.Sounds): 막기 PERFECT "챙", NORMAL 둔한 챙, 내 공격 휘두름 + 챙, 맞음 "퍽", 처형·윈드밀 마무리 베임 + 쓰러짐(사용자가 적을 쓰러뜨릴 때 소리가 별로라고 한 것 — B40 일부), 옆차기 녹음, 회피는 칼이 스쳐 감.
+- CombatSwingSounds: 적 공격 판정(CombatStep.Attack) 목표 반 박 전에 "쉭"을 dsp 예약 → "쉭-챙"이 박에 들림. 공격 예고·동시 공격 연출의 합성 바람 소리는 뺌(동시 공격 경고는 칼 드는 "칭").
+- 테스트: B48 EditMode 3·PlayMode 2, B08·B30 예전 합성음 단언을 녹음 종류로. unity-verify EditMode 176/176, PlayMode 151/151. BuildGray + smoke-test 통과, 전체 오토플레이 344판정 모두 PERFECT·클리어.
+평가: evaluator PASS (harness/reports/B48-eval-1.md). 다음: B49(사용자: 리듬감 2 최종 확인 + 테스트 빌드).

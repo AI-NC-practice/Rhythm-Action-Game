@@ -82,13 +82,13 @@ namespace RhythmActionGame.Tests
             pd.sfx = sfx;
             pd.Enabled = true;
             pd.Play(GameConfig.Fx.ParryPerfect);
-            CollectionAssert.IsSubsetOf(new[] { SfxKind.MetalClang, SfxKind.LowBoom }, sfx.History, "PERFECT 패링: 챙 + 쿵");
+            CollectionAssert.IsSubsetOf(new[] { SfxKind.ParryClang, SfxKind.LowBoom }, sfx.History, "PERFECT 패링: 챙 + 쿵 (B17.5 녹음)");
             sfx.Tick();
             Assert.AreEqual(Mathf.Pow(10f, -4f / 20f), sfx.DuckFactor, 1e-4f, "음악 −4 dB");
             pd.Play(GameConfig.Fx.Hit);
-            CollectionAssert.IsSubsetOf(new[] { SfxKind.BodyHit, SfxKind.EarRing }, sfx.History, "피격: 타격 + 귀 울림");
+            CollectionAssert.IsSubsetOf(new[] { SfxKind.Punch, SfxKind.EarRing }, sfx.History, "피격: 퍽 + 귀 울림 (B17.5)");
             pd.Play(GameConfig.Fx.DefendNormal);
-            Assert.AreEqual(SfxKind.DullClank, sfx.History[sfx.History.Count - 1], "NORMAL: 둔한 탕");
+            Assert.AreEqual(SfxKind.BlockClang, sfx.History[sfx.History.Count - 1], "NORMAL: 둔한 챙 (B17.5)");
             pd.Play(GameConfig.Fx.WindmillArrow);
             Assert.AreEqual(SfxKind.Buk, sfx.History[sfx.History.Count - 1], "윈드밀 화살표: 북");
             yield return null;

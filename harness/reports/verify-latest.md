@@ -1,7 +1,7 @@
 ﻿# Unity verify report
-time: 2026-11-16 11:32:43
+time: 2026-11-16 12:08:19
 
-## EditMode : total=173 passed=173 failed=0 skipped=0 result=Passed
+## EditMode : total=176 passed=176 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Config_MatchGddBetaB1
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_LabelPose_PopThenRise_045s
@@ -99,6 +99,9 @@ time: 2026-11-16 11:32:43
   - [Passed] RhythmActionGame.Tests.B47_BulletTimeTests.B47_Config_MatchesGddBetaB17_4_Second
   - [Passed] RhythmActionGame.Tests.B47_BulletTimeTests.B47_IsBulletCue_ByTag
   - [Passed] RhythmActionGame.Tests.B47_BulletTimeTests.B47_Spots_Gate_SurroundLastSimultaneous_BossCounterAndLastFlurry
+  - [Passed] RhythmActionGame.Tests.B48_CombatSoundTests.B48_Presets_UseRealSwordAndHitSounds
+  - [Passed] RhythmActionGame.Tests.B48_CombatSoundTests.B48_RecordedFiles_ShortMono16bit_AndCredited
+  - [Passed] RhythmActionGame.Tests.B48_CombatSoundTests.B48_SwingTiming_HalfBeatBefore_EnemyAttacksOnly
   - [Passed] RhythmActionGame.Tests.B50_JangdanTests.B50_ChartWithoutFlag_NoJangdan_And_RhythmHitSound
   - [Passed] RhythmActionGame.Tests.B50_JangdanTests.B50_JangdanNotes_Rules_GapsAndClearZones
   - [Passed] RhythmActionGame.Tests.B51_DrumKeyTests.B51_DrumKeys_JudgeOnlyJangdan_ArrowsOnlyStage
@@ -176,7 +179,7 @@ time: 2026-11-16 11:32:43
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_SpeedFx_Intensity
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_Texts_MatchGdd48
 
-## PlayMode : total=149 passed=149 failed=0 skipped=0 result=Passed
+## PlayMode : total=151 passed=151 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -288,6 +291,8 @@ time: 2026-11-16 11:32:43
   - [Passed] RhythmActionGame.Tests.B45_BeatFxPlayTests.B45_Title_CueTicksToggle_Saved
   - [Passed] RhythmActionGame.Tests.B47_BulletTimePlayTests.B52_GameScene_ClosingGate_PressAtNormalSpeed_ThenGateCameraCut
   - [Passed] RhythmActionGame.Tests.B47_BulletTimePlayTests.B52_NoSlowBeforePress_SlowAfterDodge_GrayMuffled_ThenBack_SkipIfNextClose_NoneOnFail
+  - [Passed] RhythmActionGame.Tests.B48_CombatSoundPlayTests.B48_GameScene_RecordedClipsLoaded_AndSwingBeforeEnemyAttack
+  - [Passed] RhythmActionGame.Tests.B48_CombatSoundPlayTests.B48_Swing_ScheduledHalfBeatBefore_EnemyAttack_Once
   - [Passed] RhythmActionGame.Tests.B50_JangdanPlayTests.B50_GameScene_LaneShowsNotes_NoJudgeScreen_FailKeepsHpAndSpeed
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_ChapterStartBeats_MatchSections
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(1)
