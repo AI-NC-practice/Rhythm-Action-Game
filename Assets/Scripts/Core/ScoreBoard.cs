@@ -74,6 +74,8 @@ namespace RhythmActionGame
         public const string Back = "돌아가기";
         /// <summary>판정 예고음 설정 (GDD-beta B17.2).</summary>
         public const string CueTicks = "예고음";
+        /// <summary>음악 켜기/끄기 설정 (효과음만 듣기).</summary>
+        public const string Music = "음악";
         public const string On = "켜짐";
         public const string Off = "꺼짐";
         public const string Paused = "일시정지";
@@ -97,7 +99,7 @@ namespace RhythmActionGame
         public static string Rank(string r) => $"랭크 {r}";
 
         /// <summary>UI에 나오는 모든 한글·기호 (폰트 글자 검사용).</summary>
-        public const string AllGlyphs = Title + Start + Settings + Quit + TimingOffset + Volume + Back + CueTicks + On + Off + Paused + Continue + ToTitle + Cleared + GameOver + Retry + TooEarly
+        public const string AllGlyphs = Title + Start + Settings + Quit + TimingOffset + Volume + Back + CueTicks + Music + On + Off + Paused + Continue + ToTitle + Cleared + GameOver + Retry + TooEarly
             + GameConfig.Music.Credit + "콤보 최고 속도 점수 랭크 PERFECTNORMALFAIL x0123456789.+-ms SABC↑↓←→";
     }
 

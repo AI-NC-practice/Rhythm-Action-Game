@@ -14,6 +14,9 @@ namespace RhythmActionGame
         public RectTransform Panel { get; private set; }
         public Button ContinueButton { get; private set; }
         public Button TitleButton { get; private set; }
+        /// <summary>음악 켜기/끄기 (효과음만 듣기, 테스트용).</summary>
+        public Button MusicButton { get; private set; }
+        public Text MusicText { get; private set; }
         public bool IsPaused { get; private set; }
 
         void Awake() => Build();
@@ -25,6 +28,8 @@ namespace RhythmActionGame
             UiWidgets.Label(Panel, "PauseTitle", UiText.Paused, 80, new Vector2(0, 180));
             ContinueButton = UiWidgets.Button(Panel, "ContinueButton", UiText.Continue, new Vector2(0, 0), Resume);
             TitleButton = UiWidgets.Button(Panel, "TitleButton", UiText.ToTitle, new Vector2(0, -110), ToTitle);
+            MusicButton = UiWidgets.Button(Panel, "MusicButton", MusicLabel(), new Vector2(0, -220), ToggleMusic);
+            MusicText = MusicButton.GetComponentInChildren<Text>();
             Panel.gameObject.SetActive(false);
         }
 
@@ -46,6 +51,7 @@ namespace RhythmActionGame
             IsPaused = true;
             if (clock != null) clock.Pause();
             Time.timeScale = 0f;
+            MusicText.text = MusicLabel();
             Panel.gameObject.SetActive(true);
         }
 
@@ -56,6 +62,15 @@ namespace RhythmActionGame
             Time.timeScale = slowMotion != null && slowMotion.IsActive ? GameConfig.SlowMotionTimeScale : 1f;
             if (clock != null) clock.Resume();
             Panel.gameObject.SetActive(false);
+        }
+
+        static string MusicLabel() => $"{UiText.Music} {(GameSettings.MusicOn ? UiText.On : UiText.Off)}";
+
+        /// <summary>음악 켜기/끄기 (효과음·히트사운드는 그대로, 곡과 박자는 계속).</summary>
+        public void ToggleMusic()
+        {
+            GameSettings.MusicOn = !GameSettings.MusicOn;
+            MusicText.text = MusicLabel();
         }
 
         public void ToTitle()

@@ -135,7 +135,7 @@ namespace RhythmActionGame
             {
                 if (s == null) continue;
                 if (!musicBase.ContainsKey(s)) musicBase[s] = s.volume;
-                s.volume = musicBase[s] * musicGroupVolume * DuckFactor * MusicFxGain;   // 음량만 (time·pitch는 그대로)
+                s.volume = musicBase[s] * musicGroupVolume * DuckFactor * MusicFxGain * (GameSettings.MusicOn ? 1f : 0f);   // 음량만 (time·pitch는 그대로), 설정 "음악 꺼짐"이면 0
             }
         }
 

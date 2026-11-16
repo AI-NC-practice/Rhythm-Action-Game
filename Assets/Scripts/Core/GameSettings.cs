@@ -31,6 +31,19 @@ namespace RhythmActionGame
             set { PlayerPrefs.SetInt(CueTicksKey, value ? 1 : 0); PlayerPrefs.Save(); }
         }
 
+        public const string MusicOnKey = "settings.musicOn";
+        static int musicCache = -1;
+
+        /// <summary>
+        /// 음악 켜기 (테스트용 요청, 2026-11-16 사용자). 끄면 Music 그룹(배경 곡)만 소리가 0이 되고 효과음·히트사운드·예고음은 그대로.
+        /// 곡은 계속 재생되므로 박자·판정은 바뀌지 않는다. 기본 켜짐. 매 프레임 읽으므로 값을 기억해 둔다.
+        /// </summary>
+        public static bool MusicOn
+        {
+            get { if (musicCache < 0) musicCache = PlayerPrefs.GetInt(MusicOnKey, 1) != 0 ? 1 : 0; return musicCache != 0; }
+            set { musicCache = value ? 1 : 0; PlayerPrefs.SetInt(MusicOnKey, musicCache); PlayerPrefs.Save(); }
+        }
+
         /// <summary>범위로 자르고 5 ms 단위로 맞춘다.</summary>
         public static int ClampOffset(int ms)
         {

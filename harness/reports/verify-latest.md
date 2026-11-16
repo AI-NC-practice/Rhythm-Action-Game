@@ -1,5 +1,5 @@
 ﻿# Unity verify report
-time: 2026-11-16 12:08:19
+time: 2026-11-16 12:24:28
 
 ## EditMode : total=176 passed=176 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
@@ -179,7 +179,7 @@ time: 2026-11-16 12:08:19
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_SpeedFx_Intensity
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_Texts_MatchGdd48
 
-## PlayMode : total=151 passed=151 failed=0 skipped=0 result=Passed
+## PlayMode : total=154 passed=154 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -294,6 +294,9 @@ time: 2026-11-16 12:08:19
   - [Passed] RhythmActionGame.Tests.B48_CombatSoundPlayTests.B48_GameScene_RecordedClipsLoaded_AndSwingBeforeEnemyAttack
   - [Passed] RhythmActionGame.Tests.B48_CombatSoundPlayTests.B48_Swing_ScheduledHalfBeatBefore_EnemyAttack_Once
   - [Passed] RhythmActionGame.Tests.B50_JangdanPlayTests.B50_GameScene_LaneShowsNotes_NoJudgeScreen_FailKeepsHpAndSpeed
+  - [Passed] RhythmActionGame.Tests.B53_MusicMuteTests.B53_GameScene_PauseToggle_MutesOnlyMusic_ClockAndSfxKeepGoing
+  - [Passed] RhythmActionGame.Tests.B53_MusicMuteTests.B53_Setting_DefaultOn_Saved
+  - [Passed] RhythmActionGame.Tests.B53_MusicMuteTests.B53_Title_MusicToggle
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_ChapterStartBeats_MatchSections
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(1)
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(4)

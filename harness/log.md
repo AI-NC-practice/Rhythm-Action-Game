@@ -458,3 +458,7 @@ BuildGray와 smoke-test를 통과했다(Builds/Gray/RhythmActionGame.exe). 사�
 
 ### 2026-11-16 B49 [사용자] 리듬감 2 최종 확인 — needs_user
 B48까지 반영한 BuildGray(Builds/Gray/RhythmActionGame.exe)가 smoke-test·전체 오토플레이(344판정 PERFECT, 클리어)를 통과했다. 사용자 플레이 확인을 기다린다. (B46 "합"은 취소, B47→B52 회피 슬로모션, B52 연출은 나중에 다시 다듬기로 함.)
+
+## B53 [beta] 음악 끄기 설정 (효과음만 듣기) (2026-11-16) — done (evaluator PASS)
+사용자 요청: "테스트를 위해 음악 소리 끄는 옵션, 효과음만 들을 수 있도록." GameSettings.MusicOn(PlayerPrefs settings.musicOn, 기본 켜짐). SfxPlayer가 Music 그룹(배경 곡) 음량에만 0/1을 곱함 — 곡과 박자 시계는 계속, 효과음·히트사운드·예고음은 그대로. 타이틀 설정에 "음악 켜짐/꺼짐"(돌아가기 버튼 아래로), 일시정지(Esc) 메뉴에 "음악 켜짐/꺼짐" 버튼. 테스트 B53 PlayMode 3. unity-verify EditMode 176/176, PlayMode 154/154. BuildGray + smoke-test 통과.
+평가: evaluator PASS (harness/reports/B53-eval-1.md). B49(사용자 확인) 대기 그대로.

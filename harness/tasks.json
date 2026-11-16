@@ -1140,6 +1140,24 @@
                       "notes":  "2026-11-16 evaluator PASS (1회차). 사용자 승인(\"받아도 됨\")으로 Mixkit 8개 받음 → Rec_*.wav. 적 공격 판정 반 박 전 \"쉭\" 예약, 막기 챙·맞음 퍽·처형 베임+쓰러짐·옆차기 녹음. 사용자 테스트 빌드 확인은 다음 피드백으로."
                   },
                   {
+                      "id":  "B53",
+                      "title":  "[beta] 음악 끄기 설정 (효과음만 듣기, 테스트용)",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "B48"
+                                     ],
+                      "acceptance":  [
+                                         "타이틀 설정과 일시정지 메뉴에 \"음악 켜짐/꺼짐\" — 저장(PlayerPrefs), 기본 켜짐 — 테스트",
+                                         "끄면 배경 곡(Music 그룹)만 0, 효과음·히트사운드·예고음은 그대로, 곡과 박자 시계는 계속 — 테스트",
+                                         "unity-verify 통과"
+                                     ],
+                      "status":  "done",
+                      "attempts":  1,
+                      "max_attempts":  3,
+                      "notes":  "evaluator PASS (1회차). 2026-11-16 사용자 요청: 테스트를 위해 음악 소리 끄는 옵션, 효과음만 들을 수 있도록."
+                  },
+                  {
                       "id":  "B49",
                       "title":  "[사용자] 리듬감 2 최종 확인 + 테스트 빌드",
                       "type":  "human",
