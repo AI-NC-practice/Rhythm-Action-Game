@@ -136,15 +136,18 @@ namespace RhythmActionGame.Tests
             Debug.Log($"[R15] 되감기 뒤 플레이어 {endP} 무사 {endE}, 프레임당 최대 이동 {maxJumpP:0.000}/{maxJumpE:0.000}, 가운데 남은 거리 {midDist:0.00}");
             Assert.Less(Vector3.Distance(Flat(endP), Flat(dir.RewindTargetPlayer)), 0.1f, "플레이어가 단계 시작 자리로");
             Assert.Less(Vector3.Distance(Flat(endE), Flat(dir.RewindTargetEnemy)), 0.15f, "무사가 단계 시작 자리로");
-            Assert.Less(Vector3.Distance(Flat(endP), Flat(phaseP)), 0.8f, "테스트가 적은 단계 시작 자리와도 가까움 (기록 박 차이 여유)");
-            Assert.Less(Vector3.Distance(Flat(endE), Flat(phaseE)), 0.8f, "무사도");
+            Assert.Less(Vector3.Distance(Flat(endP), Flat(phaseP)), 0.1f, "테스트가 적은 단계 시작 자리와도 일치");
+            Assert.Less(Vector3.Distance(Flat(endE), Flat(phaseE)), 0.15f, "무사도");
             Assert.Less(maxJumpP, Mathf.Max(0.05f, awayP * 0.35f), "플레이어 순간 이동 없음");
             Assert.Less(maxJumpE, Mathf.Max(0.05f, awayE * 0.35f), "무사 순간 이동 없음");
             Assert.Less(midDist, (awayP + awayE) * 0.85f, "가운데쯤에는 이미 거꾸로 이동 중");
             Assert.Greater(midDist, (awayP + awayE) * 0.15f, "한 번에 건너뛰지 않음");
         }
 
-        /// <summary>윈드밀 FAIL 되감기 (4장 포위): 플레이어·적 5명이 3단계 1마디 앞 자리로 돌아감, 프레임마다 조금씩. 챕터 되감기는 B24_ChapterRewind 테스트가 본다.</summary>
+        /// <summary>
+        /// 윈드밀 FAIL 되감기 (4장 포위): 플레이어와 적 5명(뛰어든 적 포함)이 3단계 첫 원 1마디 앞 박의 자리로 프레임마다 조금씩 돌아감.
+        /// 테스트가 그 박을 지나는 프레임에 직접 잰 자리와도 비교한다.
+        /// </summary>
         [UnityTest]
         public IEnumerator R15_WindmillFail_RewindsPlayerAndEnemiesToCheckpoint()
         {
@@ -154,44 +157,46 @@ namespace RhythmActionGame.Tests
             Assert.IsTrue(enc.Event.IsSurround);
             var cues = enc.Cues.ToList();
             var wind = cues.Where(c => Step(c).Phase == 3).ToList();
-            // 1·2단계를 치다가 되감기 박(3단계 첫 원 1마디 앞)을 지나는 순간의 자리를 테스트가 따로 적는다
             double cpBeat = wind[0].TargetBeat - GameConfig.RewindLeadBeats;
-            Vector3 cpP = Vector3.zero; List<Vector3> cpE = null; List<float> cpLunge = null; float cpOrbit = float.NaN;
-            foreach (var c in cues.Where(c => Step(c).Phase != 3))
+            // 1·2단계를 자동으로 치며 한 프레임씩: 코드가 되감기 자리를 적는 프레임에 테스트도 자리를 잰다
+            Vector3 cpP = Vector3.zero; List<Vector3> cpE = null;
+            for (int f = 0; f < 6000 && boot.clock.CurrentBeat < wind[0].TargetBeat - 0.3; f++)
             {
-                if (cpE == null && c.TargetBeat > cpBeat)
+                var before = dir.RecordedCheckpoints;
+                now += 0.01;
+                foreach (var c in boot.judge.Cues.ToArray())
+                    if (!c.Judged && c.Appeared && Step(c).Phase != 3 && now >= boot.clock.TimeOfBeat(c.TargetBeat) - 1e-6) { boot.judge.Submit(c.Key, now); break; }
+                yield return null;
+                if (cpE == null && dir.RecordedCheckpoints > before)
                 {
-                    yield return AdvanceTo(boot.clock.TimeOfBeat(cpBeat + 0.02));
                     cpP = boot.player.transform.position;
                     cpE = enc.Actors.Select(a => a != null ? a.transform.position : Vector3.zero).ToList();
-                    cpLunge = enc.Actors.Select((a, i) => dir.LungeOf(i)).ToList();
-                    cpOrbit = dir.SurroundOrbitDegrees;
                 }
-                yield return Hit(c, 0.0);
             }
-            if (cpE == null)
-            {
-                yield return AdvanceTo(boot.clock.TimeOfBeat(cpBeat + 0.02));
-                cpP = boot.player.transform.position;
-                cpE = enc.Actors.Select(a => a != null ? a.transform.position : Vector3.zero).ToList();
-                cpLunge = enc.Actors.Select((a, i) => dir.LungeOf(i)).ToList();
-                cpOrbit = dir.SurroundOrbitDegrees;
-            }
-            Assert.Greater(dir.RecordedCheckpoints, 0, "3단계 1마디 앞 자리 기록");
+            Assert.IsNotNull(cpE, "3단계 1마디 앞 자리 기록");
+            Assert.IsNotNull(dir.LastCheckpointActors, "코드가 적 5명 자리를 적음");
             yield return Hit(wind[0], 0.0);
             yield return Hit(wind[1], null);   // 윈드밀 FAIL
             Assert.IsTrue(dir.Rewinding);
             Assert.AreEqual(RewindKind.Windmill, dir.LastRewind);
             Assert.IsTrue(dir.MotionRewinding, "자리도 되감는 중");
-            var last = boot.player.transform.position;
-            float maxJump = 0f;
+            var alive = Enumerable.Range(0, enc.Actors.Length).Where(i => enc.Actors[i] != null && !enc.Actors[i].Defeated).ToList();
+            var lastP = boot.player.transform.position;
+            var lastE = alive.Select(i => enc.Actors[i].transform.position).ToList();
+            float away = alive.Select((i, n) => Vector3.Distance(Flat(lastE[n]), Flat(dir.LastCheckpointActors[i]))).DefaultIfEmpty(0f).Max();
+            float maxJumpP = 0f, maxJumpE = 0f;
             for (int s = 1; s <= 20; s++)
             {
                 real += GameConfig.RewindSeconds / 20f;
                 yield return null;
                 var p = boot.player.transform.position;
-                if (s < 20) maxJump = Mathf.Max(maxJump, Vector3.Distance(Flat(p), Flat(last)));
-                last = p;
+                var e = alive.Select(i => enc.Actors[i].transform.position).ToList();
+                if (s < 20)
+                {
+                    maxJumpP = Mathf.Max(maxJumpP, Vector3.Distance(Flat(p), Flat(lastP)));
+                    for (int n = 0; n < e.Count; n++) maxJumpE = Mathf.Max(maxJumpE, Vector3.Distance(Flat(e[n]), Flat(lastE[n])));
+                }
+                lastP = p; lastE = e;
             }
             real += 0.05f;
             yield return null;
@@ -199,20 +204,62 @@ namespace RhythmActionGame.Tests
             Assert.IsFalse(dir.Rewinding);
             Assert.IsFalse(dir.MotionRewinding);
             float dP = Vector3.Distance(Flat(boot.player.transform.position), Flat(cpP));
-            // 적: 원을 따라 돈 각도가 그때로 돌아감. 뛰어든(공격 중) 적은 판정 원을 따라 다시 정해지므로 원 위에 서 있던 적만 자리 비교
-            float dOrbit = Mathf.Abs(dir.SurroundOrbitDegrees - cpOrbit);
-            float dE = 0f; int compared = 0;
-            for (int i = 0; i < enc.Actors.Length; i++)
+            float dE = 0f;
+            foreach (var i in alive) dE = Mathf.Max(dE, Vector3.Distance(Flat(enc.Actors[i].transform.position), Flat(cpE[i])));
+            Debug.Log($"[R15] 윈드밀 되감기: 되감기 전 적 최대 거리 {away:0.00} m → 뒤 플레이어 차이 {dP:0.000} m, 적 {alive.Count}명 최대 차이 {dE:0.000} m, 프레임당 최대 {maxJumpP:0.000}/{maxJumpE:0.000} m");
+            Assert.Less(dP, 0.1f, "플레이어가 3단계 1마디 앞 자리로");
+            Assert.Less(dE, 0.3f, "적 5명(뛰어든 적 포함)도 그 자리로");
+            Assert.Less(maxJumpP, 0.3f, "플레이어 순간 이동 없음");
+            Assert.Less(maxJumpE, Mathf.Max(0.3f, away * 0.35f), "적 순간 이동 없음");
+        }
+
+        /// <summary>
+        /// 챕터 되감기(체력 0, 2챕터 92박 전투 중): 플레이어는 경로를 따라 이어 뒤로(B24 테스트), 끝나면 무대를 챕터 시작으로 다시 세운다.
+        /// 적은 챕터 시작 때 자리로 돌아가고, 자리가 바뀌는 순간(되감기 끝) 그 적은 화면 밖이거나 40 m 넘게 멀다(눈에 띄는 순간 이동 없음).
+        /// </summary>
+        [UnityTest]
+        public IEnumerator R15_ChapterRewind_EnemiesBackToChapterStart_NotSeenJumping()
+        {
+            double chStart = MapLayout.SectionOf(92).StartBeat;
+            yield return Load(chStart);
+            for (int i = 0; i < 3; i++) { now += 0.01; yield return null; }
+            var actors = Object.FindObjectsByType<EnemyActor>(FindObjectsSortMode.None).ToList();
+            var start = actors.ToDictionary(a => a, a => a.transform.position);
+            yield return UntilCombat();
+            Assert.AreEqual(92, dir.CurrentEncounter.Event.runBeat, "2챕터 92박 전투");
+            for (int i = 0; i < 100; i++) { now += 0.01; yield return null; }
+            var mid = actors.ToDictionary(a => a, a => a.transform.position);
+            int movedBefore = actors.Count(a => Vector3.Distance(Flat(mid[a]), Flat(start[a])) > 1f);
+            dir.Health.Damage(); dir.Health.Damage(); dir.Health.Damage();
+            yield return null;
+            Assert.IsTrue(dir.Rewinding);
+            Assert.AreEqual(RewindKind.Chapter, dir.LastRewind);
+            var cam = GameObject.Find("PlayerCamera").GetComponent<Camera>();
+            Dictionary<EnemyActor, Vector3> last = actors.ToDictionary(a => a, a => a.transform.position);
+            int seenJumps = 0;
+            for (int s = 1; s <= 24; s++)
             {
-                var a = enc.Actors[i];
-                if (a == null || a.Defeated || cpLunge[i] > 0.01f || dir.LungeOf(i) > 0.01f) continue;
-                dE = Mathf.Max(dE, Vector3.Distance(Flat(a.transform.position), Flat(cpE[i]))); compared++;
+                real += GameConfig.RewindSeconds / 20f;
+                yield return null;
+                foreach (var a in actors)
+                {
+                    var p = a.transform.position;
+                    if (Vector3.Distance(Flat(p), Flat(last[a])) > 1.5f)
+                    {
+                        var vp = cam.WorldToViewportPoint(last[a] + Vector3.up);
+                        bool onScreen = vp.z > 0f && vp.z < 40f && vp.x > 0f && vp.x < 1f && vp.y > 0f && vp.y < 1f && a.gameObject.activeInHierarchy;
+                        if (onScreen) { seenJumps++; Debug.Log($"[R15] 챕터 되감기: {a.name} 화면 안 {vp.z:0.0} m에서 {Vector3.Distance(p, last[a]):0.0} m 이동"); }
+                    }
+                    last[a] = p;
+                }
             }
-            Debug.Log($"[R15] 윈드밀 되감기: 플레이어 차이 {dP:0.000} m, 도는 각도 차이 {dOrbit:0.00}°, 원 위 적 {compared}명 최대 차이 {dE:0.000} m, 프레임당 최대 {maxJump:0.000} m");
-            Assert.Less(Vector3.Distance(Flat(boot.player.transform.position), Flat(dir.RewindTargetPlayer)), 0.1f, "플레이어가 되감기 목표 자리로");
-            Assert.Less(dP, 0.8f, "테스트가 적은 자리와도 가까움 (기록 순간 이동 중이면 코드는 이동이 끝난 자리를 적음)");
-            Assert.Less(dOrbit, 2f, "적들이 원을 따라 돈 각도가 그때로 (적 자리는 이 각도로 정해짐)");
-            Assert.Less(maxJump, 0.3f, "순간 이동 없음");
+            Assert.IsFalse(dir.Rewinding);
+            for (int i = 0; i < 3; i++) { now += 0.01; yield return null; }
+            float maxBack = actors.Max(a => Vector3.Distance(Flat(a.transform.position), Flat(start[a])));
+            Debug.Log($"[R15] 챕터 되감기: 전투 중 자리를 옮긴 적 {movedBefore}명, 되감은 뒤 챕터 시작 자리와 최대 차이 {maxBack:0.000} m, 화면 안 순간 이동 {seenJumps}");
+            Assert.Greater(movedBefore, 0, "전투 중 자리를 옮긴 적이 있어야 의미 있는 검사");
+            Assert.Less(maxBack, 0.3f, "적이 챕터 시작 때 자리로");
+            Assert.AreEqual(0, seenJumps, "화면 안에서 보이는 순간 이동 없음");
         }
 
         static CombatStep Step(JudgeCue c) => (CombatStep)c.Tag;

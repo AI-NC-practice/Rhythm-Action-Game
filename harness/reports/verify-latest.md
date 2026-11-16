@@ -1,5 +1,5 @@
 ﻿# Unity verify report
-time: 2026-11-17 05:45:27
+time: 2026-11-17 05:58:02
 
 ## EditMode : total=204 passed=204 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
@@ -207,7 +207,7 @@ time: 2026-11-17 05:45:27
   - [Passed] RhythmActionGame.Tests.T14_EnemyRigTests.T14_GameScene_EveryEnemy_HasModel_WeaponOnHandBone_NoCapsule
   - [Passed] RhythmActionGame.Tests.T14_EnemyRigTests.T14_PlayerController_HasExecutionAndHitStates
 
-## PlayMode : total=195 passed=194 failed=0 skipped=1 result=Passed
+## PlayMode : total=196 passed=195 failed=0 skipped=1 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -345,6 +345,7 @@ time: 2026-11-17 05:45:27
   - [Passed] RhythmActionGame.Tests.R07_EnemyRunPlayTests.R07_CombatEnemies_RunWhenMoving_NotInPlace
   - [Passed] RhythmActionGame.Tests.R07_EnemyRunPlayTests.R07_EventFigures_RunWhileMoving_NoGlide
   - [Passed] RhythmActionGame.Tests.R07_EnemyRunPlayTests.R07_RoofKick_FliesOffRoofEdge_LandsBelow_CameraFollows
+  - [Passed] RhythmActionGame.Tests.R15_R16_CombatPlacePlayTests.R15_ChapterRewind_EnemiesBackToChapterStart_NotSeenJumping
   - [Passed] RhythmActionGame.Tests.R15_R16_CombatPlacePlayTests.R15_DuelFail_RewindsPlayerAndBossToPhaseStart_Continuously
   - [Passed] RhythmActionGame.Tests.R15_R16_CombatPlacePlayTests.R15_WindmillFail_RewindsPlayerAndEnemiesToCheckpoint
   - [Passed] RhythmActionGame.Tests.R15_R16_CombatPlacePlayTests.R16_CombatStill_NotRunning_ThenRunAfterCombat

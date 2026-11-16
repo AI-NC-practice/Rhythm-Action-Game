@@ -1710,8 +1710,8 @@
                                          "PlayMode 테스트: 되감기 전후 플레이어·적 위치가 구간 시작과 일치",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  1,
+                      "status":  "done",
+                      "attempts":  2,
                       "max_attempts":  3,
                       "notes":  "사용자 피드백(2026-11-16 6번): 되돌리기를 하면 적이랑 나도 처음 위치로 가야지 왜 제자리에서 되돌려지냐. 원인 확인 필요."
                   },

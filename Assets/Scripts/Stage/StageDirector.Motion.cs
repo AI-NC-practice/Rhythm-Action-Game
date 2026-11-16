@@ -350,7 +350,7 @@ namespace RhythmActionGame
         // 되감을 수 있는 박(무사 결투 단계 시작, 윈드밀 3단계 1마디 앞)을 지날 때 자리를 적어 두고,
         // 되감기 연출(0.8초) 동안 지금 자리 → 그 자리로 거꾸로 이어 옮긴다 (순간 이동 아님).
 
-        struct MotionSnap { public Vector3 p, e; public Quaternion f; public int circle; public float orbit; }
+        struct MotionSnap { public Vector3 p, e; public Quaternion f; public int circle; public float orbit; public Vector3[] actors; public float[] lunges; }
         class Checkpoint { public double beat; public bool has; public MotionSnap snap; }
         readonly List<Checkpoint> checkpoints = new List<Checkpoint>();
         bool motionRewind;
@@ -361,6 +361,9 @@ namespace RhythmActionGame
         /// <summary>마지막 되감기가 향한 플레이어·적 자리 (테스트용).</summary>
         public Vector3 RewindTargetPlayer => rewindToSnap.p;
         public Vector3 RewindTargetEnemy => rewindToSnap.e;
+        /// <summary>마지막으로 적은 되감기 박의 적(포위 5명) 자리 (테스트용, 없으면 null).</summary>
+        public Vector3[] LastCheckpointActors { get; private set; }
+        public Vector3 LastCheckpointPlayer { get; private set; }
         /// <summary>자리를 적어 둔 되감기 박 수 (테스트용).</summary>
         public int RecordedCheckpoints => checkpoints.Count(c => c.has);
 
@@ -376,15 +379,17 @@ namespace RhythmActionGame
                 checkpoints.Add(new Checkpoint { beat = e.StartBeat + e.Steps.Where(s => s.Phase == 3).Min(s => s.OffsetBeats) - GameConfig.RewindLeadBeats });
         }
 
-        MotionSnap CurrentSnap(bool settled)
+        /// <summary>지금 보이는 자리 그대로 (이동 중이면 이동 중인 자리 — 되감은 뒤 그 자리에서 다시 시작한다).</summary>
+        MotionSnap CurrentSnap()
         {
-            // settled: 이동 중이면 그 이동이 끝난 자리 (되감은 뒤 같은 박에서 다시 시작할 때 자리)
-            return new MotionSnap
+            var snap = new MotionSnap { p = MotionPlayer, e = MotionEnemy, f = facing, circle = CircleDirection, orbit = SurroundOrbitDegrees };
+            if (SurroundMotionActive && encounter != null && encounter.Actors != null)
             {
-                p = settled && SurroundMotionActive ? sTo : settled && moveT < 1f ? pTo : MotionPlayer,
-                e = settled && (charging || moveT < 1f) ? eTo : MotionEnemy,
-                f = facing, circle = CircleDirection, orbit = SurroundOrbitDegrees,
-            };
+                // 포위: 적 5명 자리(뛰어든 정도 포함)를 하나하나 적는다 (도는 각도만으로는 뛰어든 적 자리가 안 맞음)
+                snap.actors = encounter.Actors.Select(a => a == null ? Vector3.zero : a.MotionPosition ?? a.transform.position).ToArray();
+                snap.lunges = lunge != null ? (float[])lunge.Clone() : null;
+            }
+            return snap;
         }
 
         void RecordCheckpoints()
@@ -393,7 +398,11 @@ namespace RhythmActionGame
             if (!MotionActive && !SurroundMotionActive) return;
             double beat = clock.CurrentBeat;
             foreach (var c in checkpoints)
-                if (!c.has && beat >= c.beat) { c.has = true; c.snap = CurrentSnap(true); }
+                if (!c.has && beat >= c.beat)
+                {
+                    c.has = true; c.snap = CurrentSnap();
+                    LastCheckpointPlayer = c.snap.p; LastCheckpointActors = c.snap.actors;
+                }
         }
 
         /// <summary>되감기 시작 (BeginRewind에서): 되감는 박의 기록이 있으면 자리를 거꾸로 옮기기 시작한다.</summary>
@@ -403,7 +412,7 @@ namespace RhythmActionGame
             if (!MotionActive && !SurroundMotionActive) return;
             var cp = checkpoints.Where(c => c.has).OrderBy(c => Math.Abs(c.beat - targetBeat)).FirstOrDefault();
             if (cp == null || Math.Abs(cp.beat - targetBeat) > 1e-3) return;
-            rewindFromSnap = CurrentSnap(false);
+            rewindFromSnap = CurrentSnap();
             rewindToSnap = cp.snap;
             motionRewind = true;
             foreach (var c in checkpoints) if (c.beat > cp.beat + 1e-3) c.has = false;   // 뒤 단계는 다시 지날 때 새로 적는다
@@ -418,8 +427,22 @@ namespace RhythmActionGame
             {
                 SurroundOrbitDegrees = Mathf.Lerp(rewindFromSnap.orbit, rewindToSnap.orbit, k);
                 sFrom = sTo = MotionPlayer; sMoveT = 1f;
-                if (!Rewinding) motionRewind = false;
-                UpdateSurroundMotion(0f);
+                player.CombatOffset = Flat(MotionPlayer - MotionCenter);
+                player.Place();
+                var acts = encounter != null ? encounter.Actors : null;
+                if (acts != null && rewindFromSnap.actors != null && rewindToSnap.actors != null)
+                    for (int i = 0; i < acts.Length && i < rewindToSnap.actors.Length; i++)
+                    {
+                        var a = acts[i];
+                        if (a == null || a.Defeated) continue;
+                        a.MotionPosition = Vector3.Lerp(rewindFromSnap.actors[i], rewindToSnap.actors[i], k);
+                        a.FacePoint = MotionPlayer;
+                    }
+                if (!Rewinding)
+                {
+                    motionRewind = false;
+                    if (rewindToSnap.lunges != null && lunge != null && rewindToSnap.lunges.Length == lunge.Length) System.Array.Copy(rewindToSnap.lunges, lunge, lunge.Length);
+                }
                 return;
             }
             MotionEnemy = Vector3.Lerp(rewindFromSnap.e, rewindToSnap.e, k);
