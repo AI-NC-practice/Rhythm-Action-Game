@@ -145,6 +145,8 @@ namespace RhythmActionGame.EditorTools
             var swordRenderer = sword.GetComponentInChildren<MeshRenderer>();
             foreach (var r in sword.GetComponentsInChildren<MeshRenderer>()) r.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
             playerBody.swordRenderers = sword.GetComponentsInChildren<MeshRenderer>();
+            playerBody.swordGrip = sword;
+            playerBody.animator.gameObject.AddComponent<PlayerSwordIK>().body = playerBody;   // 막기 때 손을 카메라 앞에
             var rig = new GameObject("CameraRig");
             rig.transform.SetParent(player.transform, false);
             rig.transform.localPosition = new Vector3(0, GameConfig.EyeHeight, GameConfig.Body.EyeForward);
@@ -240,6 +242,7 @@ namespace RhythmActionGame.EditorTools
             vfxPool.worldCamera = cam;
             vfxPool.particleMaterial = FxParticleMat();
             presentation.vfxPool = vfxPool;
+            playerBody.vfx = vfxPool;   // 작업 R27: 칼끼리 부딪칠 때 불꽃
             presentation.sfx = sfx;
             var hooks = systems.AddComponent<PresentationHooks>();   // 게임 이벤트 → 연출 (B07)
             hooks.presentation = presentation;
@@ -256,7 +259,7 @@ namespace RhythmActionGame.EditorTools
             duelCam.judgeFx = fx;
             duelCam.cam = cam;
             duelCam.fxOffset = fxOffset.transform;
-            duelCam.playerBody = new Renderer[] { bodyRenderer, swordRenderer };   // 3인칭: 머리 포함 원래 메시를 보이게
+            duelCam.playerBody = new Renderer[] { bodyRenderer };   // 3인칭: 머리 포함 원래 메시를 보이게. 칼은 PlayerBody가 전투 중 늘 보이게 (작업 R27: 여기서 1인칭이면 칼을 끄던 문제)
 
             // 화면이 박에 맞춰 숨 쉼 + 예고음 (GDD-beta B17.2)
             var beatFx = systems.AddComponent<BeatFx>();

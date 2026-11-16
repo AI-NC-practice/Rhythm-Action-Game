@@ -266,11 +266,45 @@ namespace RhythmActionGame.EditorTools
             var grip = new GameObject("WeaponGrip").transform;
             grip.SetParent(hand, false);
             var forearm = (hand.position - lower.position).normalized;
-            // 칼자루는 팔뚝에 거의 수직으로 주먹 가운데를 가로지르고, 칼날은 엄지 쪽(T자에서 앞)으로 조금 위로
             var blade = Vector3.ProjectOnPlane(root.forward + root.up * GameConfig.EnemyBody.GripBladeLift, forearm).normalized;
             if (blade.sqrMagnitude < 1e-4f) blade = root.forward;
-            var palm = Vector3.ProjectOnPlane(-root.up, forearm).normalized;   // T자에서 손바닥은 아래
-            grip.position = hand.position + forearm * GameConfig.EnemyBody.GripAlongHand + palm * GameConfig.EnemyBody.GripPalmDepth;
+            var palm = Vector3.ProjectOnPlane(-root.up, forearm).normalized;
+            var gripPos = hand.position + forearm * GameConfig.EnemyBody.GripAlongHand + palm * GameConfig.EnemyBody.GripPalmDepth;
+            // 작업 R27 (사용자 피드백 "칼자루가 손 위에 얹혀 있다"): 손가락 뼈가 있으면 실제 손 모양으로 정한다 —
+            // 칼자루는 검지~새끼 첫 마디 뿌리를 잇는 선(손바닥을 가로지름)을 따라 놓고, 칼날은 검지(엄지) 쪽, 손바닥 쪽으로 조금 들어간 자리.
+            var iP = animator.GetBoneTransform(HumanBodyBones.RightIndexProximal);
+            var lP = animator.GetBoneTransform(HumanBodyBones.RightLittleProximal) ?? animator.GetBoneTransform(HumanBodyBones.RightRingProximal);
+            if (iP != null && lP != null && animator.avatar != null && animator.isHuman)
+            {
+                // 손가락을 실제로 쥔 자세(FingerGrip 값)로 굽힌 뒤, 굽은 손가락 마디들이 둘러싼 고리의 가운데 = 칼자루 자리.
+                // (손바닥 방향을 엄지 위치로 짐작하면 모델마다 칼자루가 손등·손 옆에 놓였다)
+                var across = (iP.position - lP.position).normalized;            // 새끼 → 검지 = 칼날 쪽 (펴진 손에서 잼)
+                var hph = new HumanPoseHandler(animator.avatar, animator.transform);
+                var hp = new HumanPose();
+                hph.GetHumanPose(ref hp);
+                FingerGrip.Build(false, out var ids, out var vals);
+                for (int k = 0; k < ids.Length; k++) hp.muscles[ids[k]] = vals[k];
+                hph.SetHumanPose(ref hp);
+                var sum = Vector3.zero; int cnt = 0;
+                foreach (var b in new[] { HumanBodyBones.RightIndexProximal, HumanBodyBones.RightIndexIntermediate, HumanBodyBones.RightIndexDistal,
+                                          HumanBodyBones.RightMiddleProximal, HumanBodyBones.RightMiddleIntermediate, HumanBodyBones.RightMiddleDistal,
+                                          HumanBodyBones.RightRingProximal, HumanBodyBones.RightRingIntermediate, HumanBodyBones.RightRingDistal,
+                                          HumanBodyBones.RightLittleProximal, HumanBodyBones.RightLittleIntermediate, HumanBodyBones.RightLittleDistal })
+                {
+                    var t = animator.GetBoneTransform(b);
+                    if (t != null) { sum += t.position; cnt++; }
+                }
+                // 손 뼈(손목)·팔뚝이 쥔 자세에서 그대로인지 다시 잰다
+                forearm = (hand.position - lower.position).normalized;
+                if (cnt >= 6)
+                {
+                    var ring = sum / cnt;
+                    blade = Vector3.ProjectOnPlane(across, forearm).normalized;
+                    gripPos = ring;
+                }
+                hph.Dispose();
+            }
+            grip.position = gripPos;
             grip.rotation = Quaternion.LookRotation(blade, -forearm);
 
             var w = (GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>($"Assets/Art/Models/{id}.glb"));

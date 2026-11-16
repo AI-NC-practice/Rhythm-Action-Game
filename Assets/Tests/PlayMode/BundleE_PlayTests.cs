@@ -15,6 +15,10 @@ namespace RhythmActionGame.Tests
     /// </summary>
     public class BundleE_PlayTests
     {
+        /// <summary>모든 LateUpdate 뒤(최종 자세)에 한 번 실행 (WaitForEndOfFrame은 배치 모드에서 안 됨).</summary>
+        [DefaultExecutionOrder(32000)]
+        class EndProbe : MonoBehaviour { public System.Action act; void LateUpdate() { var a = act; act = null; a?.Invoke(); } }
+
         const string Out = "harness/reports/BundleE";
         const int BodyLayer = 31;
         double now;
@@ -119,14 +123,46 @@ namespace RhythmActionGame.Tests
             Assert.IsTrue(enc.IsBossDuel);
             yield return null;
             Assert.IsTrue(body.SwordVisible, "전투 중 1인칭에 내 칼이 보임");
-            bool sawSlash = false, sawBlock = false;
+            bool sawSlash = false, sawBlock = false, blockSwordOnScreen = false; float blockGuard = 0f; Vector3 bladeCam = Vector3.zero;
+            int clash0 = body.ClashCount;
             float bossGapIdle = -1f, maxBossGap = 0f;
             var bossAnim = dir.boss.GetComponentInChildren<Animator>();
             for (int f = 0; f < 3000 && boot.clock.CurrentBeat < enc.StartBeat + 24; f++)
             {
                 yield return Step();
                 if (!sawSlash && body.LastState == BodyMoves.SwordSlash) { sawSlash = true; for (int k = 0; k < 12; k++) yield return Step(); Shot(view, $"{Out}/R27_slash_fp.png"); }
-                if (!sawBlock && body.LastState == BodyMoves.SwordBlock) { sawBlock = true; for (int k = 0; k < 8; k++) yield return Step(); Shot(view, $"{Out}/R27_block_fp.png"); }
+                if (!sawBlock && body.LastState == BodyMoves.SwordBlock)
+                {
+                    sawBlock = true;
+                    for (int k = 0; k < 12; k++) yield return Step();
+                    var probe = new GameObject("EndProbe").AddComponent<EndProbe>();
+                    probe.act = () =>
+                    {
+                        Shot(view, $"{Out}/R27_block_fp.png");
+                        var sr = body.swordRenderers[0];
+                        var gT = body.swordGrip; var tT = gT.GetComponentsInChildren<Transform>().FirstOrDefault(x => x.name == "WeaponTip");
+                        var vp = view.WorldToViewportPoint(tT != null ? Vector3.Lerp(gT.position, tT.position, 0.3f) : sr.bounds.center);   // 칼자루 쪽 30% (칼끝은 화면 밖까지 가로지를 수 있음)
+                        blockSwordOnScreen = vp.z > 0.05f && vp.x > 0f && vp.x < 1f && vp.y > 0f && vp.y < 1f && sr.shadowCastingMode == UnityEngine.Rendering.ShadowCastingMode.On && sr.enabled;
+                        string V(Vector3 w) { var q = view.WorldToViewportPoint(w); return $"({q.x:0.00},{q.y:0.00},{q.z:0.00})"; }
+                        var swT = body.swordGrip; var tipT = swT.GetComponentsInChildren<Transform>().FirstOrDefault(x => x.name == "WeaponTip");
+                        bladeCam = view.transform.InverseTransformDirection(swT.forward);
+                        Log($"R27 막기 화면 위치(최종 자세): 오른손 {V(body.animator.GetBoneTransform(HumanBodyBones.RightHand).position)} 칼자루 {V(swT.position)} 칼끝 {(tipT != null ? V(tipT.position) : "-")} 칼 방향(카메라 기준) {bladeCam}");
+                        var only = new GameObject("SwordOnly").AddComponent<Camera>();
+                        only.enabled = false; only.clearFlags = CameraClearFlags.SolidColor; only.backgroundColor = new Color(0.2f, 0.2f, 0.3f);
+                        only.cullingMask = 1 << BodyLayer; only.fieldOfView = view.fieldOfView; only.nearClipPlane = view.nearClipPlane;
+                        only.transform.SetPositionAndRotation(view.transform.position, view.transform.rotation);
+                        var oldLayers = body.swordRenderers.Select(x => x.gameObject.layer).ToArray();
+                        foreach (var x in body.swordRenderers) x.gameObject.layer = BodyLayer;
+                        int vbl = body.VisibleBody.gameObject.layer; body.VisibleBody.gameObject.layer = BodyLayer;
+                        Shot(only, $"{Out}/R27_block_swordonly.png");
+                        for (int i2 = 0; i2 < oldLayers.Length; i2++) body.swordRenderers[i2].gameObject.layer = oldLayers[i2];
+                        body.VisibleBody.gameObject.layer = vbl;
+                        Object.Destroy(only.gameObject);
+                    };
+                    yield return null;
+                    Object.Destroy(probe.gameObject);
+                    blockGuard = body.SwordGuardWeight;
+                }
                 var en = dir.boss.GetComponentInChildren<EnemyAnimator>();
                 if (en != null && en.CurrentState == EnemyMoves.Idle && bossAnim != null && !bossAnim.IsInTransition(0) && bossAnim.GetCurrentAnimatorStateInfo(0).IsName(EnemyMoves.Idle))
                 {
@@ -136,6 +172,12 @@ namespace RhythmActionGame.Tests
                 }
             }
             Log($"R27 베기 {sawSlash}, 막기 {sawBlock}; R28 무사 대기 두 손 거리 처음 {bossGapIdle:0.00} 최대 {maxBossGap:0.00} m");
+            Log($"R27 막기 순간 내 칼 화면 안 {blockSwordOnScreen} (막기 자세 {blockGuard:0.00}), 칼끼리 부딪침 {body.ClashCount - clash0}번, 마지막 불꽃 자리-카메라 {Vector3.Distance(body.LastClashPoint, view.transform.position):0.00} m");
+            Assert.IsTrue(blockSwordOnScreen, "막는 순간 1인칭 화면에 내 칼이 보임");
+            Assert.Less(bladeCam.x, -0.6f, "막기: 칼날이 화면을 오른쪽에서 왼쪽으로 가로질러 막음 (손목을 꺾지 않는 가로막기)");
+            Assert.Less(Mathf.Abs(bladeCam.z), 0.5f, "막기: 칼날이 앞뒤가 아니라 가로");
+            Assert.Greater(body.ClashCount - clash0, 1, "막기·베기마다 칼끼리 부딪쳐 불꽃");
+            Assert.Less(Vector3.Distance(body.LastClashPoint, view.transform.position), 2.0f, "불꽃은 눈앞 칼이 닿는 곳");
             Assert.IsTrue(sawSlash, "내 공격·칼 겨루기 성공 → 칼로 벰");
             Assert.IsTrue(sawBlock, "적 공격 ↑ 성공 → 칼로 막음");
             Assert.Greater(bossGapIdle, 0f, "무사 대기 상태를 봄");
@@ -454,7 +496,31 @@ namespace RhythmActionGame.Tests
                 if (m >= 5) Assert.Greater(hud.ComboPop, 0f, $"콤보 {m}: 단계가 오르는 순간 튐");
             }
             Log("R26 " + string.Join(" | ", seen));
-            Assert.AreEqual(4, hud.ComboTierUps, "단계 4번 오름 (5·10·20·50)");
+            int upsFirstPass = hud.ComboTierUps;
+            // 튐이 끝난 뒤 안정된 단계별 상태 (실제 게임 씬, BeatFx 켜짐): 화면 글자 크기가 단계마다 커지고, 색이 다르고, 10↑부터 빛 테두리
+            var b2 = new ScoreBoard();
+            var stable = new List<(int tier, float scale, Color col, bool glow)>();
+            int c2 = 0;
+            foreach (var m in new[] { 3, 5, 10, 20, 50 })
+            {
+                b.Reset();
+                for (int i = 0; i < m; i++) b.Add(Judgement.Perfect, true);
+                float until = Time.realtimeSinceStartup + GameConfig.ComboPopSeconds + 0.3f;
+                while (Time.realtimeSinceStartup < until) yield return null;
+                var ol = hud.ComboText.GetComponent<UnityEngine.UI.Outline>();
+                float shown = hud.ComboText.rectTransform.localScale.x / Mathf.Max(1e-4f, hud.ComboBeatScale);   // 박자 출렁임을 뺀 화면 크기
+                stable.Add((hud.ComboTier, shown, hud.ComboText.color, ol != null && ol.enabled));
+                c2++;
+            }
+            Log("R26 안정 상태 " + string.Join(" | ", stable.Select(x => $"단계{x.tier} 크기{x.scale:0.00} 색{x.col} 테두리{x.glow}")));
+            for (int i = 1; i < stable.Count; i++)
+            {
+                Assert.Greater(stable[i].scale, stable[i - 1].scale + 0.03f, $"단계 {stable[i].tier}: 화면 글자가 더 큼 (BeatFx가 덮어쓰지 않음)");
+                Assert.AreNotEqual(stable[i - 1].col, stable[i].col, $"단계 {stable[i].tier}: 색이 다름");
+            }
+            Assert.IsFalse(stable[0].glow, "5 미만은 테두리 없음");
+            Assert.IsTrue(stable.Where(x => x.tier >= 2).All(x => x.glow), "10↑ 빛 테두리");
+            Assert.AreEqual(4, upsFirstPass, "단계 4번 오름 (5·10·20·50)");
             var colors = Enumerable.Range(0, GameConfig.ComboTierColors.Length).Select(i => GameConfig.ComboTierColors[i]).Distinct().Count();
             Assert.AreEqual(GameConfig.ComboTierColors.Length, colors, "단계마다 다른 색");
         }

@@ -74,7 +74,7 @@ namespace RhythmActionGame
                 foreach (var h in hud.Hearts) h.rectTransform.localScale = s;
                 hud.SpeedText.rectTransform.localScale = s;
                 hud.ScoreText.rectTransform.localScale = s;
-                hud.ComboText.rectTransform.localScale = s;
+                hud.ComboBeatScale = 1f + Pulse * GameConfig.BeatFx.HudScale;   // 작업 R26: 콤보 글자 크기는 GameHud가 단계 크기와 곱해 한 곳에서 (덮어쓰면 단계 크기가 사라졌다)
             }
         }
     }

@@ -79,6 +79,10 @@ namespace RhythmActionGame
         /// <summary>단계가 오를 때 튀는 정도 (1 → 0으로 줄어듦).</summary>
         public float ComboPop { get; private set; }
         Outline comboGlow;
+        /// <summary>박자 출렁임 배율 (BeatFx가 넣음). 콤보 글자 크기 = 단계 크기 × 튐 × 이 값.</summary>
+        public float ComboBeatScale { get; set; } = 1f;
+        /// <summary>단계 크기 × 튐 (테스트용, 박자 출렁임 빼고).</summary>
+        public float ComboTierScale { get; private set; } = 1f;
 
         public static int TierOf(int combo)
         {
@@ -97,7 +101,8 @@ namespace RhythmActionGame
             var col = GameConfig.ComboTierColors[Mathf.Clamp(tier, 0, GameConfig.ComboTierColors.Length - 1)];
             ComboText.color = Color.Lerp(col, Color.white, ComboPop * 0.6f);
             float sc = GameConfig.ComboTierScales[Mathf.Clamp(tier, 0, GameConfig.ComboTierScales.Length - 1)] * (1f + GameConfig.ComboPopScale * ComboPop * ComboPop);
-            ComboText.rectTransform.localScale = Vector3.one * sc;
+            ComboTierScale = sc;
+            ComboText.rectTransform.localScale = Vector3.one * (sc * ComboBeatScale);
             if (comboGlow == null) { comboGlow = ComboText.gameObject.AddComponent<Outline>(); comboGlow.effectDistance = new Vector2(3, -3); }
             comboGlow.enabled = tier >= 2;
             comboGlow.effectColor = new Color(col.r, col.g, col.b, tier >= 4 ? 0.9f : 0.55f);

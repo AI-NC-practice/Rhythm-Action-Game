@@ -1,13 +1,28 @@
 # 작업 인계 문서 (beta1-1)
 
-- 작성: 2026-11-16, **마지막 갱신: 2026-11-17 04:50** (R18~R18d·버그 2건 뒤, 새 대화창에서 이어서 하기 위한 정리)
-- **⏰ 제출 마감: 2026-11-17 13:20.** 남은 시간에는 2장 "마감 계획"대로 묶어서 처리한다.
-- 브랜치: **`beta1-1`** (GitHub `AI-NC-practice/Rhythm-Action-Game`, 비공개). `main`에는 개발자 모드까지만 들어가 있다.
-- 작업 목록의 진실은 언제나 `harness/tasks.json`이다. 작업별 기록은 `harness/log.md`(맨 아래가 최신), 평가 보고서는 `harness/reports/<작업>-eval-<n>.md`.
-- 마지막 전체 검증: **EditMode 204/204, PlayMode 186/187 (실패 0, 검토용 1개 Explicit 건너뜀)** (`harness/reports/R18d-verify.md`). 최종 빌드는 T15 때 것이 마지막이다(**제출 전에 반드시 다시 빌드**).
-- **지금 상태 한 줄:** 추격 연출 개편 R17·R18·R18b·R18c·R18d와 사용자 버그 2건(2챕터 낮은 담·5챕터 궁궐 담을 뚫는 돌진 적)까지 끝났다. 마지막 커밋 `5d625e3`. **다음은 2장 마감 계획의 묶음 A**.
+- 작성: 2026-11-16, **마지막 갱신: 2026-11-17 08:45** (사용자 출근으로 이 컴퓨터 작업 중단 — 다른 컴퓨터에서 이어서)
+- **⏰ 제출 마감: 2026-11-17 13:20.**
+- 브랜치: **`beta1-1`** (GitHub `AI-NC-practice/Rhythm-Action-Game`, 비공개). `main`에는 개발자 모드까지만.
+- 작업 목록의 진실은 언제나 `harness/tasks.json`. 작업별 기록은 `harness/log.md`(맨 아래가 최신), 평가 보고서는 evaluator가 돌려준 결과(대화) — log.md에 요약.
+- **지금 상태 한 줄:** 묶음 A(R19·R20·R23·R16·R15)와 점수 개편 R25는 **done**. 사용자 빌드 플레이 피드백 묶음 E(R26~R34)는 **구현 끝, 평가 중**(R26·R27은 평가 1회차 FAIL → 고침, 재평가 필요. R28~R34는 아직 평가 전). 마지막 커밋에 묶음 E 수정이 모두 들어 있다.
+- 마지막 전체 검증(08:33, 마지막 커밋과 같은 코드): EditMode 208/208, PlayMode 206/208 — **실패 1: `R06_Chapter4Surround_BodyTurnsWithCamera_NoScreenCover`** "내 몸이 화면을 30% 넘게 가린 프레임 17/789 (기준 15 이하)". 원인 추정: R27 막기 때 오른손·칼을 눈앞에 두는 IK(PlayerSwordIK, GameConfig.Body.SwordGuardHand)가 4장 포위 전투의 ↑ 막기에서도 켜져 화면을 가림. **다음 컴퓨터에서 가장 먼저 고칠 것** — 방법 후보: 막기 손 자리를 조금 아래·옆으로(SwordGuardHand y −0.16 → −0.22, x 0.14 → 0.2) 하거나, 측정에서 칼 렌더러를 빼고 손·팔만 보는지 확인. 고친 뒤 `-Platform PlayMode -Filter 'R06_|BundleE_'` → 전체 검증.
+- 최종 빌드: 06:19에 R25까지 반영한 `Builds/Final` + smoke test 통과, 루트 `tempFinal.zip`(약 420 MB, git에 안 올림 — 이 컴퓨터에만 있음). 묶음 E는 빌드에 **안 들어 있음** → 마지막에 다시 빌드.
 
----
+## 0. 다음 컴퓨터에서 바로 할 일 (순서대로)
+
+1. 1장 절차대로 받고 Unity로 한 번 열었다 닫기 → `HumanoidImport.ConfigureAll` → `SceneBuilder.BuildAll` → **R06 포위 전투 화면 가림 실패(위 "마지막 전체 검증") 고치기** → `unity-verify.ps1` 전체.
+   - 이번에 적 3종 모델 바탕이 `Assets/Art/Models/<id>/<id>_rig_fingers.fbx`(손가락 리그)로 바뀌었다. ConfigureAll이 꼭 필요하다(아바타 손가락 뼈 52개).
+2. 전체 검증이 통과하면 **evaluator를 하나씩**(동시에 띄우면 Unity 배치가 서로 막힌다 — 이번에 겪음): R26 → R27 → R28 → R29 → R30 → R31 → R32 → R33 → R34. 프롬프트는 "R26 작업을 평가해줘."만.
+   - PASS면 tasks.json status done·attempts 올리고 log.md에 한 줄. FAIL이면 지적대로 고치고 같은 작업 다시(최대 3회).
+3. 사용자 확인이 필요한 것(아래 "열린 질문")을 물어본다.
+4. 빌드: `BuildScript.BuildFinal` → `smoke-test-build.ps1` → 필요하면 루트에 `tempFinal.zip`으로 압축(사용자 요청 방식, .gitignore에 있음).
+5. 시간이 남으면 R13·R14·R22·R24(연출 다듬기). R18e·R21·R08·R09·R12·B40은 미루기 추천. 마지막 R10(최적화·GitHub Releases — 공개·업로드는 승인 필요), R11·T16(사용자 플레이).
+
+### 열린 질문 (사용자 확인 필요)
+- R25: 체력 0 챕터 되감기도 "챕터 시작 점수 − 1000"으로 한 것(사용자는 무사·윈드밀만 말함)과 랭크 경계값(SSS 97·SS 93·S 88·A 80·B 70·C 60·D 50 %)은 Claude 제안. GDD-beta B20에 "사용자 확인 필요"로 적음.
+- R29: 2·3·4번째 뒤돌아보기는 바로 뒤 전투 때문에 1.5박(1번째만 2박). 장구 노트가 컷과 1~2개 겹칠 수 있음(원은 화면 가장자리에 보여 칠 수 있음). 지붕 위 컷(126.5박)에서는 쫓는 무리를 안 씀(지붕 길 충돌 상자 높이 때문에 떠 보였음) — 지붕 위 적이 대신 보임.
+- R30: 매트릭스 회피 때 NearMiss 카메라가 위를 보며 화면 대부분이 하늘 — 칼날은 잘 보이지만 방향감이 흔들릴 수 있음.
+- R27: 막기는 한 손 가로막기(손목을 꺾지 않는 범위). 두 손 막기는 왼손 방향을 맞추는 IK가 필요해 뺐다.
 
 ## 1. 다른 컴퓨터·다른 계정에서 이어서 시작하기
 
@@ -65,33 +80,33 @@
 
 ## 2. 지금 멈춘 곳과 다음 할 일
 
-- 마지막 작업 커밋: `5d625e3` R18d + 버그 2건 (이 문서 갱신은 그다음 커밋).
-- tasks.json: done 79, pending 18(B40, R18e, R08, R09, R13~R16, R19~R24, R10, R12), needs_user 2(T16, R11은 pending이지만 사람 작업), blocked 1(B46 취소).
-- **작업 방식 (2026-11-17 사용자 요청, 마감 때문):** "남은 구현·수정 항목 몇 개를 묶어서 한 번에 처리하고 그 후에 테스트". → 묶음 안의 작업을 모두 구현한 뒤 `unity-verify.ps1` 전체를 **한 번** 돌리고, 작업마다 evaluator를 부른다(서로 독립이면 동시에). 커밋은 묶음 끝에 작업별로 또는 한 번에(메시지에 작업 ID 모두). 작업마다 하던 중간 검증은 하지 않는다(빌드·씬 생성은 필요할 때만).
-- **씬 생성은 몇 분 걸리고 전체 검증은 약 15분**이다. 묶음당 1번만.
+- 마지막 커밋: 이 문서 갱신 커밋(묶음 E 칼 쥐기 마지막 수정 포함). 그 앞 `ae3038f`(묶음 E 구현), `ff4bcb6`(R25), `a71bdc3`(R15), `f2a387b`(묶음 A).
+- tasks.json: done 86 (R15·R16·R19·R20·R23·R25 포함), pending — 묶음 E R26(시도 1)·R27(시도 1)·R28~R34(평가 전), R13·R14·R21·R22·R24, R18e·R08·R09·R12·B40, R10, 사람 R11·T16, blocked B46(취소).
+- **작업 방식 (2026-11-17 사용자 요청, 마감):** 몇 개씩 묶어 한 번에 구현 → 전체 검증 한 번 → evaluator는 **하나씩**. 커밋은 묶음 끝에.
+- 씬 생성 몇 분, 전체 검증 약 15분, evaluator 하나 약 5분(각자 전체 검증을 다시 돌림).
 
-### 마감 계획 (13:20 제출, 추천 순서 — 사용자와 확인하고 시작)
-| 묶음 | 작업 | 내용 | 예상 |
+### 묶음 E (2026-11-17 오전 빌드 플레이 피드백) — 무엇을 했나
+| 작업 | 사용자 말 | 한 것 | 상태 |
 |---|---|---|---|
-| **A 빠른 수정 (코드만)** | R19 | 204박 대문 통과 때 1인칭 화면 앞에 내 몸이 보임 (원인부터, R14와 겹침) | 짧음 |
-| | R20 | 하늘 끝이 휜 띠 (배경 원통 위쪽 경계 BackdropTopFade) | 짧음 |
-| | R23 | 1인칭 바닥 길 가장자리 검은 사선 (길 메시 윤곽선) | 짧음 |
-| | R16 | 멈춰 싸울 때 내 몸 제자리 달리기 | 짧음 |
-| | R15 | 되감기 때 나와 적을 처음 위치로 (원인 확인부터) | 중간 |
-| | (제안) | 지붕 위 회색 네모 이펙트(텍스처 없는 파티클로 보임) | 짧음 |
-| **B 최종 빌드 (안전판)** | R10 일부 | `BuildFinal` + `smoke-test-build.ps1` 먼저 한 번 (LOD·임포스터 최적화는 시간 남으면) | 20분 |
-| **C 연출 다듬기 (시간 되면)** | R13 | 지붕 위 낮은 처마가 대문처럼 보임 | 중간 |
-| | R24 | 지붕 위 복선 적이 오래 서 있음 (동작은 사용자와 정함, Mixamo 상시 승인) | 중간 |
-| | R22 | 4장 광장 빈 느낌·쓰러진 적이 남게 (방법 사용자와) | 중간 |
-| | R14 | 대문 아슬아슬 통과 동작 | 중간 |
-| **D 미루기 추천** | R18e | 시민 3종 VARCO(약 900포인트 승인됨) — 생성·리깅에 1시간 넘게 걸림 | 김 |
-| | R21 | 마을 밖 빈 평지 (방법 사용자와, 에셋 필요 가능) | 김 |
-| | R08·R09·R12·B40 | 슬로모션 차이·전투 동작 다듬기·효과음(VARCO Sound) | 김 |
-| **마지막** | R10 | 최종 빌드 다시 + smoke test, GitHub Releases(공개 범위·업로드는 사용자 승인) | 30분 |
-| | R11·T16 | [사용자] 다시 플레이 확인 | 사용자 |
+| R27 | 칼이 손에 꽂혀 있다, 손가락으로 쥐어야 한다(사진 기준), 내 칼로 같이 싸우기 | 플레이어 칼을 오른손 뼈에. 적 3종 VARCO "humanoid-fingers"로 다시 리깅(0포인트) → `<id>_rig_fingers.fbx`. 칼 붙일 때 손가락을 쥔 값으로 굽혀 **굽은 손가락 12마디 고리 가운데**에 칼자루(EnemyRig.AttachWeapon). FingerGrip(적)·PlayerBody.ApplyGrip(플레이어 두 손)이 런타임에 손가락을 쥔 값으로. 전투 중 1인칭에 칼 보임(DuelCamera가 끄던 것 고침), 막기(↑) = 손 IK로 눈앞 가로막기 + 손목 회전, 베기 = Mixamo Power Slash, 칼끼리 닿는 곳 불꽃 | 평가 1회차 FAIL(막기 때 칼 안 보임·불꽃 없음) → 고침. 손가락 모양은 사용자가 3번 지적 → 손 확대(BundleE/R27_hand_*.png, R27_block_*.png, finger_*.png)로 확인함. **재평가 필요** |
+| R28 | 공격 뒤 팔 벌리고 서 있음 | 대기 = Mixamo Great Sword Idle(무사·병사·플레이어) | 평가 전 |
+| R29 | 뒤돌아보기 휙휙, 따라오는 적 없음 | 2박(1.5박), 돌아오기 더 천천히, 땅 위 컷에 쫓는 무리 3명 | 평가 전 |
+| R30 | 매트릭스 자세면 칼이 얼굴 앞을 스치게 | 전투 회피 슬로에서 적 칼 복사본이 눈앞 0.4 m를 가로지름 | 평가 전 |
+| R31 | 윈드밀 때 내 발 안 보임, 쓰러진 병사 팔 벌리고 칼 떠 있음 | 윈드밀 3인칭 컷, 쓰러짐은 클립으로(몸 전체 회전 없앰 — 원인), 칼이 손에서 빠져 날아가 바닥에 | 평가 전 |
+| R32 | 5챕터 돌진 적 같은 높이로 어떻게 피했나 | 적은 1.4 m 옆으로 비켜 오고 나는 반대로 낮춰 베며 엇갈림 | 평가 전 |
+| R33 | 벽 탈 이유가 없다 | 벽타기 4곳에 길 막는 뒤집힌 수레·독 | 평가 전 |
+| R34 | 적 쓰러뜨린 뒤 팔이 화면을 오래 가림 | 처형 동작 1.5박만 | 평가 전 |
+| R26 | 콤보 단계마다 다른 이펙트 | 5·10·20·50 단계별 색·크기·빛 테두리·튐 | 평가 1회차 FAIL(BeatFx가 크기 덮어씀) → 고침, **재평가 필요** |
 
-- `/run-tasks`는 파일 순서대로 pending을 고르므로 **B40(→R12로 미룸)과 R18e(마감 때문에 미룸 추천)를 건너뛰는지 사용자에게 먼저 확인**한다.
-- 기획 결정이 필요한 것(log.md "제안"): 건물 밀도, 1번째 지붕 위 적(127박) 발차기 낙하가 옆 80°라 1인칭에서 안 보임, 옆으로 피하기 NORMAL 화면 가림(0.835), 발 IK, 뒤돌아보기 컷에서 PERFECT면 추격 적이 쓰러져 "쫓는 무리" 느낌 약함, 회색 네모 이펙트.
+### 이전 마감 계획 (참고)
+| 묶음 | 작업 | 상태 |
+|---|---|---|
+| A 빠른 수정 | R19·R20·R23·R16·R15 + 회색 네모(파티클 텍스처) | **done** |
+| (추가) 점수 개편 | R25 (GDD-beta B20) | **done** |
+| B 최종 빌드 안전판 | BuildFinal + smoke | 06:19 완료(R25까지). 묶음 E 반영 빌드는 아직 |
+| C 연출 다듬기 | R13·R24·R22·R14 | 남음 (R22의 "쓰러진 적이 사라짐"은 R31로 원인 해결 — 남은 건 "광장이 비어 보임") |
+| D 미루기 | R18e·R21·R08·R09·R12·B40 | 남음 |
+| 마지막 | R10 빌드·Releases, R11·T16 | 남음 |
 
 ## 3. 사용자 피드백과 처리 상태
 
@@ -129,6 +144,21 @@
 
 **주의(정직하게):** R03에서 "공중에 뜬 적 해결"이라고 했지만 시작 자리만 검사해서 사실이 아니었고, R07 첫 보고("뜬 프레임 0")도 보이지 않는 충돌 상자를 지지면으로 쳐서 무사를 놓쳤다. 지금 검사는 보이는 메시로 만든 검사용 충돌체만 센다. **"고쳤다"고 하기 전에 실제 장면(미리보기 PNG)으로 확인할 것.**
 
+### 빌드 플레이 (2026-11-17 오전, Builds/Final) — 묶음 E
+| # | 사용자 말 | 처리 |
+|---|---|---|
+| 1 | 칼이 손에 꽂혀 있다 / 손가락으로 쥐어야(사진) / 손가락이 이상하게 꺾였다 | R27 (위 표). 마지막 확인: 굽힘 값이 음수일수록 손가락 끝이 손바닥 쪽(뒤로 안 꺾임), 이상했던 건 두 손 막기 왼손 IK → 뺌 |
+| 2 | 검을 들어 같이 싸우기, 칭칭 | R27 막기·베기·불꽃 |
+| 3 | 팔 벌리고 서 있는 검사 | R28 |
+| 4 | 뒤돌아보기 휙휙, 따라오는 적 없음 | R29 |
+| 5 | 매트릭스 자세 칼 스침 | R30 |
+| 6 | 윈드밀 발 안 보임, 쓰러진 병사 어색·칼 떠 있음 | R31 |
+| 7 | 5챕터 돌진 적 피하기 어색 | R32 |
+| 8 | 벽타기 이유 | R33 |
+| 9 | 처형 뒤 팔이 화면 오래 가림 | R34 |
+| 10 | 콤보 단계 이펙트 | R26 |
+| 11 | 점수·실패 규칙 (장구 50/20+콤보 보너스, 방향키 100/50, 무사·윈드밀 초입 − 1000, 랭크 SSS~F) | R25 done, GDD-beta B20 |
+
 ## 4. 세션별 한 일
 
 | 작업 | 내용 | 커밋 |
@@ -145,6 +175,9 @@
 | R18b | 매복 적 숨은 자리(빌드 때 시선 검사), 땅 위 전투 적 숨음→알아챔→달려옴, 궁궐 담 밑 기와집 고정 자리 | 43a53dd |
 | R18c | Mixamo Running Jump·Falling Idle·Hard Landing, 지붕 위 전투 적 앞질러 착지 | 975d004 |
 | R18d + 버그 | 뒤돌아보기 컷, 돌진 적 담 뚫기 2건, B17 테스트 씨앗 고정 | 5d625e3 |
+| 묶음 A | R19 대문 컷 낮은 자세, R20 하늘 띠(배경 위쪽 투명), R23 길 외곽선 끔·색 대비, R16 전투 대기 자세, R15 되감기 때 자리도 되감기, 파티클 둥근 점 | f2a387b, a71bdc3 |
+| R25 | 점수·콤보·랭크·되감기 패널티 (GDD-beta B20), R26 추가 | ff4bcb6 |
+| 묶음 E | R26~R34 (칼 쥐기·손가락 리그·칼 든 대기·뒤돌아보기·매트릭스·윈드밀 컷·쓰러짐·돌진·벽타기 짐·처형·콤보 단계) | ae3038f + 이 인계 커밋 |
 
 VARCO 포인트 누적 약 17,400 (R17~R18d는 0) (T10 2,050 + T11 1,000 + T11R 3,550 + R02 10,800). run_flow 17/45회(`harness/varco-usage.log`). 플로우 ID `harness/asset_specs.json`의 `defaults.flow_id` = `7c1eec5d-c366-4ce4-8713-0b6adb6fc1da`.
 Mixamo 동작 16개(`Assets/Art/Animations/Mixamo/`, R07 flying_back, R18 walk, R18c running_jump·falling_idle·hard_landing).
@@ -178,6 +211,19 @@ Mixamo 동작 16개(`Assets/Art/Animations/Mixamo/`, R07 flying_back, R18 walk, 
 
 - `R18_ChaseRedesignPlayTests`, `R18b_HiddenEnemiesPlayTests`(화면 카메라 시선 가림), `R18c_LeapInPlayTests`, `R18d_LookBackPlayTests`, `Bug1117_EnemyClipPlayTests`(몸이 메시 속: 여러 방향 광선의 첫 면이 뒷면), `Review_StageWalkthroughPlayTests`(Explicit, 4박마다 1인칭·3인칭 → `harness/scripts/review-sheet.py`로 모음).
 
+### 묶음 A·R25·묶음 E에서 바뀐 구조 (2026-11-17)
+- **적 모델 바탕:** `EnemyRig.BaseFbx` = `<id>_rig_fingers.fbx`(VARCO Rig humanoid-fingers, 플로우 Rig 노드 eef304be(boss)·02f9ff3b(spear)·11113720(sword)). 기존 VARCO 동작 FBX는 Humanoid로 그대로 옮겨 씀. `EnemyRig.AttachWeapon`(internal)은 T자(Rebind)에서 손가락을 쥔 값으로 굽혀 고리 가운데에 칼자루 — **플레이어 칼도 이것을 씀**(SceneBuilder).
+- **손가락:** `FingerGrip`(적·사건 적, 창병은 두 손), `PlayerBody.ApplyGrip`(두 손). 값 `GameConfig.Body.GripCurl1/GripCurl23/GripThumb`(−1 = 가장 굽힘, Min으로 더 굽힌 쪽만).
+- **Mixamo 추가 3개:** `great_sword_idle`(대기, 반복), `great_sword_block`, `great_sword_slash` (`Assets/Art/Animations/Mixamo/`). 적 Idle = Mixamo great_sword_idle, 윈드밀 쓰러짐 = flying_back. 플레이어 컨트롤러: CombatIdle·SwordBlock·SwordSlash 상태, 레이어 IK Pass 켬(`PlayerSwordIK`가 막기 때 오른손 IK).
+- **PlayerBody:** CombatIdle 전환(R16), 처형 1.5박 자르기(R34), 칼 보이기(전투 중 매 프레임), 막기 손목 회전(UpdateSwordGuard), 부딪침 불꽃(Clash), 3인칭 컷 중 1인칭용 몸 숨김(ThirdPersonCut).
+- **BulletTimeFx:** 대문 컷 낮은 자세(R19, RequestLowestPose), 매트릭스 칼날(R30, BladeSweep), 윈드밀 3인칭 컷(R31).
+- **StageDirector.Motion:** 되감기 체크포인트(R15) — 결투 단계 시작·윈드밀 1마디 앞 자리(포위는 적 5명 자리·lunge까지) 기록, 되감기 동안 거꾸로 이어 옮김.
+- **ScoreBoard/ScoreKeeper:** 장구·방향키 분리(StageDirector.AnyCueJudged), 체크포인트 − 1000(RewindScorePenalty), 랭크 8단계(RankNames/RankRatios), 만점 = ScoreKeeper.MaxScoreOf(stage1 33,100).
+- **EnemyActor 쓰러짐:** 모델 적은 클립이 눕힘(몸 회전 없음), TossWeapon(칼 날아감, 리셋 때 RestoreWeapon). EventProp 사건 적 PERFECT = EnemyFigureRun.PlayDefeat + 그 자리 고정.
+- **LookBackCut:** 컷 길이 `GameConfig.Fx.LookBackLengths`, 쫓는 무리 `pursuers`(SceneBuilder가 만듦, 땅 위 컷만), `LengthOf(i)`, `OnRoof`.
+- **Backdrop.shader:** 위쪽 투명(투명 큐 맨 앞), `_TopToFog` = 1이면 예전 모습(R20 전후 비교 테스트 전용).
+- **테스트:** `BundleE_PlayTests`(R26~R34, 미리보기 `harness/reports/BundleE/`), `R27_FingerCurlDiagTests`(손가락 진단), `R19_GateBodyPlayTests`(R19·R20·R23), `R15_R16_CombatPlacePlayTests`, `R25_ScoreRulesTests`/`R25_ScorePlayTests`. 최종 자세(모든 LateUpdate 뒤)를 찍을 때는 `[DefaultExecutionOrder(32000)]` 측정기 — 배치 모드에서 WaitForEndOfFrame은 안 됨.
+
 ### 알아 둔 함정
 - **발밑·지지면 검사는 보이는 메시로만.** 게임의 충돌 상자(지붕 길·성문 상자)는 보이는 모델보다 넓거나 높다(성문 0.5 m).
 - PlayMode 테스트에서 시간을 주입할 때는 박자 시계, 슬로모션, Hit Stop(TimeFx.RealTime)을 모두. 실제 시간으로 진행하는 연출(발차기 낙하 궤적)은 `Time.realtimeSinceStartup`으로 기다리고, **기다리는 동안에도 자동 연주를 계속**해야 한다(놓쳐서 되감기면 적이 제자리로 돌아감).
@@ -188,6 +234,10 @@ Mixamo 동작 16개(`Assets/Art/Animations/Mixamo/`, R07 flying_back, R18 walk, 
 - 배치 모드에서 컴파일 오류가 나면 `unity-exec`가 끝나지 않고 멈출 수 있다(R07 후속에서도 겪음) → 10분 넘게 걸리면 `harness/reports/exec.log`의 `error CS`부터 본다.
 - 프로퍼티(`MotionEnemy` 등)의 `.y`를 직접 바꿀 수 없다(CS1612).
 - 메시를 합쳐 에셋으로 저장하면 용량이 커진다. 파일 하나 20 MB 넘으면 훅이 커밋을 막는다.
+- **evaluator를 동시에 여러 개 띄우지 말 것** — 각자 unity-verify를 돌려 서로 "Unity Editor가 열려 있다"로 막힌다. 하나씩.
+- 평가자가 백그라운드로 남긴 Unity 배치가 끝나기 전에 검증을 돌리면 막힌다 → `Get-Process Unity`가 0일 때.
+- DuelCamera는 결투 내내 `playerBody` 렌더러를 1인칭이면 그림자만으로 덮어쓴다(칼은 목록에서 뺐음). BeatFx는 HUD 크기를 매 프레임 덮어쓴다(콤보는 `ComboBeatScale`로 넘김).
+- 손가락 근육: HumanTrait.MuscleName은 "Right Index 1 Stretched" 형식(곡선 이름은 "RightHand.Index.1 Stretched").
 
 ## 6. 음악·차트 파이프라인 (곡을 다시 만들 때)
 
@@ -236,6 +286,10 @@ Mixamo 동작 16개(`Assets/Art/Animations/Mixamo/`, R07 flying_back, R18 walk, 
 - 에셋 품질에 민감하다. 포인트는 "많이 써도 된다"고 했지만 쓰기 전에는 항상 예상 포인트를 알리고 승인받는다.
 - 비용(VARCO 포인트, 유료 결제), 다운로드(파일명·출처·용량), 공개 범위 변경은 사용자 승인 후에만. Mixamo 로그인은 사용자, 다운로드는 Claude(앱 브라우저).
 - **작업 방식 (2026-11-17, 마감 13:20):** 남은 항목을 몇 개씩 묶어 한 번에 구현하고, 그다음 한 번에 테스트한다 (2장).
+- **점수 규칙 (2026-11-17 사용자 결정):** GDD-beta B20. 콤보는 장구만.
+- **칼 쥐기 기준 (2026-11-17):** 사진처럼 손가락이 칼자루를 감싸 쥐어야 한다. 손을 편 채 칼만 붙어 있거나 칼자루가 손 위에 얹히면 안 된다. 손가락이 이상하게 꺾이면 바로 지적함 → **손 확대 그림을 직접 보고** 보여 줄 것.
+- **VARCO 리깅·Mixamo 업로드 (2026-11-17):** "VARCO 리깅 다시 해 보고 안 되면 Mixamo" — VARCO humanoid-fingers로 해결(Mixamo 업로드 안 함).
+- 빌드 공유: 루트에 `tempFinal.zip`으로 압축해 달라고 함(git에 안 올림).
 - **Mixamo 동작은 상시 승인 (2026-11-17):** "공중 동작이나 처음 뛰는 동작 모두 필요하다면 언제든 믹사모에서 추천해주세요. 다 수용하겠습니다." → 필요한 Mixamo 동작은 골라서 받고(FBX Binary·Without Skin·30fps, 가능하면 In Place) 무엇을 왜 받았는지 알린다. VARCO 포인트는 여전히 견적 승인.
 
 ## 9. 꼭 지킬 규칙 (CLAUDE.md 요약)

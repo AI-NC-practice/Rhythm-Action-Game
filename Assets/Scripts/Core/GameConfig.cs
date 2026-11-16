@@ -904,6 +904,18 @@ namespace RhythmActionGame
             public const float GripThumb = -0.35f;
             /// <summary>처형 동작을 보여 주는 길이 (박). 그 뒤 달리기·대기로 크로스페이드 — 팔이 화면을 오래 가리지 않게.</summary>
             public const double ExecShowBeats = 1.5;
+            /// <summary>
+            /// 작업 R27 (평가 1회차): 막기 칼 자세 — 오른손 자리(카메라 기준 m: 오른쪽·위·앞), 칼날 방향(카메라 기준, 왼쪽 위로 가로지름),
+            /// 들어 올리기·유지·내리기 시간(박자 시계 초), 부딪칠 때 불꽃 수.
+            /// </summary>
+            public static readonly UnityEngine.Vector3 SwordGuardHand = new UnityEngine.Vector3(0.14f, -0.16f, 0.42f);
+            public static readonly UnityEngine.Vector3 SwordGuardBlade = new UnityEngine.Vector3(-0.8f, 0.55f, 0.25f);
+            public const float SwordGuardIn = 0.08f;
+            public const float SwordGuardHold = 0.3f;
+            public const float SwordGuardOut = 0.2f;
+            public const int ClashSparks = 28;
+            /// <summary>두 손 막기: 왼손을 오른손에서 칼자루 끝 쪽으로 떨어뜨리는 거리 (m).</summary>
+            public const float SwordGuardLeftHandGap = 0.11f;
             /// <summary>벽타기 카메라 기울기 (도, 몸과 같은 방향 = 벽 반대쪽으로). NORMAL은 절반에 흔들림.</summary>
             public const float WallRunCameraRoll = 20f;
             /// <summary>아래로 피하기(미끄러지기) 중 내 몸(팔·다리)이 화면을 가리는 비율 상한 (0~1, PlayMode 측정).</summary>
@@ -934,6 +946,8 @@ namespace RhythmActionGame
             public const float GripAlongHand = 0.085f;
             public const float GripPalmDepth = 0.03f;
             public const float GripBladeLift = 0.35f;
+            /// <summary>손가락 뼈가 있을 때: 칼자루를 손가락 첫 마디 뿌리에서 손목 쪽으로 들이는 거리 (m) — 손바닥 안 깊숙이.</summary>
+            public const float GripBackFromKnuckles = 0.015f;
             public const float WeaponTossOut = 2.5f;
             public const float WeaponTossSide = 1.5f;
             public const float WeaponTossUp = 4f;

@@ -123,6 +123,9 @@ namespace RhythmActionGame.EditorTools
             ctrl.AddParameter(PlayerBody.ActionSpeedParam, AnimatorControllerParameterType.Float);
             ctrl.AddParameter(PlayerBody.RunSpeedParam, AnimatorControllerParameterType.Float);
             ctrl.parameters = ctrl.parameters.Select(p => { if (p.type == AnimatorControllerParameterType.Float) p.defaultFloat = 1f; return p; }).ToArray();
+            var layers = ctrl.layers;
+            layers[0].iKPass = true;   // 작업 R27: 막기 때 손 IK (PlayerSwordIK)
+            ctrl.layers = layers;
             var sm = ctrl.layers[0].stateMachine;
             var n = new List<string>();
             var s = new List<float>();

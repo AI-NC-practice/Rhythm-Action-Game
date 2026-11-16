@@ -28,6 +28,10 @@ namespace RhythmActionGame
         public Camera viewCamera;
         /// <summary>오른손에 쥔 칼 (작업 R27). 전투 중에는 1인칭 화면에도 보인다.</summary>
         public Renderer[] swordRenderers;
+        /// <summary>오른손 칼자루 (WeaponGrip, 작업 R27). 막기 동안 칼날 방향을 맞춘다.</summary>
+        public Transform swordGrip;
+        /// <summary>칼끼리 부딪칠 때 불꽃 (PresentationDirector.vfxPool).</summary>
+        public VfxPool vfx;
         /// <summary>상태 이름별 클립 길이 (초). SceneBuilder가 채운다.</summary>
         public string[] stateNames;
         public float[] stateSeconds;
@@ -155,8 +159,8 @@ namespace RhythmActionGame
             // 작업 R27: 내 칼로 같이 싸운다 — 내 공격·칼 겨루기 성공은 베기, 적 공격을 ↑로 막으면 칼로 막기 (칼끼리 부딪침)
             else if (r != Judgement.Fail && cue.Tag is CombatStep c)
             {
-                if (c.Kind == CombatStepKind.Strike || c.Kind == CombatStepKind.Lock) PlayOneShot(BodyMoves.SwordSlash);
-                else if (c.Kind == CombatStepKind.Attack && c.Key == ArrowKey.Up) PlayOneShot(BodyMoves.SwordBlock);
+                if (c.Kind == CombatStepKind.Strike || c.Kind == CombatStepKind.Lock) { PlayOneShot(BodyMoves.SwordSlash); Clash(false); }
+                else if (c.Kind == CombatStepKind.Attack && c.Key == ArrowKey.Up) { PlayOneShot(BodyMoves.SwordBlock); guardStart = clock != null ? clock.Now : double.NaN; Clash(true); }
             }
         }
 
@@ -236,6 +240,79 @@ namespace RhythmActionGame
         float followDt;
 
         bool swordShown;
+
+        // ---------------- 작업 R27 (평가 1회차): 막을 때 내 칼이 1인칭 화면에 보이게 + 칼끼리 닿는 곳에서 불꽃 ----------------
+        double guardStart = double.NaN;
+        Quaternion swordLocalRot;
+        bool swordLocalSaved;
+        /// <summary>막기 칼 자세 비율 0~1 (PlayerSwordIK가 손을 카메라 앞에 둔다).</summary>
+        public float SwordGuardWeight
+        {
+            get
+            {
+                if (clock == null || double.IsNaN(guardStart)) return 0f;
+                float t = (float)(clock.Now - guardStart);
+                float up = GameConfig.Body.SwordGuardIn, hold = GameConfig.Body.SwordGuardHold, down = GameConfig.Body.SwordGuardOut;
+                if (t < 0f || t > up + hold + down) return 0f;
+                if (t < up) return Mathf.SmoothStep(0f, 1f, t / up);
+                if (t < up + hold) return 1f;
+                return Mathf.SmoothStep(1f, 0f, (t - up - hold) / down);
+            }
+        }
+        /// <summary>칼끼리 부딪친 횟수·마지막 자리 (테스트용).</summary>
+        public int ClashCount { get; private set; }
+        public Vector3 LastClashPoint { get; private set; }
+
+        /// <summary>칼날을 막는 방향(카메라 앞을 가로지르는 대각선)으로. 매 프레임 칼의 손 기준 자세를 되돌린 뒤 덮어쓴다.</summary>
+        void UpdateSwordGuard()
+        {
+            if (swordGrip == null) return;
+            if (!swordLocalSaved) { swordLocalRot = swordGrip.localRotation; swordLocalSaved = true; }
+            swordGrip.localRotation = swordLocalRot;
+            float w = SwordGuardWeight;
+            if (w <= 0f || viewCamera == null) return;
+            var c = viewCamera.transform;
+            var d = GameConfig.Body.SwordGuardBlade;
+            var blade = (c.right * d.x + c.up * d.y + c.forward * d.z).normalized;
+            // 칼만 돌리면 칼자루가 주먹에서 빠져 보였다 → 손목(손 뼈)을 돌려 주먹이 칼자루를 쥔 채 함께 돈다.
+            // 칼날은 팔뚝에 수직인 평면 안에서만 (손목이 꺾여 보이지 않게)
+            var hand = animator != null ? animator.GetBoneTransform(HumanBodyBones.RightHand) : null;
+            var lower = animator != null ? animator.GetBoneTransform(HumanBodyBones.RightLowerArm) : null;
+            if (hand == null || lower == null) return;
+            var forearm = (hand.position - lower.position).normalized;
+            var want = Vector3.ProjectOnPlane(blade, forearm);
+            if (want.sqrMagnitude < 1e-4f) return;
+            var turn = Quaternion.FromToRotation(swordGrip.forward, want.normalized);
+            hand.rotation = Quaternion.Slerp(Quaternion.identity, turn, w) * hand.rotation;
+        }
+
+        /// <summary>칼끼리 부딪침: 적 칼날 위에서 내 눈앞(막기 자리)에 가장 가까운 점에 불꽃.</summary>
+        void Clash(bool guard)
+        {
+            if (viewCamera == null || director == null || director.CurrentEncounter == null || director.CurrentEncounter.Actors == null) return;
+            var c = viewCamera.transform;
+            var g = GameConfig.Body.SwordGuardHand;
+            var near = c.position + c.right * g.x * 0.5f + c.up * g.y + c.forward * (g.z + 0.25f);
+            EnemyActor best = null; float bd = float.PositiveInfinity;
+            foreach (var a in director.CurrentEncounter.Actors)
+            {
+                if (a == null || a.Defeated || a.weaponVisual == null) continue;
+                float d = (a.transform.position - c.position).sqrMagnitude;
+                if (d < bd) { bd = d; best = a; }
+            }
+            Vector3 p = near;
+            if (best != null)
+            {
+                var tip = best.weaponTip != null ? best.weaponTip.position : best.weaponVisual.position + best.weaponVisual.forward;
+                var a0 = best.weaponVisual.position; var ab = tip - a0;
+                float t = Mathf.Clamp01(Vector3.Dot(near - a0, ab) / Mathf.Max(1e-6f, ab.sqrMagnitude));
+                var onBlade = a0 + ab * t;
+                p = (onBlade - near).magnitude < 1.2f ? Vector3.Lerp(near, onBlade, 0.5f) : near;
+            }
+            LastClashPoint = p;
+            ClashCount++;
+            if (vfx != null) vfx.Play(VfxKind.Embers, p, 3, GameConfig.Body.ClashSparks, new Color(2.4f, 1.6f, 0.6f));
+        }
         /// <summary>칼을 1인칭 화면에 보이는 중인지 (작업 R27, 테스트용).</summary>
         public bool SwordVisible => swordShown;
 
@@ -244,9 +321,11 @@ namespace RhythmActionGame
         {
             if (swordRenderers == null) return;
             bool want = director != null && director.State == StageState.Combat;
-            if (want == swordShown) return;
-            swordShown = want;
-            foreach (var r in swordRenderers) if (r != null) r.shadowCastingMode = want ? ShadowCastingMode.On : ShadowCastingMode.ShadowsOnly;
+            // 전투 중에는 매 프레임 켠다 — 무사 결투 3인칭 컷이 끝날 때 칼을 "그림자만"으로 되돌려 1인칭에서 칼이 사라졌다 (평가 1회차)
+            if (want) { foreach (var r in swordRenderers) if (r != null && r.shadowCastingMode != ShadowCastingMode.On) r.shadowCastingMode = ShadowCastingMode.On; swordShown = true; return; }
+            if (!swordShown) return;
+            swordShown = false;
+            foreach (var r in swordRenderers) if (r != null) r.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
         }
 
         /// <summary>
@@ -369,7 +448,7 @@ namespace RhythmActionGame
                 for (int i = 0; i < names.Length; i++)
                 {
                     string n = names[i].Replace('.', ' ');   // "Right Index 1 Stretched" (곡선 이름 "RightHand.Index.1 Stretched"도 같게)
-                    if (!n.StartsWith("RightHand ") && !n.StartsWith("Right ")) continue;
+                    if (!n.StartsWith("RightHand ") && !n.StartsWith("Right ") && !n.StartsWith("LeftHand ") && !n.StartsWith("Left ")) continue;   // 두 손 (칼 동작은 두 손으로 쥠)
                     float v = float.NaN;
                     foreach (var f in new[] { "Index", "Middle", "Ring", "Little" })
                     {
@@ -406,6 +485,7 @@ namespace RhythmActionGame
             followDt = 0f;
             UpdateVisibility();
             UpdateSwordVisibility();
+            UpdateSwordGuard();
         }
 
         /// <summary>

@@ -1944,7 +1944,7 @@
                                          "unity-verify.ps1 전체 통과"
                                      ],
                       "status":  "pending",
-                      "attempts":  0,
+                      "attempts":  1,
                       "max_attempts":  3,
                       "notes":  "사용자 요청 2026-11-17: 지금 목표·빌드를 끝낸 뒤 버그 잡고 추가."
                   },
@@ -1963,7 +1963,7 @@
                                          "unity-verify.ps1 전체 통과"
                                      ],
                       "status":  "pending",
-                      "attempts":  0,
+                      "attempts":  1,
                       "max_attempts":  3,
                       "notes":  "사용자 피드백 2026-11-17 (빌드 플레이, 묶음 E로 한 번에 구현·검증)."
                   },
