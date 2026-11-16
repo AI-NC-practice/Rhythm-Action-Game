@@ -1331,10 +1331,10 @@
                                          "smoke-test-build.ps1 통과",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  3,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "완료(2026-11-16, 3회차 PASS): 상자→VARCO 모델(충돌 유지), 챕터별 장식, 외곽 그림 원통·해 질 녘·안개, 드로우콜 평균 778→290(SetPass 675→268), 최종 빌드·smoke 통과. "
                   },
                   {
                       "id":  "T16",

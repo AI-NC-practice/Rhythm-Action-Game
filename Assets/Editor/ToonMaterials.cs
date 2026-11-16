@@ -30,6 +30,7 @@ namespace RhythmActionGame.EditorTools
             m.SetFloat("_Steps", GameConfig.Body.ToonSteps);
             m.SetFloat("_ShadowLevel", GameConfig.Body.ToonShadowLevel);
             m.SetFloat("_OutlineWidth", GameConfig.Body.OutlineWidth);
+            m.enableInstancing = true;   // 작업 T15: 같은 모델이 많은 맵 장식
         }
 
         static Material Load(string id)

@@ -26,8 +26,10 @@ namespace RhythmActionGame.EditorTools
             Directory.CreateDirectory(ScenesDir);
             Directory.CreateDirectory(MaterialsDir);
             EnemyRig.ClearCache();
+            shapeCache.Clear();
             MusicTool.ApplyImportSettings();
             AudioProjectSettings.Apply();
+            if (GraphicsSettings.defaultRenderPipeline is UniversalRenderPipelineAsset urp) { urp.shadowCascadeCount = GameConfig.Map.ShadowCascades; EditorUtility.SetDirty(urp); }   // 작업 T15: 그림자 그리기 호출 줄이기
             BuildTitle();
             BuildGame();
             EditorBuildSettings.scenes = new[]
@@ -36,6 +38,7 @@ namespace RhythmActionGame.EditorTools
                 new EditorBuildSettingsScene(GameScenePath, true),
             };
             AssetDatabase.SaveAssets();
+            DrawCallReport.BuildNoBatchScene();   // 작업 T15: 드로우콜 비교용 (정적 배칭 없음)
             Debug.Log("[SceneBuilder] Title, Game 씬 생성 완료");
         }
 
@@ -78,11 +81,7 @@ namespace RhythmActionGame.EditorTools
             light.intensity = 1.2f;
             light.color = new Color(1f, 0.93f, 0.82f);
             light.shadows = LightShadows.Soft;
-            sun.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
-            RenderSettings.ambientMode = AmbientMode.Trilight;
-            RenderSettings.ambientSkyColor = new Color(0.55f, 0.6f, 0.7f);
-            RenderSettings.ambientEquatorColor = new Color(0.45f, 0.42f, 0.4f);
-            RenderSettings.ambientGroundColor = new Color(0.25f, 0.22f, 0.2f);
+            BuildAtmosphere(light);   // 해 질 녘 해·하늘·안개 (작업 T15)
 
             var map = new GameObject("Map").transform;
             BuildGround(map);
@@ -90,6 +89,8 @@ namespace RhythmActionGame.EditorTools
             BuildRoofs(map);
             BuildAlley(map);
             BuildObstacles(map, chart);
+            BuildDressing(map);        // 챕터 컨셉 장식 (작업 T15)
+            BuildBackdrop(map);        // 먼 외곽 그림 원통
             var eventProps = BuildEventProps(map, chart);
             var enemies = BuildEnemies(map, chart);
 
@@ -160,7 +161,7 @@ namespace RhythmActionGame.EditorTools
             cam.fieldOfView = GameConfig.FovDefault;
             cam.nearClipPlane = 0.05f;
             cam.farClipPlane = 600f;
-            cam.clearFlags = CameraClearFlags.SolidColor;
+            cam.clearFlags = CameraClearFlags.Skybox;   // 해 질 녘 하늘 (작업 T15)
             cam.backgroundColor = new Color(0.62f, 0.72f, 0.82f);
             player.transform.position = MapLayout.PointAt(0);
 
@@ -320,12 +321,13 @@ namespace RhythmActionGame.EditorTools
 
         static void BuildGround(Transform map)
         {
-            var ground = Box(map, "Ground", new Vector3(135f, -0.1f, 195f), new Vector3(420f, 0.2f, 520f), Quaternion.identity, Mat("Ground", new Color(0.55f, 0.5f, 0.42f)));
+            var gc = MapCenter(); float gs = GameConfig.Map.BackdropRadius * 2f + 20f;   // 작업 T15: 땅이 외곽 그림 원통까지 닿게
+            var ground = Box(map, "Ground", new Vector3(gc.x, -0.1f, gc.z), new Vector3(gs, 0.2f, gs), Quaternion.identity, Mat("Ground", new Color(0.55f, 0.5f, 0.42f)));
             ground.isStatic = true;
             // 지면 위 길 (폭 3 m)
             int i = 0;
             foreach (var r in MapLayout.SplitAtCorners(0, MapLayout.TotalLength))
-                StripBox(map, $"Path_{i++}", r.x, r.y, 0.02f, GameConfig.PathWidth, 0.04f, 0f, Mat("Path", new Color(0.7f, 0.66f, 0.58f)));
+                StripBox(map, $"Path_{i++}", r.x, r.y, 0.02f, GameConfig.PathWidth, 0.04f, 0f, Mat("Path", new Color(0.7f, 0.66f, 0.58f))).isStatic = true;   // 정적 배칭 (작업 T15)
         }
 
         static void BuildSections(Transform map)
@@ -349,7 +351,12 @@ namespace RhythmActionGame.EditorTools
             {
                 var color = roof.AssetId == "gate" ? new Color(0.55f, 0.25f, 0.2f) : roof.AssetId == "wall_stone" ? new Color(0.6f, 0.6f, 0.58f) : new Color(0.32f, 0.33f, 0.36f);
                 foreach (var r in MapLayout.SplitAtCorners(roof.Start, Mathf.Min(roof.End, MapLayout.TotalLength + 5f)))
-                    StripBox(parent, $"Prop_{roof.AssetId}_{n++}", r.x, r.y, roof.Height * 0.5f, 6f, roof.Height, 0f, Mat("Roof_" + roof.AssetId, color));
+                {
+                    var box = StripBox(parent, $"Prop_{roof.AssetId}_{n++}", r.x, r.y, roof.Height * 0.5f, 6f, roof.Height, 0f, Mat("Roof_" + roof.AssetId, color));
+                    // 작업 T15: 지붕 길 상자는 충돌만, 보이는 것은 모델 (성문 길은 돌담 줄 가운데에 성문)
+                    if (roof.AssetId == "gate") TileIntoBox(box.transform, "wall_stone", "gate");
+                    else TileIntoBox(box.transform, roof.AssetId);
+                }
             }
         }
 
@@ -360,8 +367,8 @@ namespace RhythmActionGame.EditorTools
             parent.SetParent(map);
             var m = Mat("AlleyWall", new Color(0.78f, 0.74f, 0.66f));
             float end = MapLayout.Sections[0].EndBeat * GameConfig.MetersPerBeat - 4f;
-            StripBox(parent, "AlleyWall_L", 4f, end, 1.5f, 0.6f, 3f, -2.6f, m);
-            StripBox(parent, "AlleyWall_R", 4f, end, 1.5f, 0.6f, 3f, 2.6f, m);
+            TileIntoBox(StripBox(parent, "AlleyWall_L", 4f, end, 1.5f, 0.6f, 3f, -2.6f, m).transform, "wall_stone");   // 작업 T15: 돌담 모델
+            TileIntoBox(StripBox(parent, "AlleyWall_R", 4f, end, 1.5f, 0.6f, 3f, 2.6f, m).transform, "wall_stone");
         }
 
         static void BuildObstacles(Transform map, ChartData chart)
@@ -380,9 +387,10 @@ namespace RhythmActionGame.EditorTools
                 var side = e.Key == ArrowKey.Left ? -1f : e.Key == ArrowKey.Right ? 1f : 0f;
                 switch (e.kind)
                 {
-                    case "cart": LocalBox(root, "Prop_cart", new Vector3(0, 0.6f, 0), new Vector3(1.6f, 1.2f, 1.0f), Mat("Cart", new Color(0.55f, 0.38f, 0.22f))); break;
-                    case "jars": LocalBox(root, "Prop_jars", new Vector3(side == 0 ? 0 : -side * 0.6f, 0.5f, 0), new Vector3(1.4f, 1.0f, 1.2f), Mat("Jars", new Color(0.45f, 0.28f, 0.18f))); break;
-                    case "low_wall": LocalBox(root, "Prop_wall_stone", new Vector3(0, 0.5f, 0), new Vector3(3.2f, 1.0f, 0.5f), Mat("LowWall", new Color(0.6f, 0.6f, 0.58f))); break;
+                    // 작업 T15: 상자는 충돌만, 같은 자리에 VARCO 모델
+                    case "cart": FitIntoBox(LocalBox(root, "Prop_cart", new Vector3(0, 0.6f, 0), new Vector3(1.6f, 1.2f, 1.0f), Mat("Cart", new Color(0.55f, 0.38f, 0.22f))).transform, "cart"); break;
+                    case "jars": FitIntoBox(LocalBox(root, "Prop_jars", new Vector3(side == 0 ? 0 : -side * 0.6f, 0.5f, 0), new Vector3(1.4f, 1.0f, 1.2f), Mat("Jars", new Color(0.45f, 0.28f, 0.18f))).transform, "jars"); break;
+                    case "low_wall": FitIntoBox(LocalBox(root, "Prop_wall_stone", new Vector3(0, 0.5f, 0), new Vector3(3.2f, 1.0f, 0.5f), Mat("LowWall", new Color(0.6f, 0.6f, 0.58f))).transform, "wall_stone"); break;
                     case "clothesline":
                         var cl = Mat("Clothesline", new Color(0.85f, 0.85f, 0.8f));
                         LocalBox(root, "Prop_clothesline_PostL", new Vector3(-1.7f, 1.0f, 0), new Vector3(0.1f, 2.0f, 0.1f), cl);
@@ -390,7 +398,7 @@ namespace RhythmActionGame.EditorTools
                         LocalBox(root, "Prop_clothesline", new Vector3(0, 1.4f, 0), new Vector3(3.4f, 0.4f, 0.05f), cl);
                         break;
                     case "eave": LocalBox(root, "Prop_eave", new Vector3(0, 1.4f, 0), new Vector3(3.4f, 0.3f, 1.0f), Mat("Eave", new Color(0.3f, 0.3f, 0.33f))); break;
-                    case "wall_run": LocalBox(root, "Prop_wall_stone", new Vector3(side * 2.0f, 1.75f, 0), new Vector3(0.5f, 3.5f, 8f), Mat("WallRun", new Color(0.66f, 0.64f, 0.6f))); break;
+                    case "wall_run": TileIntoBox(LocalBox(root, "Prop_wall_stone", new Vector3(side * 2.0f, 1.75f, 0), new Vector3(0.5f, 3.5f, 8f), Mat("WallRun", new Color(0.66f, 0.64f, 0.6f))).transform, "wall_stone"); break;
                     default: break; // roof_climb, roof_jump, drop_down, gate_climb: 지붕 덩어리가 장애물이다
                 }
             }

@@ -1,5 +1,5 @@
 ﻿# Unity verify report
-time: 2026-11-16 16:20:12
+time: 2026-11-16 17:35:54
 
 ## EditMode : total=189 passed=189 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
@@ -192,7 +192,7 @@ time: 2026-11-16 16:20:12
   - [Passed] RhythmActionGame.Tests.T14_EnemyRigTests.T14_GameScene_EveryEnemy_HasModel_WeaponOnHandBone_NoCapsule
   - [Passed] RhythmActionGame.Tests.T14_EnemyRigTests.T14_PlayerController_HasExecutionAndHitStates
 
-## PlayMode : total=161 passed=161 failed=0 skipped=0 result=Passed
+## PlayMode : total=163 passed=163 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -354,5 +354,7 @@ time: 2026-11-16 16:20:12
   - [Passed] RhythmActionGame.Tests.T14_EnemyCombatPlayTests.T14_Enemy_Model_WeaponInHand_ImpactOnTargetBeat_CrossfadeBetweenAttacks
   - [Passed] RhythmActionGame.Tests.T14_EnemyCombatPlayTests.T14_HitPushback_Windmill_PlayerHit_States
   - [Passed] RhythmActionGame.Tests.T14_EnemyCombatPlayTests.T14_RoofKick_EnemyFallsOffRoof_PlayerKicks
+  - [Passed] RhythmActionGame.Tests.T15_DrawCallTests.T15_DrawCalls_BeforeAfter_Recorded_AndReduced
+  - [Passed] RhythmActionGame.Tests.T15_DrawCallTests.T15_Map_ModelsReplaceGrayBoxes_Atmosphere
 
 OVERALL: PASS

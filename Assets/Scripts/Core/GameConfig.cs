@@ -822,5 +822,41 @@ namespace RhythmActionGame
             /// <summary>처형 시작 때 적이 서는 거리 (m, 플레이어 발 기준). 발차기·칼 뺏기·찌르기.</summary>
             public const float ExecutionDistance = 1.2f;
         }
+
+        /// <summary>맵 꾸미기·분위기 (작업 T15, GDD 5·6, 2026-11-16 사용자 맵 디자인 요청).</summary>
+        public static class Map
+        {
+            /// <summary>길 옆 장식이 길(경로 중심선)에서 떨어져야 하는 최소 거리 (m, 모델 반폭 더하기 전).</summary>
+            public const float DressClearance = 4.5f;
+            /// <summary>장식 배치 간격 (m, 길을 따라).</summary>
+            public const float DressSpacing = 11f;
+            /// <summary>집·담 장식의 길 옆 거리 (m): 가까운 줄, 먼 줄.</summary>
+            public const float DressNear = 9f;
+            public const float DressFar = 17f;
+            /// <summary>마을 구간(1·3·5)의 가장 먼 집 줄 (m) — 배경 그림까지 빈 땅을 줄인다.</summary>
+            public const float DressFarthest = 27f;
+            /// <summary>장식 집 높이 (m) — 지붕 길보다 조금 낮게 해 지붕 위가 트여 보이게.</summary>
+            public const float DressHouseHeight = 4.2f;
+            /// <summary>궁궐 담 장식 높이 (m).</summary>
+            public const float PalaceWallHeight = 4.5f;
+            /// <summary>배치 무작위 씨앗 (같은 결과).</summary>
+            public const int DressSeed = 1716;
+
+            /// <summary>먼 배경(산·지붕 실루엣)을 그린 원통 반지름·높이 (m). 맵 중심 기준.</summary>
+            public const float BackdropRadius = 300f;
+            public const float BackdropHeight = 110f;
+            /// <summary>원통 밑을 땅 아래로 내리는 깊이 (m).</summary>
+            public const float BackdropSink = 6f;
+
+            /// <summary>해 질 녘 해 (도): 높이·방향.</summary>
+            public const float SunPitch = 17f;
+            public const float SunYaw = -62f;
+            public const float SunIntensity = 1.25f;
+            /// <summary>그림자 단계 수 (URP 주광 캐스케이드). 4 → 2로 그림자 그리기 호출을 줄인다.</summary>
+            public const int ShadowCascades = 2;
+            /// <summary>안개 (선형, m).</summary>
+            public const float FogStart = 70f;
+            public const float FogEnd = 330f;
+        }
     }
 }

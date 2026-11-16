@@ -165,17 +165,32 @@ namespace RhythmActionGame
             if (dt < 0 || dt > 0.25) dt = 0;                       // 시간 되돌림·긴 멈춤은 건너뜀
             float speed = clock == null ? 1f : clock.IsPaused ? 0f : clock.IsRunning ? clock.SpeedMultiplier : 1f;
             animator.Update((float)dt * speed);
+            followDt += (float)dt * speed;
         }
 
+        float followDt;
+
+        /// <summary>머리 뼈 따라가기는 LateUpdate(Cinemachine Brain보다 먼저, 실행 순서 −50)에서, 시간은 박자 시계 시간으로.</summary>
         void LateUpdate()
+        {
+            FollowHead(followDt);
+            followDt = 0f;
+        }
+
+        /// <summary>
+        /// 카메라 받침이 머리 뼈를 따라간다. 박자 시계 시간으로 한다 (작업 T15 수정: 실제 프레임 시간이면 무거운 씬에서
+        /// 프레임마다 움직임이 달라진다). Update에서 하면 컷 카메라 검사 사이에 받침이 움직이므로 LateUpdate에서 한다.
+        /// </summary>
+        void FollowHead(float dt)
         {
             if (cameraRig == null || head == null) return;
             var now = transform.InverseTransformPoint(head.position);
             var target = (now - headRest) * GameConfig.Body.HeadFollowWeight;
-            float k = 1f - Mathf.Exp(-GameConfig.Body.HeadFollowSharpness * Time.unscaledDeltaTime);
+            float k = 1f - Mathf.Exp(-GameConfig.Body.HeadFollowSharpness * dt);
             rigOffset = Vector3.Lerp(rigOffset, target, k);
             cameraRig.localPosition = new Vector3(0f, GameConfig.EyeHeight, GameConfig.Body.EyeForward) + rigOffset;
         }
+
 
         /// <summary>
         /// 머리·목(과 그 아래 뼈)에 가중치가 실린 삼각형을 뺀 메시 복사본을 만들어 화면에 그리고, 원래 메시는 그림자만 남긴다.

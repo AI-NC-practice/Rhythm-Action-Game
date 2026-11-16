@@ -94,8 +94,35 @@ namespace RhythmActionGame.EditorTools
             }
         }
 
+        /// <summary>챕터마다 1인칭 눈높이 미리보기와 위에서 본 전경 (작업 T15). 결과: harness/reports/preview/t15_*.png</summary>
+        public static void CaptureT15()
+        {
+            EditorSceneManager.OpenScene(SceneBuilder.GameScenePath, OpenSceneMode.Single);
+            var cam = GameObject.Find("PlayerCamera").GetComponent<Camera>();
+            cam.transform.SetParent(null, true);
+            var player = GameObject.Find("Player");
+            if (player != null) player.SetActive(false);
+            Directory.CreateDirectory(OutDir);
+            foreach (var beat in new[] { 24, 84, 140, 186, 224, 258 })
+            {
+                var p = MapLayout.PointAt(beat * GameConfig.MetersPerBeat, out var fwd);
+                cam.transform.position = p + Vector3.up * GameConfig.EyeHeight;
+                cam.transform.rotation = Quaternion.LookRotation(fwd + Vector3.down * 0.05f);
+                Shot(cam, $"{OutDir}/t15_ch{MapLayout.SectionOf(beat).Number}_{beat}.png");
+                cam.transform.rotation = Quaternion.LookRotation(Quaternion.Euler(0, 70f, 0) * fwd);
+                Shot(cam, $"{OutDir}/t15_ch{MapLayout.SectionOf(beat).Number}_{beat}_side.png");
+            }
+            var mid = MapLayout.PointAt(MapLayout.TotalLength * 0.45f);
+            cam.farClipPlane = 1200f;
+            cam.transform.position = mid + new Vector3(-160f, 140f, -160f);
+            cam.transform.LookAt(mid);
+            Shot(cam, $"{OutDir}/t15_overview.png");
+            Debug.Log("[PreviewCapture] T15 미리보기 저장");
+        }
+
         static void Shot(Camera cam, string path)
         {
+            foreach (var d in Object.FindObjectsByType<DressingInstancer>(FindObjectsSortMode.None)) d.Draw();   // 인스턴싱 장식 (T15)
             var rt = new RenderTexture(1280, 720, 24);
             var prev = cam.targetTexture;
             cam.targetTexture = rt;

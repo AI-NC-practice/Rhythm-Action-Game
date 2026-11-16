@@ -2,6 +2,7 @@
 // - UniversalForward: 주광(그림자 포함)의 N·L을 _Steps 단계로 끊어 _ShadowLevel~1 밝기로, 노멀 맵 지원, 하늘빛(SH) 약간.
 // - SRPDefaultUnlit: 뒷면만 노멀 방향으로 화면 공간에서 부풀려 외곽선 (URP는 이 패스도 함께 그린다).
 // - ShadowCaster / DepthOnly: 그림자와 깊이.
+// - GPU 인스턴싱 지원 (작업 T15, 같은 모델이 많은 맵 장식). SRP Batcher와도 맞는다(UnityPerMaterial).
 // 값(단계, 두께)은 GameConfig.Body에서 SceneBuilder·ToonMaterials가 넣는다.
 Shader "RhythmActionGame/Toon"
 {
@@ -44,12 +45,13 @@ Shader "RhythmActionGame/Toon"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile_instancing
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
             #pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW _SHADOWS_SOFT_MEDIUM _SHADOWS_SOFT_HIGH
             #pragma multi_compile_fog
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
-            struct Attributes { float4 positionOS : POSITION; float3 normalOS : NORMAL; float4 tangentOS : TANGENT; float2 uv : TEXCOORD0; };
+            struct Attributes { float4 positionOS : POSITION; float3 normalOS : NORMAL; float4 tangentOS : TANGENT; float2 uv : TEXCOORD0; UNITY_VERTEX_INPUT_INSTANCE_ID };
             struct Varyings
             {
                 float4 positionCS : SV_POSITION;
@@ -62,6 +64,7 @@ Shader "RhythmActionGame/Toon"
 
             Varyings vert(Attributes i)
             {
+                UNITY_SETUP_INSTANCE_ID(i);
                 Varyings o;
                 VertexPositionInputs p = GetVertexPositionInputs(i.positionOS.xyz);
                 VertexNormalInputs n = GetVertexNormalInputs(i.normalOS, i.tangentOS);
@@ -100,12 +103,14 @@ Shader "RhythmActionGame/Toon"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile_instancing
             #pragma multi_compile_fog
-            struct Attributes { float4 positionOS : POSITION; float3 normalOS : NORMAL; };
+            struct Attributes { float4 positionOS : POSITION; float3 normalOS : NORMAL; UNITY_VERTEX_INPUT_INSTANCE_ID };
             struct Varyings { float4 positionCS : SV_POSITION; float fog : TEXCOORD0; };
 
             Varyings vert(Attributes i)
             {
+                UNITY_SETUP_INSTANCE_ID(i);
                 Varyings o;
                 float4 cs = TransformObjectToHClip(i.positionOS.xyz);
                 float3 nCS = TransformWorldToHClipDir(TransformObjectToWorldNormal(i.normalOS));
@@ -129,13 +134,15 @@ Shader "RhythmActionGame/Toon"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile_instancing
             #pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
             float3 _LightDirection;
             float3 _LightPosition;
-            struct Attributes { float4 positionOS : POSITION; float3 normalOS : NORMAL; };
+            struct Attributes { float4 positionOS : POSITION; float3 normalOS : NORMAL; UNITY_VERTEX_INPUT_INSTANCE_ID };
             float4 vert(Attributes i) : SV_POSITION
             {
+                UNITY_SETUP_INSTANCE_ID(i);
                 float3 pWS = TransformObjectToWorld(i.positionOS.xyz);
                 float3 nWS = TransformObjectToWorldNormal(i.normalOS);
             #if _CASTING_PUNCTUAL_LIGHT_SHADOW
@@ -163,7 +170,9 @@ Shader "RhythmActionGame/Toon"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
-            float4 vert(float4 positionOS : POSITION) : SV_POSITION { return TransformObjectToHClip(positionOS.xyz); }
+            #pragma multi_compile_instancing
+            struct DAttributes { float4 positionOS : POSITION; UNITY_VERTEX_INPUT_INSTANCE_ID };
+            float4 vert(DAttributes i) : SV_POSITION { UNITY_SETUP_INSTANCE_ID(i); return TransformObjectToHClip(i.positionOS.xyz); }
             half frag() : SV_Target { return 0; }
             ENDHLSL
         }

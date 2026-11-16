@@ -14,6 +14,28 @@ namespace RhythmActionGame.Tests
     /// 무사 결투 3인칭 컷 A~D (GDD-beta B11.5). 결투 전체를 한 프레임 0.01초로 돌리고,
     /// Cinemachine 블렌드도 같은 0.01초씩 진행시켜(UniformDeltaTimeOverride) 시계와 카메라 시간을 맞춘다.
     /// </summary>
+    /// <summary>
+    /// 프레임 끝(모든 LateUpdate 뒤, Cinemachine Brain이 카메라를 놓은 뒤)에 화면 카메라와 활성 가상 카메라의 거리를 잰다 (T15).
+    /// 코루틴은 다음 프레임 Update 뒤에 돌아 그 사이 부모(플레이어) 이동이 섞이므로, 화면 = 가상 카메라 검사는 여기서 한다.
+    /// </summary>
+    [DefaultExecutionOrder(32000)]
+    class EndOfFrameCamProbe : MonoBehaviour
+    {
+        public Camera screen;
+        public CinemachineBrain brain;
+        public ICinemachineCamera Active;
+        public bool Blending;
+        public float Gap = -1f;
+
+        void LateUpdate()
+        {
+            if (screen == null || brain == null) return;
+            Active = brain.ActiveVirtualCamera;
+            Blending = brain.IsBlending;
+            Gap = Active is CinemachineCamera c ? Vector3.Distance(screen.transform.position, c.transform.position) : -1f;
+        }
+    }
+
     public class B28_DuelCutTests
     {
         const double Dt = 0.01;
@@ -46,6 +68,11 @@ namespace RhythmActionGame.Tests
             dir.FailHitSeconds = 0f;   // beta1-1: 피격 연출(GDD-beta B12.2)은 B30 테스트에서 따로 본다. 여기서는 바로 되감기
             dir.slowMotion.RealTime = () => real;
             CinemachineCore.UniformDeltaTimeOverride = (float)Dt;
+            // T15: 카메라 흔들림·박 출렁임도 같은 고정 시간으로 (실제 프레임 시간이면 무거운 씬에서 프레임 사이 부모 이동이 커져 결과가 흔들림)
+            foreach (var fx in Object.FindObjectsByType<CameraFx>(FindObjectsSortMode.None)) fx.DeltaTime = () => (float)Dt;
+            foreach (var fx in Object.FindObjectsByType<BeatFx>(FindObjectsSortMode.None)) fx.DeltaTime = () => (float)Dt;
+            dir.MotionDeltaTime = () => (float)Dt;                 // 전투 이동도 고정 시간 (B32·B33·B34와 같은 방식)
+            foreach (var bt in Object.FindObjectsByType<BulletTimeFx>(FindObjectsSortMode.None)) bt.DeltaTime = () => (float)Dt;   // PERFECT 아슬아슬 회피 슬로
             boot.StartRun(start);
             yield return null;
         }
@@ -61,6 +88,9 @@ namespace RhythmActionGame.Tests
             var frames = new List<Frame>();
             var seen = new HashSet<string>();
             var minAngle = new Dictionary<string, float>(); var maxAngle = new Dictionary<string, float>();
+            var probe = new GameObject("CamProbe").AddComponent<EndOfFrameCamProbe>();
+            probe.screen = boot.playerCamera; probe.brain = duel.Brain;
+            int gapChecks = 0;
             double delay = perfect ? 0.0 : 0.12;                               // NORMAL은 속도를 바꾸지 않는다 (1.0 유지)
             string prevCut = null;
             StageDirector.Encounter enc = null;
@@ -108,8 +138,10 @@ namespace RhythmActionGame.Tests
                     if (fr.Cut != "S" && !duel.CutTopDown)   // beta1-1 B13.4: 컷마다 반지름 (A·D·K 3.5~5 m, B 칼날 1.2 m), S는 어깨 너머
                         Assert.That(flat.magnitude, Is.InRange(Mathf.Min(def.r0, def.r1) - 1e-3f, Mathf.Max(def.r0, def.r1) + 1e-3f), $"{fr.Cut} 반지름");
                     Assert.Greater(Vector3.Dot(cc.transform.forward, (duel.CutLookAt - cc.transform.position).normalized), 0.999f, $"{fr.Cut}: 중간점을 바라봄");
-                    if (!fr.Blending && ReferenceEquals(fr.Active, cc))
-                        Assert.Less(Vector3.Distance(boot.playerCamera.transform.position, cc.transform.position), 0.02f, "화면 = 3인칭 카메라");   // beta1-1 B13: 다음 프레임 Update에서 플레이어(카메라 부모)가 움직인 만큼 차이 (Brain이 LateUpdate마다 다시 맞춤)
+                    // T15: 화면 = 3인칭 카메라는 프레임 끝(Brain이 카메라를 놓은 뒤)에 잰 값으로 본다. 전에는 코루틴 시점(다음 프레임 Update 뒤)에 재서
+                    // 그 프레임 플레이어(카메라 부모) 이동이 섞였고, 씬이 무거워져 프레임 시간이 바뀌자 0.02를 넘나들었다.
+                    if (!fr.Blending && ReferenceEquals(fr.Active, cc) && !probe.Blending && ReferenceEquals(probe.Active, cc))
+                    { Assert.Less(probe.Gap, 0.02f, "화면 = 3인칭 카메라"); gapChecks++; }
                     minAngle[fr.Cut] = minAngle.TryGetValue(fr.Cut, out var mn) ? Mathf.Min(mn, duel.CutAngle) : duel.CutAngle;
                     maxAngle[fr.Cut] = maxAngle.TryGetValue(fr.Cut, out var mx) ? Mathf.Max(mx, duel.CutAngle) : duel.CutAngle;
                 }
@@ -121,6 +153,7 @@ namespace RhythmActionGame.Tests
                 }
                 prevCut = fr.Cut;
             }
+            Assert.Greater(gapChecks, 10, "프레임 끝 화면 = 3인칭 카메라 검사를 실제로 함");
             Assert.AreEqual(StageState.Cleared, dir.State, "결투 클리어");
 
             // 판정 원이 나타나기 0.4초 전에는 이미 1인칭

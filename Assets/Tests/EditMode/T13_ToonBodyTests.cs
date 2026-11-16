@@ -56,7 +56,7 @@ namespace RhythmActionGame.Tests
                     if (!(r is MeshRenderer) && !(r is SkinnedMeshRenderer)) continue;
                     foreach (var m in r.sharedMaterials)
                     {
-                        if (m == null || m.name == "Ghost") continue;     // 잔상(반투명)은 툰 대상 아님
+                        if (m == null || m.name == "Ghost" || m.name == "Backdrop") continue;     // 잔상(반투명)·먼 배경 그림(T15, 조명 없는 착시)은 툰 대상 아님
                         Assert.AreEqual(Toon, m.shader.name, $"{r.name}: {m.name}");
                         n++;
                     }
