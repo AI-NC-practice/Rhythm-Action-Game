@@ -1735,12 +1735,128 @@
                       "notes":  "사용자 피드백(2026-11-16 7번): 보스 만났을 때 나 달리기 모션 나오는데 왜 제자리에서 달리냐. 적 쪽은 R07."
                   },
                   {
+                      "id":  "R19",
+                      "title":  "대문 통과 때 1인칭 화면 앞에 내 몸이 보이는 문제 (204박)",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "R16"
+                                     ],
+                      "acceptance":  [
+                                         "원인을 확인해 log에 적음 (카메라가 몸에서 떨어지는 순간·이유)",
+                                         "닫히는 대문 사건 동안 1인칭 화면에 내 몸 전체가 앞쪽에 보이는 프레임 0 — R06 방식(내 몸만 그려 화면 위치 측정) 테스트",
+                                         "PERFECT·NORMAL·FAIL 1인칭 미리보기 PNG",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  "전체 훑어보기 2026-11-17 (harness/reports/review/NOTES.md), 사용자 \"1~6번 모두 넣기\". R14(대문 통과 동작)와 겹치면 R14 결과를 기준으로."
+                  },
+                  {
+                      "id":  "R20",
+                      "title":  "하늘 끝이 활처럼 휜 띠로 보이는 문제",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "R19"
+                                     ],
+                      "acceptance":  [
+                                         "1인칭 화면에서 배경 원통 위쪽 경계가 휜 띠로 보이지 않음 (하늘과 배경 그림이 자연스럽게 이어짐)",
+                                         "평지·지붕 위·궁궐 1인칭 미리보기 PNG (전후 비교)",
+                                         "드로우콜이 크게 늘지 않음 (T15 기록과 비교)",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  "전체 훑어보기 2026-11-17 (harness/reports/review/NOTES.md), 사용자 \"1~6번 모두 넣기\"."
+                  },
+                  {
+                      "id":  "R21",
+                      "title":  "마을 밖 빈 평지와 배경 그림 이음 (지붕 위·궁궐에서 보이는 곳)",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "R20"
+                                     ],
+                      "acceptance":  [
+                                         "시작 전 방법을 사용자와 정함 (예: 먼 집·담·나무 띠, 지형 기복, 배경 그림 아래쪽 이음, 안개) — 새 에셋이 필요하면 포인트 견적 승인",
+                                         "지붕 위(104~160박)·궁궐(250박~) 1인칭에서 넓은 빈 평지가 보이지 않음 — 미리보기 PNG 전후 비교",
+                                         "드로우콜 증가는 사용자가 받아들일 범위 (T15 기록과 비교해 log에 적음)",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  "전체 훑어보기 2026-11-17 (harness/reports/review/NOTES.md), 사용자 \"1~6번 모두 넣기\"."
+                  },
+                  {
+                      "id":  "R22",
+                      "title":  "4장 광장이 비어 보임 + 쓰러진 적이 남지 않음",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "R21"
+                                     ],
+                      "acceptance":  [
+                                         "시작 전 방법을 사용자와 정함 (광장 크기·소품·구경꾼 등)",
+                                         "광장(176~196박) 1인칭·3인칭에서 빈 느낌이 줄어듦 — 미리보기 PNG 전후 비교",
+                                         "쓰러진 적은 쓰러진 자리에 남아 있다가 화면 밖에서 사라짐 (바로 사라지지 않음) — 테스트",
+                                         "포위 전투 판정·연출 테스트 그대로 통과",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  "전체 훑어보기 2026-11-17 (harness/reports/review/NOTES.md), 사용자 \"1~6번 모두 넣기\"."
+                  },
+                  {
+                      "id":  "R23",
+                      "title":  "1인칭 바닥에 보이는 검은 사선(길 가장자리 선) 없애기",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "R22"
+                                     ],
+                      "acceptance":  [
+                                         "원인을 확인해 log에 적음 (길 메시 윤곽선·툰 외곽선 등)",
+                                         "1인칭 미리보기에서 길 가장자리 검은 선이 보이지 않음 (전후 비교 PNG)",
+                                         "길이 바닥과 구분은 됨 (길이 사라져 보이지 않음)",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  "전체 훑어보기 2026-11-17 (harness/reports/review/NOTES.md), 사용자 \"1~6번 모두 넣기\"."
+                  },
+                  {
+                      "id":  "R24",
+                      "title":  "지붕 위 복선 적이 오래 가만히 서 있지 않게",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "R23"
+                                     ],
+                      "acceptance":  [
+                                         "시작 전 동작을 사용자와 정함 (예: 플레이어를 가리키며 외침 없이 손짓, 지붕을 따라 달려 사라짐, 몸을 숨김) — Mixamo 동작이 필요하면 승인 후 다운로드",
+                                         "복선 적이 보이는 동안 같은 자리에 가만히 서 있는 시간이 2박 이하 — 테스트",
+                                         "복선 적이 공중에 뜨지 않고 지붕을 뚫지 않음 (R07 기준)",
+                                         "1인칭 미리보기 PNG",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  "전체 훑어보기 2026-11-17 (harness/reports/review/NOTES.md), 사용자 \"1~6번 모두 넣기\". 사용자가 싫어한 \"아무것도 안 하는 병사\"와 같은 느낌."
+                  },
+                  {
                       "id":  "R10",
                       "title":  "최적화: LOD + 임포스터 + GPU Resident Drawer + 최종 빌드",
                       "type":  "unity",
                       "skill":  "unity-feature",
                       "depends_on":  [
-                                         "R16"
+                                         "R24"
                                      ],
                       "acceptance":  [
                                          "건물·담 등 큰 모델에 LODGroup (LOD 메시는 Blender 삼각형 줄이기)",

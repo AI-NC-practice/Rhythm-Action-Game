@@ -788,3 +788,6 @@ VARCO MCP: 3D 생성(Generate3D)은 이미지 1장만 받고 멀티뷰 노드가
 - 사용자 요청 "걷기 전용 동작 믹사모에 있을 텐데": Mixamo "Standard Walk"(사용자 선택, In Place, FBX Binary·Without Skin·30fps, 390 KB) → `Assets/Art/Animations/Mixamo/walk.fbx`, 반복 재생. 적 Animator에 Walk 상태, EnemyFigureRun(사건 소품 적)이 2.6 m/s보다 느리면 걷기(되돌이 2.1 m/s, 배율 = 속도/1.5). 돌진 적 걷는 구간에서 걷기 동작 100%(테스트 단언 추가). 전투 적(EnemyAnimator)은 늘 달려서 다가오므로 그대로.
 - 사용자 요청 "다른 구간에 이치에 맞지 않는 점": `Review_StageWalkthroughPlayTests`(Explicit)로 0~260박 4박마다 1인칭·3인칭 66곳을 찍어 모음(`harness/reports/review/`), 본 것은 `harness/reports/review/NOTES.md`. 새로 본 것: 204박 대문에서 1인칭에 내 몸이 앞에 보임, 하늘 끝이 휜 띠, 마을 밖 빈 땅, 4장 광장이 비고 쓰러진 적이 안 남음, 바닥 검은 사선, 지붕 위 복선 적이 오래 서 있음.
 - unity-verify 전체: EditMode 204/204, PlayMode 180/180 (+검토용 1개 건너뜀).
+
+### 2026-11-17 작업 추가 R19~R24 (사용자 "1~6번 모두 넣기")
+전체 훑어보기(harness/reports/review/NOTES.md)에서 본 것 6개를 작업으로 추가: R19 대문 통과 때 1인칭에 내 몸이 보임(204박), R20 하늘 끝 휜 띠, R21 마을 밖 빈 평지·배경 이음(방법은 사용자와 정함), R22 4장 광장 빈 느낌·쓰러진 적 남김(방법은 사용자와 정함), R23 바닥 검은 사선, R24 지붕 위 복선 적이 오래 서 있음(동작은 사용자와 정함). 순서는 R16 뒤, R10(최적화·최종 빌드) 앞. 다음: R18b.
