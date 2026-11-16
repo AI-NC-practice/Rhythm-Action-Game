@@ -1351,6 +1351,244 @@
                       "attempts":  0,
                       "max_attempts":  1,
                       "notes":  ""
+                  },
+                  {
+                      "id":  "R01",
+                      "title":  "[사용자] 맵 재설계 안 + 새 에셋·포인트 견적",
+                      "type":  "human",
+                      "depends_on":  [
+                                         "T15"
+                                     ],
+                      "acceptance":  [
+                                         "사용자 요청(2026-11-16): 맵을 대충 만들지 말고 잘 계산해서 오밀조밀하고 예쁘게. 조선 사극의 시장(장터) 거리처럼 만들어도 됨",
+                                         "챕터 6개(마을 골목·돌담과 지붕 오르기·기와지붕·마당 포위·궁궐 담·성문 위)별 배치 안: 위에서 본 배치도(PNG 또는 HTML)와 1인칭 눈높이에서 보이는 장면 설명. 1구간 뒤~2구간 앞은 장터 거리(좌판·차양·옹기 가게·짚단·수레·걸린 천·등)",
+                                         "배치 원칙을 수치로 적음: 길 폭과 길가 건물 사이 거리, 건물 사이 틈, 같은 모델 반복 간격(같은 모델이 연달아 보이지 않게), 회전·크기 변화 범위, 소품 밀도(10 m당 개수), 시선 끝에 랜드마크(큰 나무·누각·대문)",
+                                         "좁고 굽은 골목과 부드러운 모퉁이(90° 꺾임을 곡선으로), 초가·기와 섞기, 흙담·돌담, 장독대·우물·나무·흙길",
+                                         "먼 배경(산·궁궐·지붕 실루엣)을 반복 없이 다시 그리는 방법",
+                                         "새 에셋 목록(맵 + 회색 상자 장애물: 빨랫줄·처마·밧줄 + 사건 소품: 항아리·화살·깃발·문짝 등)과 VARCO 예상 포인트",
+                                         "사용자가 배치 안과 포인트를 승인함"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  1,
+                      "notes":  "HANDOFF 3장 피드백 8번(맵 순간이동·조잡, 조선 거리 느낌 아님). 맵 디자인 요구 사항은 log.md 2026-11-16 항목(챕터 컨셉 배치, 외곽 착시, 로우폴리+노멀 맵, 드로우콜 줄이기)."
+                  },
+                  {
+                      "id":  "R02",
+                      "title":  "맵·장애물·사건 소품 새 에셋 생성 (VARCO)",
+                      "type":  "asset",
+                      "skill":  "varco3d-asset",
+                      "depends_on":  [
+                                         "R01"
+                                     ],
+                      "acceptance":  [
+                                         "R01에서 승인한 목록·포인트 안에서만 생성 (모든 호출에 flowId)",
+                                         "4면도 검수 → 정면 한 장 → 고폴리 → 바닥 면 삭제 + 로우폴리 + 색·노멀 굽기(T11R 방식)",
+                                         "에셋마다 미리보기 렌더와 mesh_check(경계 변·조각 수) 통과, 파일 하나 20 MB 이하",
+                                         "Assets/Art/Models/\u003cid\u003e/에 저장, 툰 머티리얼 연결",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  "피드백 8·3·5번 에셋을 한 번에 만든다."
+                  },
+                  {
+                      "id":  "R03",
+                      "title":  "맵 다시 짓기: 챕터별 직접 배치 + 장터 거리",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "R02"
+                                     ],
+                      "acceptance":  [
+                                         "R01 배치 안대로 SceneBuilder.Map.cs에서 챕터별로 직접 배치 (줄 맞춘 자동 배치 제거). 배치 수치는 GameConfig.Map",
+                                         "오밀조밀하고 예쁘게: 같은 모델이 연달아 보이지 않음, 회전·크기 변화, 길가 소품 밀도가 R01 수치를 지킴 (EditMode 테스트로 검사)",
+                                         "1구간 뒤~2구간 앞 장터 거리 (좌판·차양·옹기·짚단·수레·천·등)",
+                                         "경로 모퉁이를 곡선으로 (판정 박자·구간 길이 유지), 사건·되감기 카메라가 순간이동처럼 보이지 않음",
+                                         "적이 서 있는 곳(복선·지붕 위 감시 포함) 발밑에 실제 지붕·담·땅이 있음",
+                                         "먼 배경 그림 반복 줄이기 (R01 방법)",
+                                         "챕터마다 눈높이 미리보기 PNG를 남기고 사용자에게 보여 줌",
+                                         "드로우콜을 재서 T15(평균 290)보다 크게 늘지 않음 (harness/reports/drawcalls.md)",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  "피드백 8번, 1번 일부."
+                  },
+                  {
+                      "id":  "R04",
+                      "title":  "회색 상자 장애물·사건 소품 → 모델",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "R03"
+                                     ],
+                      "acceptance":  [
+                                         "빨랫줄·처마·밧줄 장애물을 R02 모델로 교체 (충돌 상자는 그대로, 그리기만 끔)",
+                                         "사건 소품(EventProps: 굴러오는 항아리·화살·깃발·문짝 등) 회색 도형을 모델로 교체, 사건 동작은 그대로",
+                                         "게임 화면에 회색 상자·회색 공이 남지 않음 (PlayMode 테스트로 Gray 머티리얼 렌더러 검사)",
+                                         "미리보기 PNG",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  "피드백 3번(철봉·허들), 5번(경단)."
+                  },
+                  {
+                      "id":  "R05",
+                      "title":  "T14 적 공격 전환 PlayMode 테스트 실패 고치기",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "R04"
+                                     ],
+                      "acceptance":  [
+                                         "T14_Enemy_Model_WeaponInHand_ImpactOnTargetBeat_CrossfadeBetweenAttacks 실패 원인 확인 (다시 만든 적 컨트롤러인지, 테스트 시간 진행인지, 게임 코드인지) 후 log.md에 기록",
+                                         "게임 동작이 틀렸으면 게임 코드를, 테스트 가정이 틀렸으면 테스트를 고침 (테스트 약화 금지: 다음 공격 상태·크로스페이드 검사는 유지)",
+                                         "unity-verify.ps1 전체 통과, 두 번 연속"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  "2026-11-16 집 컴퓨터에서 BuildAll 뒤 두 번 연속 실패: 다음 공격 상태 기대 Attack_overhead, 실제 Attack_horizontal (T14_EnemyCombatPlayTests.cs:116)."
+                  },
+                  {
+                      "id":  "R06",
+                      "title":  "1인칭 카메라·동작 정리 (실패·벽타기·미끄러지기)",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "R05"
+                                     ],
+                      "acceptance":  [
+                                         "실패 동작 중 머리 없는 몸이 화면 정면에 보이지 않음 (카메라를 머리 뼈에 붙이거나 1인칭용 실패 연출로)",
+                                         "벽타기: 몸을 벽 쪽으로 약 45° 기울여 벽을 밟고 달림 + 카메라 기울기 (값은 GameConfig.Body)",
+                                         "미끄러지기(아래로 피하기): 팔·무릎이 화면을 가리는 비율이 정해 둔 상한 이하 (PlayMode에서 화면 가림 측정)",
+                                         "결과별 미리보기 PNG",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  "피드백 2·6·7번."
+                  },
+                  {
+                      "id":  "R07",
+                      "title":  "적 이동 동작 + 공중에 뜬 적 + 지붕 발차기 낙하",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "R06"
+                                     ],
+                      "acceptance":  [
+                                         "적 Animator에 달리기(forward_run_1) 상태를 넣고 돌진·이동 때 이동 속도에 맞춰 재생 (미끄러지듯 다가오지 않음)",
+                                         "공중에 떠 있는 적이 없음: 모든 적의 발밑에 지붕·담·땅이 있거나 높이를 맞춤 (PlayMode 레이캐스트 검사)",
+                                         "지붕 위 PERFECT 발차기: Mixamo에서 어울리는 동작(차여서 뒤로 날아감 → 떨어짐)을 골라 사용자에게 보여 주고 승인 → 사용자 로그인, Claude 다운로드 → HumanoidImport",
+                                         "적은 그 동작으로 지붕 아래로 떨어지고, 떨어지는 모습이 보이도록 카메라가 따라 보거나 짧은 컷",
+                                         "미리보기 PNG",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  "피드백 4·1번 + 사용자 요청(2026-11-16): 상대가 발차기로 건물에서 떨어지는 장면. 지금은 3구간 지붕 위 창 포졸 PERFECT 때만 나오고 hit_fall 클립 + 코드 궤적이라 약함."
+                  },
+                  {
+                      "id":  "R08",
+                      "title":  "미뤄 둔 것 1: 슬로모션 성공/실패 차이 + 리듬감 2 다듬기",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "R07"
+                                     ],
+                      "acceptance":  [
+                                         "슬로모션 성공과 실패가 화면·소리로 확실히 다름 (B47·B52 사용자 의견: 나중에 다 손보자)",
+                                         "리듬감 2(B49) 다듬을 점을 사용자와 정해 적용 (노드에는 슬로를 걸지 않음, 누르는 느낌 유지)",
+                                         "사용자 확인",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  "HANDOFF 3장 \u0027나중에 고치자\u0027 항목."
+                  },
+                  {
+                      "id":  "R09",
+                      "title":  "미뤄 둔 것 2: 전투 동작·테스트 다듬기",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "R08"
+                                     ],
+                      "acceptance":  [
+                                         "창 적 two_hand_attack 클립(31.9초)을 쓰는 구간만 남기도록 정리",
+                                         "칼 뺏기 동작을 더 맞는 동작으로 교체 (Mixamo 후보를 사용자에게 보여 주고 승인)",
+                                         "찌르기 처형(StabWithOwnSword) PlayMode 테스트 보강",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  "HANDOFF 3장 \u0027나중에 고치자\u0027 항목. 지평선 지붕 띠 반복은 R03, 드로우콜은 R10."
+                  },
+                  {
+                      "id":  "R10",
+                      "title":  "최적화: LOD + 임포스터 + GPU Resident Drawer + 최종 빌드",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "R09"
+                                     ],
+                      "acceptance":  [
+                                         "건물·담 등 큰 모델에 LODGroup (LOD 메시는 Blender 삼각형 줄이기)",
+                                         "중간 거리 임포스터(빌보드) 검토 후 적용 또는 쓰지 않는 이유 기록",
+                                         "GPU Resident Drawer(Unity 6) 검토 후 적용, 지붕 길·골목 담도 인스턴싱",
+                                         "적용 전후 드로우콜·SetPass를 재서 harness/reports/drawcalls.md에 기록",
+                                         "BuildScript.BuildFinal로 Builds/Final 생성, smoke-test-build.ps1 통과",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  "피드백 9번."
+                  },
+                  {
+                      "id":  "R11",
+                      "title":  "[사용자] 다시 플레이 확인",
+                      "type":  "human",
+                      "depends_on":  [
+                                         "R10"
+                                     ],
+                      "acceptance":  [
+                                         "사용자에게 Builds/Final exe 경로 안내",
+                                         "사용자가 플레이 후 피드백. 통과하면 T16도 done"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  1,
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "R12",
+                      "title":  "효과음·환경음 (VARCO Sound)",
+                      "type":  "asset",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "R11"
+                                     ],
+                      "acceptance":  [
+                                         "사용자 결정(2026-11-16): 효과음은 나중에. 시작 전에 사용자와 범위를 다시 정함",
+                                         "VARCO Sound로 장터·골목 환경음, 남은 효과음(B40), 사건 소리(낙하·착지·문 닫힘 등). 기합 추임새는 넣지 않음",
+                                         "시작 전에 예상 포인트를 알리고 승인받음",
+                                         "unity-verify.ps1 전체 통과, 끝나면 B40도 done"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  "VARCO Sound 사용 가능(사용자, 2026-11-16)."
                   }
               ]
 }

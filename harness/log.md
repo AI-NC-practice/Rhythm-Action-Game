@@ -619,3 +619,10 @@ VARCO MCP: 3D 생성(Generate3D)은 이미지 1장만 받고 멀티뷰 노드가
   7. 아래로 피하기에서 팔·무릎이 화면을 크게 가린다
   8. 맵이 순간이동하고 조잡하다, 조선 거리 느낌이 아니다 (줄 맞춘 자동 배치, 같은 모델 반복, 90° 꺾임)
   9. 질문: 먼 곳 이미지 처리? LOD? 언리얼 ISM 같은 최적화? → 원통 배경 그림만(조잡), LOD 없음, 장식만 RenderMeshInstanced(컬링·LOD 없는 ISM 수준), GPU Resident Drawer 미사용
+
+## 2026-11-16 집 컴퓨터 이어받기 + 피드백 작업 R01~R12 추가
+- 환경: Unity 6000.4.0f1·라이선스·Git·gh·Python(numpy·scipy) 정상, Blender는 5.3(project.json은 5.2 경로). SceneBuilder.BuildAll 성공. unity-verify: EditMode 189/189, PlayMode 162/163 — T14_Enemy_Model_WeaponInHand_ImpactOnTargetBeat_CrossfadeBetweenAttacks가 두 번 연속 실패(다음 공격 기대 Attack_overhead, 실제 Attack_horizontal) → R05.
+- 이 컴퓨터의 Builds/Gray·b51 빌드는 2026-11-15 것이라 툰 셰이딩·모델이 없다. 최종 빌드는 R10에서 다시 만든다.
+- 사용자 승인으로 HANDOFF 3장 피드백을 작업으로 나눴다. 순서(사용자): 맵 재설계(R01 안·견적 → R02 에셋 → R03 맵) → 회색 상자 교체(R04) → T14 테스트(R05) → 1인칭 카메라·동작(R06) → 적 이동·공중 적·지붕 발차기 낙하(R07) → 미뤄 둔 것(R08·R09) → 최적화(R10) → 사용자 확인(R11) → 효과음(R12, VARCO Sound, 나중에).
+- 사용자 요청: 맵은 대충 말고 잘 계산해서 오밀조밀하고 예쁘게, 조선 사극 같은 장터 거리를 넣어도 됨. VARCO Sound 사용 가능. 상대가 발차기로 건물에서 떨어지는 장면에 어울리는 동작을 찾아 넣기.
+- 다음 작업: R01.
