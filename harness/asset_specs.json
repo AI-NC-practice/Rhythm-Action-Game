@@ -1,7 +1,7 @@
 {
   "_help": "VARCO 3D 생성 명세 (MCP: TextInput -> GenerateImage -> Generate3D [-> Rig -> Animate]). flow_id는 이 프로젝트 전용 플로우 ID (사용자가 VARCO에서 새로 만든 뒤 기록, 다른 프로젝트 플로우 재사용 금지). polygon_count는 목표 삼각형 수, texture_size는 텍스처 해상도. Git LFS 없이 올리기 위해 파일 1개당 15MB 이하. status: pending | generated | failed | blocked. calls.image 최대 3, calls.mesh 최대 2. 움직이는 캐릭터는 rig(humanoid | humanoid-fingers | quadruped)와 animations(get_animation_catalog의 key 목록)를 넣는다.",
   "defaults": {
-    "flow_id": null,
+    "flow_id": "7c1eec5d-c366-4ce4-8713-0b6adb6fc1da",
     "flow_name": "Rhythm-Action-Game",
     "max_run_flow_calls": 45,
     "max_image_calls_per_asset": 3,
@@ -86,12 +86,12 @@
       "height_m": 1.0,
       "polygon_count": 1500,
       "texture_size": 1024,
-      "prompt": "Korean Joseon hwando single-edged slightly curved sword, black lacquered scabbard-less blade with round guard and wrapped handle, lying horizontally",
-      "nodes": { "text": null, "image": null, "mesh": null },
-      "calls": { "image": 0, "mesh": 0 },
-      "status": "pending",
-      "triangles": null,
-      "file_mb": null,
+      "prompt": "Korean Joseon hwando single-edged slightly curved sword, bright polished silver steel blade, round dark iron guard, black cord-wrapped handle, no scabbard, lying horizontally",
+      "nodes": { "text": "4f93f2f9-12b6-49d0-9c9c-1087eddd4296", "image": "bb422aa2-959e-4d09-b0d5-8a9459963483", "mesh": "94450ff9-8efe-4077-8abe-cb06ee5f2cd1" },
+      "calls": { "image": 2, "mesh": 1 },
+      "status": "generated",
+      "triangles": 1500,
+      "file_mb": 2.66,
       "notes": "height_m은 길이. 칼 뺏기 연출에서 플레이어 손으로 옮긴다."
     },
     {
@@ -101,11 +101,11 @@
       "polygon_count": 1000,
       "texture_size": 1024,
       "prompt": "Korean Joseon dynasty spear, long wooden shaft, steel spearhead with red tassel below the blade, lying horizontally",
-      "nodes": { "text": null, "image": null, "mesh": null },
-      "calls": { "image": 0, "mesh": 0 },
-      "status": "pending",
-      "triangles": null,
-      "file_mb": null,
+      "nodes": { "text": "d363a103-fafd-44f7-bef6-48f3198026d7", "image": "14a415d6-fee8-42f5-94b9-08c42b656e5c", "mesh": "1fca6565-da89-4bc5-953b-ee40ae2ea530" },
+      "calls": { "image": 1, "mesh": 1 },
+      "status": "generated",
+      "triangles": 1132,
+      "file_mb": 2.71,
       "notes": "height_m은 길이."
     },
     {
@@ -115,11 +115,11 @@
       "polygon_count": 5000,
       "texture_size": 2048,
       "prompt": "traditional Korean hanok house with curved dark gray giwa tile roof, white plaster walls, wooden pillars and lattice doors, stone foundation",
-      "nodes": { "text": null, "image": null, "mesh": null },
-      "calls": { "image": 0, "mesh": 0 },
-      "status": "pending",
-      "triangles": null,
-      "file_mb": null,
+      "nodes": { "text": "25029f4d-4474-4374-bbcb-c78ed8d8f8c3", "image": "e66f2c59-479c-4fe9-94c4-d8cee4cd8174", "mesh": "370b8b11-a9e8-49fd-a724-055b5cc70151", "remesh": "f562e4eb-0ffa-462b-8af4-190861425e59" },
+      "calls": { "image": 1, "mesh": 1 },
+      "status": "generated",
+      "triangles": 4892,
+      "file_mb": 9.12,
       "notes": "지붕 위를 달린다. 충돌은 Unity 기본 도형(박스)으로 따로 둔다."
     },
     {
@@ -129,11 +129,11 @@
       "polygon_count": 2000,
       "texture_size": 1024,
       "prompt": "traditional Korean stone wall segment, stacked stones with clay, small giwa tile cap on top, straight section 3 meters long",
-      "nodes": { "text": null, "image": null, "mesh": null },
-      "calls": { "image": 0, "mesh": 0 },
-      "status": "pending",
-      "triangles": null,
-      "file_mb": null,
+      "nodes": { "text": "dd27c885-8acc-4bc6-8f93-da5ab5e0c756", "image": "f3c866b6-2dc2-4b6c-9b6a-982f3abbc43e", "mesh": "56ece67b-f5ed-4545-838f-a59e64046fa8", "remesh": "0e605e18-d1e5-4206-856c-0fc3885580d3" },
+      "calls": { "image": 1, "mesh": 1 },
+      "status": "generated",
+      "triangles": 2428,
+      "file_mb": 4.69,
       "notes": "길이 3 m로 맞춰 반복 배치. 벽타기용 높은 벽은 크기를 늘려 재사용."
     },
     {
@@ -142,13 +142,13 @@
       "height_m": 8.0,
       "polygon_count": 5000,
       "texture_size": 2048,
-      "prompt": "Korean Joseon fortress gate with stone arch base and wooden two-story pavilion on top, curved giwa tile roof, red wooden pillars, dancheong painted eaves",
-      "nodes": { "text": null, "image": null, "mesh": null },
-      "calls": { "image": 0, "mesh": 0 },
-      "status": "pending",
-      "triangles": null,
-      "file_mb": null,
-      "notes": "마지막 결전 장소. 누각 위 바닥은 기본 도형으로 충돌 처리."
+      "prompt": "Korean Joseon fortress gate, massive solid rectangular stone block base with straight vertical sides and one round arched tunnel through the middle with closed red wooden doors, a single-story wooden pavilion with red pillars on top of the base, one curved dark giwa tile roof, chunky solid simple shapes, no thin floating parts",
+      "nodes": { "text": "70e8f456-9f18-4210-8091-965902b3910d", "image": "c23cfe28-650b-4e15-ade7-c65abea46175", "mesh": "35a67a3a-2504-4999-b9a3-4d9796b23b0f", "remesh": "1895f138-00c3-438a-9068-633b9d6a4d5f" },
+      "calls": { "image": 2, "mesh": 2 },
+      "status": "generated",
+      "triangles": 4678,
+      "file_mb": 8.17,
+      "notes": "성문 위를 달린다. 1차 3D는 돌 받침·아치가 파편으로 나와(원본 단계) 받침을 단순한 돌덩이·1층 누각 이미지로 바꿔 2차로 만듦. 고폴리 원본 harness/reports/varco/gate_high.glb (노멀 맵 굽기용, T15)."
     },
     {
       "id": "cart",
@@ -157,11 +157,11 @@
       "polygon_count": 2000,
       "texture_size": 1024,
       "prompt": "old wooden Korean hand cart with two large wooden wheels, loaded with straw sacks",
-      "nodes": { "text": null, "image": null, "mesh": null },
-      "calls": { "image": 0, "mesh": 0 },
-      "status": "pending",
-      "triangles": null,
-      "file_mb": null,
+      "nodes": { "text": "0e80b5ce-b4ab-4216-bd59-7274ea13f4a0", "image": "f5fc4941-e8ef-4d6c-968b-1af331542aa9", "mesh": "222d5248-6cea-4415-9740-47d41bfffe49" },
+      "calls": { "image": 1, "mesh": 1 },
+      "status": "generated",
+      "triangles": 2396,
+      "file_mb": 5.1,
       "notes": "↑ 뛰어넘기 장애물."
     },
     {
@@ -171,11 +171,11 @@
       "polygon_count": 2000,
       "texture_size": 1024,
       "prompt": "cluster of traditional Korean brown onggi clay jars of different sizes with lids, grouped together",
-      "nodes": { "text": null, "image": null, "mesh": null },
-      "calls": { "image": 0, "mesh": 0 },
-      "status": "pending",
-      "triangles": null,
-      "file_mb": null,
+      "nodes": { "text": "c4c7ed6d-a03c-4a30-a7f6-94d9690b4648", "image": "b35b897b-f48c-4ac8-84a0-5fbcf9fb0185", "mesh": "2f36026d-37fd-4dc2-b0e0-5c5354215e8a" },
+      "calls": { "image": 1, "mesh": 1 },
+      "status": "generated",
+      "triangles": 2018,
+      "file_mb": 3.65,
       "notes": "↑ 또는 ←/→ 장애물."
     }
   ]

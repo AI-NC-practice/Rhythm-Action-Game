@@ -476,3 +476,25 @@ B48까지 반영한 BuildGray(Builds/Gray/RhythmActionGame.exe)가 smoke-test·�
 - 폴리곤이 많으면 고폴리 → 로우폴리 remesh + 노멀 맵.
 - 같은 머티리얼을 묶어 렌더링(드로우콜 줄이기: SRP Batcher, GPU 인스턴싱, 정적 배칭, 텍스처 아틀라스 등) — 쓸 만한 방법은 적용.
 T10은 VARCO 전용 플로우(flow_id 비어 있음)와 포인트 승인을 기다린다.
+
+## T10 정적 에셋 생성 (VARCO 7개) — 진행 중 (2026-11-16)
+- 사용자: 이 프로젝트 전용 플로우 만듦 + 포인트 승인(예상 약 1,540~3,220). flow_id 7c1eec5d-c366-4ce4-8713-0b6adb6fc1da 기록 (같은 이름의 예전 플로우 16d67390…은 쓰지 않음).
+- 이미지 7장(1회 실행 350포인트 — 기본 모델 gpt-image-2.5-flare 장당 50, 예상 20보다 큼). 6장 통과, 칼은 날이 검게 나와(프롬프트 "black lacquered … blade") 강철 날로 프롬프트를 고쳐 다시 생성(50포인트).
+- 3D 7개 + Remesh 3개 1회 실행 1,400포인트. 기와집·돌담·성문은 30,000폴리로 만들고 무료 Remesh로 5,000/2,000/5,000 — 고폴리 원본은 T15에서 노멀 맵 굽기용으로 남긴다(사용자 요청: 고폴리 → 로우폴리 + 노멀 맵).
+- 지금까지 청구 합계: 1,800포인트.
+- 성문 1차 3D는 원본 단계에서 돌 받침·아치가 파편으로 나옴(Remesh·decimate 탓 아님, 고폴리 원본도 같음) → 받침을 반듯한 돌덩이·1층 누각으로 단순화한 이미지(50)로 2차 3D(200, 마지막 허용). Remesh 목표 5,000은 15~20% 넘쳐 4,200으로 다시(무료).
+- 결과 (모두 check-glb 통과, unity-verify 176/176·154/154, 미리보기 harness/reports/preview/*.png):
+
+| ID | 삼각형 | MB | 이미지/3D 호출 | 상태 |
+|---|---|---|---|---|
+| weapon_sword | 1500 | 2.66 | 2/1 | generated |
+| weapon_spear | 1132 | 2.71 | 1/1 | generated |
+| house_giwa | 4892 | 9.12 | 1/1 | generated (30k → Remesh, 고폴리 보관) |
+| wall_stone | 2428 | 4.69 | 1/1 | generated (30k → Remesh, 고폴리 보관) |
+| gate | 4678 | 8.17 | 2/2 | generated (30k → Remesh, 고폴리 보관) |
+| cart | 2396 | 5.10 | 1/1 | generated |
+| jars | 2018 | 3.65 | 1/1 | generated |
+
+- 실제 청구: 이미지 350 + 50 + 50, 3D 1,400 + 200, Remesh 0 = **2,050포인트** (run_flow 6회).
+- 도구: harness/scripts/varco/spec-set.py — asset_specs.json의 필드 하나만 바꿔 손으로 쓴 한 줄 배열 모양을 지킨다(Python json.dump로 다시 쓰면 파일 전체 모양이 바뀜).
+평가: evaluator PASS (harness/reports/T10-eval-1.md). 다음: T11 (캐릭터 4개 + 리깅 + 동작, 포인트 승인 필요).

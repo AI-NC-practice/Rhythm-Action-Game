@@ -1188,10 +1188,10 @@
                                          "asset_specs.json의 status/triangles/file_mb/calls 기록, 에셋당 이미지 최대 3회·3D 최대 2회 준수",
                                          "unity-verify.ps1 전체 통과 (GLB 임포트 오류 없음)"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  "2026-11-16 사용자: 맵 디자인(T15)을 고려해 만들 것 — 고폴리는 로우폴리 remesh + 노멀 맵, 같은 머티리얼 묶기(드로우콜). 시작 전 필요: 이 프로젝트 전용 VARCO 플로우(flow_id 비어 있음) + 포인트 승인."
+                      "notes":  "evaluator PASS (1회차, 2026-11-16). 실제 2,050포인트. 고폴리 원본 harness/reports/varco/*_high.glb (T15 노멀 맵). 2026-11-16 사용자: 맵 디자인(T15)을 고려해 만들 것 — 고폴리는 로우폴리 remesh + 노멀 맵, 같은 머티리얼 묶기(드로우콜). 시작 전 필요: 이 프로젝트 전용 VARCO 플로우(flow_id 비어 있음) + 포인트 승인."
                   },
                   {
                       "id":  "T11",
