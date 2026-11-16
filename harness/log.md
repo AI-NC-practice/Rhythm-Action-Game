@@ -498,3 +498,16 @@ T10은 VARCO 전용 플로우(flow_id 비어 있음)와 포인트 승인을 기�
 - 실제 청구: 이미지 350 + 50 + 50, 3D 1,400 + 200, Remesh 0 = **2,050포인트** (run_flow 6회).
 - 도구: harness/scripts/varco/spec-set.py — asset_specs.json의 필드 하나만 바꿔 손으로 쓴 한 줄 배열 모양을 지킨다(Python json.dump로 다시 쓰면 파일 전체 모양이 바뀜).
 평가: evaluator PASS (harness/reports/T10-eval-1.md). 다음: T11 (캐릭터 4개 + 리깅 + 동작, 포인트 승인 필요).
+
+## T11 캐릭터 4개 + 리깅 + 동작 — 진행 중 (2026-11-16)
+- 사용자 포인트 승인(예상 약 1,000~2,200). 동작 이름 24종 모두 카탈로그에 있음(대기 동작 외 isPlus).
+- T자 자세 이미지 4장(200) — 4장 모두 정면·팔 수평·빈손·전신, 통과.
+- 3D(tPose 1) 4 + Rig 4(player humanoid-fingers, 나머지 humanoid) + Animate 38(inPlace) 1회 실행 800포인트. T11 합계 1,000.
+- 결과: 동작 38개 모두 성공(isPlus 거부 없음). FBX 원본은 동작마다 메시 포함 약 8 MB → 캐릭터당 메시 FBX 1개(첫 동작) + 나머지는 Blender로 메시를 뺀 뼈+동작 FBX(0.2~0.4 MB, harness/scripts/blender/strip_mesh_fbx.py — 장면 길이를 동작 길이에 맞춤). 원본은 harness/reports/varco/<id>_raw/ (gitignore, 받는 주소 t11-<id>.txt).
+- 삼각형: player 5,000, enemy_sword 5,000, enemy_spear 5,030 → 4,356, boss 5,696 → 4,870 (리깅 전에 무료 Remesh 4,200을 넣고 Rig·Animate 다시, 0포인트).
+- 텍스처: 각 캐릭터 GLB에서 base_color.png·normal.png를 꺼내 FBX 옆에 (extract-glb-textures.ps1).
+- Unity: Assets/Editor/HumanoidImport.cs (ConfigureAll) — 파일마다 Humanoid 아바타(CreateFromThisModel, 뼈만 든 동작 FBX라 경로가 달라 CopyFromOther 대신 근육 공간 리타기팅), 텍스처 이름으로 머티리얼, looping·forward_run·idle만 반복. [HumanoidImport] 로그 38개 모두 avatar valid=true human=true (player 뼈 52 손가락 포함, 나머지 22). 보고서 harness/reports/humanoid-import.md.
+- 메모: enemy_spear two_hand_attack은 VARCO 원본이 960프레임(32초)으로 길다 → T14에서 필요한 구간만 쓰기.
+- 테스트 T11_CharacterImportTests 2개. unity-verify EditMode 178/178, PlayMode 154/154.
+- 포인트: 이미지 200 + 3D 800 = 1,000 (Remesh·Rig·Animate 0). run_flow 3회.
+평가: evaluator PASS (harness/reports/T11-eval-1.md). 다음: T12 (Mixamo 동작 — 로그인은 사용자).

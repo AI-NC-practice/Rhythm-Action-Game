@@ -1208,10 +1208,10 @@
                                          "isPlus 동작이 거부되면 isPlus=false 동작으로 바꾸고 notes에 기록",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "2026-11-16 evaluator PASS (1회차). 1,000포인트. 동작 38개, 아바타 모두 valid. 메시 FBX는 캐릭터당 하나, 나머지는 뼈+동작만. "
                   },
                   {
                       "id":  "T12",

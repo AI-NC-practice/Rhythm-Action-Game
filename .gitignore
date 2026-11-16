@@ -73,3 +73,6 @@ __pycache__/
 
 # 압축을 푼 테스트 패키지 폴더 (beta1-1에서 실수로 한 번 커밋됨)
 /RhythmActionGame-*-dev*/
+
+# T11: VARCO 원본 동작 FBX(각 8 MB, 다시 받기: harness/reports/varco/t11-<id>.txt)
+harness/reports/varco/*_raw/

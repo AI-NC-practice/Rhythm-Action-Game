@@ -1,7 +1,7 @@
 ﻿# Unity verify report
-time: 2026-11-16 13:01:40
+time: 2026-11-16 13:39:00
 
-## EditMode : total=176 passed=176 failed=0 skipped=0 result=Passed
+## EditMode : total=178 passed=178 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Config_MatchGddBetaB1
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_LabelPose_PopThenRise_045s
@@ -178,6 +178,8 @@ time: 2026-11-16 13:01:40
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_Settings_SaveAndLoad
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_SpeedFx_Intensity
   - [Passed] RhythmActionGame.Tests.T08_ScoreAndTextTests.T08_Texts_MatchGdd48
+  - [Passed] RhythmActionGame.Tests.T11_CharacterImportTests.T11_EachAnimation_HasHumanoidFbx_ValidAvatar_AndClip
+  - [Passed] RhythmActionGame.Tests.T11_CharacterImportTests.T11_MeshFbx_HasTexturesNextToIt_AndFingersOnPlayer
 
 ## PlayMode : total=154 passed=154 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
