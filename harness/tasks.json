@@ -1150,7 +1150,7 @@
                                          "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과",
                                          "사용자가 플레이해 리듬감이 살아났는지 확인"
                                      ],
-                      "status":  "pending",
+                      "status":  "needs_user",
                       "attempts":  0,
                       "max_attempts":  1,
                       "notes":  ""

@@ -455,3 +455,6 @@ BuildGray와 smoke-test를 통과했다(Builds/Gray/RhythmActionGame.exe). 사�
 - CombatSwingSounds: 적 공격 판정(CombatStep.Attack) 목표 반 박 전에 "쉭"을 dsp 예약 → "쉭-챙"이 박에 들림. 공격 예고·동시 공격 연출의 합성 바람 소리는 뺌(동시 공격 경고는 칼 드는 "칭").
 - 테스트: B48 EditMode 3·PlayMode 2, B08·B30 예전 합성음 단언을 녹음 종류로. unity-verify EditMode 176/176, PlayMode 151/151. BuildGray + smoke-test 통과, 전체 오토플레이 344판정 모두 PERFECT·클리어.
 평가: evaluator PASS (harness/reports/B48-eval-1.md). 다음: B49(사용자: 리듬감 2 최종 확인 + 테스트 빌드).
+
+### 2026-11-16 B49 [사용자] 리듬감 2 최종 확인 — needs_user
+B48까지 반영한 BuildGray(Builds/Gray/RhythmActionGame.exe)가 smoke-test·전체 오토플레이(344판정 PERFECT, 클리어)를 통과했다. 사용자 플레이 확인을 기다린다. (B46 "합"은 취소, B47→B52 회피 슬로모션, B52 연출은 나중에 다시 다듬기로 함.)
