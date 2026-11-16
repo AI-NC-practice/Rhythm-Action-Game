@@ -1168,10 +1168,10 @@
                                          "BuildScript.BuildGray 빌드 + smoke-test-build.ps1 통과",
                                          "사용자가 플레이해 리듬감이 살아났는지 확인"
                                      ],
-                      "status":  "needs_user",
+                      "status":  "done",
                       "attempts":  0,
                       "max_attempts":  1,
-                      "notes":  ""
+                      "notes":  "2026-11-16 사용자: \"별로긴 한데 일단 넘어가자, 다 나중에 수정하는 걸로\". "
                   },
                   {
                       "id":  "T10",

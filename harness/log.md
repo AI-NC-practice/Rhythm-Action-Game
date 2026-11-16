@@ -462,3 +462,10 @@ B48까지 반영한 BuildGray(Builds/Gray/RhythmActionGame.exe)가 smoke-test·�
 ## B53 [beta] 음악 끄기 설정 (효과음만 듣기) (2026-11-16) — done (evaluator PASS)
 사용자 요청: "테스트를 위해 음악 소리 끄는 옵션, 효과음만 들을 수 있도록." GameSettings.MusicOn(PlayerPrefs settings.musicOn, 기본 켜짐). SfxPlayer가 Music 그룹(배경 곡) 음량에만 0/1을 곱함 — 곡과 박자 시계는 계속, 효과음·히트사운드·예고음은 그대로. 타이틀 설정에 "음악 켜짐/꺼짐"(돌아가기 버튼 아래로), 일시정지(Esc) 메뉴에 "음악 켜짐/꺼짐" 버튼. 테스트 B53 PlayMode 3. unity-verify EditMode 176/176, PlayMode 154/154. BuildGray + smoke-test 통과.
 평가: evaluator PASS (harness/reports/B53-eval-1.md). B49(사용자 확인) 대기 그대로.
+
+### 2026-11-16 B49 [사용자] 리듬감 2 최종 확인 — done (사용자: 넘어감)
+사용자: "그 별로긴 한데 일단 넘어가자, 다 나중에 수정하는 걸로." → 리듬감 2(박 펄스·예고음·회피 슬로모션·전투 소리)는 지금 만족스럽지 않음. 나중에 다시 다듬을 목록:
+- 회피 슬로모션 연출(성공·실패 차이, 칼이 스치는 느낌, 대문 컷) — B52
+- 전투 소리 녹음 선택·크기·박 맞춤 — B48
+- 그 밖에 리듬감 전반
+다음: T10 (VARCO 3D 정적 에셋, 포인트 비용 → 사용자 승인 필요).
