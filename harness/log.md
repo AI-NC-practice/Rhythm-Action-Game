@@ -566,3 +566,13 @@ VARCO MCP: 3D 생성(Generate3D)은 이미지 1장만 받고 멀티뷰 노드가
   처음 slide는 사용자가 누른 "With Skin"(2.1 MB)으로 받혀서 Without Skin(0.4 MB)으로 다시 받음. 11개 합 4.6 MB.
 - HumanoidImport.ConfigureMixamo(ConfigureAll 끝에서도 호출): 11개 모두 avatar valid·human, humanMotion, 뼈 52(mixamorig), 길이 0.93~3.17초 → harness/reports/mixamo-import.md. 테스트 T12_MixamoImportTests: Humanoid·메시 없음, player 모델에 샘플링하면 팔·다리 뼈가 움직임(리타기팅). unity-verify EditMode 181/181, PlayMode 154/154.
 평가: evaluator PASS (harness/reports/T12-eval-1.md). 다음: T13.
+
+## T13 툰 셰이딩 + 1인칭 전신 플레이어 — 진행 중 (2026-11-16)
+- 툰 셰이더 Assets/Shaders/Toon.shader: 주광(그림자 포함) 3단계 명암(가장 어두운 0.55), 노멀 맵, 뒤집은 외곽선(SRPDefaultUnlit, Cull Front, 화면 높이 0.25%), ShadowCaster·DepthOnly. 값은 GameConfig.Body.
+- 머티리얼: SceneBuilder.Mat(회색 상자·적 캡슐 등) 모두 툰, 실행 중 소품(EventProps)도 툰. 에셋 11개 툰 머티리얼 Assets/Art/Materials/Toon/<id>.mat(캐릭터 base_color·normal, 정적은 GLB 안 구운 텍스처) — 배치는 T14·T15.
+- 플레이어: 캡슐 → player FBX(키 1.75 m에 맞춤). PlayerBody: 원래 메시 ShadowsOnly + 머리·목 뼈 삼각형을 뺀 복사본을 화면에(머리 메시는 그림자만). 카메라는 눈높이 1.65 m·앞 0.12 m 기준으로 머리 뼈 움직임 35%를 부드럽게 따라감(장애물 카메라 연출과 겹치지 않게).
+- Animator(Assets/Art/Animations/Player.controller): Run(두 걸음 = 2박) + 동작 6(Vault·Climb·Slide·Drop·Dodge·WallRun) × 결과 3 = 18 상태, 클립은 Mixamo(T12)·VARCO player(T11). 판정 결과마다 크로스페이드 0.12초, 클립 길이를 4박에 맞춘 재생 속도, 왼쪽 피하기·벽타기는 좌우 반전, 끝나면 Run. Animator는 박자 시계 시간으로 직접 진행(속도 배율·일시정지 반영).
+- 고친 점: 클립 루트 설정 — 앞뒤·좌우 이동과 방향은 루트로 빼서 버리고(제자리), 높이는 자세에 남김, 몸 방향 기준. 그전에는 넘기 동작에서 몸이 카메라 앞으로 날아가 보였음. player 메시 FBX는 Read/Write 켬(머리 삼각형 빼기).
+- 눈 확인: harness/reports/preview/t13_*.png (PreviewCapture.CaptureT13) — 3인칭 정면·측면 외곽선·명암, 1인칭 달리기·넘기.
+- 테스트: T13_ToonBodyTests(EditMode 5), T13_PlayerBodyPlayTests(PlayMode 3: 머리 뺀 복사본·눈높이·몸 방향, PERFECT/NORMAL/FAIL 상태 전환과 4박 속도, 왼쪽 반전 후 Run 복귀). unity-verify EditMode 186/186, PlayMode 157/157.
+평가: evaluator PASS (harness/reports/T13-eval-1.md). 다음: T14.

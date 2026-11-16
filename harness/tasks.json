@@ -1267,10 +1267,10 @@
                                          "달리기와 장애물 결과(PERFECT/NORMAL/FAIL)별 Animator 상태가 연결되고 4박자 길이에 맞게 재생 속도 조정 — PlayMode 테스트로 상태 전환 확인",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "완료(2026-11-16): 툰 셰이더(3단계+뒤집은 외곽선) 전 머티리얼, player 모델(머리 뺀 복사본 + 원본 그림자만), 카메라 머리 뼈 추적, 결과별 Animator 18 상태·4박 속도."
                   },
                   {
                       "id":  "T14",

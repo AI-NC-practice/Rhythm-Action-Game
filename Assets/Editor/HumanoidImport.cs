@@ -53,9 +53,10 @@ namespace RhythmActionGame.EditorTools
                     imp.materialLocation = ModelImporterMaterialLocation.InPrefab;
                     imp.materialName = ModelImporterMaterialName.BasedOnTextureName;
                     imp.materialSearch = ModelImporterMaterialSearch.Local;
+                    imp.isReadable = Path.GetFileNameWithoutExtension(files[i]) == BodyMoves.RunClip;   // T13: PlayerBody가 머리 삼각형을 빼려면 메시를 읽어야 한다
                     bool loop = IsLoop(Path.GetFileNameWithoutExtension(files[i]));
                     var clips = imp.defaultClipAnimations;
-                    foreach (var c in clips) { c.loopTime = loop; c.lockRootRotation = true; c.lockRootHeightY = true; c.lockRootPositionXZ = true; }
+                    foreach (var c in clips) { c.loopTime = loop; c.lockRootRotation = false; c.lockRootHeightY = true; c.lockRootPositionXZ = false; c.keepOriginalOrientation = false; c.keepOriginalPositionXZ = false; c.keepOriginalPositionY = false; c.heightFromFeet = true; }   // T13: 앞뒤·좌우 이동과 방향은 루트로 빼서 버림(applyRootMotion 끔 → 제자리), 높이는 자세에 남김(점프), 발 높이 기준
                     imp.clipAnimations = clips;
                     imp.SaveAndReimport();
                     var avatar = AssetDatabase.LoadAllAssetsAtPath(files[i]).OfType<Avatar>().FirstOrDefault();
@@ -102,7 +103,7 @@ namespace RhythmActionGame.EditorTools
                 imp.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
                 imp.materialImportMode = ModelImporterMaterialImportMode.None;
                 var clips = imp.defaultClipAnimations;
-                foreach (var c in clips) { c.loopTime = false; c.lockRootRotation = true; c.lockRootHeightY = true; c.lockRootPositionXZ = true; }
+                foreach (var c in clips) { c.loopTime = false; c.lockRootRotation = false; c.lockRootHeightY = true; c.lockRootPositionXZ = false; c.keepOriginalOrientation = false; c.keepOriginalPositionXZ = false; c.keepOriginalPositionY = false; c.heightFromFeet = true; }   // T13: 앞뒤·좌우 이동과 방향은 루트로 빼서 버림(applyRootMotion 끔 → 제자리), 높이는 자세에 남김(점프), 발 높이 기준
                 imp.clipAnimations = clips;
                 imp.SaveAndReimport();
                 var assets = AssetDatabase.LoadAllAssetsAtPath(path);

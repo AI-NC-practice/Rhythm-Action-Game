@@ -22,12 +22,18 @@ namespace RhythmActionGame
 
         static readonly Dictionary<string, Material> runtimeMats = new Dictionary<string, Material>();
 
-        /// <summary>실행 중 머티리얼 (URP Lit). 에디터에서는 SceneBuilder가 에셋 머티리얼을 넘긴다.</summary>
+        /// <summary>실행 중 머티리얼 (툰, 작업 T13 — 없으면 URP Lit). 에디터에서는 SceneBuilder가 에셋 머티리얼을 넘긴다.</summary>
         public static Material RuntimeMat(string name, Color color)
         {
             if (runtimeMats.TryGetValue(name, out var m) && m != null) return m;
-            var shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
+            var shader = Shader.Find("RhythmActionGame/Toon") ?? Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
             m = new Material(shader) { name = name, color = color };
+            if (m.HasProperty("_Steps"))
+            {
+                m.SetFloat("_Steps", GameConfig.Body.ToonSteps);
+                m.SetFloat("_ShadowLevel", GameConfig.Body.ToonShadowLevel);
+                m.SetFloat("_OutlineWidth", GameConfig.Body.OutlineWidth);
+            }
             runtimeMats[name] = m;
             return m;
         }

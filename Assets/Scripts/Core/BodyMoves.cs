@@ -1,0 +1,65 @@
+namespace RhythmActionGame
+{
+    /// <summary>
+    /// 1인칭 전신 플레이어의 Animator 상태 고르기 (작업 T13). 장애물(사건) 판정 결과마다 상태 하나.
+    /// 상태 이름 = "{동작}_{결과}" (예: Vault_Perfect). 기본은 Run(반복).
+    /// 동작은 장애물 분류(GDD 4.4)로 정하고, 분류가 없는 새 사건·안 멈추는 적은 판정 키로 정한다(↑ Climb, ↓ Slide, ←/→ Dodge).
+    /// </summary>
+    public static class BodyMoves
+    {
+        public const string Run = "Run";
+
+        /// <summary>상태 이름에 쓰는 동작 이름.</summary>
+        public static readonly string[] Actions = { "Vault", "Climb", "Slide", "Drop", "Dodge", "WallRun" };
+        public static readonly Judgement[] Results = { Judgement.Perfect, Judgement.Normal, Judgement.Fail };
+
+        public static string ActionOf(ObstacleCategory c)
+        {
+            switch (c)
+            {
+                case ObstacleCategory.Vault: return "Vault";
+                case ObstacleCategory.Climb: return "Climb";
+                case ObstacleCategory.Slide: return "Slide";
+                case ObstacleCategory.Drop: return "Drop";
+                case ObstacleCategory.Dodge: return "Dodge";
+                default: return "WallRun";
+            }
+        }
+
+        public static string ActionOfKey(ArrowKey k) =>
+            k == ArrowKey.Up ? "Climb" : k == ArrowKey.Down ? "Slide" : "Dodge";
+
+        public static string State(string action, Judgement r) => $"{action}_{r}";
+
+        /// <summary>사건 하나의 판정 결과 → 상태 이름. category가 없으면 key로.</summary>
+        public static string StateFor(ObstacleCategory? category, ArrowKey key, Judgement r) =>
+            State(category.HasValue ? ActionOf(category.Value) : ActionOfKey(key), r);
+
+        /// <summary>왼쪽으로 피하는/달리는 동작은 오른쪽 클립을 좌우 반전한다.</summary>
+        public static bool Mirror(string action, ArrowKey key) =>
+            key == ArrowKey.Left && (action == "Dodge" || action == "WallRun");
+
+        /// <summary>
+        /// 상태별 클립 (작업 T12 Mixamo + T11 VARCO player). 앞은 Mixamo 파일 이름(Assets/Art/Animations/Mixamo/),
+        /// "player_"로 시작하면 VARCO player 동작(Assets/Art/Models/player/).
+        /// </summary>
+        public static string ClipFor(string action, Judgement r)
+        {
+            switch (action)
+            {
+                case "Vault": return r == Judgement.Perfect ? "vault" : r == Judgement.Normal ? "player_climb_box" : "hit_obstacle";
+                case "Climb": return r == Judgement.Perfect ? "player_run_jump" : r == Judgement.Normal ? "player_climb_box" : "hit_obstacle";
+                case "Slide": return r == Judgement.Perfect ? "slide" : r == Judgement.Normal ? "player_box_slide" : "hit_obstacle";
+                case "Drop": return r == Judgement.Perfect ? "player_forward_roll" : r == Judgement.Normal ? "player_heavy_landing_1" : "player_forward_fall_twist";
+                case "Dodge": return r == Judgement.Perfect ? "dodge_right" : r == Judgement.Normal ? "player_spin_jump_dodge" : "player_heavy_hit_back";
+                default: return r == Judgement.Perfect ? "wall_run" : r == Judgement.Normal ? "player_wall_side_walk" : "stumble";
+            }
+        }
+
+        public const string RunClip = "player_forward_run_1";
+
+        /// <summary>클립을 beats 박 길이에 맞추는 재생 속도.</summary>
+        public static float SpeedToFit(float clipSeconds, float beats, float secondsPerBeat) =>
+            beats <= 0f || secondsPerBeat <= 0f ? 1f : clipSeconds / (beats * secondsPerBeat);
+    }
+}

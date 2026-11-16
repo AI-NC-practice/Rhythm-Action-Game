@@ -776,5 +776,33 @@ namespace RhythmActionGame
             /// <summary>게임 안 출처 표기 (CC BY·공공누리 1유형).</summary>
             public const string Credit = "음악 재료(공유마당): 한국저작권위원회 「태평소독주 시그널음악」「국악기_꽹과리」 CC BY · (재)전주정보문화산업진흥원 「전통악기 장구」 공공누리 1유형";
         }
+
+        /// <summary>1인칭 전신 플레이어와 툰 셰이딩 (작업 T13, GDD 4.3·5·6).</summary>
+        public static class Body
+        {
+            /// <summary>플레이어 모델 키 (m, GDD 5 에셋 표).</summary>
+            public const float PlayerHeight = 1.75f;
+            /// <summary>카메라가 머리 뼈 움직임을 따라가는 비율 (0~1). 장애물 카메라 연출(StageDirector)과 겹쳐 두 번 움직이지 않게 일부만.</summary>
+            public const float HeadFollowWeight = 0.35f;
+            /// <summary>머리 뼈 추적 부드럽게 (1/초, 지수 감쇠).</summary>
+            public const float HeadFollowSharpness = 14f;
+            /// <summary>눈 위치를 머리 뼈보다 앞으로 (m). 아래를 볼 때 머리를 뺀 목 단면이 화면에 걸리지 않게.</summary>
+            public const float EyeForward = 0.12f;
+            /// <summary>달리기 한 주기(두 걸음)의 박자 수 — 달리기 재생 속도를 박에 맞춘다.</summary>
+            public const float RunCycleBeats = 2f;
+            /// <summary>장애물 동작 한 번의 길이 (박자). 클립 길이를 이 길이에 맞게 재생 속도를 바꾼다.</summary>
+            public const float ActionBeats = ObstacleBeats;
+            /// <summary>동작 사이 크로스페이드 (초, GDD 6 "0.1~0.15초").</summary>
+            public const float CrossFadeSeconds = 0.12f;
+            /// <summary>머리 메시로 볼 뼈 가중치 (머리·목 합이 이 값 이상인 삼각형은 1인칭 카메라에 그리지 않음).</summary>
+            public const float HeadWeightThreshold = 0.5f;
+
+            /// <summary>툰 명암 단계 수 (GDD 6 "2~3단계").</summary>
+            public const int ToonSteps = 3;
+            /// <summary>가장 어두운 단계의 밝기 (0~1).</summary>
+            public const float ToonShadowLevel = 0.55f;
+            /// <summary>외곽선 두께 (화면 높이 대비, 뒤집은 메시).</summary>
+            public const float OutlineWidth = 0.0025f;
+        }
     }
 }

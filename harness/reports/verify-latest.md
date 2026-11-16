@@ -1,7 +1,7 @@
 ﻿# Unity verify report
-time: 2026-11-16 15:23:56
+time: 2026-11-16 15:49:51
 
-## EditMode : total=181 passed=181 failed=0 skipped=0 result=Passed
+## EditMode : total=186 passed=186 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Config_MatchGddBetaB1
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_LabelPose_PopThenRise_045s
@@ -183,8 +183,13 @@ time: 2026-11-16 15:23:56
   - [Passed] RhythmActionGame.Tests.T11R_StaticBakeTests.T11R_StaticGlb_LowPoly_Under15MB_WithBakedColorAndNormal
   - [Passed] RhythmActionGame.Tests.T12_MixamoImportTests.T12_EachMixamoClip_IsHumanoid_NoMesh
   - [Passed] RhythmActionGame.Tests.T12_MixamoImportTests.T12_MixamoClips_RetargetOntoPlayer
+  - [Passed] RhythmActionGame.Tests.T13_ToonBodyTests.T13_BodyMoves_Mapping
+  - [Passed] RhythmActionGame.Tests.T13_ToonBodyTests.T13_GameScene_AllMeshMaterialsAreToon
+  - [Passed] RhythmActionGame.Tests.T13_ToonBodyTests.T13_PlayerController_RunPlusActionResultStates_WithClips
+  - [Passed] RhythmActionGame.Tests.T13_ToonBodyTests.T13_ToonMaterials_ForAllElevenAssets
+  - [Passed] RhythmActionGame.Tests.T13_ToonBodyTests.T13_ToonShader_HasForwardOutlineShadowPasses
 
-## PlayMode : total=154 passed=154 failed=0 skipped=0 result=Passed
+## PlayMode : total=157 passed=157 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -339,5 +344,8 @@ time: 2026-11-16 15:23:56
   - [Passed] RhythmActionGame.Tests.T08_UiTests.T08_SpeedLines_AndFovBonus
   - [Passed] RhythmActionGame.Tests.T08_UiTests.T08_Title_StartLoadsGame
   - [Passed] RhythmActionGame.Tests.T08_UiTests.T08_Title_Texts_AndSettingsSaved
+  - [Passed] RhythmActionGame.Tests.T13_PlayerBodyPlayTests.T13_DodgeLeft_Mirrored_ThenBackToRun
+  - [Passed] RhythmActionGame.Tests.T13_PlayerBodyPlayTests.T13_ObstacleResults_DriveAnimatorStates_FitFourBeats
+  - [Passed] RhythmActionGame.Tests.T13_PlayerBodyPlayTests.T13_PlayerModel_HeadlessVisible_ShadowOnlyOriginal_CameraAtEye
 
 OVERALL: PASS

@@ -132,15 +132,8 @@ namespace RhythmActionGame.EditorTools
             var player = new GameObject("Player");
             var follower = player.AddComponent<PathFollower>();
             follower.clock = clock;
-            var body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            body.name = "Body";
-            Object.DestroyImmediate(body.GetComponent<Collider>());
-            body.transform.SetParent(player.transform, false);
-            body.transform.localPosition = new Vector3(0, 0.9f, 0);
-            body.transform.localScale = new Vector3(0.5f, 0.9f, 0.5f);
-            var bodyRenderer = body.GetComponent<MeshRenderer>();
-            bodyRenderer.sharedMaterial = Mat("Player", new Color(0.9f, 0.9f, 0.85f));
-            bodyRenderer.shadowCastingMode = ShadowCastingMode.ShadowsOnly; // 1인칭: 몸은 그림자만 (모델 교체는 T13)
+            // 1인칭 전신 모델 (작업 T13): player FBX(Humanoid) + 툰 머티리얼 + Animator. 원래 메시는 그림자만, 머리 뺀 복사본을 화면에 (PlayerBody).
+            var playerBody = BuildPlayerModel(player.transform, out var bodyRenderer);
             // 칼 막대 (1인칭에서는 그림자만, 무사 결투 3인칭 컷에서 보임 — GDD-beta B11.5)
             var sword = GameObject.CreatePrimitive(PrimitiveType.Cube);
             sword.name = "Sword";
@@ -154,7 +147,7 @@ namespace RhythmActionGame.EditorTools
             swordRenderer.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
             var rig = new GameObject("CameraRig");
             rig.transform.SetParent(player.transform, false);
-            rig.transform.localPosition = new Vector3(0, GameConfig.EyeHeight, 0);
+            rig.transform.localPosition = new Vector3(0, GameConfig.EyeHeight, GameConfig.Body.EyeForward);
             var motion = new GameObject("Motion");   // 장애물·전투 카메라 연출 (StageDirector)
             motion.transform.SetParent(rig.transform, false);
             var cam = CreateCamera("PlayerCamera", Vector3.zero, Quaternion.identity);
@@ -195,6 +188,9 @@ namespace RhythmActionGame.EditorTools
             director.motion = motion.transform;
             director.normalEnemies = enemies.Normal.ToArray();
             director.slowMotion = systems.AddComponent<SlowMotion>();
+            playerBody.director = director;
+            playerBody.clock = clock;
+            playerBody.cameraRig = rig.transform;
             BuildDirectorExtra(director, enemies);
 
             // 새 사건·안 멈추는 적·복선 소품 진행 (GDD-beta B2)
@@ -244,7 +240,7 @@ namespace RhythmActionGame.EditorTools
             duelCam.judgeFx = fx;
             duelCam.cam = cam;
             duelCam.fxOffset = fxOffset.transform;
-            duelCam.playerBody = new Renderer[] { bodyRenderer, swordRenderer };
+            duelCam.playerBody = new Renderer[] { bodyRenderer, swordRenderer };   // 3인칭: 머리 포함 원래 메시를 보이게
 
             // 화면이 박에 맞춰 숨 쉼 + 예고음 (GDD-beta B17.2)
             var beatFx = systems.AddComponent<BeatFx>();
@@ -590,6 +586,61 @@ namespace RhythmActionGame.EditorTools
             return m;
         }
 
+        /// <summary>
+        /// 플레이어 모델 (작업 T13): player FBX를 Model로 넣고 키를 GameConfig.Body.PlayerHeight에 맞춘다.
+        /// 툰 머티리얼, Player.controller, PlayerBody(상태 이름·클립 길이)를 붙인다.
+        /// </summary>
+        static PlayerBody BuildPlayerModel(Transform player, out SkinnedMeshRenderer smr)
+        {
+            ToonMaterials.BuildAll();
+            var ctrl = ToonMaterials.BuildPlayerController(out var names, out var seconds);
+            string fbxPath = $"{HumanoidImport.Root}/player/{BodyMoves.RunClip}.fbx";
+            if (AssetImporter.GetAtPath(fbxPath) is ModelImporter mi && !mi.isReadable) { mi.isReadable = true; mi.SaveAndReimport(); }   // 머리 삼각형 빼기 (PlayerBody)
+            var fbx = AssetDatabase.LoadAssetAtPath<GameObject>(fbxPath);
+            var model = (GameObject)PrefabUtility.InstantiatePrefab(fbx);
+            PrefabUtility.UnpackPrefabInstance(model, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
+            model.name = "Model";
+            model.transform.SetParent(player, false);
+            model.transform.localPosition = Vector3.zero;
+            model.transform.localRotation = Quaternion.identity;
+            smr = model.GetComponentInChildren<SkinnedMeshRenderer>();
+            // 키 맞추기: 지금 자세로 구운 메시의 세계 높이 → PlayerHeight, 발바닥을 0에
+            float h = MeasureHeight(smr, out float minY);
+            if (h > 0.01f)
+            {
+                float k = GameConfig.Body.PlayerHeight / h;
+                model.transform.localScale *= k;
+                model.transform.localPosition = new Vector3(0f, -(minY - player.position.y) * k, 0f);
+            }
+            smr.sharedMaterials = new[] { ToonMaterials.Character("player") };
+            smr.updateWhenOffscreen = true;
+            var animator = model.GetComponent<Animator>() ?? model.AddComponent<Animator>();
+            animator.runtimeAnimatorController = ctrl;
+            animator.applyRootMotion = false;
+            animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+            var body = player.gameObject.AddComponent<PlayerBody>();
+            body.animator = animator;
+            body.body = smr;
+            body.stateNames = names;
+            body.stateSeconds = seconds;
+            return body;
+        }
+
+        static float MeasureHeight(SkinnedMeshRenderer smr, out float minY)
+        {
+            var m = new Mesh();
+            smr.BakeMesh(m, true);
+            float lo = float.MaxValue, hi = float.MinValue;
+            foreach (var v in m.vertices)
+            {
+                float y = (smr.transform.position + smr.transform.rotation * v).y;
+                lo = Mathf.Min(lo, y); hi = Mathf.Max(hi, y);
+            }
+            Object.DestroyImmediate(m);
+            minY = lo;
+            return hi - lo;
+        }
+
         public static Material Mat(string name, Color color)
         {
             string path = $"{MaterialsDir}/{name}.mat";
@@ -597,9 +648,10 @@ namespace RhythmActionGame.EditorTools
             if (m == null)
             {
                 Directory.CreateDirectory(MaterialsDir);
-                m = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+                m = new Material(ToonMaterials.Shader);
                 AssetDatabase.CreateAsset(m, path);
             }
+            ToonMaterials.ApplyToon(m);   // 모든 회색 상자·적 머티리얼도 툰 (작업 T13)
             m.SetColor("_BaseColor", color);
             m.color = color;
             EditorUtility.SetDirty(m);
