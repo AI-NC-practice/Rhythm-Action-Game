@@ -1061,10 +1061,10 @@
                                          "GDD-beta B17.2 각 항목 — 테스트",
                                          "unity-verify 통과, 테스트 빌드로 사용자 확인"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  ""
+                      "notes":  "2026-11-16 evaluator PASS (1회차). 박 펄스(판정 원·HUD·레인·비네트, 마디 첫 박 1.8배), 예고음 2박·1박 전(장단 노드 제외, 설정에서 끄기), 걸음 1박 한 걸음 카메라 출렁임. 사용자 테스트 빌드 확인은 다음 피드백으로."
                   },
                   {
                       "id":  "B46",

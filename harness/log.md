@@ -403,3 +403,12 @@ BuildGray와 smoke-test를 통과했다(Builds/Gray/RhythmActionGame.exe). 사�
 ## B51 [beta] 장구 키 Q·W 분리 + 장단 간격 1박 + 아래 레인으로 되돌림 (2026-11-15)
 사용자 결정: 위쪽 한 줄은 더 어렵다, 아까(아래 장구 레인) 방식으로. 장애물과 장구가 같은 박에 나와 어려웠고, 장구는 Q·W처럼 키를 나누자. 표시를 5475817(B50) 상태로 되돌리고(JangdanLaneView, JudgeRingView, SceneBuilder, GameBootstrap, GameConfig, RhythmNotes), ArrowKey에 Kung(Q 궁편 덩)·Deok(W 채편 덕)을 더했다. JudgeSystem은 Q·W를 읽고, JudgeRules.SameLane으로 장구 키는 장단 노드만, 방향키는 사건·전투만 판정(다른 줄의 앞 노드를 FAIL로 만들지 않음). 레인 노드 글자 Q/W, 히트사운드 Q 덩·W 덕. 장단 노드는 사건·전투 판정과 1박(GameConfig.Jangdan.EventClearBeats) 안에 놓지 않음 → 장단 206(Q 69, W 137), 전체 판정 344로 줄어 테스트 범위를 330~440으로(GDD-beta B18.5에 적음). 오토플레이로 타임라인 다시 뽑고(344개, 챕터 시작 같음) 곡 다시 만듦(404박 그대로). 테스트 B51_DrumKeyTests 추가, B50 테스트 Q/W로. unity-verify EditMode 165/165, PlayMode 144/144.
 평가: evaluator PASS. 다음: 사용자 테스트 빌드 확인 후 B45.
+
+## B45 [beta] 박 펄스 + 예고음 + 발걸음·카메라 박 맞춤 (2026-11-16)
+새 컴퓨터에서 이어서 시작(beta1-1). 사용자: B51 소감·B10 처리는 나중에, 일단 넘어가자. 처음 배치 명령은 Unity 라이선스 미활성으로 실패 → 사용자가 Unity Hub에서 활성화.
+- 박 펄스: BeatPulse(순수 함수) — 박 순간 1, 0.35박 동안 제곱으로 줄어듦, 마디 첫 박 1.8배. BeatFx가 판정 원 목표 원(+8%), 장구 레인 판정 표시(+12%), HUD 하트·속도·점수·콤보(+5%), 화면 가장자리 비네트(0.12, ScreenFx.BeatVignette로 최댓값 합침)에 건다.
+- 예고음: CueTickPlayer가 사건·전투 판정의 목표 2박 전·1박 전에 작은 "틱"(1박 전은 높은 음)을 dsp 예약으로 낸다. 장단 노드는 제외, 다른 판정 박 0.25박 안이면 빼고, 같은 박은 한 번만. 타이틀 설정에 "예고음 켜짐/꺼짐"(GameSettings.CueTicks, 기본 켜짐).
+- 걸음·카메라: 카메라 계층에 BeatBob(Motion → BeatBob → FxOffset → PlayerCamera). 달리면 1박 = 한 걸음(박 순간 5 cm 낮음, 왼발·오른발 번갈아 좌우 2.5 cm·기울기 0.6°), 멈추면 박마다 살짝 내려앉음. F1·일시정지면 모두 0.
+- 수치는 GameConfig.BeatFx. 테스트 B45 EditMode 5·PlayMode 3. unity-verify EditMode 170/170, PlayMode 147/147. BuildGray + smoke-test 통과.
+평가: evaluator PASS (1회차, harness/reports/B45-eval-1.md). 다음: 사용자 테스트 빌드 확인 후 B46.
+- 제안: 발걸음 소리(아주 작은 "툭")를 박마다 넣으면 귀로도 박이 느껴질 수 있다. 곡과 겹칠 수 있어 넣지 않았다.

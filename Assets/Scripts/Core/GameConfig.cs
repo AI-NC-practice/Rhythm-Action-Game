@@ -641,6 +641,51 @@ namespace RhythmActionGame
             public static readonly UnityEngine.Color DeokColor = new UnityEngine.Color(0.95f, 0.3f, 0.25f, 1f);    // W 채편
         }
 
+        // ---------------- B45 화면이 박에 맞춰 숨 쉼 (GDD-beta B17.2) ----------------
+        /// <summary>
+        /// 박 펄스·예고음·걸음 출렁임 (GDD-beta B17.2, 제안서 rhythm-feel 2.1-2·2.2-4·5). 모든 값은 GDD에 없음, Claude가 정함.
+        /// 박 펄스 세기 = 마디 첫 박이면 BarAccent, 아니면 1 × (1 − 박 안 위치/PulseBeats)² (박 순간 가장 크고 빠르게 줄어듦).
+        /// </summary>
+        public static class BeatFx
+        {
+            /// <summary>펄스가 이어지는 길이 (박). 0.35박 = 0.175초(1.00배).</summary>
+            public const float PulseBeats = 0.35f;
+            /// <summary>마디 첫 박의 세기 배율 (보통 박 = 1).</summary>
+            public const float BarAccent = 1.8f;
+            /// <summary>보통 박 세기 1일 때 판정 원 테두리(목표 원) 크기 증가 (0.08 = 8%).</summary>
+            public const float RingScale = 0.08f;
+            /// <summary>보통 박 세기 1일 때 HUD(하트·속도·점수·콤보) 크기 증가.</summary>
+            public const float HudScale = 0.05f;
+            /// <summary>보통 박 세기 1일 때 장구 레인 판정 표시 크기 증가.</summary>
+            public const float LaneScale = 0.12f;
+            /// <summary>보통 박 세기 1일 때 화면 가장자리(비네트) 세기. 다른 화면 효과와 항목별 최댓값으로 합친다.</summary>
+            public const float Vignette = 0.12f;
+
+            /// <summary>예고음: 판정 원의 목표 박 1박 전·2박 전에 "틱" (판정 원이 떠 있는 동안 남은 박마다, ApproachBeats = 2).</summary>
+            public const int TickCount = 2;
+            /// <summary>예고음 음량 (작게). 마지막(1박 전) 틱은 TickLastBoost 배 높은 음.</summary>
+            public const float TickVolume = 0.35f;
+            /// <summary>예고음 주파수 (Hz)와 길이 (초). 1박 전 틱은 한 음 높여 "곧"을 알린다.</summary>
+            public const float TickFrequency = 2200f;
+            public const float TickLastFrequency = 2900f;
+            public const float TickSeconds = 0.03f;
+            /// <summary>다른 판정의 목표 박과 이만큼(박) 안이면 예고음을 내지 않는다 (히트사운드와 겹치지 않게).</summary>
+            public const float TickClearBeats = 0.25f;
+            /// <summary>예고음을 이만큼(초) 미리 예약한다 (메트로놈과 같음).</summary>
+            public const double TickLookAheadSeconds = 0.1;
+
+            /// <summary>걸음: 1박 = 한 걸음. 발이 닿는 박 순간 카메라가 가장 낮다 (m).</summary>
+            public const float StepDropMeters = 0.05f;
+            /// <summary>걸음마다 좌우로 옮기는 폭 (m, 왼발·오른발 번갈아).</summary>
+            public const float StepSwayMeters = 0.025f;
+            /// <summary>걸음마다 기우는 각 (도).</summary>
+            public const float StepRollDegrees = 0.6f;
+            /// <summary>멈춰 있을 때(전투) 박마다 살짝 출렁이는 높이 (m, 박 펄스 세기 × 이 값).</summary>
+            public const float IdleDipMeters = 0.015f;
+            /// <summary>달리기 ↔ 멈춤 전환을 부드럽게 (초당 변화량).</summary>
+            public const float RunBlendPerSecond = 4f;
+        }
+
         // ---------------- B10 배경 음악 (GDD 1장 사운드: 국악 퓨전, BPM 고정, 보컬 없음) ----------------
         /// <summary>
         /// 배경 음악 "스테이지 1" — 퓨전 국악 액션, 120 BPM, 101마디(404박, 3분 22초). harness/scripts/music/make-song.py가

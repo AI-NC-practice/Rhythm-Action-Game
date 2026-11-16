@@ -65,6 +65,7 @@ namespace RhythmActionGame.EditorTools
             boot.pause = pause;
             boot.result = result;
             boot.speedFx = speedFx;
+            if (boot.beatFx != null) boot.beatFx.hud = hud;   // 박 펄스 HUD (GDD-beta B17.2)
             EventSystemObject();
         }
     }

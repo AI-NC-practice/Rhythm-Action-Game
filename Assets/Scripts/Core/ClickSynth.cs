@@ -32,6 +32,28 @@ namespace RhythmActionGame
         public static bool IsAccent(long beatIndex) =>
             ((beatIndex % GameConfig.BeatsPerBar) + GameConfig.BeatsPerBar) % GameConfig.BeatsPerBar == 0;
 
+        /// <summary>판정 예고음 "틱" 파형 (GDD-beta B17.2): 짧고 높은 소리. last면 한 음 높게(1박 전).</summary>
+        public static float[] CreateTick(bool last)
+        {
+            int n = Mathf.RoundToInt(SampleRate * GameConfig.BeatFx.TickSeconds);
+            var data = new float[n];
+            float f = last ? GameConfig.BeatFx.TickLastFrequency : GameConfig.BeatFx.TickFrequency;
+            for (int i = 0; i < n; i++)
+            {
+                float t = i / (float)SampleRate;
+                data[i] = 0.8f * Mathf.Exp(-t * 150f) * Mathf.Sin(2f * Mathf.PI * f * t);
+            }
+            return data;
+        }
+
+        public static AudioClip CreateTickClip(bool last)
+        {
+            var data = CreateTick(last);
+            var clip = AudioClip.Create(last ? "CueTickLast" : "CueTick", data.Length, 1, SampleRate, false);
+            clip.SetData(data, 0);
+            return clip;
+        }
+
         public static AudioClip CreateClip(bool accent)
         {
             var data = Create(accent);

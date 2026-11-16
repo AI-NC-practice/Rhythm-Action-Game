@@ -21,6 +21,10 @@ namespace RhythmActionGame
         public JangguBacking backing;
         public HitSoundPlayer hitSound;
         public JangdanLaneView jangdanLane;
+        /// <summary>박 펄스·걸음 (GDD-beta B17.2).</summary>
+        public BeatFx beatFx;
+        /// <summary>판정 예고음 (GDD-beta B17.2).</summary>
+        public CueTickPlayer cueTicks;
         public bool autoStart = true;
 
         public static GameBootstrap Instance { get; private set; }
@@ -73,6 +77,7 @@ namespace RhythmActionGame
             clock.MusicBeatOffset = MusicPlan.SongBeatAtRun(runBeat);   // 챕터 되감기·이동은 그 챕터의 곡 위치부터 (GDD-beta B16.3)
             clock.StartClock();
             if (backing != null) backing.ResetSchedule();
+            if (cueTicks != null) cueTicks.ResetSchedule();
             if (director != null) director.ResetStage(runBeat);
         }
     }

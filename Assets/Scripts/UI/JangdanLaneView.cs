@@ -26,6 +26,8 @@ namespace RhythmActionGame
         public static float NoteX(double beatsAhead) => (float)(beatsAhead * GameConfig.Jangdan.LanePxPerBeat);
         public RectTransform Lane { get { Build(); return lane; } }
         public Text FlashText { get { Build(); return flashText; } }
+        /// <summary>판정 표시 원 (박 펄스가 크기를 바꾼다, GDD-beta B17.2).</summary>
+        public Image HitMarker { get { Build(); return hitMarker; } }
 
         void Awake() => Build();
         void OnEnable() { if (judge != null) judge.CueJudged += OnJudged; }

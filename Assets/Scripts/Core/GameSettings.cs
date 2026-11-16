@@ -22,6 +22,15 @@ namespace RhythmActionGame
             set { PlayerPrefs.SetInt(VolumeKey, Mathf.Clamp(value, GameConfig.VolumeMin, GameConfig.VolumeMax)); PlayerPrefs.Save(); }
         }
 
+        public const string CueTicksKey = "settings.cueTicks";
+
+        /// <summary>판정 예고음 "틱" 켜기 (GDD-beta B17.2, 설정에서 끄기). 기본 켜짐.</summary>
+        public static bool CueTicks
+        {
+            get => PlayerPrefs.GetInt(CueTicksKey, 1) != 0;
+            set { PlayerPrefs.SetInt(CueTicksKey, value ? 1 : 0); PlayerPrefs.Save(); }
+        }
+
         /// <summary>범위로 자르고 5 ms 단위로 맞춘다.</summary>
         public static int ClampOffset(int ms)
         {

@@ -158,8 +158,10 @@ namespace RhythmActionGame.EditorTools
             var motion = new GameObject("Motion");   // 장애물·전투 카메라 연출 (StageDirector)
             motion.transform.SetParent(rig.transform, false);
             var cam = CreateCamera("PlayerCamera", Vector3.zero, Quaternion.identity);
+            var beatBob = new GameObject("BeatBob");   // 걸음·박 출렁임 (BeatFx, GDD-beta B17.2)
+            beatBob.transform.SetParent(motion.transform, false);
             var fxOffset = new GameObject("FxOffset");   // 연출 층 (CameraFx, GDD-beta B5)
-            fxOffset.transform.SetParent(motion.transform, false);
+            fxOffset.transform.SetParent(beatBob.transform, false);
             cam.transform.SetParent(fxOffset.transform, false);
             cam.fieldOfView = GameConfig.FovDefault;
             cam.nearClipPlane = 0.05f;
@@ -244,6 +246,21 @@ namespace RhythmActionGame.EditorTools
             duelCam.fxOffset = fxOffset.transform;
             duelCam.playerBody = new Renderer[] { bodyRenderer, swordRenderer };
 
+            // 화면이 박에 맞춰 숨 쉼 + 예고음 (GDD-beta B17.2)
+            var beatFx = systems.AddComponent<BeatFx>();
+            beatFx.clock = clock;
+            beatFx.follower = follower;
+            beatFx.bob = beatBob.transform;
+            beatFx.screenFx = screenFx;
+            beatFx.ringView = ringView;
+            beatFx.lane = lane;
+            beatFx.presentation = presentation;
+            var tickGo = new GameObject("CueTicks");
+            tickGo.transform.SetParent(systems.transform, false);
+            var cueTicks = tickGo.AddComponent<CueTickPlayer>();
+            cueTicks.clock = clock;
+            cueTicks.judge = judge;
+
             var boot = new GameObject("GameBootstrap").AddComponent<GameBootstrap>();
             boot.director = director;
             boot.clock = clock;
@@ -256,6 +273,8 @@ namespace RhythmActionGame.EditorTools
             boot.backing = backing;
             boot.hitSound = hitSound;
             boot.jangdanLane = lane;
+            boot.beatFx = beatFx;
+            boot.cueTicks = cueTicks;
 
             BuildGameExtra(boot, chart);
             EditorSceneManager.SaveScene(scene, GameScenePath);

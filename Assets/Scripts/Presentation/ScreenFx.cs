@@ -40,6 +40,8 @@ namespace RhythmActionGame
         public float Lens { get; private set; }
         public float BloomIntensity { get; private set; }
         public int ActivePulses => pulses.Count;
+        /// <summary>박 펄스 화면 가장자리 (GDD-beta B17.2, BeatFx가 매 프레임 넣음). 다른 비네트와 최댓값으로 합친다.</summary>
+        public float BeatVignette { get; set; }
         public VolumeProfile Profile => volume != null ? volume.profile : null;
 
         void Awake() => EnsureSetup();
@@ -109,6 +111,7 @@ namespace RhythmActionGame
             float vig = judgeFx != null ? judgeFx.VignetteIntensity : 0f;
             Color vigColor = Color.black;
             float ca = 0f, ld = 0f, bl = GameConfig.Fx.BloomBase;
+            if (BeatVignette > vig) vig = BeatVignette;
             // 노출: 밝히는 섬광이 있으면 그중 최댓값, 없으면 가장 어두운 값 (판정 화면 포함)
             float brightest = 0f, darkest = Mathf.Min(0f, exp);
             foreach (var a in pulses)

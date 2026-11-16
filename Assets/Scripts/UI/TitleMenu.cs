@@ -17,6 +17,9 @@ namespace RhythmActionGame
         public Slider VolumeSlider { get; private set; }
         public Text OffsetValue { get; private set; }
         public Text VolumeValue { get; private set; }
+        /// <summary>예고음 켜기/끄기 (GDD-beta B17.2).</summary>
+        public Button CueTicksButton { get; private set; }
+        public Text CueTicksValue { get; private set; }
 
         /// <summary>테스트에서 종료 대신 기록만 한다.</summary>
         public bool QuitRequested { get; private set; }
@@ -50,7 +53,10 @@ namespace RhythmActionGame
             UiWidgets.Label(SettingsPanel, "VolumeLabel", UiText.Volume, 40, new Vector2(-360, 0), TextAnchor.MiddleRight, new Vector2(320, 60));
             VolumeSlider = UiWidgets.Slider(SettingsPanel, "VolumeSlider", GameConfig.VolumeMin, GameConfig.VolumeMax, GameSettings.Volume, new Vector2(80, 0), v => SetVolume(Mathf.RoundToInt(v)));
             VolumeValue = UiWidgets.Label(SettingsPanel, "VolumeValue", GameSettings.Volume.ToString(), 40, new Vector2(470, 0), TextAnchor.MiddleLeft, new Vector2(200, 60));
-            BackButton = UiWidgets.Button(SettingsPanel, "BackButton", UiText.Back, new Vector2(0, -200), CloseSettings);
+            UiWidgets.Label(SettingsPanel, "CueTicksLabel", UiText.CueTicks, 40, new Vector2(-360, -110), TextAnchor.MiddleRight, new Vector2(320, 60));
+            CueTicksButton = UiWidgets.Button(SettingsPanel, "CueTicksButton", OnOff(GameSettings.CueTicks), new Vector2(80, -110), ToggleCueTicks);
+            CueTicksValue = CueTicksButton.GetComponentInChildren<Text>();
+            BackButton = UiWidgets.Button(SettingsPanel, "BackButton", UiText.Back, new Vector2(0, -240), CloseSettings);
             SettingsPanel.gameObject.SetActive(false);
         }
 
@@ -62,6 +68,7 @@ namespace RhythmActionGame
             VolumeSlider.SetValueWithoutNotify(GameSettings.Volume);
             OffsetValue.text = GameSettings.FormatOffset(GameSettings.TimingOffsetMs);
             VolumeValue.text = GameSettings.Volume.ToString();
+            CueTicksValue.text = OnOff(GameSettings.CueTicks);
             MainPanel.gameObject.SetActive(false);
             SettingsPanel.gameObject.SetActive(true);
         }
@@ -83,6 +90,15 @@ namespace RhythmActionGame
             GameSettings.Volume = v;
             VolumeValue.text = GameSettings.Volume.ToString();
             AudioListener.volume = GameSettings.Volume / 100f;
+        }
+
+        static string OnOff(bool on) => on ? UiText.On : UiText.Off;
+
+        /// <summary>예고음 켜기/끄기를 바꾸고 저장한다.</summary>
+        public void ToggleCueTicks()
+        {
+            GameSettings.CueTicks = !GameSettings.CueTicks;
+            CueTicksValue.text = OnOff(GameSettings.CueTicks);
         }
 
         public void Quit()
