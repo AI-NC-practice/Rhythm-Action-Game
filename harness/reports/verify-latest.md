@@ -1,5 +1,5 @@
 ﻿# Unity verify report
-time: 2026-11-16 22:40:20
+time: 2026-11-16 22:49:50
 
 ## EditMode : total=200 passed=200 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
@@ -203,8 +203,7 @@ time: 2026-11-16 22:40:20
   - [Passed] RhythmActionGame.Tests.T14_EnemyRigTests.T14_GameScene_EveryEnemy_HasModel_WeaponOnHandBone_NoCapsule
   - [Passed] RhythmActionGame.Tests.T14_EnemyRigTests.T14_PlayerController_HasExecutionAndHitStates
 
-## PlayMode : total=168 passed=167 failed=1 skipped=0 result=Failed(Child)
-- FAIL RhythmActionGame.Tests.T14_EnemyCombatPlayTests.T14_Enemy_Model_WeaponInHand_ImpactOnTargetBeat_CrossfadeBetweenAttacks: 다음 공격 상태 Expected string length 15 but was 17. Strings differ at index 7. Expected: "Attack_overhead" But was: "Attack_horizontal" ------------------^
+## PlayMode : total=168 passed=168 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -368,10 +367,10 @@ time: 2026-11-16 22:40:20
   - [Passed] RhythmActionGame.Tests.T13_PlayerBodyPlayTests.T13_ObstacleResults_DriveAnimatorStates_FitFourBeats
   - [Passed] RhythmActionGame.Tests.T13_PlayerBodyPlayTests.T13_PlayerModel_HeadlessVisible_ShadowOnlyOriginal_CameraAtEye
   - [Passed] RhythmActionGame.Tests.T14_EnemyCombatPlayTests.T14_Disarm_PlayerAndEnemyStartSameBeat_Aligned
-  - [Failed] RhythmActionGame.Tests.T14_EnemyCombatPlayTests.T14_Enemy_Model_WeaponInHand_ImpactOnTargetBeat_CrossfadeBetweenAttacks
+  - [Passed] RhythmActionGame.Tests.T14_EnemyCombatPlayTests.T14_Enemy_Model_WeaponInHand_ImpactOnTargetBeat_CrossfadeBetweenAttacks
   - [Passed] RhythmActionGame.Tests.T14_EnemyCombatPlayTests.T14_HitPushback_Windmill_PlayerHit_States
   - [Passed] RhythmActionGame.Tests.T14_EnemyCombatPlayTests.T14_RoofKick_EnemyFallsOffRoof_PlayerKicks
   - [Passed] RhythmActionGame.Tests.T15_DrawCallTests.T15_DrawCalls_BeforeAfter_Recorded_AndReduced
   - [Passed] RhythmActionGame.Tests.T15_DrawCallTests.T15_Map_ModelsReplaceGrayBoxes_Atmosphere
 
-OVERALL: FAIL
+OVERALL: PASS

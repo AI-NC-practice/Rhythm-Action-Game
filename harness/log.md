@@ -715,3 +715,10 @@ VARCO MCP: 3D 생성(Generate3D)은 이미지 1장만 받고 멀티뷰 노드가
 - 테스트 R04_NoGrayShapesPlayTests: Game 씬에 그리는 기본 도형(상자·공·캡슐·원통) 없음(땅·길 띠 제외), 장애물 충돌 상자 유지·모델 대신 보임, 사건 부품 모두 모델, 칼 모델. 미리보기 harness/reports/R04/*.png, 모음 all_props.png.
 - unity-verify: EditMode 200/200, PlayMode 167/168 (실패 T14 기존 — R05).
 평가: evaluator PASS (harness/reports/R04-eval-1.md, 단서: T14 기존 실패 — R05). 다음: R05 (T14 실패 원인 찾아 고치기).
+
+## R05 T14 적 공격 전환 PlayMode 테스트 실패 고치기 — 진행 중 (2026-11-16)
+- 재현: 92박 칼 포졸 1번(가로 베기, 2.5 s) 판정 뒤 다음 공격(내려 베기, 3.0 s, 1박 뒤)의 상태 전환이 2.98 s(목표 0.02 s 전)에야 일어남 → 테스트 창(목표 0.1 s 전까지)에서 Attack_horizontal 그대로.
+- 원인: 테스트 전제. 테스트는 박자 시계를 주입 시간(프레임당 0.01 s)으로 돌리지만 Hit Stop(TimeFx)은 실제 시계(realtimeSinceStartup)로 끝난다. 배치 모드에서 프레임이 빠르면 Hit Stop이 수십 프레임(주입 시간 약 0.47 s) 이어져 적이 멈춘 채 다음 공격 시작이 늦어짐. 애니메이터 컨트롤러는 다시 만들어도 내용(상태·클립·전환)이 같음을 확인 — 원인 아님. 실제 게임은 두 시계가 같이 흐르므로 게임 코드는 정상.
+- 수정: T14 테스트에서 TimeFx.RealTime도 같은 주입 시간을 따르게 함 (검사 항목은 그대로: 다음 공격 상태·크로스페이드).
+- unity-verify 전체 두 번 연속 통과: EditMode 200/200, PlayMode 168/168 (harness/reports/R05-verify-1.md, R05-verify-2.md).
+평가: evaluator PASS (harness/reports/R05-eval-1.md). 다음: tasks.json의 다음 pending 작업.

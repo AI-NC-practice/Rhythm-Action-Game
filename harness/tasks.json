@@ -1450,10 +1450,10 @@
                                          "게임 동작이 틀렸으면 게임 코드를, 테스트 가정이 틀렸으면 테스트를 고침 (테스트 약화 금지: 다음 공격 상태·크로스페이드 검사는 유지)",
                                          "unity-verify.ps1 전체 통과, 두 번 연속"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  "2026-11-16 집 컴퓨터에서 BuildAll 뒤 두 번 연속 실패: 다음 공격 상태 기대 Attack_overhead, 실제 Attack_horizontal (T14_EnemyCombatPlayTests.cs:116)."
+                      "notes":  "evaluator PASS (1회차, 2026-11-16, harness/reports/R05-eval-1.md). 원인: 테스트가 박자 시계만 주입하고 Hit Stop(TimeFx)은 실제 시계 — 빠른 프레임에서 Hit Stop이 길어져 다음 공격이 늦게 시작. T14 테스트에서 TimeFx.RealTime도 주입 시간에 연결. 전체 두 번 연속 통과."
                   },
                   {
                       "id":  "R06",

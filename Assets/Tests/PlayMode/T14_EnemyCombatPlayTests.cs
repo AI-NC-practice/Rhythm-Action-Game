@@ -30,6 +30,9 @@ namespace RhythmActionGame.Tests
             boot.judge.readKeyboard = false;
             boot.judge.OffsetSource = () => 0f;
             dir.slowMotion.RealTime = () => realTime;
+            // 작업 R05: Hit Stop도 같은 주입 시간으로 끝나게 한다. 실제 시계(realtimeSinceStartup)를 그대로 두면 프레임이 빠를수록
+            // Hit Stop이 더 많은 프레임(= 더 많은 주입 박자 시간) 동안 이어져, 다음 공격이 목표 0.02초 전에야 시작하는 등 기계 속도에 따라 결과가 달랐다.
+            foreach (var fx in Object.FindObjectsByType<TimeFx>(FindObjectsSortMode.None)) fx.RealTime = () => realTime + (float)now;
             boot.StartRun(startRunBeat);
             yield return null;
         }
