@@ -328,12 +328,18 @@ namespace RhythmActionGame.EditorTools
         static void BuildGround(Transform map)
         {
             var gc = MapCenter(); float gs = GameConfig.Map.BackdropRadius * 2f + 20f;   // 작업 T15: 땅이 외곽 그림 원통까지 닿게
-            var ground = Box(map, "Ground", new Vector3(gc.x, -0.1f, gc.z), new Vector3(gs, 0.2f, gs), Quaternion.identity, Mat("Ground", new Color(0.55f, 0.5f, 0.42f)));
+            var groundMat = Mat("Ground", new Color(0.47f, 0.42f, 0.35f));   // 작업 R23: 외곽선을 끄면 길이 바닥과 거의 같은 색이라 차이를 키움 (예전 0.55, 0.5, 0.42)
+            var pathMat = Mat("Path", new Color(0.8f, 0.74f, 0.63f));        // (예전 0.7, 0.66, 0.58)
+            // 작업 R23: 땅·길은 얇은 상자라 툰 외곽선(뒤집은 껍질)이 길 가장자리·조각 이음매마다 검은 사선으로 보였다 → 외곽선 패스를 끈다
+            groundMat.SetShaderPassEnabled(ToonMaterials.OutlineLightMode, false);
+            pathMat.SetShaderPassEnabled(ToonMaterials.OutlineLightMode, false);
+            EditorUtility.SetDirty(groundMat); EditorUtility.SetDirty(pathMat);
+            var ground = Box(map, "Ground", new Vector3(gc.x, -0.1f, gc.z), new Vector3(gs, 0.2f, gs), Quaternion.identity, groundMat);
             ground.isStatic = true;
             // 지면 위 길 (폭 3 m). 작업 R03: 모퉁이 곡선을 따라 짧은 조각으로
             int i = 0;
             foreach (var r in MapLayout.SplitAlongCurve(0, MapLayout.TotalLength))
-                StripBox(map, $"Path_{i++}", r.x, r.y, 0.02f, GameConfig.PathWidth, 0.04f, 0f, Mat("Path", new Color(0.7f, 0.66f, 0.58f)), curved: true).isStatic = true;   // 정적 배칭 (작업 T15)
+                StripBox(map, $"Path_{i++}", r.x, r.y, 0.02f, GameConfig.PathWidth, 0.04f, 0f, pathMat, curved: true).isStatic = true;   // 정적 배칭 (작업 T15)
         }
 
         static void BuildSections(Transform map)

@@ -400,11 +400,40 @@ namespace RhythmActionGame
         /// </summary>
         public static Material ParticleMaterial(Material asset)
         {
-            if (asset != null) return asset;
-            var shader = Shader.Find("Universal Render Pipeline/Particles/Unlit") ?? Shader.Find("Sprites/Default");
-            var m = new Material(shader) { name = "VfxParticle_Runtime" };
-            SetupAdditive(m);
+            Material m;
+            if (asset != null) m = new Material(asset) { name = asset.name + "_Soft" };   // 에셋은 그대로 두고 복사본에 텍스처
+            else
+            {
+                var shader = Shader.Find("Universal Render Pipeline/Particles/Unlit") ?? Shader.Find("Sprites/Default");
+                m = new Material(shader) { name = "VfxParticle_Runtime" };
+                SetupAdditive(m);
+            }
+            // 묶음 A 제안(2026-11-17, 회색 네모): 텍스처가 없으면 파티클이 네모 판으로 그려져 지붕 위에 회색·흰 네모가 보였다 → 가장자리가 흐린 둥근 점
+            if (m.HasProperty("_BaseMap") && m.GetTexture("_BaseMap") == null) m.SetTexture("_BaseMap", SoftDot());
+            if (m.HasProperty("_MainTex") && m.GetTexture("_MainTex") == null) m.SetTexture("_MainTex", SoftDot());
             return m;
+        }
+
+        static Texture2D softDot;
+
+        /// <summary>가운데가 밝고 가장자리로 갈수록 투명해지는 둥근 점 (64×64, 알파).</summary>
+        public static Texture2D SoftDot()
+        {
+            if (softDot != null) return softDot;
+            const int n = 64;
+            softDot = new Texture2D(n, n, TextureFormat.RGBA32, false) { name = "VfxSoftDot", wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Bilinear };
+            var px = new Color32[n * n];
+            for (int y = 0; y < n; y++)
+                for (int x = 0; x < n; x++)
+                {
+                    float dx = (x + 0.5f) / n * 2f - 1f, dy = (y + 0.5f) / n * 2f - 1f;
+                    float a = Mathf.Clamp01(1f - Mathf.Sqrt(dx * dx + dy * dy));
+                    a = a * a * (3f - 2f * a);
+                    px[y * n + x] = new Color32(255, 255, 255, (byte)(a * 255f));
+                }
+            softDot.SetPixels32(px);
+            softDot.Apply(false, true);
+            return softDot;
         }
 
         /// <summary>URP Particles/Unlit을 가산 투명으로 설정한다.</summary>

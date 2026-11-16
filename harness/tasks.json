@@ -1711,7 +1711,7 @@
                                          "unity-verify.ps1 전체 통과"
                                      ],
                       "status":  "pending",
-                      "attempts":  0,
+                      "attempts":  1,
                       "max_attempts":  3,
                       "notes":  "사용자 피드백(2026-11-16 6번): 되돌리기를 하면 적이랑 나도 처음 위치로 가야지 왜 제자리에서 되돌려지냐. 원인 확인 필요."
                   },
@@ -1729,8 +1729,8 @@
                                          "PlayMode 테스트: 전투 중 이동 속도 0이면 달리기 상태가 아님",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  1,
                       "max_attempts":  3,
                       "notes":  "사용자 피드백(2026-11-16 7번): 보스 만났을 때 나 달리기 모션 나오는데 왜 제자리에서 달리냐. 적 쪽은 R07."
                   },
@@ -1748,8 +1748,8 @@
                                          "PERFECT·NORMAL·FAIL 1인칭 미리보기 PNG",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  1,
                       "max_attempts":  3,
                       "notes":  "전체 훑어보기 2026-11-17 (harness/reports/review/NOTES.md), 사용자 \"1~6번 모두 넣기\". R14(대문 통과 동작)와 겹치면 R14 결과를 기준으로."
                   },
@@ -1767,8 +1767,8 @@
                                          "드로우콜이 크게 늘지 않음 (T15 기록과 비교)",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  1,
                       "max_attempts":  3,
                       "notes":  "전체 훑어보기 2026-11-17 (harness/reports/review/NOTES.md), 사용자 \"1~6번 모두 넣기\"."
                   },
@@ -1825,8 +1825,8 @@
                                          "길이 바닥과 구분은 됨 (길이 사라져 보이지 않음)",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  2,
                       "max_attempts":  3,
                       "notes":  "전체 훑어보기 2026-11-17 (harness/reports/review/NOTES.md), 사용자 \"1~6번 모두 넣기\"."
                   },

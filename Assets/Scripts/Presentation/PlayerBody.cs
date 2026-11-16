@@ -207,17 +207,101 @@ namespace RhythmActionGame
         void Update()
         {
             if (animator == null) return;
+            if (lowPosePending) SnapToLowestPose();
             double now = clock != null ? clock.Now : Time.unscaledTimeAsDouble;
             double dt = double.IsNaN(lastNow) ? 0 : now - lastNow;
             lastNow = now;
             if (dt < 0 || dt > 0.25) dt = 0;                       // 시간 되돌림·긴 멈춤은 건너뜀
             float speed = clock == null ? 1f : clock.IsPaused ? 0f : clock.IsRunning ? clock.SpeedMultiplier : 1f;
+            UpdateCombatStance((float)dt * speed);
             animator.Update((float)dt * speed);
             followDt += (float)dt * speed;
             actionLeft -= (float)dt * speed;
         }
 
         float followDt;
+
+        static readonly int RunHash = Animator.StringToHash(BodyMoves.Run);
+        static readonly int CombatIdleHash = Animator.StringToHash(BodyMoves.CombatIdle);
+        Vector3 lastMovePos;
+        bool hasLastMovePos;
+        /// <summary>전투 대기 자세인지 (작업 R16, 테스트용).</summary>
+        public bool InCombatStance { get; private set; }
+        /// <summary>몸(플레이어 뿌리) 수평 이동 빠르기 (m/s, 박자 시계 시간, 부드럽게).</summary>
+        public float MoveSpeed { get; private set; }
+
+        /// <summary>
+        /// 작업 R16: 전투(멈추는 적·포위·무사 결투)에서 몸이 거의 안 움직이면 달리기 대신 대기 자세로, 움직이면 달리기를 이동 빠르기에 맞춰.
+        /// 동작(장애물·피격)·처형 중에는 건드리지 않는다. 전투가 끝나면 달리기로 크로스페이드.
+        /// </summary>
+        void UpdateCombatStance(float dt)
+        {
+            if (animator == null || animator.runtimeAnimatorController == null) return;
+            var at = transform.position;   // 플레이어 뿌리 (경로 + 전투 이동 CombatOffset). 머리 따라가기 출렁임은 빼고
+            if (hasLastMovePos && dt > 1e-4f)
+            {
+                var d = at - lastMovePos; d.y = 0f;
+                float v = d.magnitude / dt;
+                if (v > 30f) v = 0f;   // 되감기·순간 이동
+                MoveSpeed = Mathf.Lerp(MoveSpeed, v, 1f - Mathf.Exp(-GameConfig.Body.CombatSpeedSharpness * dt));
+            }
+            if (dt > 1e-4f || !hasLastMovePos) { lastMovePos = at; hasLastMovePos = true; }
+            bool combat = director != null && director.State == StageState.Combat;
+            bool still = MoveSpeed < GameConfig.Body.CombatStillSpeed;
+            float len = seconds.TryGetValue(BodyMoves.Run, out var rs) ? rs : 1f;
+            float runRate = BodyMoves.SpeedToFit(len, GameConfig.Body.RunCycleBeats, GameConfig.SecondsPerBeat);
+            float runMps = GameConfig.MetersPerBeat / GameConfig.SecondsPerBeat;
+            animator.SetFloat(RunSpeedParam, combat && !still ? runRate * Mathf.Clamp(MoveSpeed / runMps, GameConfig.Body.CombatRunMinRate, 1f) : runRate);
+            if (animator.IsInTransition(0) || actionLeft > 0f) return;
+            int cur = animator.GetCurrentAnimatorStateInfo(0).shortNameHash;
+            if (combat && still && cur == RunHash) SetLoopState(BodyMoves.CombatIdle);
+            else if ((!combat || !still) && cur == CombatIdleHash) SetLoopState(BodyMoves.Run);
+            InCombatStance = animator.GetCurrentAnimatorStateInfo(0).shortNameHash == CombatIdleHash || LastState == BodyMoves.CombatIdle;
+        }
+
+        void SetLoopState(string state)
+        {
+            if (!animator.HasState(0, Animator.StringToHash(state))) return;
+            LastState = state;
+            LastMirror = false;
+            animator.SetBool(MirrorParam, false);
+            animator.CrossFadeInFixedTime(state, GameConfig.Body.CrossFadeSeconds, 0);
+        }
+
+        bool lowPosePending;
+        /// <summary>마지막으로 넘긴 낮은 자세의 정규화 시간 (작업 R19, 테스트용). 넘기지 않았으면 −1.</summary>
+        public float LowPoseNormalizedTime { get; private set; } = -1f;
+        /// <summary>마지막으로 넘긴 낮은 자세의 머리 높이 (몸 받침 기준 m, 테스트용).</summary>
+        public float LowPoseHeadHeight { get; private set; } = float.NaN;
+
+        /// <summary>
+        /// 작업 R19: 대문 3인칭 컷이 시작되면 지금 동작(미끄러지기·숙이기)에서 머리가 가장 낮은 자리로 넘겨 달라고 한다.
+        /// 다음 Update(판정 이벤트 뒤 크로스페이드가 걸린 다음)에서 처리한다.
+        /// </summary>
+        public void RequestLowestPose() => lowPosePending = true;
+
+        void SnapToLowestPose()
+        {
+            lowPosePending = false;
+            if (animator == null || animator.runtimeAnimatorController == null || head == null || LastState == BodyMoves.Run) return;
+            int state = Animator.StringToHash(LastState);
+            if (!animator.HasState(0, state)) return;
+            Transform basis = bodyOffset != null ? bodyOffset : transform;
+            float best = GameConfig.Body.LowPoseSearchFrom, bestY = float.PositiveInfinity;
+            int n = Mathf.Max(2, GameConfig.Body.LowPoseSamples);
+            for (int i = 0; i < n; i++)
+            {
+                float t = Mathf.Lerp(GameConfig.Body.LowPoseSearchFrom, GameConfig.Body.LowPoseSearchTo, i / (float)(n - 1));
+                animator.Play(state, 0, t);
+                animator.Update(0f);
+                float y = basis.InverseTransformPoint(head.position).y;
+                if (y < bestY) { bestY = y; best = t; }
+            }
+            animator.Play(state, 0, best);
+            animator.Update(0f);
+            LowPoseNormalizedTime = best;
+            LowPoseHeadHeight = bestY;
+        }
 
         /// <summary>머리 뼈 따라가기는 LateUpdate(Cinemachine Brain보다 먼저, 실행 순서 −50)에서, 시간은 박자 시계 시간으로.</summary>
         void LateUpdate()

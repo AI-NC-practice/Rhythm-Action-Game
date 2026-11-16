@@ -39,6 +39,9 @@ namespace RhythmActionGame.EditorTools
 
         public static Shader Shader => Shader.Find(ShaderName);
 
+        /// <summary>Toon.shader 외곽선 패스("ToonOutline")의 LightMode — Material.SetShaderPassEnabled로 끌 때 쓴다 (작업 R23).</summary>
+        public const string OutlineLightMode = "SRPDefaultUnlit";
+
         /// <summary>툰 값(단계·어두운 밝기·외곽선)을 머티리얼에 넣는다.</summary>
         public static void ApplyToon(Material m)
         {
@@ -102,7 +105,9 @@ namespace RhythmActionGame.EditorTools
 
         static AnimationClip ClipOf(string name)
         {
-            string path = name.StartsWith("player_") ? $"{HumanoidImport.Root}/player/{name}.fbx" : $"{HumanoidImport.MixamoRoot}/{name}.fbx";
+            string path = name.StartsWith("player_") ? $"{HumanoidImport.Root}/player/{name}.fbx"
+                : name.StartsWith("enemy_sword_") ? $"{HumanoidImport.Root}/enemy_sword/{name}.fbx"   // 작업 R16: 적 대기 클립(Humanoid)을 플레이어에 옮겨 씀
+                : $"{HumanoidImport.MixamoRoot}/{name}.fbx";
             var clip = AssetDatabase.LoadAllAssetsAtPath(path).OfType<AnimationClip>().FirstOrDefault(c => !c.name.StartsWith("__preview__"));
             if (clip == null) Debug.LogError($"[ToonMaterials] 클립 없음: {path}");
             return clip;
@@ -154,6 +159,12 @@ namespace RhythmActionGame.EditorTools
                 }
                 row++;
             }
+            // 작업 R16: 멈춰 싸울 때 대기 자세 (반복). 들어가고 나오는 것은 PlayerBody가 이동 속도를 보고 크로스페이드한다.
+            var idleClip = ClipOf(BodyMoves.CombatIdleClip);
+            var idle = sm.AddState(BodyMoves.CombatIdle, new Vector3(520, 0, 0));
+            idle.motion = idleClip;
+            n.Add(BodyMoves.CombatIdle); s.Add(idleClip != null ? idleClip.length : 1f);
+
             // 처형·피격 (작업 T14): 원래 속도로 한 번, 끝나면 Run
             var extra = BodyMoves.Executions.Select(h => (BodyMoves.ExecState(h), BodyMoves.ExecClip(h))).ToList();
             extra.Add((BodyMoves.Hit, BodyMoves.HitClip));

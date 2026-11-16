@@ -31,6 +31,7 @@ Material:
     m_Floats:
     - _FogBlend: 0.35
     - _TopFade: 0.55
+    - _TopToFog: 0
     - _Warm: 0.3
     m_Colors:
     - _FogColor: {r: 0.86, g: 0.68, b: 0.56, a: 1}

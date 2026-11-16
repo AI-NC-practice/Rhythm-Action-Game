@@ -90,6 +90,7 @@ namespace RhythmActionGame
             judge.ClearAll();                       // 남은 원도 모두 사라짐 (B11)
             if (slowMotion != null) slowMotion.Cancel();
             clock.Pause();
+            if (kind != RewindKind.Chapter) BeginMotionRewind(targetBeat);   // 작업 R15: 판정마다 옮긴 자리도 되감는다
             RewindStarted?.Invoke(kind);
         }
 

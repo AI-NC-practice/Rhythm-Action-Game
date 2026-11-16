@@ -139,6 +139,9 @@ namespace RhythmActionGame
             gateCamRot = Quaternion.LookRotation(look - gateCamPos, Vector3.up);
             gateCut = true;
             SetBodyVisible(true);
+            // 작업 R19: 슬로 동안에는 미끄러지기 클립 앞부분(선 자세)만 재생돼 "문 안에 서 있는 내 몸"으로 보였다 → 가장 낮은 자세로 넘긴다
+            var pb = playerBody != null && playerBody.Length > 0 && playerBody[0] != null ? playerBody[0].GetComponentInParent<PlayerBody>() : null;
+            if (pb != null) pb.RequestLowestPose();
         }
 
         void EndGateCut()

@@ -828,6 +828,21 @@ namespace RhythmActionGame
             /// <summary>벽 찾기 광선 길이 (m)와 발바닥–벽 면 틈 (m).</summary>
             public const float WallRunMaxSearch = 4f;
             public const float WallRunFootGap = 0.05f;
+
+            // ----- 작업 R19: 대문 3인칭 컷 (GDD-beta 회피 슬로모션 "문 건너편에서 미끄러져 들어오는 주인공") -----
+            /// <summary>컷이 시작되면 미끄러지기(·숙이기) 클립에서 머리가 가장 낮은 자리로 바로 넘긴다: 찾는 범위(정규화 시간)와 표본 수.
+            /// 슬로(0.3배) 동안에는 클립 앞 약 10%(선 자세)만 재생돼 문 안에 서 있는 것처럼 보였다.</summary>
+            public const float LowPoseSearchFrom = 0.1f;
+            public const float LowPoseSearchTo = 0.75f;
+            public const int LowPoseSamples = 14;
+
+            // ----- 작업 R16: 멈춰 싸울 때 제자리 달리기 없애기 (사용자 피드백 2026-11-16 7번) -----
+            /// <summary>전투 중 몸(플레이어 뿌리) 수평 이동이 이 빠르기(m/s) 아래면 대기 자세, 위면 달리기(속도에 맞춘 재생 배율).</summary>
+            public const float CombatStillSpeed = 0.6f;
+            /// <summary>전투 이동 빠르기 부드럽게 (1/초).</summary>
+            public const float CombatSpeedSharpness = 8f;
+            /// <summary>전투 중 달리기 재생 배율의 아래 한계 (평소 달리기 대비).</summary>
+            public const float CombatRunMinRate = 0.4f;
             /// <summary>벽타기 카메라 기울기 (도, 몸과 같은 방향 = 벽 반대쪽으로). NORMAL은 절반에 흔들림.</summary>
             public const float WallRunCameraRoll = 20f;
             /// <summary>아래로 피하기(미끄러지기) 중 내 몸(팔·다리)이 화면을 가리는 비율 상한 (0~1, PlayMode 측정).</summary>

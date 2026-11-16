@@ -58,6 +58,10 @@ namespace RhythmActionGame
 
         public const string RunClip = "player_forward_run_1";
 
+        /// <summary>작업 R16: 멈춰 싸우는 동안(전투 상태, 이동 거의 없음) 대기 자세. 플레이어 전용 대기 클립이 없어 같은 Humanoid 적(검)의 대기 클립을 옮겨 쓴다.</summary>
+        public const string CombatIdle = "CombatIdle";
+        public const string CombatIdleClip = "enemy_sword_standing_idle_1_looping";
+
         /// <summary>내가 맞음 (작업 T14).</summary>
         public const string Hit = "Hit";
         public const string HitClip = "player_light_hit_back";

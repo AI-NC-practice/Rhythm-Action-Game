@@ -1,5 +1,5 @@
 ﻿# Unity verify report
-time: 2026-11-17 04:38:51
+time: 2026-11-17 05:45:27
 
 ## EditMode : total=204 passed=204 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
@@ -207,7 +207,7 @@ time: 2026-11-17 04:38:51
   - [Passed] RhythmActionGame.Tests.T14_EnemyRigTests.T14_GameScene_EveryEnemy_HasModel_WeaponOnHandBone_NoCapsule
   - [Passed] RhythmActionGame.Tests.T14_EnemyRigTests.T14_PlayerController_HasExecutionAndHitStates
 
-## PlayMode : total=187 passed=186 failed=0 skipped=1 result=Passed
+## PlayMode : total=195 passed=194 failed=0 skipped=1 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -345,6 +345,10 @@ time: 2026-11-17 04:38:51
   - [Passed] RhythmActionGame.Tests.R07_EnemyRunPlayTests.R07_CombatEnemies_RunWhenMoving_NotInPlace
   - [Passed] RhythmActionGame.Tests.R07_EnemyRunPlayTests.R07_EventFigures_RunWhileMoving_NoGlide
   - [Passed] RhythmActionGame.Tests.R07_EnemyRunPlayTests.R07_RoofKick_FliesOffRoofEdge_LandsBelow_CameraFollows
+  - [Passed] RhythmActionGame.Tests.R15_R16_CombatPlacePlayTests.R15_DuelFail_RewindsPlayerAndBossToPhaseStart_Continuously
+  - [Passed] RhythmActionGame.Tests.R15_R16_CombatPlacePlayTests.R15_WindmillFail_RewindsPlayerAndEnemiesToCheckpoint
+  - [Passed] RhythmActionGame.Tests.R15_R16_CombatPlacePlayTests.R16_CombatStill_NotRunning_ThenRunAfterCombat
+  - [Passed] RhythmActionGame.Tests.R15_R16_CombatPlacePlayTests.R16_NormalEnemy_StanceThenRunCrossfadeAfterCombat
   - [Passed] RhythmActionGame.Tests.R18_ChaseRedesignPlayTests.R18_ChargeEnemies_WalkThenSprint
   - [Passed] RhythmActionGame.Tests.R18_ChaseRedesignPlayTests.R18_ChaseEnemies_FarRoofLine_LeapIn_FallBehind
   - [Passed] RhythmActionGame.Tests.R18b_HiddenEnemiesPlayTests.R18b_Ambush_HiddenUntilTwoBeatsBefore
@@ -352,6 +356,10 @@ time: 2026-11-17 04:38:51
   - [Passed] RhythmActionGame.Tests.R18c_LeapInPlayTests.R18c_RoofFighters_OvertakeLeapLand
   - [Passed] RhythmActionGame.Tests.R18d_LookBackPlayTests.R18d_LookBack_Chapters
   - [Passed] RhythmActionGame.Tests.R18d_LookBackPlayTests.R18d_LookBack_OncePerChaseChapter_NoRings_EnemyVisible
+  - [Passed] RhythmActionGame.Tests.R19_GateBodyPlayTests.R19_ClosingGate_NoStandingBody_LowSlideInCut_Previews
+  - [Passed] RhythmActionGame.Tests.R19_GateBodyPlayTests.R20_R23_FirstPersonPreviews_FlatRoofPalace
+  - [Passed] RhythmActionGame.Tests.R19_GateBodyPlayTests.R20_SkyBand_BeforeAfter_SameFrame
+  - [Passed] RhythmActionGame.Tests.R19_GateBodyPlayTests.R23_PathEdgeLines_BeforeAfter_SameFrame
   - [Skipped] RhythmActionGame.Tests.Review_StageWalkthroughPlayTests.Review_Stage1_Walkthrough_Shots
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Font_HasJudgeGlyphs
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Fx_GrayAndZoom_EnterAndExit

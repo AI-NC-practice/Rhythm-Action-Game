@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace RhythmActionGame
@@ -54,12 +56,15 @@ namespace RhythmActionGame
             moveT = 1f;
             ArenaLateral = float.PositiveInfinity;
             if (player != null) { player.CombatOffset = Vector3.zero; player.CombatFacing = null; }
+            checkpoints.Clear();
+            motionRewind = false;
         }
 
         /// <summary>전투 시작: 결투 원을 잡고, 적은 서 있던 자리(5 m 앞)에서 싸움 거리까지 돌진한다 (B13.2).</summary>
         void BeginMotion(Encounter e)
         {
             ResetMotion();
+            SetCheckpoints(e);   // 작업 R15
             if (e.Event.IsSurround) { BeginSurroundMotion(e); return; }   // B13.3
             if (e.Actors == null || e.Actors.Length == 0 || e.Actors[0] == null || player == null) return;
             motionActor = e.Actors[0];
@@ -269,6 +274,8 @@ namespace RhythmActionGame
         {
             float dt = MotionDeltaTime();
             if (MotionReturning) { UpdateReturn(dt); return; }
+            if (motionRewind && (MotionActive || SurroundMotionActive)) { UpdateMotionRewind(); return; }   // 작업 R15
+            RecordCheckpoints();
             if (SurroundMotionActive) { UpdateSurroundMotion(dt); return; }
             if (!MotionActive || motionActor == null) return;
             if (encounter == null || encounter.Done || motionActor.Defeated) { BeginReturn(); return; }
@@ -312,6 +319,12 @@ namespace RhythmActionGame
                 var smooth = Quaternion.Slerp(facing, want, 1f - Mathf.Exp(-dt / GameConfig.CombatFaceSmoothSeconds));
                 facing = Quaternion.RotateTowards(facing, smooth, GameConfig.CombatFaceMaxDegPerSec * dt);
             }
+            ShowMotion();
+        }
+
+        /// <summary>지금 MotionPlayer·MotionEnemy·facing을 플레이어와 적에게 그린다.</summary>
+        void ShowMotion()
+        {
             player.CombatOffset = Flat(MotionPlayer - MotionCenter);
             var shownEnemy = MotionEnemy;
             if (encounter.Event.onRoof && motionActor.HasArena)
@@ -330,6 +343,98 @@ namespace RhythmActionGame
             player.Place();
             motionActor.MotionPosition = shownEnemy;
             motionActor.FacePoint = MotionPlayer;
+        }
+
+        // ---------------- 작업 R15: 되감기 때 자리도 되감기 (사용자 피드백 2026-11-16 6번) ----------------
+        // 판정마다 옮긴 자리(B13)는 되감기 때 그대로 남아 "제자리에서 효과만 되돌려지는" 것처럼 보였다.
+        // 되감을 수 있는 박(무사 결투 단계 시작, 윈드밀 3단계 1마디 앞)을 지날 때 자리를 적어 두고,
+        // 되감기 연출(0.8초) 동안 지금 자리 → 그 자리로 거꾸로 이어 옮긴다 (순간 이동 아님).
+
+        struct MotionSnap { public Vector3 p, e; public Quaternion f; public int circle; public float orbit; }
+        class Checkpoint { public double beat; public bool has; public MotionSnap snap; }
+        readonly List<Checkpoint> checkpoints = new List<Checkpoint>();
+        bool motionRewind;
+        MotionSnap rewindFromSnap, rewindToSnap;
+
+        /// <summary>되감기 동안 자리를 되감는 중인지 (테스트용).</summary>
+        public bool MotionRewinding => motionRewind;
+        /// <summary>마지막 되감기가 향한 플레이어·적 자리 (테스트용).</summary>
+        public Vector3 RewindTargetPlayer => rewindToSnap.p;
+        public Vector3 RewindTargetEnemy => rewindToSnap.e;
+        /// <summary>자리를 적어 둔 되감기 박 수 (테스트용).</summary>
+        public int RecordedCheckpoints => checkpoints.Count(c => c.has);
+
+        /// <summary>전투 시작: 되감을 수 있는 박 목록.</summary>
+        void SetCheckpoints(Encounter e)
+        {
+            checkpoints.Clear();
+            if (e == null || e.Steps == null) return;
+            if (e.IsBossDuel)
+                for (int ph = BossDuel.PhaseExplore; ph <= BossDuel.PhaseFinish; ph++)
+                    checkpoints.Add(new Checkpoint { beat = e.StartBeat + BossDuel.PhaseStart(ph) });
+            if (e.Event.IsSurround && e.Steps.Any(s => s.Phase == 3))
+                checkpoints.Add(new Checkpoint { beat = e.StartBeat + e.Steps.Where(s => s.Phase == 3).Min(s => s.OffsetBeats) - GameConfig.RewindLeadBeats });
+        }
+
+        MotionSnap CurrentSnap(bool settled)
+        {
+            // settled: 이동 중이면 그 이동이 끝난 자리 (되감은 뒤 같은 박에서 다시 시작할 때 자리)
+            return new MotionSnap
+            {
+                p = settled && SurroundMotionActive ? sTo : settled && moveT < 1f ? pTo : MotionPlayer,
+                e = settled && (charging || moveT < 1f) ? eTo : MotionEnemy,
+                f = facing, circle = CircleDirection, orbit = SurroundOrbitDegrees,
+            };
+        }
+
+        void RecordCheckpoints()
+        {
+            if (checkpoints.Count == 0 || Rewinding || HitPending || clock == null || !clock.IsRunning) return;
+            if (!MotionActive && !SurroundMotionActive) return;
+            double beat = clock.CurrentBeat;
+            foreach (var c in checkpoints)
+                if (!c.has && beat >= c.beat) { c.has = true; c.snap = CurrentSnap(true); }
+        }
+
+        /// <summary>되감기 시작 (BeginRewind에서): 되감는 박의 기록이 있으면 자리를 거꾸로 옮기기 시작한다.</summary>
+        void BeginMotionRewind(double targetBeat)
+        {
+            motionRewind = false;
+            if (!MotionActive && !SurroundMotionActive) return;
+            var cp = checkpoints.Where(c => c.has).OrderBy(c => Math.Abs(c.beat - targetBeat)).FirstOrDefault();
+            if (cp == null || Math.Abs(cp.beat - targetBeat) > 1e-3) return;
+            rewindFromSnap = CurrentSnap(false);
+            rewindToSnap = cp.snap;
+            motionRewind = true;
+            foreach (var c in checkpoints) if (c.beat > cp.beat + 1e-3) c.has = false;   // 뒤 단계는 다시 지날 때 새로 적는다
+        }
+
+        void UpdateMotionRewind()
+        {
+            float u = Rewinding ? RewindProgress : 1f;
+            float k = Ease(u);
+            MotionPlayer = Vector3.Lerp(rewindFromSnap.p, rewindToSnap.p, k);
+            if (SurroundMotionActive)
+            {
+                SurroundOrbitDegrees = Mathf.Lerp(rewindFromSnap.orbit, rewindToSnap.orbit, k);
+                sFrom = sTo = MotionPlayer; sMoveT = 1f;
+                if (!Rewinding) motionRewind = false;
+                UpdateSurroundMotion(0f);
+                return;
+            }
+            MotionEnemy = Vector3.Lerp(rewindFromSnap.e, rewindToSnap.e, k);
+            facing = Quaternion.Slerp(rewindFromSnap.f, rewindToSnap.f, k);
+            if (!Rewinding)
+            {
+                motionRewind = false;
+                MotionPlayer = pFrom = pTo = rewindToSnap.p;
+                MotionEnemy = eFrom = eTo = rewindToSnap.e;
+                facing = rewindToSnap.f;
+                CircleDirection = rewindToSnap.circle;
+                moveT = 1f; charging = false; swapping = false;
+                moveSeconds = GameConfig.CombatMoveSeconds;
+            }
+            if (motionActor != null) ShowMotion();
         }
 
         bool RingUp()

@@ -1070,6 +1070,7 @@ namespace RhythmActionGame.EditorTools
             mat.SetTexture("_MainTex", AssetDatabase.LoadAssetAtPath<Texture2D>(texPath));
             mat.SetColor("_FogColor", FogColor);
             mat.SetFloat("_TopFade", GameConfig.Map.BackdropTopFade);
+            mat.renderQueue = -1;   // 작업 R20: 셰이더 큐(투명 맨 앞, 하늘 뒤)를 그대로 — 예전에 저장된 불투명 큐를 지운다
             EditorUtility.SetDirty(mat);
 
             string meshPath = $"{BackdropDir}/BackdropCylinder.asset";
