@@ -69,6 +69,39 @@ namespace RhythmActionGame
             string combo = UiText.Combo(b != null ? b.Combo : 0);
             ComboText.text = combo;
             ComboText.enabled = combo.Length > 0;
+            UpdateComboTier(b != null ? b.Combo : 0);
+        }
+
+        // ---------------- 작업 R26: 장구 콤보 단계별 표시 (보너스 단계 5·10·20·50) ----------------
+        /// <summary>지금 콤보 단계 (0: 5 미만, 1: 5↑, 2: 10↑, 3: 20↑, 4: 50↑)와 단계가 오른 횟수 (테스트용).</summary>
+        public int ComboTier { get; private set; }
+        public int ComboTierUps { get; private set; }
+        /// <summary>단계가 오를 때 튀는 정도 (1 → 0으로 줄어듦).</summary>
+        public float ComboPop { get; private set; }
+        Outline comboGlow;
+
+        public static int TierOf(int combo)
+        {
+            int t = 0;
+            for (int i = 0; i < GameConfig.JangdanComboBonusAt.Length; i++) if (combo >= GameConfig.JangdanComboBonusAt[i]) t = i + 1;
+            return t;
+        }
+
+        void UpdateComboTier(int combo)
+        {
+            int tier = TierOf(combo);
+            if (tier > ComboTier) { ComboTierUps++; ComboPop = 1f; }
+            ComboTier = tier;
+            ComboPop = Mathf.Max(0f, ComboPop - Time.unscaledDeltaTime / GameConfig.ComboPopSeconds);
+            if (ComboText == null) return;
+            var col = GameConfig.ComboTierColors[Mathf.Clamp(tier, 0, GameConfig.ComboTierColors.Length - 1)];
+            ComboText.color = Color.Lerp(col, Color.white, ComboPop * 0.6f);
+            float sc = GameConfig.ComboTierScales[Mathf.Clamp(tier, 0, GameConfig.ComboTierScales.Length - 1)] * (1f + GameConfig.ComboPopScale * ComboPop * ComboPop);
+            ComboText.rectTransform.localScale = Vector3.one * sc;
+            if (comboGlow == null) { comboGlow = ComboText.gameObject.AddComponent<Outline>(); comboGlow.effectDistance = new Vector2(3, -3); }
+            comboGlow.enabled = tier >= 2;
+            comboGlow.effectColor = new Color(col.r, col.g, col.b, tier >= 4 ? 0.9f : 0.55f);
+            comboGlow.effectDistance = Vector2.one * (2f + tier) * (1f + ComboPop);
         }
     }
 }

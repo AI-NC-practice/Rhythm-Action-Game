@@ -60,7 +60,10 @@ namespace RhythmActionGame
 
         /// <summary>작업 R16: 멈춰 싸우는 동안(전투 상태, 이동 거의 없음) 대기 자세. 플레이어 전용 대기 클립이 없어 같은 Humanoid 적(검)의 대기 클립을 옮겨 쓴다.</summary>
         public const string CombatIdle = "CombatIdle";
-        public const string CombatIdleClip = "enemy_sword_standing_idle_1_looping";
+        public const string CombatIdleClip = "great_sword_idle";   // 작업 R28: Mixamo 칼 든 대기 (예전 적 VARCO 대기는 팔을 벌림)
+        /// <summary>작업 R27: 전투에서 내 칼로 막기(적 공격 ↑ 성공)·베기(내 공격·칼 겨루기 성공). Mixamo Great Sword Blocked Impact / Power Slash.</summary>
+        public const string SwordBlock = "SwordBlock", SwordBlockClip = "great_sword_block";
+        public const string SwordSlash = "SwordSlash", SwordSlashClip = "great_sword_slash";
 
         /// <summary>내가 맞음 (작업 T14).</summary>
         public const string Hit = "Hit";

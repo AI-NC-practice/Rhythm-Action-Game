@@ -47,7 +47,7 @@ namespace RhythmActionGame.Tests
                 foreach (var part in prop.parts)
                     Assert.IsNotNull(part.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name.StartsWith("Model_")), $"{prop.kind}: {part.name}는 모델");
             // 칼: 환도 모델 (1인칭 그림자만)
-            var sword = GameObject.Find("Player").transform.Find("Sword");
+            var sword = GameObject.Find("Player").GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == "Sword");   // 작업 R27: 오른손 뼈 아래
             Assert.IsNotNull(sword);
             Assert.IsTrue(sword.GetComponentsInChildren<MeshRenderer>(true).All(r => r.GetComponent<MeshFilter>().sharedMesh.name != "Cube"), "칼은 모델");
         }

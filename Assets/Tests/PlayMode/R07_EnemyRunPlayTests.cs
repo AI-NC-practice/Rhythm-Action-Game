@@ -176,7 +176,9 @@ namespace RhythmActionGame.Tests
                     var st = Get(stats, "F:" + f.transform.parent.name + "/" + f.name);
                     Count(st, f.MoveSpeed, f.Moving, !f.Moving);   // 작업 R18 후속: 걷기도 이동 동작
                     var prop = f.GetComponentInParent<EventProp>();
-                    if ((prop == null || (!prop.EnemyDown && !prop.ChaseHopping)) && Near(f.transform)) CountFoot(st, f.transform);   // 집 사이 틈을 뛰어넘는 중은 제외
+                    var lbc = Object.FindAnyObjectByType<LookBackCut>();   // 작업 R29: 쫓는 무리도 지붕 사이 틈을 뛰어넘는 중은 제외
+                    bool pursuerHop = lbc != null && lbc.pursuers != null && System.Array.IndexOf(lbc.pursuers, f.transform) is int pk && pk >= 0 && lbc.PursuerHopping(pk);
+                    if ((prop == null || (!prop.EnemyDown && !prop.ChaseHopping)) && !pursuerHop && Near(f.transform)) CountFoot(st, f.transform);   // 집 사이 틈을 뛰어넘는 중은 제외
                 }
             }
         }

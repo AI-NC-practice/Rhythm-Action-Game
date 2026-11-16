@@ -1947,6 +1947,154 @@
                       "attempts":  0,
                       "max_attempts":  3,
                       "notes":  "사용자 요청 2026-11-17: 지금 목표·빌드를 끝낸 뒤 버그 잡고 추가."
+                  },
+                  {
+                      "id":  "R27",
+                      "title":  "플레이어 검을 손에 쥐고 같이 싸우기 (칼끼리 부딪침)",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "R26"
+                                     ],
+                      "acceptance":  [
+                                         "플레이어 칼이 오른손 뼈에 붙어 손이 칼자루를 쥠 (손가락을 칼이 뚫지 않음)",
+                                         "전투 중 1인칭 화면에 내 칼이 보이고, 적 공격을 막을 때(↑)·내 공격(칼 겨루기·내 공격 원) 때 칼을 들어 막거나 벰 — 적 칼과 부딪치는 순간 불꽃·소리",
+                                         "PlayMode 미리보기 PNG(막기·베기 순간 1인칭)와 칼 손잡이-손 거리 측정",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  "사용자 피드백 2026-11-17 (빌드 플레이, 묶음 E로 한 번에 구현·검증)."
+                  },
+                  {
+                      "id":  "R28",
+                      "title":  "적·플레이어 전투 대기 자세 (팔 벌린 자세 없애기)",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "R27"
+                                     ],
+                      "acceptance":  [
+                                         "무사·일반 병사가 공격 뒤·대치 중에 팔을 벌리고 서 있지 않고 칼을 든 전투 자세(Mixamo 대기 동작)",
+                                         "플레이어 전투 대기(R16 CombatIdle)도 같은 칼 든 자세",
+                                         "3인칭 미리보기 PNG(무사·병사)",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  "사용자 피드백 2026-11-17 (빌드 플레이, 묶음 E로 한 번에 구현·검증)."
+                  },
+                  {
+                      "id":  "R29",
+                      "title":  "뒤돌아보기 천천히 + 뒤에 쫓아오는 적이 보이게",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "R28"
+                                     ],
+                      "acceptance":  [
+                                         "돌아보는 동작이 휙휙이 아니라 천천히 돌아보고 천천히 돌아옴 (판정 원과 겹치지 않음)",
+                                         "돌아본 화면에 쫓아오는 적(무리)이 보임 — PERFECT로 쓰러뜨린 뒤에도",
+                                         "PlayMode 테스트·미리보기 PNG",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  "사용자 피드백 2026-11-17 (빌드 플레이, 묶음 E로 한 번에 구현·검증)."
+                  },
+                  {
+                      "id":  "R30",
+                      "title":  "매트릭스 회피: 칼이 얼굴 앞을 스쳐 지나가는 슬로 연출",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "R29"
+                                     ],
+                      "acceptance":  [
+                                         "회피 슬로모션 판정(전투)에서 몸을 젖히고 적 칼날이 얼굴 앞을 스치듯 지나감",
+                                         "1인칭 미리보기 PNG (칼날이 화면 가까이)",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  "사용자 피드백 2026-11-17 (빌드 플레이, 묶음 E로 한 번에 구현·검증)."
+                  },
+                  {
+                      "id":  "R31",
+                      "title":  "윈드밀 발차기가 보이게 + 쓰러진 적 자세·칼이 빠져 날아감",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "R30"
+                                     ],
+                      "acceptance":  [
+                                         "윈드밀에서 내 발차기가 화면에 보이고 적이 그 발에 맞아 날아감",
+                                         "쓰러진 적이 팔 벌린 자세로 굳지 않고 쓰러진 자세로 남음, 칼은 손에서 빠져 날아가 떨어짐 (일반 전투·포위 모두)",
+                                         "미리보기 PNG",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  "사용자 피드백 2026-11-17 (빌드 플레이, 묶음 E로 한 번에 구현·검증)."
+                  },
+                  {
+                      "id":  "R32",
+                      "title":  "5챕터 돌진 적 피하기를 말이 되게",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "R31"
+                                     ],
+                      "acceptance":  [
+                                         "돌진 적과 엇갈릴 때 몸이 옆으로 비키거나 낮춰 실제로 피함 (같은 높이로 통과하지 않음)",
+                                         "1인칭·3인칭 미리보기 PNG, 측정(적 몸과 내 몸이 겹치지 않음)",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  "사용자 피드백 2026-11-17 (빌드 플레이, 묶음 E로 한 번에 구현·검증)."
+                  },
+                  {
+                      "id":  "R33",
+                      "title":  "벽타기에 이유 두기 (길을 막는 것)",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "R32"
+                                     ],
+                      "acceptance":  [
+                                         "벽타기 사건마다 길을 막는 것(수레·짐더미 등, 또는 다가오는 적)이 있어 벽을 탈 이유가 보임",
+                                         "1인칭 미리보기 PNG",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  "사용자 피드백 2026-11-17 (빌드 플레이, 묶음 E로 한 번에 구현·검증)."
+                  },
+                  {
+                      "id":  "R34",
+                      "title":  "적을 쓰러뜨린 뒤 팔이 화면을 오래 가리지 않게",
+                      "type":  "unity",
+                      "skill":  "unity-feature",
+                      "depends_on":  [
+                                         "R33"
+                                     ],
+                      "acceptance":  [
+                                         "처형 동작에서 팔이 화면을 크게 가리는 시간이 짧음 (측정: 가림 비율이 높은 시간)",
+                                         "R06 방식 측정 결과와 미리보기 PNG",
+                                         "unity-verify.ps1 전체 통과"
+                                     ],
+                      "status":  "pending",
+                      "attempts":  0,
+                      "max_attempts":  3,
+                      "notes":  "사용자 피드백 2026-11-17 (빌드 플레이, 묶음 E로 한 번에 구현·검증)."
                   }
               ]
 }

@@ -156,6 +156,18 @@ namespace RhythmActionGame
         // ---------------- GDD 4.8 화면 ----------------
         /// <summary>콤보 표시를 시작하는 최소 콤보 수.</summary>
         public const int ComboShowMin = 2;
+        /// <summary>작업 R26 (사용자 요청 2026-11-17): 장구 콤보 단계(5·10·20·50 이상)별 색·크기, 단계가 오를 때 튀는 시간(실제 초)·크기.</summary>
+        public static readonly UnityEngine.Color[] ComboTierColors =
+        {
+            new UnityEngine.Color(1f, 1f, 1f),            // 5 미만: 흰색
+            new UnityEngine.Color(0.55f, 0.85f, 1f),      // 5↑: 하늘색
+            new UnityEngine.Color(1f, 0.85f, 0.3f),       // 10↑: 금색
+            new UnityEngine.Color(1f, 0.45f, 0.2f),       // 20↑: 주황 불꽃
+            new UnityEngine.Color(0.95f, 0.35f, 1f),      // 50↑: 보라 빛
+        };
+        public static readonly float[] ComboTierScales = { 1f, 1.08f, 1.18f, 1.3f, 1.45f };
+        public const float ComboPopSeconds = 0.45f;
+        public const float ComboPopScale = 0.6f;
         public const int VolumeMin = 0;
         public const int VolumeMax = 100;
         public const int VolumeDefault = 80;
@@ -425,10 +437,21 @@ namespace RhythmActionGame
             /// (원은 목표 2박 전부터 뜸), 컷 동안(앞뒤 0.25박) 장단 노드를 칠 일이 없음. 바로 앞 추격 적이 공격 뒤 뒤처진 때.
             /// </summary>
             public static readonly double[] LookBackRunBeats = { 40.5, 90.5, 126.5, 238.5 };
+            /// <summary>작업 R29: 컷마다 길이 (박). 2·3·4번째(90.5·126.5·238.5)는 바로 뒤 전투(92·128·240박)가 시작되기 전에 끝나게 1.5박, 나머지는 LookBackBeats.</summary>
+            public static readonly double[] LookBackLengths = { 2.0, 1.5, 1.5, 1.5 };
             /// <summary>컷 길이 (박), 돌아보는 각도 (도), 돌아보기·돌아오기에 쓰는 비율 (나머지는 보고 있음).</summary>
-            public const double LookBackBeats = 1.0;
+            /// <summary>작업 R29 (사용자 피드백 "너무 휙휙"): 1박 → 2박(1초), 돌아보기 0.3·보기 0.3·돌아오기 0.4 (돌아오기가 더 느림).</summary>
+            public const double LookBackBeats = 2.0;
             public const float LookBackYaw = 165f;
             public const float LookBackTurnPart = 0.3f;
+            public const float LookBackReturnPart = 0.4f;
+            /// <summary>작업 R29: 뒤에서 쫓아오는 무리 (컷 1박 전부터 컷 뒤 1박까지만 보임). 플레이어 뒤 거리(m)·옆(m), 좁혀 오는 빠르기(m/박).</summary>
+            public static readonly float[] PursuerGaps = { 7f, 10f, 13f };
+            public static readonly float[] PursuerLaterals = { -1.1f, 1.0f, 0.1f };
+            public const float PursuerGainPerBeat = 0.8f;
+            public const double PursuerLeadBeats = 1.0;
+            /// <summary>길 높이가 이보다 높으면 지붕 위 (쫓는 무리를 한 줄로).</summary>
+            public const float PursuerRoofHeight = 1.5f;
             // 4장 겹침 규칙
             /// <summary>기울기(롤) 합계 한도 (도).</summary>
             public const float RollLimit = 10f;
@@ -745,6 +768,27 @@ namespace RhythmActionGame
             public const float GateCamSideMeters = 1.2f;
             public const float GateLookHeight = 0.8f;
             /// <summary>
+            /// 작업 R30 (사용자 피드백 "매트릭스 자세면 칼이 얼굴 앞을 스쳐 지나가게"): 전투 회피 슬로 동안 적 칼날 복사본이 카메라 앞을 가로지름.
+            /// 카메라 기준 시작·끝 자리(m, 오른쪽→왼쪽, 눈 앞 0.4 m 안팎), 위로 휘는 정도, 칼 방향(도), 걸리는 실제 초.
+            /// </summary>
+            public static readonly UnityEngine.Vector3 BladeFrom = new UnityEngine.Vector3(0.75f, 0.12f, 0.5f);
+            public static readonly UnityEngine.Vector3 BladeTo = new UnityEngine.Vector3(-0.85f, -0.05f, 0.35f);
+            public const float BladeArc = 0.06f;
+            public const float BladeTilt = 8f;
+            public const float BladeYaw = -70f;
+            public const float BladeYawSwing = -25f;
+            public const float BladeSweepSeconds = 0.6f;
+            /// <summary>
+            /// 작업 R31 (사용자 피드백 "윈드밀 때 내 발이 안 보임"): 윈드밀이 도는 동안(+조금) 3인칭 컷. 길이(실제 초), 플레이어 앞쪽 기준 시작 방향(도),
+            /// 컷 동안 카메라가 도는 각도(도), 거리·높이(m), 바라보는 높이(m).
+            /// </summary>
+            public const float WindmillCutSeconds = 1.3f;
+            public const float WindmillCutYaw = 150f;
+            public const float WindmillCutOrbitDeg = 50f;
+            public const float WindmillCutDistance = 4.2f;
+            public const float WindmillCutHeight = 2.2f;
+            public const float WindmillLookHeight = 0.7f;
+            /// <summary>
             /// B4 2·3번(사건·전투 PERFECT 뒤 0.4초 슬로모션)을 쓰는지. GDD-beta B17.4로 없앰(false).
             /// 처형·윈드밀 마무리(SlowMoMode.Always)는 그대로.
             /// </summary>
@@ -850,6 +894,16 @@ namespace RhythmActionGame
             public const float CombatSpeedSharpness = 8f;
             /// <summary>전투 중 달리기 재생 배율의 아래 한계 (평소 달리기 대비).</summary>
             public const float CombatRunMinRate = 0.4f;
+
+            // ----- 작업 R27·R34 (사용자 피드백 2026-11-17) -----
+            /// <summary>내 칼 막기·베기 동작 재생 배율 (Mixamo 클립이 1초 남짓이라 한 박 안팎에 끝나게).</summary>
+            public const float SwordMoveSpeed = 1.6f;
+            /// <summary>칼을 쥔 오른손 손가락 근육 값 (Humanoid, −1 = 가장 굽힘): 첫 마디·나머지 마디·엄지.</summary>
+            public const float GripCurl1 = -0.75f;
+            public const float GripCurl23 = -0.9f;
+            public const float GripThumb = -0.35f;
+            /// <summary>처형 동작을 보여 주는 길이 (박). 그 뒤 달리기·대기로 크로스페이드 — 팔이 화면을 오래 가리지 않게.</summary>
+            public const double ExecShowBeats = 1.5;
             /// <summary>벽타기 카메라 기울기 (도, 몸과 같은 방향 = 벽 반대쪽으로). NORMAL은 절반에 흔들림.</summary>
             public const float WallRunCameraRoll = 20f;
             /// <summary>아래로 피하기(미끄러지기) 중 내 몸(팔·다리)이 화면을 가리는 비율 상한 (0~1, PlayMode 측정).</summary>
@@ -874,6 +928,19 @@ namespace RhythmActionGame
         /// <summary>적 모델·전투 애니메이션 (작업 T14).</summary>
         public static class EnemyBody
         {
+            // ----- 작업 R31: 쓰러질 때 칼이 손에서 빠져 날아감 (사용자 피드백 2026-11-17) -----
+            /// <summary>칼 처음 빠르기 (m/s): 쓰러지는 쪽·옆·위, 도는 빠르기 (도/초).</summary>
+            /// <summary>작업 R27 보강: 칼자루 자리 — 손목(손 뼈)에서 손가락 쪽 거리·손바닥 쪽 깊이(m), 칼날을 위로 드는 정도(엄지 쪽 기준).</summary>
+            public const float GripAlongHand = 0.085f;
+            public const float GripPalmDepth = 0.03f;
+            public const float GripBladeLift = 0.35f;
+            public const float WeaponTossOut = 2.5f;
+            public const float WeaponTossSide = 1.5f;
+            public const float WeaponTossUp = 4f;
+            public const float WeaponTossSpinDeg = 720f;
+            /// <summary>윈드밀에 맞아 날아가는 거리 (m).</summary>
+            public const float WindmillFlyMeters = 5f;
+
             // ----- 작업 R07: 적 달리기 (사용자 피드백 4·7번, GDD에 없음) -----
             /// <summary>이 속도(m/s, 수평) 넘게 움직이면 달리기, RunStopSpeed 아래로 떨어지면 대기 (되돌이 여유).</summary>
             public const float RunStartSpeed = 0.8f;
@@ -1095,6 +1162,12 @@ namespace RhythmActionGame
             public const float LeapContactBefore = 1.75f;
             public const float LeapIdleBefore = 0.4f;
             /// <summary>옆 지붕 줄의 옆 거리 범위 (m)와 간격, 나타나는 자리(플레이어 뒤 m), 박차는 자리(전투 자리보다 앞 m).</summary>
+            /// <summary>작업 R32: 돌진 적이 엇갈려 지나가는 쪽(+1 오른쪽)·옆 거리(m)·비켜 오기 시작하는 판정 전 박.</summary>
+            /// <summary>작업 R33: 벽타기 구간에서 길을 막는 수레의 가운데 옆 거리 (m, 벽 반대쪽). 플레이어는 벽 쪽 0.9 m·높이 1.2 m로 지나간다.</summary>
+            public const float WallRunBlockX = 0.5f;
+            public const float ChargePassSide = 1f;
+            public const float ChargePassOffset = 1.4f;
+            public const float ChargePassBeats = 1.5f;
             public const float LeapLateralMin = 6f;
             public const float LeapLateralMax = 12f;
             public const float LeapStartBehind = 5f;

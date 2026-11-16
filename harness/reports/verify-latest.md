@@ -1,5 +1,5 @@
 ﻿# Unity verify report
-time: 2026-11-17 06:13:26
+time: 2026-11-17 07:29:14
 
 ## EditMode : total=208 passed=208 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
@@ -211,7 +211,7 @@ time: 2026-11-17 06:13:26
   - [Passed] RhythmActionGame.Tests.T14_EnemyRigTests.T14_GameScene_EveryEnemy_HasModel_WeaponOnHandBone_NoCapsule
   - [Passed] RhythmActionGame.Tests.T14_EnemyRigTests.T14_PlayerController_HasExecutionAndHitStates
 
-## PlayMode : total=198 passed=197 failed=0 skipped=1 result=Passed
+## PlayMode : total=207 passed=206 failed=0 skipped=1 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -330,6 +330,15 @@ time: 2026-11-17 06:13:26
   - [Passed] RhythmActionGame.Tests.B53_MusicMuteTests.B53_Setting_DefaultOn_Saved
   - [Passed] RhythmActionGame.Tests.B53_MusicMuteTests.B53_Title_MusicToggle
   - [Passed] RhythmActionGame.Tests.Bug1117_EnemyClipPlayTests.Bug1117_EnemyClip_Ch2DeathRewind_Ch5
+  - [Passed] RhythmActionGame.Tests.BundleE_PlayTests.R26_ComboTiers_ColorScalePop
+  - [Passed] RhythmActionGame.Tests.BundleE_PlayTests.R27_Hands_FingersWrapHilt
+  - [Passed] RhythmActionGame.Tests.BundleE_PlayTests.R27_R28_Duel_SwordInHand_BlockSlash_GuardStance
+  - [Passed] RhythmActionGame.Tests.BundleE_PlayTests.R28_R34_NormalEnemy_Stance_ExecutionArmCoverShort
+  - [Passed] RhythmActionGame.Tests.BundleE_PlayTests.R29_LookBack_Slow_PursuersVisible
+  - [Passed] RhythmActionGame.Tests.BundleE_PlayTests.R30_DuelBullet_BladePassesInFrontOfFace
+  - [Passed] RhythmActionGame.Tests.BundleE_PlayTests.R31_Windmill_FootVisible_FallenPose_WeaponFlies
+  - [Passed] RhythmActionGame.Tests.BundleE_PlayTests.R32_Charge_PassesBeside_NotThrough
+  - [Passed] RhythmActionGame.Tests.BundleE_PlayTests.R33_WallRun_HasBlockerOnPath
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_ChapterStartBeats_MatchSections
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(1)
   - [Passed] RhythmActionGame.Tests.DevModeTests.DevMode_JumpTo_StartsGameAtChapter(4)

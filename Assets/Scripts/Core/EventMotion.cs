@@ -50,8 +50,9 @@ namespace RhythmActionGame
                     return P ? new Move(y: -0.3f, pitch: 30f) : N ? new Move(y: -0.15f, wobble: 4f) : new Move(y: -0.5f, pitch: -10f, shake: 10f);
                 case "banner_slide": // ↓ 깃발 줄 타고 내려옴
                     return P ? new Move(y: -0.4f, pitch: 15f) : N ? new Move(y: -0.6f, wobble: 5f) : new Move(y: -0.9f, pitch: -10f, shake: 10f);
-                case EventCatalog.Charge: // ↑ 엇갈리며 베기
-                    return P ? new Move(y: 0.2f, pitch: -4f, roll: 6f) : N ? new Move(z: -0.4f, wobble: 6f) : new Move(y: -0.7f, z: -1.2f, shake: 12f);
+                case EventCatalog.Charge: // ↑ 엇갈리며 베기 — 작업 R32: 적이 지나가는 반대쪽으로 비켜 몸을 낮춤 (적은 GameConfig.Map.ChargePassSide 쪽)
+                    return P ? new Move(x: -GameConfig.Map.ChargePassSide * 0.9f, y: -0.25f, pitch: 4f, roll: -GameConfig.Map.ChargePassSide * 8f)
+                        : N ? new Move(x: -GameConfig.Map.ChargePassSide * 0.6f, y: -0.1f, wobble: 6f) : new Move(y: -0.7f, z: -1.2f, shake: 12f);
                 case EventCatalog.Ambush:
                     return P ? new Move(x: side * 0.7f, roll: -side * 8f) : N ? new Move(x: side * 0.4f, wobble: 6f) : new Move(z: -0.6f, shake: 10f);
                 case EventCatalog.Chase:

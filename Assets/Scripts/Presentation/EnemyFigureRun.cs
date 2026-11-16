@@ -23,11 +23,32 @@ namespace RhythmActionGame
 
         void OnEnable() { hasLast = false; MoveSpeed = 0f; Running = false; Walking = false; }
 
+        /// <summary>작업 R31·R32: 쓰러짐 (PERFECT). 쓰러지는 동작을 한 번 재생하고 그 자세로 누워 있는다.</summary>
+        public bool Down { get; private set; }
+
+        public void PlayDefeat()
+        {
+            if (Down || animator == null || animator.runtimeAnimatorController == null) return;
+            Down = true;
+            Running = false; Walking = false; MoveSpeed = 0f;   // 쓰러진 자리에 멈춤 (EventProp가 위치를 고정)
+            animator.speed = 1f;
+            int st = Animator.StringToHash(EnemyMoves.DefeatState(ExecutionKind.PushDown));
+            if (animator.HasState(0, st)) animator.CrossFadeInFixedTime(st, GameConfig.EnemyBody.CrossFadeSeconds * 0.5f, 0);
+        }
+
+        public void ResetFigure()
+        {
+            Down = false;
+            hasLast = false; MoveSpeed = 0f; Running = false; Walking = false;
+            if (animator != null && animator.runtimeAnimatorController != null) { animator.speed = 1f; animator.Play(EnemyMoves.Idle, 0, 0f); }
+        }
+
         bool hasWalk, checkedWalk;
         void Go(string state) => animator.CrossFadeInFixedTime(state, GameConfig.EnemyBody.CrossFadeSeconds, 0);
 
         void LateUpdate()
         {
+            if (Down) { MoveSpeed = 0f; return; }
             if (animator == null || animator.runtimeAnimatorController == null) return;
             // 소품 위치는 박자 시계로 정해지므로 속도도 박자 시계 시간으로 잰다
             var clock = BeatClock.Instance;

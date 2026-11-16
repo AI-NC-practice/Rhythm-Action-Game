@@ -168,13 +168,16 @@ namespace RhythmActionGame.EditorTools
             // 처형·피격 (작업 T14): 원래 속도로 한 번, 끝나면 Run
             var extra = BodyMoves.Executions.Select(h => (BodyMoves.ExecState(h), BodyMoves.ExecClip(h))).ToList();
             extra.Add((BodyMoves.Hit, BodyMoves.HitClip));
+            extra.Add((BodyMoves.SwordBlock, BodyMoves.SwordBlockClip));   // 작업 R27
+            extra.Add((BodyMoves.SwordSlash, BodyMoves.SwordSlashClip));
             int ex = 0;
             foreach (var (name, clipName) in extra)
             {
                 var clip = ClipOf(clipName);
                 var st = sm.AddState(name, new Vector3(ex++ * 220, 120 + row * 70, 0));
                 st.motion = clip;
-                var back = st.AddTransition(run);
+                if (name == BodyMoves.SwordBlock || name == BodyMoves.SwordSlash) st.speed = GameConfig.Body.SwordMoveSpeed;   // 작업 R27: 한 박 안에 끝나게
+                var back = st.AddTransition(name == BodyMoves.SwordBlock || name == BodyMoves.SwordSlash ? idle : run);   // 작업 R27: 칼 동작 뒤에는 바로 전투 대기 (달리기를 한 프레임 거치지 않게)
                 back.hasExitTime = true;
                 back.exitTime = 0.95f;
                 back.hasFixedDuration = true;

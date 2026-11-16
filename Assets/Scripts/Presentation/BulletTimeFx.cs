@@ -87,6 +87,8 @@ namespace RhythmActionGame
             active = null;
             phase = Phase.None;
             EndGateCut();
+            EndBladeSweep();
+            EndWindmillCut();
             if (clock != null && clock.IsRunning) clock.SetSlowFactor(1f, clock.Now);
             if (ownsTimeScale && Time.timeScale > 0f && (slowMotion == null || !slowMotion.IsActive)) Time.timeScale = 1f;
             ownsTimeScale = false;
@@ -123,7 +125,7 @@ namespace RhythmActionGame
             StartCount++;
             bool fx = presentation == null || presentation.Enabled;
             if (cue.Tag is StageDirector.ObstacleRun run) { if (fx) BeginGateCut(run, cue); }
-            else if (fx && cameraFx != null) cameraFx.Add(GameConfig.Fx.NearMiss);
+            else if (fx && cameraFx != null) { cameraFx.Add(GameConfig.Fx.NearMiss); BeginBladeSweep(); }
             Started?.Invoke(cue);
         }
 
@@ -155,6 +157,12 @@ namespace RhythmActionGame
         void SetBodyVisible(bool on)
         {
             if (playerBody == null) return;
+            var pb = playerBody.Length > 0 && playerBody[0] != null ? playerBody[0].GetComponentInParent<PlayerBody>() : null;
+            if (pb != null)
+            {
+                pb.ThirdPersonCut = on;   // 같은 프레임에 1인칭용(머리 없는) 몸을 숨김 — 카메라가 3인칭으로 옮겨진 첫 프레임에 목 단면이 보이지 않게
+                if (on && pb.VisibleBody != null) pb.VisibleBody.enabled = false;
+            }
             foreach (var r in playerBody) if (r != null) r.shadowCastingMode = on ? ShadowCastingMode.On : ShadowCastingMode.ShadowsOnly;
         }
 
@@ -188,15 +196,116 @@ namespace RhythmActionGame
                     releaseT += dt;
                     float u = Mathf.Clamp01(releaseT / GameConfig.BulletTime.ReleaseSeconds);
                     clock.SetSlowFactor(Mathf.Lerp(releaseFrom, 1f, u), now);
-                    if (u >= 1f) { active = null; phase = Phase.None; EndGateCut(); }
+                    if (u >= 1f) { active = null; phase = Phase.None; EndGateCut(); EndBladeSweep(); }
                 }
             }
             ApplyTimeScale();
             ApplyLook();
         }
 
+        // ---------------- 작업 R30: 매트릭스 회피 — 적 칼날이 얼굴 앞을 스쳐 지나감 ----------------
+        GameObject bladeCopy;
+        EnemyActor bladeOwner;
+        Renderer[] bladeHidden;
+        float bladeT;
+        /// <summary>칼날이 얼굴 앞을 지나가는 중 (테스트용)과 지나간 횟수.</summary>
+        public bool BladeSweeping => bladeCopy != null;
+        public int BladeSweepCount { get; private set; }
+        public Transform BladeTransform => bladeCopy != null ? bladeCopy.transform : null;
+
+        /// <summary>전투 회피 슬로모션이 걸리면: 가장 가까운 적의 칼을 복사해 슬로 동안 1인칭 카메라 바로 앞을 가로질러 지나가게 한다 (원래 칼은 잠깐 숨김).</summary>
+        void BeginBladeSweep()
+        {
+            EndBladeSweep();
+            if (cam == null || director == null || director.CurrentEncounter == null || director.CurrentEncounter.Actors == null) return;
+            EnemyActor best = null; float bd = float.PositiveInfinity;
+            foreach (var a in director.CurrentEncounter.Actors)
+            {
+                if (a == null || a.Defeated || a.weaponVisual == null) continue;
+                float d = (a.transform.position - cam.transform.position).sqrMagnitude;
+                if (d < bd) { bd = d; best = a; }
+            }
+            if (best == null) return;
+            bladeOwner = best;
+            bladeCopy = Instantiate(best.weaponVisual.gameObject);
+            bladeCopy.name = "BladeSweep";
+            bladeHidden = best.weaponVisual.GetComponentsInChildren<Renderer>();
+            foreach (var r in bladeHidden) r.enabled = false;
+            bladeT = 0f;
+            BladeSweepCount++;
+            PlaceBlade(0f);
+        }
+
+        void PlaceBlade(float u)
+        {
+            if (bladeCopy == null || cam == null) return;
+            var c = cam.transform;
+            float k = Mathf.SmoothStep(0f, 1f, u);
+            var from = GameConfig.BulletTime.BladeFrom; var to = GameConfig.BulletTime.BladeTo;
+            var local = Vector3.Lerp(from, to, k) + Vector3.up * (GameConfig.BulletTime.BladeArc * Mathf.Sin(k * Mathf.PI));
+            bladeCopy.transform.SetPositionAndRotation(c.TransformPoint(local),
+                c.rotation * Quaternion.Euler(GameConfig.BulletTime.BladeTilt, GameConfig.BulletTime.BladeYaw + GameConfig.BulletTime.BladeYawSwing * k, 0f));
+        }
+
+        void EndBladeSweep()
+        {
+            if (bladeCopy != null) Destroy(bladeCopy);
+            bladeCopy = null;
+            if (bladeHidden != null) foreach (var r in bladeHidden) if (r != null) r.enabled = true;
+            bladeHidden = null;
+            bladeOwner = null;
+        }
+
+        // ---------------- 작업 R31: 윈드밀 3인칭 컷 — 내 발차기와 날아가는 적을 함께 ----------------
+        bool windmillCut;
+        float windmillLeft, windmillT, windmillBaseYaw;
+        Vector3 windmillCenter;
+        /// <summary>윈드밀 3인칭 컷 중 (테스트용)과 컷 횟수.</summary>
+        public bool WindmillCut => windmillCut;
+        public int WindmillCutCount { get; private set; }
+
+        void UpdateWindmillCut()
+        {
+            bool fxOn = presentation == null || presentation.Enabled;
+            if (!windmillCut && fxOn && cam != null && director != null && director.WindmillSpinning && director.player != null)
+            {
+                windmillCut = true;
+                WindmillCutCount++;
+                windmillLeft = GameConfig.BulletTime.WindmillCutSeconds;
+                windmillT = 0f;
+                windmillCenter = director.player.transform.position;
+                var f = director.player.transform.forward; f.y = 0f;
+                windmillBaseYaw = Quaternion.LookRotation(f.sqrMagnitude > 1e-4f ? f.normalized : Vector3.forward).eulerAngles.y + GameConfig.BulletTime.WindmillCutYaw;
+                SetBodyVisible(true);
+            }
+            if (!windmillCut) return;
+            float dt = Mathf.Max(0f, DeltaTime());
+            windmillLeft -= dt; windmillT += dt;
+            if (windmillLeft <= 0f && !director.WindmillSpinning) { EndWindmillCut(); return; }
+            float yaw = windmillBaseYaw + GameConfig.BulletTime.WindmillCutOrbitDeg * Mathf.Clamp01(windmillT / GameConfig.BulletTime.WindmillCutSeconds);
+            var pos = windmillCenter + Quaternion.Euler(0f, yaw, 0f) * new Vector3(0f, 0f, -GameConfig.BulletTime.WindmillCutDistance) + Vector3.up * GameConfig.BulletTime.WindmillCutHeight;
+            var look = windmillCenter + Vector3.up * GameConfig.BulletTime.WindmillLookHeight;
+            cam.transform.SetPositionAndRotation(pos, Quaternion.LookRotation(look - pos, Vector3.up));
+        }
+
+        void EndWindmillCut()
+        {
+            if (!windmillCut) return;
+            windmillCut = false;
+            if (cam != null && !gateCut) { cam.transform.localPosition = Vector3.zero; cam.transform.localRotation = Quaternion.identity; }
+            if (!gateCut) SetBodyVisible(false);
+        }
+
         void LateUpdate()
         {
+            UpdateWindmillCut();
+            if (bladeCopy != null)
+            {
+                bladeT += Mathf.Max(0f, DeltaTime());
+                float u = bladeT / GameConfig.BulletTime.BladeSweepSeconds;
+                if (u >= 1f || bladeOwner == null || bladeOwner.Defeated) EndBladeSweep();
+                else PlaceBlade(u);
+            }
             if (gateCut && cam != null) cam.transform.SetPositionAndRotation(gateCamPos, gateCamRot);
         }
 

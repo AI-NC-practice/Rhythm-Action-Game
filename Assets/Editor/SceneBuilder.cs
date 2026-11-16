@@ -139,16 +139,12 @@ namespace RhythmActionGame.EditorTools
             // 1인칭 전신 모델 (작업 T13): player FBX(Humanoid) + 툰 머티리얼 + Animator. 원래 메시는 그림자만, 머리 뺀 복사본을 화면에 (PlayerBody).
             var playerBody = BuildPlayerModel(player.transform, out var bodyRenderer);
             // 칼 (1인칭에서는 그림자만, 무사 결투 3인칭 컷에서 보임 — GDD-beta B11.5). 작업 R04: 회색 막대 → 환도 모델(weapon_sword)
-            var sword = new GameObject("Sword").transform;
-            sword.SetParent(player.transform, false);
-            sword.localPosition = new Vector3(0.35f, 1.1f, 0.35f);
-            sword.localRotation = Quaternion.Euler(-35f, 0f, 0f);
-            var swordAxis = new GameObject("SwordAxis").transform;   // 모델 긴 축(x)을 칼 방향(z)으로
-            swordAxis.SetParent(sword, false);
-            swordAxis.localRotation = Quaternion.Euler(0f, -90f, 0f);
-            FitModelCentered(swordAxis, "weapon_sword", new Vector3(0.9f, 0.12f, 0.08f));
+            // 작업 R27: 칼을 오른손 뼈에 쥔다 (적과 같은 방식). 예전에는 몸 앞 고정 자리에 떠 있어 손가락을 뚫었다.
+            EnemyRig.AttachWeapon(playerBody.animator, playerBody.animator.transform, "sword", out var sword, out _);
+            sword.name = "Sword";
             var swordRenderer = sword.GetComponentInChildren<MeshRenderer>();
             foreach (var r in sword.GetComponentsInChildren<MeshRenderer>()) r.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
+            playerBody.swordRenderers = sword.GetComponentsInChildren<MeshRenderer>();
             var rig = new GameObject("CameraRig");
             rig.transform.SetParent(player.transform, false);
             rig.transform.localPosition = new Vector3(0, GameConfig.EyeHeight, GameConfig.Body.EyeForward);
@@ -215,6 +211,18 @@ namespace RhythmActionGame.EditorTools
             presentation.cameraFx = cameraFx;
             presentation.timeFx = timeFx;
             var lookBack = systems.AddComponent<LookBackCut>();   // 작업 R18d
+            {
+                // 작업 R29: 뒤돌아봤을 때 쫓아오는 무리 (평소 숨김)
+                var group = new GameObject("LookBackPursuers").transform;
+                var list = new System.Collections.Generic.List<Transform>();
+                for (int k = 0; k < GameConfig.Fx.PursuerGaps.Length; k++)
+                {
+                    var f = EnemyRig.Figure(group, $"Pursuer_{k}", Vector3.zero);
+                    f.gameObject.SetActive(false);
+                    list.Add(f);
+                }
+                lookBack.pursuers = list.ToArray();
+            }
             lookBack.cameraFx = cameraFx;
             lookBack.presentation = presentation;
             director.presentation = presentation;
@@ -420,7 +428,13 @@ namespace RhythmActionGame.EditorTools
                         ReplaceBoxes(root, "eave_low", new Vector3(0, 0.78f, 0), new Vector3(4.0f, 1.55f, 1.2f),
                             LocalBox(root, "Prop_eave", new Vector3(0, 1.4f, 0), new Vector3(3.4f, 0.3f, 1.0f), Mat("Eave", new Color(0.3f, 0.3f, 0.33f))).transform);
                         break;
-                    case "wall_run": TileIntoBox(LocalBox(root, "Prop_wall_stone", new Vector3(side * 2.0f, 1.75f, 0), new Vector3(0.5f, 3.5f, 8f), Mat("WallRun", new Color(0.66f, 0.64f, 0.6f))).transform, "wall_stone"); break;
+                    case "wall_run":
+                        TileIntoBox(LocalBox(root, "Prop_wall_stone", new Vector3(side * 2.0f, 1.75f, 0), new Vector3(0.5f, 3.5f, 8f), Mat("WallRun", new Color(0.66f, 0.64f, 0.6f))).transform, "wall_stone");
+                        // 작업 R33 (사용자 피드백 "벽을 탈 이유가 없다"): 벽 반대쪽으로 치우쳐 길을 막는 뒤집힌 수레와 독 더미 — 벽을 타야 지나간다
+                        var block = LocalBox(root, "Prop_wallrun_block_cart", new Vector3(-side * GameConfig.Map.WallRunBlockX, 0.55f, 0.3f), new Vector3(2.4f, 1.1f, 1.2f), Mat("Cart", new Color(0.55f, 0.38f, 0.22f))).transform;
+                        FitIntoBox(block, "cart");
+                        FitIntoBox(LocalBox(root, "Prop_wallrun_block_jars", new Vector3(-side * (GameConfig.Map.WallRunBlockX + 1.3f), 0.5f, -0.7f), new Vector3(1.2f, 1.0f, 1.0f), Mat("Jars", new Color(0.45f, 0.28f, 0.18f))).transform, "jars");
+                        break;
                     default: break; // roof_climb, roof_jump, drop_down, gate_climb: 지붕 덩어리가 장애물이다
                 }
             }

@@ -34,7 +34,8 @@ namespace RhythmActionGame
         public static string AttackState(string attack) => "Attack_" + attack;
         public static string DefeatState(ExecutionKind how) => "Defeat_" + how;
 
-        public static string IdleClip(string model) => "standing_idle_1_looping";
+        /// <summary>작업 R28: 대기 = 칼을 든 전투 자세 (Mixamo "Great Sword Idle", 사용자 상시 승인 2026-11-17). 예전 VARCO 대기는 팔을 벌리고 서 있었다.</summary>
+        public static string IdleClip(string model) => MixamoPrefix + "great_sword_idle";
 
         public static string GuardClip(string model) => model == "boss" ? "retreat_block" : "cross_block";
 
@@ -66,7 +67,7 @@ namespace RhythmActionGame
             {
                 case ExecutionKind.KickOffRoof: return MixamoPrefix + KickFallClip;   // 작업 R07: 차여서 뒤로 날아감 (사용자 승인 2026-11-17)
                 case ExecutionKind.DisarmSlash: return boss ? "hit_fall" : "struggle_fall";
-                case ExecutionKind.Windmill: return boss ? "heavy_hit_back" : "light_hit_back";
+                case ExecutionKind.Windmill: return MixamoPrefix + KickFallClip;   // 작업 R31: 발에 맞아 뒤로 날아가 쓰러짐 (예전 맞고 비틀거림 → 선 자세로 누움)
                 default: return "hit_fall";
             }
         }

@@ -28,7 +28,9 @@ namespace RhythmActionGame.Tests
             CollectionAssert.AreEquivalent(new[] { "player", "enemy_sword", "enemy_spear", "boss" }, chars.Select(c => c.id).ToArray());
             foreach (var c in chars)
             {
-                Assert.AreEqual(c.animations.Length, EditorTools.HumanoidImport.FbxOf(c.id).Count, $"{c.id}: 동작 수만큼 FBX");
+                // 작업 R27 보강: 적은 손가락 리그(<id>_rig_fingers.fbx, 동작 없음)가 하나 더 있다
+                int rig = File.Exists($"Assets/Art/Models/{c.id}/{c.id}_rig_fingers.fbx") ? 1 : 0;
+                Assert.AreEqual(c.animations.Length + rig, EditorTools.HumanoidImport.FbxOf(c.id).Count, $"{c.id}: 동작 수만큼 FBX (+ 손가락 리그)");
                 foreach (var anim in c.animations)
                 {
                     string path = $"Assets/Art/Models/{c.id}/{c.id}_{anim}.fbx";
@@ -58,8 +60,19 @@ namespace RhythmActionGame.Tests
                 // 메시가 든 FBX는 캐릭터당 하나 (첫 동작) — 나머지는 뼈+동작만 (저장소 용량)
                 var withMesh = EditorTools.HumanoidImport.FbxOf(c.id)
                     .Where(p => AssetDatabase.LoadAllAssetsAtPath(p).OfType<Mesh>().Any()).ToList();
-                Assert.AreEqual(1, withMesh.Count, $"{c.id}: 메시 FBX 하나");
-                Assert.AreEqual($"{dir}/{c.id}_{c.animations[0]}.fbx", withMesh[0]);
+                string rigPath = $"{dir}/{c.id}_rig_fingers.fbx";
+                bool hasRig = File.Exists(rigPath);
+                // 작업 R27 보강: 적은 손가락 리그 FBX(메시 포함)가 모델 바탕 — 첫 동작 FBX의 메시와 함께 둘
+                Assert.AreEqual(hasRig ? 2 : 1, withMesh.Count, $"{c.id}: 메시 FBX (첫 동작{(hasRig ? " + 손가락 리그" : "")})");
+                Assert.AreEqual($"{dir}/{c.id}_{c.animations[0]}.fbx", withMesh.First(p => p != rigPath));
+                if (hasRig)
+                {
+                    var ra = AssetDatabase.LoadAllAssetsAtPath(rigPath).OfType<Avatar>().First();
+                    Assert.IsTrue(ra.isValid && ra.isHuman, $"{c.id} 손가락 리그 아바타");
+                    Assert.IsTrue(ra.humanDescription.human.Any(h => h.humanName.Contains("Index")), $"{c.id} 손가락 리그에 손가락 뼈");
+                    int rt = AssetDatabase.LoadAllAssetsAtPath(rigPath).OfType<Mesh>().Sum(m => m.triangles.Length / 3);
+                    Assert.LessOrEqual(rt, 15000, $"{c.id} 손가락 리그 삼각형 ({rt})");
+                }
                 int tris = AssetDatabase.LoadAllAssetsAtPath(withMesh[0]).OfType<Mesh>().Sum(m => m.triangles.Length / 3);
                 // T11R(2026-11-16 사용자 결정): 손가락·모자 챙이 무너지지 않게 캐릭터 상한 15,000
                 Assert.LessOrEqual(tris, 15000, $"{c.id} 삼각형 15,000 이하 ({tris})");

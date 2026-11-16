@@ -1,0 +1,462 @@
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using NUnit.Framework;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.TestTools;
+
+namespace RhythmActionGame.Tests
+{
+    /// <summary>
+    /// 묶음 E (사용자 빌드 플레이 피드백 2026-11-17): R27 칼 쥐기·같이 싸우기, R28 칼 든 대기, R29 뒤돌아보기, R30 매트릭스 회피,
+    /// R31 윈드밀 컷·쓰러진 적·칼 날아감, R32 돌진 적 엇갈림, R33 벽타기 막는 짐, R34 처형 팔 가림, R26 콤보 단계. 미리보기 → harness/reports/BundleE/.
+    /// </summary>
+    public class BundleE_PlayTests
+    {
+        const string Out = "harness/reports/BundleE";
+        const int BodyLayer = 31;
+        double now;
+        GameBootstrap boot;
+        StageDirector dir;
+        PlayerBody body;
+        Camera view;
+
+        [TearDown]
+        public void TearDown()
+        {
+            if (dir != null && dir.slowMotion != null) dir.slowMotion.Cancel();
+            Time.timeScale = 1f;
+        }
+
+        IEnumerator Load(double startBeat, bool bullet = false)
+        {
+            Directory.CreateDirectory(Out);
+            yield return SceneManager.LoadSceneAsync("Game");
+            yield return null;
+            boot = GameBootstrap.Instance;
+            dir = boot.director;
+            body = Object.FindAnyObjectByType<PlayerBody>();
+            now = 0;
+            boot.clock.TimeSource = () => now;
+            float realTime = Time.realtimeSinceStartup;
+            dir.slowMotion.RealTime = () => realTime + (float)now;
+            dir.RewindRealTime = () => realTime + (float)now;
+            dir.MotionDeltaTime = () => 0.01f;
+            dir.SpinDeltaTime = () => 0.01f;
+            foreach (var fx in Object.FindObjectsByType<TimeFx>(FindObjectsSortMode.None)) fx.RealTime = () => realTime + (float)now;
+            foreach (var cf in Object.FindObjectsByType<CameraFx>(FindObjectsSortMode.None)) cf.DeltaTime = () => 0.01f;
+            if (boot.bulletTime != null) { boot.bulletTime.DeltaTime = () => 0.01f; boot.bulletTime.enabled = bullet; }
+            boot.judge.readKeyboard = false;
+            boot.judge.OffsetSource = () => 0f;
+            dir.AllowEventSlowMotion = false;
+            boot.StartRun(startBeat);
+            yield return null;
+            view = GameObject.Find("PlayerCamera").GetComponent<Camera>();
+        }
+
+        /// <summary>자동 연주 한 프레임 (모두 PERFECT). 체력이 줄면 채운다.</summary>
+        IEnumerator Step(System.Func<JudgeCue, bool> skip = null)
+        {
+            now += 0.01;
+            foreach (var c in boot.judge.Cues.ToArray())
+                if (!c.Judged && c.Appeared && (skip == null || !skip(c)) && now >= boot.clock.TimeOfBeat(c.TargetBeat) - 1e-6) { boot.judge.Submit(c.Key, now); break; }
+            if (dir.Health.Hp < GameConfig.MaxHp) dir.Health.Reset();
+            yield return null;
+        }
+
+        static void Shot(Camera cam, string path)
+        {
+            var big = new RenderTexture(640, 360, 24);
+            var old = cam.targetTexture;
+            cam.targetTexture = big;
+            cam.Render();
+            cam.targetTexture = old;
+            var prev = RenderTexture.active;
+            RenderTexture.active = big;
+            var t = new Texture2D(640, 360, TextureFormat.RGB24, false);
+            t.ReadPixels(new Rect(0, 0, 640, 360), 0, 0);
+            RenderTexture.active = prev;
+            File.WriteAllBytes(path, t.EncodeToPNG());
+            Object.Destroy(t);
+            big.Release();
+        }
+
+        Camera ThirdPerson(Vector3 target, Vector3 from)
+        {
+            var go = new GameObject("BundleE_TP");
+            var c = go.AddComponent<Camera>();
+            c.enabled = false;
+            c.fieldOfView = 50f;
+            go.transform.position = from;
+            go.transform.LookAt(target);
+            return c;
+        }
+
+        static float HandGap(Animator a)
+        {
+            var l = a.GetBoneTransform(HumanBodyBones.LeftHand); var r = a.GetBoneTransform(HumanBodyBones.RightHand);
+            return l != null && r != null ? Vector3.Distance(l.position, r.position) : -1f;
+        }
+
+        static void Log(string line) { Debug.Log("[BundleE] " + line); File.AppendAllText($"{Out}/summary.txt", line + "\n"); }
+
+        // ---------------- R27 + R28: 무사 결투 — 칼 쥐기, 막기·베기, 칼 든 대기 ----------------
+        [UnityTest]
+        public IEnumerator R27_R28_Duel_SwordInHand_BlockSlash_GuardStance()
+        {
+            yield return Load(256);
+            var sword = GameObject.Find("Player").GetComponentsInChildren<Transform>(true).First(t => t.name == "Sword");
+            var hand = body.animator.GetBoneTransform(HumanBodyBones.RightHand);
+            Assert.IsTrue(sword.IsChildOf(hand), "칼이 오른손 뼈 아래 (손과 함께 움직임)");
+            float gripGap = Vector3.Distance(sword.position, hand.position);
+            Log($"R27 칼 손잡이-손 거리 {gripGap:0.000} m");
+            Assert.Less(gripGap, 0.15f, "손잡이가 손바닥에");
+            for (int i = 0; i < 4000 && dir.State != StageState.Combat; i++) yield return Step();
+            Assert.AreEqual(StageState.Combat, dir.State);
+            var enc = dir.CurrentEncounter;
+            Assert.IsTrue(enc.IsBossDuel);
+            yield return null;
+            Assert.IsTrue(body.SwordVisible, "전투 중 1인칭에 내 칼이 보임");
+            bool sawSlash = false, sawBlock = false;
+            float bossGapIdle = -1f, maxBossGap = 0f;
+            var bossAnim = dir.boss.GetComponentInChildren<Animator>();
+            for (int f = 0; f < 3000 && boot.clock.CurrentBeat < enc.StartBeat + 24; f++)
+            {
+                yield return Step();
+                if (!sawSlash && body.LastState == BodyMoves.SwordSlash) { sawSlash = true; for (int k = 0; k < 12; k++) yield return Step(); Shot(view, $"{Out}/R27_slash_fp.png"); }
+                if (!sawBlock && body.LastState == BodyMoves.SwordBlock) { sawBlock = true; for (int k = 0; k < 8; k++) yield return Step(); Shot(view, $"{Out}/R27_block_fp.png"); }
+                var en = dir.boss.GetComponentInChildren<EnemyAnimator>();
+                if (en != null && en.CurrentState == EnemyMoves.Idle && bossAnim != null && !bossAnim.IsInTransition(0) && bossAnim.GetCurrentAnimatorStateInfo(0).IsName(EnemyMoves.Idle))
+                {
+                    float g = HandGap(bossAnim);
+                    maxBossGap = Mathf.Max(maxBossGap, g);
+                    if (bossGapIdle < 0f) bossGapIdle = g;
+                }
+            }
+            Log($"R27 베기 {sawSlash}, 막기 {sawBlock}; R28 무사 대기 두 손 거리 처음 {bossGapIdle:0.00} 최대 {maxBossGap:0.00} m");
+            Assert.IsTrue(sawSlash, "내 공격·칼 겨루기 성공 → 칼로 벰");
+            Assert.IsTrue(sawBlock, "적 공격 ↑ 성공 → 칼로 막음");
+            Assert.Greater(bossGapIdle, 0f, "무사 대기 상태를 봄");
+            Assert.Less(maxBossGap, 0.7f, "무사 대기: 두 손으로 칼을 쥔 자세 (팔 벌림 아님)");
+            // 3인칭 미리보기: 무사 대기 자세
+            var bp = dir.boss.transform.position;
+            var tp = ThirdPerson(bp + Vector3.up * 1.1f, bp + dir.boss.transform.forward * 3.5f + Vector3.up * 1.6f);
+            Shot(tp, $"{Out}/R28_boss_stance_tp.png");
+            Object.Destroy(tp.gameObject);
+            // 플레이어 전투 대기도 칼 든 자세
+            for (int f = 0; f < 200 && body.LastState != BodyMoves.CombatIdle; f++) yield return Step();
+            for (int f = 0; f < 30; f++) yield return Step();
+            if (body.LastState == BodyMoves.CombatIdle)
+            {
+                float pg = HandGap(body.animator);
+                Log($"R28 플레이어 전투 대기 두 손 거리 {pg:0.00} m");
+                Assert.Less(pg, 0.7f, "플레이어 대기도 두 손으로 칼");
+            }
+            Assert.IsTrue(File.Exists($"{Out}/R27_slash_fp.png") && File.Exists($"{Out}/R27_block_fp.png"));
+        }
+
+        // ---------------- R28: 일반 병사 대기 + R34: 처형 뒤 팔 가림 ----------------
+        [UnityTest]
+        public IEnumerator R28_R34_NormalEnemy_Stance_ExecutionArmCoverShort()
+        {
+            var ev = StageChart.Load().events.Where(e => e.IsDuel).OrderBy(e => e.runBeat).First();
+            yield return Load(ev.runBeat - 6);
+            // 내 몸만 그리는 측정 카메라 (R06 방식)
+            var pc = new GameObject("BundleE_Probe").AddComponent<Camera>();
+            pc.enabled = false; pc.clearFlags = CameraClearFlags.SolidColor; pc.backgroundColor = new Color(1f, 0f, 1f, 1f);
+            pc.cullingMask = 1 << BodyLayer;
+            var rt = new RenderTexture(160, 90, 24); pc.targetTexture = rt;
+            var tex = new Texture2D(160, 90, TextureFormat.RGBA32, false);
+            body.VisibleBody.gameObject.layer = BodyLayer;
+            float Cover()
+            {
+                pc.transform.SetPositionAndRotation(view.transform.position, view.transform.rotation);
+                pc.fieldOfView = view.fieldOfView; pc.nearClipPlane = view.nearClipPlane; pc.aspect = 16f / 9f;
+                pc.Render();
+                var prev = RenderTexture.active; RenderTexture.active = rt;
+                tex.ReadPixels(new Rect(0, 0, 160, 90), 0, 0); RenderTexture.active = prev;
+                int hit = 0; var px = tex.GetPixels32();
+                foreach (var c in px) if (!(c.r > 240 && c.g < 15 && c.b > 240)) hit++;
+                return hit / (float)px.Length;
+            }
+            for (int i = 0; i < 4000 && dir.State != StageState.Combat; i++) yield return Step();
+            Assert.AreEqual(StageState.Combat, dir.State);
+            var actor = dir.CurrentEncounter.Actors[0];
+            var an = actor.GetComponentInChildren<Animator>();
+            float maxGap = 0f; int idleFrames = 0;
+            bool execStarted = false; double execBeat = double.NaN;
+            float bigCoverSeconds = 0f, maxCover = 0f;
+            bool shot = false;
+            for (int f = 0; f < 4000 && (dir.State == StageState.Combat || (execStarted && boot.clock.CurrentBeat < execBeat + 4)); f++)
+            {
+                yield return Step();
+                var ea = actor.GetComponentInChildren<EnemyAnimator>();
+                if (!actor.Defeated && ea != null && ea.CurrentState == EnemyMoves.Idle && !an.IsInTransition(0) && an.GetCurrentAnimatorStateInfo(0).IsName(EnemyMoves.Idle)) { idleFrames++; maxGap = Mathf.Max(maxGap, HandGap(an)); }
+                if (!execStarted && body.LastState.StartsWith("Exec_")) { execStarted = true; execBeat = boot.clock.CurrentBeat; }
+                if (execStarted && boot.clock.CurrentBeat < execBeat + 4)
+                {
+                    float c = Cover();
+                    maxCover = Mathf.Max(maxCover, c);
+                    if (c > 0.25f) bigCoverSeconds += 0.01f;
+                    if (!shot && boot.clock.CurrentBeat > execBeat + 0.5) { shot = true; Shot(view, $"{Out}/R34_exec_fp.png"); }
+                }
+            }
+            Log($"R28 병사 대기 프레임 {idleFrames}, 두 손 거리 최대 {maxGap:0.00} m; R34 처형 {body.LastState} 화면 25% 넘게 가린 시간 {bigCoverSeconds:0.00} s, 최대 가림 {maxCover:0.000}, 줄인 횟수 {body.ExecCappedCount}");
+            Assert.Greater(idleFrames, 0);
+            Assert.Less(maxGap, 0.7f, "병사 대기: 두 손으로 칼 (팔 벌림 아님)");
+            Assert.IsTrue(execStarted, "처형");
+            Assert.Less(bigCoverSeconds, 0.6f, "팔이 화면을 크게 가리는 시간이 짧음");
+            Assert.Greater(body.ExecCappedCount, 0, "처형 동작을 줄여 끝냄");
+            rt.Release();
+            Object.Destroy(pc.gameObject);
+        }
+
+        // ---------------- R29: 뒤돌아보기 천천히 + 쫓는 무리 ----------------
+        [UnityTest]
+        public IEnumerator R29_LookBack_Slow_PursuersVisible()
+        {
+            // 돌아오기가 돌아보기보다 느림
+            float turnTime = GameConfig.Fx.LookBackTurnPart * (float)GameConfig.Fx.LookBackBeats * GameConfig.SecondsPerBeat;
+            float backTime = GameConfig.Fx.LookBackReturnPart * (float)GameConfig.Fx.LookBackBeats * GameConfig.SecondsPerBeat;
+            Assert.GreaterOrEqual(turnTime, 0.28f, "돌아보는 데 0.3초 안팎 (예전 0.15초)");
+            Assert.Greater(backTime, turnTime, "돌아오기가 더 천천히");
+            var lb0 = GameConfig.Fx.LookBackRunBeats;
+            int seen = 0;
+            for (int k = 0; k < lb0.Length; k++)
+            {
+                yield return Load(lb0[k] - 6);
+                var lb = Object.FindAnyObjectByType<LookBackCut>();
+                int visibleMid = 0; bool shot = false;
+                for (int f = 0; f < 3000 && boot.player.VisualRunBeat < lb0[k] + LookBackCut.LengthOf(k) + 1.3; f++)
+                {
+                    yield return Step();
+                    if (lb.Active && Mathf.Abs(lb.CurrentYaw) > 150f)
+                    {
+                        foreach (var p in LookBackCut.Enemies())   // 쫓는 무리 + 그 밖의 쫓는 적 (지붕 위 컷은 지붕 위 적)
+                        {
+                            if (p == null || !p.gameObject.activeInHierarchy) continue;
+                            var vp = view.WorldToViewportPoint(p.position + Vector3.up * 1.1f);
+                            if (vp.z > 0f && vp.z < 45f && vp.x > 0f && vp.x < 1f && vp.y > 0f && vp.y < 1f) visibleMid++;
+                        }
+                        if (!LookBackCut.OnRoof(lb0[k])) Assert.IsTrue(lb.PursuersShown, $"땅 위 컷 {k}: 쫓는 무리");
+                        if (!shot) { shot = true; Shot(view, $"{Out}/R29_lookback_{k}.png"); }
+                    }
+                }
+                Log($"R29 컷 {k} ({lb0[k]}박): 돌아본 화면에 쫓는 적 보인 프레임·명 {visibleMid}");
+                if (visibleMid > 0) seen++;
+                Assert.IsFalse(lb.PursuersShown, "컷이 끝나면 숨김");
+            }
+            Assert.AreEqual(lb0.Length, seen, "모든 뒤돌아보기에서 쫓는 적이 보임");
+        }
+
+        // ---------------- R30: 매트릭스 회피 칼날 ----------------
+        [UnityTest]
+        public IEnumerator R30_DuelBullet_BladePassesInFrontOfFace()
+        {
+            yield return Load(256, bullet: true);
+            for (int i = 0; i < 4000 && dir.State != StageState.Combat; i++) yield return Step();
+            var enc = dir.CurrentEncounter;
+            float minDist = float.PositiveInfinity; bool shot = false;
+            for (int f = 0; f < 6000 && boot.clock.CurrentBeat < enc.StartBeat + GameConfig.BulletTime.BossBeats[0] + 2; f++)
+            {
+                yield return Step();
+                var bt = boot.bulletTime.BladeTransform;
+                if (bt != null)
+                {
+                    var tipT = bt.GetComponentsInChildren<Transform>().FirstOrDefault(x => x.name == "WeaponTip");
+                    var a0 = bt.position; var a1 = tipT != null ? tipT.position : bt.position + bt.forward * GameConfig.EnemyBody.SwordLength;
+                    var e = view.transform.position;
+                    var ab = a1 - a0; float tt = Mathf.Clamp01(Vector3.Dot(e - a0, ab) / Mathf.Max(1e-6f, ab.sqrMagnitude));
+                    minDist = Mathf.Min(minDist, Vector3.Distance(e, a0 + ab * tt));
+                    if (!shot && boot.bulletTime.BladeSweeping) { for (int k = 0; k < 25; k++) yield return Step(); if (boot.bulletTime.BladeSweeping) { shot = true; Shot(view, $"{Out}/R30_blade_fp.png"); } }
+                }
+            }
+            Log($"R30 칼날 지나간 횟수 {boot.bulletTime.BladeSweepCount}, 카메라와 최소 거리 {minDist:0.00} m");
+            Assert.Greater(boot.bulletTime.BladeSweepCount, 0, "회피 슬로모션에서 칼날이 지나감");
+            Assert.Less(minDist, 0.6f, "얼굴 앞 가까이");
+            Assert.Greater(minDist, 0.05f, "카메라를 뚫지는 않음");
+        }
+
+        // ---------------- R31: 윈드밀 3인칭 컷 + 쓰러진 적 + 칼 날아감 ----------------
+        [UnityTest]
+        public IEnumerator R31_Windmill_FootVisible_FallenPose_WeaponFlies()
+        {
+            yield return Load(181, bullet: true);
+            for (int i = 0; i < 4000 && dir.State != StageState.Combat; i++) yield return Step();
+            var enc = dir.CurrentEncounter;
+            Assert.IsTrue(enc.Event.IsSurround);
+            int cutFrames = 0, footFrames = 0; bool shot = false, cutSeen = false;
+            for (int f = 0; f < 8000 && !(enc.Done && cutSeen && !boot.bulletTime.WindmillCut); f++)
+            {
+                if (boot.bulletTime.WindmillCut) cutSeen = true;
+                yield return Step();
+                if (boot.bulletTime.WindmillCut)
+                {
+                    cutFrames++;
+                    var foot = body.animator.GetBoneTransform(HumanBodyBones.RightFoot);
+                    var foot2 = body.animator.GetBoneTransform(HumanBodyBones.LeftFoot);
+                    foreach (var ft in new[] { foot, foot2 })
+                    {
+                        var vp = view.WorldToViewportPoint(ft.position);
+                        if (vp.z > 0f && vp.x > 0.05f && vp.x < 0.95f && vp.y > 0.05f && vp.y < 0.95f) { footFrames++; break; }
+                    }
+                    if (!shot && cutFrames == 25) { shot = true; Shot(view, $"{Out}/R31_windmill_cut.png"); }
+                }
+            }
+            float waitUntil = Time.realtimeSinceStartup + 8f;   // 칼이 슬로모션 속에서 떨어질 때까지 (실제 시간)
+            while (Time.realtimeSinceStartup < waitUntil && enc.Actors.Any(a => a != null && a.weaponVisual != null && (!a.WeaponDropped || a.weaponVisual.position.y > a.transform.position.y + 0.2f))) yield return Step();
+            for (int f = 0; f < 60; f++) yield return Step();
+            // 쓰러진 적: 엉덩이가 낮음(누움), 칼이 손에서 빠져 바닥에
+            int lying = 0, dropped = 0;
+            var tp = ThirdPerson(dir.CurrentEncounter != null ? dir.CurrentEncounter.Actors[0].transform.position : enc.Actors[0].transform.position, boot.player.transform.position + Vector3.up * 4f - boot.player.transform.forward * 3f);
+            foreach (var a in enc.Actors)
+            {
+                if (a == null) continue;
+                var hips = a.GetComponentInChildren<Animator>().GetBoneTransform(HumanBodyBones.Hips);
+                float hipUp = hips.position.y - a.transform.position.y;
+                if (hipUp < 0.5f) lying++;
+                if (a.WeaponDropped && a.weaponVisual != null && Mathf.Abs(a.weaponVisual.position.y - a.transform.position.y) < 0.4f) dropped++;
+                Log($"R31 적 {a.name}: 칼 빠짐 {a.WeaponDropped}, 칼 높이 {(a.weaponVisual != null ? a.weaponVisual.position.y : float.NaN):0.00}, 적 발 높이 {a.transform.position.y:0.00}, 엉덩이 {hipUp:0.00}, 칼 부모 {(a.weaponVisual != null && a.weaponVisual.parent != null ? a.weaponVisual.parent.name : "-")}");
+            }
+            var center = enc.Actors.Where(a => a != null).Select(a => a.transform.position).Aggregate(Vector3.zero, (s, p) => s + p) / enc.Actors.Count(a => a != null);
+            tp.transform.position = center + new Vector3(0f, 7f, -6f);
+            tp.transform.LookAt(center);
+            Shot(tp, $"{Out}/R31_fallen_tp.png");
+            Object.Destroy(tp.gameObject);
+            Log($"R31 윈드밀 컷 프레임 {cutFrames}, 발이 화면에 보인 프레임 {footFrames}; 누운 적 {lying}/{enc.Actors.Length}, 칼이 빠져 바닥에 {dropped}");
+            Assert.Greater(cutFrames, 20, "윈드밀 3인칭 컷");
+            Assert.Greater(footFrames, cutFrames / 3, "컷 동안 내 발이 화면에 보임");
+            Assert.AreEqual(enc.Actors.Count(a => a != null), lying, "쓰러진 적이 모두 누워 있음 (선 자세로 눕지 않음)");
+            Assert.AreEqual(enc.Actors.Count(a => a != null), dropped, "칼이 손에서 빠져 바닥에 떨어짐");
+        }
+
+        // ---------------- R32: 돌진 적과 엇갈림 ----------------
+        [UnityTest]
+        public IEnumerator R32_Charge_PassesBeside_NotThrough()
+        {
+            var ev = StageChart.Load().events.First(e => e.EventKind == EventCatalog.Charge && e.IsEnemy);
+            yield return Load(ev.runBeat - 6);
+            var prop = Object.FindObjectsByType<EventProp>(FindObjectsSortMode.None).First(p => p.runBeat == ev.runBeat);
+            double hit = ev.runBeat + EventCatalog.Get(EventCatalog.Charge).Slots[0].Offset;
+            float minGap = float.PositiveInfinity; bool shotFp = false, shotTp = false, sawSlash = false, sawClimb = false;
+            for (int f = 0; f < 3000 && boot.player.VisualRunBeat < hit + 1.5; f++)
+            {
+                yield return Step();
+                double v = boot.player.VisualRunBeat;
+                if (v > hit - 0.4 && v < hit + 0.4)
+                {
+                    var a = view.transform.position; a.y = 0f;
+                    var b = prop.enemy.position; b.y = 0f;
+                    minGap = Mathf.Min(minGap, Vector3.Distance(a, b));
+                }
+                if (body.LastState == BodyMoves.SwordSlash) sawSlash = true;
+                if (body.LastState.StartsWith("Climb")) sawClimb = true;
+                if (!shotFp && v >= hit - 0.15) { shotFp = true; Shot(view, $"{Out}/R32_charge_fp.png"); }
+                if (!shotTp && v >= hit - 0.05)
+                {
+                    shotTp = true;
+                    var pl = boot.player.transform;
+                    var tp = ThirdPerson(pl.position + Vector3.up * 1f, pl.position - pl.forward * 4f + Vector3.up * 2.5f);
+                    Shot(tp, $"{Out}/R32_charge_tp.png");
+                    Object.Destroy(tp.gameObject);
+                }
+            }
+            Log($"R32 돌진 적({ev.runBeat}박)과 판정 ±0.4박 사이 수평 최소 거리 {minGap:0.00} m, 쓰러짐 {prop.EnemyDown}, 내 동작 {body.LastState}");
+            Assert.Greater(minGap, 1.0f, "엇갈려 지나감 (몸이 겹치지 않음)");
+            Assert.IsTrue(sawSlash, "오르기(점프) 대신 칼로 벰");
+            Assert.IsFalse(sawClimb, "↑라도 오르기 동작이 아님");
+        }
+
+        // ---------------- R33: 벽타기 막는 짐 ----------------
+        [UnityTest]
+        public IEnumerator R33_WallRun_HasBlockerOnPath()
+        {
+            var walls = StageChart.Load().events.Where(e => e.kind == "wall_run").ToList();
+            Assert.Greater(walls.Count, 0);
+            yield return Load(walls[0].runBeat - 4);
+            foreach (var w in walls)
+            {
+                var block = Object.FindObjectsByType<Transform>(FindObjectsSortMode.None).Where(t => t.name.StartsWith("Prop_wallrun_block_cart")).Select(t => t.position).ToList();
+                var center = MapLayout.PointAt((w.runBeat + 2) * GameConfig.MetersPerBeat);
+                float nearest = block.Count == 0 ? 99f : block.Min(p => Vector3.Distance(new Vector3(p.x, 0, p.z), new Vector3(center.x, 0, center.z)));
+                Log($"R33 벽타기 {w.runBeat}박: 길 가운데와 가장 가까운 막는 수레 {nearest:0.00} m");
+                Assert.Less(nearest, 2.5f, $"{w.runBeat}박 벽타기 자리에 길을 막는 수레");
+            }
+            for (int k = 0; k < walls.Count; k++)
+            {
+                yield return Load(walls[k].runBeat - 1.5);
+                for (int f = 0; f < 2000 && boot.player.VisualRunBeat < walls[k].runBeat + 0.6; f++) yield return Step();
+                Shot(view, $"{Out}/R33_wallrun_{walls[k].runBeat}_fp.png");
+            }
+        }
+
+        // ---------------- R27 보강: 손가락으로 칼자루를 쥐는지 (손 확대) ----------------
+        /// <summary>오른손을 0.55 m 앞에서 찍고, 검지·약지 끝이 칼자루(손잡이 점)에서 가까운지 잰다.</summary>
+        IEnumerator HandShot(Animator a, Transform grip, string name, List<string> lines)
+        {
+            yield return null;
+            var hand = a.GetBoneTransform(HumanBodyBones.RightHand);
+            var tipI = a.GetBoneTransform(HumanBodyBones.RightIndexDistal) ?? a.GetBoneTransform(HumanBodyBones.RightIndexIntermediate);
+            var tipR = a.GetBoneTransform(HumanBodyBones.RightRingDistal) ?? a.GetBoneTransform(HumanBodyBones.RightRingIntermediate);
+            var root = a.transform;
+            var tp = ThirdPerson(hand.position, hand.position + (root.right * 0.35f + root.forward * 0.35f + Vector3.up * 0.15f));
+            tp.nearClipPlane = 0.02f;
+            tp.fieldOfView = 35f;
+            Shot(tp, $"{Out}/R27_hand_{name}.png");
+            Object.Destroy(tp.gameObject);
+            float dI = tipI != null && grip != null ? Vector3.Distance(tipI.position, grip.position) : -1f;
+            float dR = tipR != null && grip != null ? Vector3.Distance(tipR.position, grip.position) : -1f;
+            lines.Add($"{name}: 손가락 뼈 {(tipI != null ? "있음" : "없음")}, 검지 끝-칼자루 {dI:0.000} m, 약지 끝-칼자루 {dR:0.000} m");
+        }
+
+        [UnityTest]
+        public IEnumerator R27_Hands_FingersWrapHilt()
+        {
+            var lines = new List<string>();
+            yield return Load(256);
+            for (int i = 0; i < 4000 && dir.State != StageState.Combat; i++) yield return Step();
+            for (int i = 0; i < 100; i++) yield return Step();
+            var bossA = dir.boss.GetComponentInChildren<Animator>();
+            yield return HandShot(bossA, dir.boss.weaponVisual, "boss", lines);
+            var pSword = GameObject.Find("Player").GetComponentsInChildren<Transform>(true).First(t => t.name == "Sword");
+            yield return HandShot(body.animator, pSword, "player", lines);
+            var ev = StageChart.Load().events.First(e => e.EventKind == EventCatalog.Charge && e.IsEnemy);
+            yield return Load(ev.runBeat - 1);
+            for (int i = 0; i < 30; i++) yield return Step();
+            var prop = Object.FindObjectsByType<EventProp>(FindObjectsSortMode.None).First(p => p.runBeat == ev.runBeat);
+            var fa = prop.enemy.GetComponentInChildren<Animator>();
+            yield return HandShot(fa, prop.enemy.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == "WeaponGrip"), "charge_soldier", lines);
+            var spear = Object.FindObjectsByType<EnemyActor>(FindObjectsSortMode.None).FirstOrDefault(a => a.kind == "spear");
+            if (spear != null) yield return HandShot(spear.GetComponentInChildren<Animator>(), spear.weaponVisual, "spear", lines);
+            foreach (var l in lines) Log("R27 손 " + l);
+            Assert.IsTrue(lines.All(l => l.Contains("손가락 뼈 있음")), "모두 손가락 뼈가 있음");
+            Assert.IsTrue(lines.All(l => { var m = System.Text.RegularExpressions.Regex.Match(l, @"검지 끝-칼자루 ([0-9.]+)"); return m.Success && float.Parse(m.Groups[1].Value) < 0.09f; }), "검지 끝이 칼자루를 감쌈 (9 cm 안)");
+        }
+
+        // ---------------- R26: 콤보 단계 ----------------
+        [UnityTest]
+        public IEnumerator R26_ComboTiers_ColorScalePop()
+        {
+            yield return Load(0);
+            var hud = boot.hud;
+            var b = boot.score.Board;
+            var seen = new List<string>();
+            int[] marks = { 4, 5, 10, 20, 50 };
+            int n = 0;
+            foreach (var m in marks)
+            {
+                while (n < m) { b.Add(Judgement.Perfect, true); n++; }
+                yield return null;
+                seen.Add($"{m}:{hud.ComboTier}/{hud.ComboText.color}/{hud.ComboText.rectTransform.localScale.x:0.00}");
+                Assert.AreEqual(GameHud.TierOf(m), hud.ComboTier, $"콤보 {m} 단계");
+                if (m >= 5) Assert.Greater(hud.ComboPop, 0f, $"콤보 {m}: 단계가 오르는 순간 튐");
+            }
+            Log("R26 " + string.Join(" | ", seen));
+            Assert.AreEqual(4, hud.ComboTierUps, "단계 4번 오름 (5·10·20·50)");
+            var colors = Enumerable.Range(0, GameConfig.ComboTierColors.Length).Select(i => GameConfig.ComboTierColors[i]).Distinct().Count();
+            Assert.AreEqual(GameConfig.ComboTierColors.Length, colors, "단계마다 다른 색");
+        }
+    }
+}

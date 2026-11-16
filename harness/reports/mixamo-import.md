@@ -9,6 +9,9 @@
 | duck.fbx | True | True | 52 | mixamo.com | 1.53 | True |
 | falling_idle.fbx | True | True | 52 | mixamo.com | 0.70 | True |
 | flying_back.fbx | True | True | 52 | mixamo.com | 3.03 | True |
+| great_sword_block.fbx | True | True | 52 | mixamo.com | 0.87 | True |
+| great_sword_idle.fbx | True | True | 52 | mixamo.com | 2.00 | True |
+| great_sword_slash.fbx | True | True | 52 | mixamo.com | 1.80 | True |
 | hard_landing.fbx | True | True | 52 | mixamo.com | 2.00 | True |
 | hit_obstacle.fbx | True | True | 52 | mixamo.com | 1.80 | True |
 | kick.fbx | True | True | 52 | mixamo.com | 1.60 | True |

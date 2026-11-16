@@ -21,6 +21,7 @@
 | enemy_sword | enemy_sword_forward_run_1.fbx | True | True | 22 | Scene | 1.60 | True |
 | enemy_sword | enemy_sword_hit_fall.fbx | True | True | 22 | Scene | 1.73 | False |
 | enemy_sword | enemy_sword_light_hit_back.fbx | True | True | 22 | Scene | 1.63 | False |
+| enemy_sword | enemy_sword_rig_fingers.fbx | True | True | 52 | - | 0.00 | False |
 | enemy_sword | enemy_sword_standing_idle_1_looping.fbx | True | True | 22 | Take 001 | 10.23 | True |
 | enemy_sword | enemy_sword_struggle_fall.fbx | True | True | 22 | Scene | 5.00 | False |
 | enemy_sword | enemy_sword_sword_slash.fbx | True | True | 22 | Scene | 5.00 | False |
@@ -29,6 +30,7 @@
 | enemy_spear | enemy_spear_hit_fall.fbx | True | True | 22 | Scene | 1.73 | False |
 | enemy_spear | enemy_spear_jump_stab_land.fbx | True | True | 22 | Scene | 5.00 | False |
 | enemy_spear | enemy_spear_light_hit_back.fbx | True | True | 22 | Scene | 1.63 | False |
+| enemy_spear | enemy_spear_rig_fingers.fbx | True | True | 52 | - | 0.00 | False |
 | enemy_spear | enemy_spear_standing_idle_1_looping.fbx | True | True | 22 | Take 001 | 10.23 | True |
 | enemy_spear | enemy_spear_struggle_fall.fbx | True | True | 22 | Scene | 5.00 | False |
 | enemy_spear | enemy_spear_two_hand_attack.fbx | True | True | 22 | Scene | 31.90 | False |
@@ -37,6 +39,7 @@
 | boss | boss_heavy_hit_back.fbx | True | True | 22 | Scene | 1.90 | False |
 | boss | boss_hit_fall.fbx | True | True | 22 | Scene | 1.73 | False |
 | boss | boss_retreat_block.fbx | True | True | 22 | Scene | 3.73 | False |
+| boss | boss_rig_fingers.fbx | True | True | 52 | - | 0.00 | False |
 | boss | boss_spinning_slash.fbx | True | True | 22 | Scene | 4.70 | False |
 | boss | boss_standing_idle_1_looping.fbx | True | True | 22 | Take 001 | 10.23 | True |
 | boss | boss_sword_slash.fbx | True | True | 22 | Scene | 5.00 | False |

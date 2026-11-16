@@ -112,7 +112,7 @@ namespace RhythmActionGame
             attacking = false;
             State = "Idle";
             if (weaponPivot != null) { weaponPivot.localRotation = Quaternion.identity; weaponPivot.gameObject.SetActive(true); }
-            if (weaponVisual != null) weaponVisual.gameObject.SetActive(true);
+            if (weaponVisual != null) { RestoreWeapon(); weaponVisual.gameObject.SetActive(true); }
             if (anim != null) anim.OnReset();
             if (trail != null) { trail.emitting = false; trail.Clear(); }
             foreach (var g in ghosts) if (g != null) Destroy(g);
@@ -395,6 +395,52 @@ namespace RhythmActionGame
             return dressing ? Mathf.Max(best, DressingInstancer.TopBelow(from, currentY + 0.6f)) : best;   // 충돌체 없는 길 옆 집·담 지붕 (경계 상자 윗면, 대략)
         }
 
+        // ---------------- 작업 R31: 칼이 손에서 빠져 날아감 ----------------
+        Transform weaponHome;
+        Vector3 weaponHomePos;
+        Quaternion weaponHomeRot;
+        /// <summary>칼이 손에서 빠져 날아가 떨어졌는지 (테스트용).</summary>
+        public bool WeaponDropped { get; private set; }
+
+        void RestoreWeapon()
+        {
+            WeaponDropped = false;
+            if (weaponVisual == null || weaponHome == null) return;
+            weaponVisual.SetParent(weaponHome, false);
+            weaponVisual.localPosition = weaponHomePos;
+            weaponVisual.localRotation = weaponHomeRot;
+        }
+
+        /// <summary>손에서 빠진 칼: 쓰러지는 쪽 옆으로 튀어 올랐다가 돌며 떨어져 바닥(발 높이)에 눕는다.</summary>
+        IEnumerator TossWeapon(Vector3 away, float groundY)
+        {
+            if (weaponVisual == null) yield break;
+            if (weaponHome == null) { weaponHome = weaponVisual.parent; weaponHomePos = weaponVisual.localPosition; weaponHomeRot = weaponVisual.localRotation; }
+            WeaponDropped = true;
+            weaponVisual.SetParent(transform.parent, true);
+            var side = Vector3.Cross(Vector3.up, away).normalized * (Random.value < 0.5f ? -1f : 1f);
+            var vel = away * GameConfig.EnemyBody.WeaponTossOut + side * GameConfig.EnemyBody.WeaponTossSide + Vector3.up * GameConfig.EnemyBody.WeaponTossUp;
+            var spinAxis = Vector3.Cross(Vector3.up, vel).normalized;
+            if (spinAxis.sqrMagnitude < 1e-4f) spinAxis = Vector3.right;
+            for (float t = 0f; t < 3f; t += Time.deltaTime)
+            {
+                float dt = Frozen ? 0f : Time.deltaTime;
+                vel += Vector3.down * 9.8f * dt;
+                weaponVisual.position += vel * dt;
+                weaponVisual.Rotate(spinAxis, GameConfig.EnemyBody.WeaponTossSpinDeg * dt, Space.World);
+                if (vel.y < 0f && weaponVisual.position.y <= groundY + 0.05f)
+                {
+                    // 바닥에 눕힘: 칼 긴 축을 수평으로
+                    var p = weaponVisual.position; p.y = groundY + 0.05f; weaponVisual.position = p;
+                    var fwd = Vector3.ProjectOnPlane(weaponVisual.forward, Vector3.up);
+                    if (fwd.sqrMagnitude < 1e-4f) fwd = away;
+                    weaponVisual.rotation = Quaternion.LookRotation(fwd.normalized, Vector3.up);
+                    yield break;
+                }
+                yield return null;
+            }
+        }
+
         IEnumerator DefeatRoutine(ExecutionKind how, Vector3 away)
         {
             if (how == ExecutionKind.KickOffRoof) { yield return KickOffRoofRoutine(away); yield break; }
@@ -402,6 +448,23 @@ namespace RhythmActionGame
             var startRot = transform.rotation;
             if (how == ExecutionKind.DisarmSlash && weaponPivot != null) weaponPivot.gameObject.SetActive(false); // 칼을 빼앗김
             if (how == ExecutionKind.DisarmSlash && weaponVisual != null) weaponVisual.gameObject.SetActive(false);
+            if (anim != null)
+            {
+                // 작업 R31: 모델 적은 쓰러지는 동작(클립)이 몸을 눕힌다 — 몸 전체를 돌리면 선 자세로 누워 팔을 벌리고 칼이 떠 보였다.
+                // 윈드밀은 바깥으로 날아가고(Flying Back Death), 칼은 손에서 빠져 날아간다.
+                if (how != ExecutionKind.DisarmSlash) StartCoroutine(TossWeapon(away, start.y));
+                float d = how == ExecutionKind.Windmill ? 1.0f : 0.6f;
+                float dist = how == ExecutionKind.Windmill ? GameConfig.EnemyBody.WindmillFlyMeters : 0.4f;
+                for (float t = 0; t < d; t += Frozen ? 0f : Time.deltaTime)
+                {
+                    float k = t / d;
+                    float e = 1f - (1f - k) * (1f - k);
+                    transform.position = start + away * (dist * e) + Vector3.up * (how == ExecutionKind.Windmill ? 1.2f * Mathf.Sin(k * Mathf.PI) : 0f);
+                    yield return null;
+                }
+                transform.position = start + away * dist;
+                yield break;
+            }
             float dur = how == ExecutionKind.KickOffRoof || how == ExecutionKind.Windmill ? 1.0f : 0.6f;
             for (float t = 0; t < dur; t += Frozen ? 0f : Time.deltaTime)
             {

@@ -67,6 +67,22 @@ namespace RhythmActionGame
         /// <summary>회색 상자 상태 이름: Idle, Active, Done, Enemy_Down 등 (테스트용).</summary>
         public string State { get; private set; } = "Idle";
         public bool EnemyDown { get; private set; }
+
+        EnemyFigureRun figure;
+        bool figureChecked;
+        EnemyFigureRun Figure { get { if (!figureChecked) { figureChecked = true; figure = enemy != null ? enemy.GetComponent<EnemyFigureRun>() : null; } return figure; } }
+
+        /// <summary>
+        /// 작업 R31·R32: PERFECT로 쓰러짐. 모델 적은 쓰러지는 동작(클립)이 몸을 눕힌다 — 몸 전체를 돌리면 선 자세로 누워 팔을 벌린 채 보였다.
+        /// 회색 상자(모델 없음)만 예전처럼 몸을 돌린다.
+        /// </summary>
+        Quaternion Down(Quaternion q, Quaternion fall)
+        {
+            EnemyDown = true;
+            if (Figure == null) return q * fall;
+            Figure.PlayDefeat();
+            return q;
+        }
         /// <summary>추격 적이 집 사이 틈을 뛰어넘는 중 (작업 R07, 테스트용).</summary>
         public bool ChaseHopping { get; private set; }
 
@@ -102,6 +118,7 @@ namespace RhythmActionGame
                 parts[i].gameObject.SetActive(true);
             }
             if (enemy != null) { enemy.localPosition = enemyHome; enemy.localRotation = enemyHomeRot; enemy.gameObject.SetActive(true); }
+            if (Figure != null) Figure.ResetFigure();
             EnemyDown = false;
             State = "Idle";
             if (kind == StageChart.TypeForeshadow) gameObject.SetActive(false);
@@ -217,7 +234,7 @@ namespace RhythmActionGame
             w.y = y;
             enemy.position = w;
             var rot = Quaternion.LookRotation(fwd, Vector3.up);   // 달리는 방향을 봄
-            if (u > 0 && r == Judgement.Perfect) { rot = rot * Quaternion.Euler(0, 0, -cs * Mathf.Min(90f, u * 180f)); EnemyDown = true; }
+            if (u > 0 && r == Judgement.Perfect) rot = Down(rot, Quaternion.Euler(0, 0, -cs * Mathf.Min(90f, u * 180f)));
             enemy.rotation = rot;
             return true;
         }
@@ -271,6 +288,8 @@ namespace RhythmActionGame
 
         void AnimateEnemy(double t, StageDirector.ObstacleRun run, System.Func<int, float> slotZ, float playerZ)
         {
+            // 작업 R31·R32: 쓰러지는 동작을 시작한 사건 적은 그 자리에 남는다 (누운 채 길을 따라 미끄러지지 않게)
+            if (Figure != null && Figure.Down) { State = "Enemy_Down"; return; }
             string how = companion != "" ? companion : kind;
             var r = Result(run, 0);
             float hitT = slotOffsets.Length > 0 ? slotOffsets[0] : 2f;
@@ -283,9 +302,12 @@ namespace RhythmActionGame
                     // 앞에서 달려와 판정 시점에 플레이어와 만남. PERFECT 쓰러짐, NORMAL 스쳐 지나감, FAIL 그 자리
                     // 작업 R18 (GDD-beta B19.4): 멀리서 대기 → 걷기 → 점점 빨라져 판정 2박 전부터 질주 (갑자기 튀어나오지 않게)
                     p.z = slotZ(0) + ChargeAhead((float)(hitT - t));
+                    // 작업 R32 (사용자 피드백 "같은 높이로 어떻게 피한 거냐"): 마지막 ChargePassBeats박 동안 한쪽으로 비켜 와서 엇갈려 지나간다
+                    // (플레이어는 반대쪽으로 비킴, EventMotion). 판정 뒤에도 그 옆 줄을 유지.
+                    p.x = enemyHome.x + GameConfig.Map.ChargePassSide * GameConfig.Map.ChargePassOffset * Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(1f - (float)(hitT - t) / GameConfig.Map.ChargePassBeats));
                     if (u > 0 && r.HasValue)
                     {
-                        if (r == Judgement.Perfect) { q = enemyHomeRot * Quaternion.Euler(-Mathf.Min(90f, u * 180f), 0, 0); EnemyDown = true; }
+                        if (r == Judgement.Perfect) q = Down(enemyHomeRot, Quaternion.Euler(-Mathf.Min(90f, u * 180f), 0, 0));   // 엇갈리며 베여 쓰러짐
                         else if (r == Judgement.Normal) p.z = slotZ(0) - u * 4f;
                     }
                     // 작업 R07 후속 (사용자 피드백 2026-11-17 "벽을 뚫고 오네"): 로컬 직선이 아니라 실제 길을 따라 달려온다 (모퉁이에서 건물을 뚫지 않게)
@@ -314,12 +336,12 @@ namespace RhythmActionGame
                         var toPath = new Vector3(0f, 0f, slotZ(0)) - p; toPath.y = 0f;
                         var lookDir = k <= 0f ? -runDir : k < 0.8f ? runDir : Vector3.Lerp(runDir.normalized, toPath.normalized, (k - 0.8f) / 0.2f);
                         q = lookDir.sqrMagnitude > 1e-4f ? Quaternion.LookRotation(lookDir.normalized) : enemyHomeRot;
-                        if (u > 0 && r == Judgement.Perfect) { q = q * Quaternion.Euler(0, 0, side * Mathf.Min(90f, u * 180f)); EnemyDown = true; }
+                        if (u > 0 && r == Judgement.Perfect) q = Down(q, Quaternion.Euler(0, 0, side * Mathf.Min(90f, u * 180f)));
                         break;
                     }
                     float pop = Mathf.Clamp01((float)(t - (hitT - 1.0)));
                     p = new Vector3(-side * Mathf.Lerp(3.2f, 1.0f, pop), float.IsNaN(ambushEndY) ? enemyHome.y : Mathf.Lerp(enemyHome.y, ambushEndY, pop), slotZ(0));
-                    if (u > 0 && r == Judgement.Perfect) { q = enemyHomeRot * Quaternion.Euler(0, 0, side * Mathf.Min(90f, u * 180f)); EnemyDown = true; }
+                    if (u > 0 && r == Judgement.Perfect) q = Down(enemyHomeRot, Quaternion.Euler(0, 0, side * Mathf.Min(90f, u * 180f)));
                     break;
                 case EventCatalog.Chase:
                     // 옆 지붕에서 나란히 달림 (플레이어보다 2 m 앞)
@@ -327,7 +349,7 @@ namespace RhythmActionGame
                     if (ChaseOnPath(t, cs, u, r)) { if (EnemyDown) State = "Enemy_Down"; return; }
                     p = new Vector3(cs * chaseLateral, enemyHome.y, playerZ + 2f);
                     q = enemyHomeRot * Quaternion.Euler(0, 180f, 0);   // 작업 R07: 플레이어 쪽이 아니라 달리는 방향을 봄 (뒷걸음질로 달리지 않게)
-                    if (u > 0 && r == Judgement.Perfect) { q = q * Quaternion.Euler(0, 0, -cs * Mathf.Min(90f, u * 180f)); EnemyDown = true; }
+                    if (u > 0 && r == Judgement.Perfect) q = Down(q, Quaternion.Euler(0, 0, -cs * Mathf.Min(90f, u * 180f)));
                     break;
             }
             enemy.localPosition = p;

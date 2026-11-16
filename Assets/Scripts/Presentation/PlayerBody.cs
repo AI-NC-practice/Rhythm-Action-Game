@@ -26,6 +26,8 @@ namespace RhythmActionGame
         public Transform bodyOffset;
         /// <summary>화면 카메라 (PlayerCamera, 작업 R06). 목 단면이 화면에 들어오면 몸을 숨긴다.</summary>
         public Camera viewCamera;
+        /// <summary>오른손에 쥔 칼 (작업 R27). 전투 중에는 1인칭 화면에도 보인다.</summary>
+        public Renderer[] swordRenderers;
         /// <summary>상태 이름별 클립 길이 (초). SceneBuilder가 채운다.</summary>
         public string[] stateNames;
         public float[] stateSeconds;
@@ -70,6 +72,9 @@ namespace RhythmActionGame
             return GameConfig.Body.WallRunFootOffset;
         }
         bool inverted;
+
+        /// <summary>3인칭 컷 중 (BulletTimeFx가 켬): 머리 없는 1인칭용 몸은 숨긴다.</summary>
+        public bool ThirdPersonCut { get; set; }
 
         /// <summary>화면에 그리는 몸을 숨겼는지 (테스트용).</summary>
         public bool BodyHidden { get; private set; }
@@ -129,6 +134,8 @@ namespace RhythmActionGame
         void OnSlotJudged(StageDirector.ObstacleRun run, int slot, Judgement r)
         {
             var key = slot >= 0 && slot < run.SlotKeys.Count ? run.SlotKeys[slot] : run.Event.Key;
+            // 작업 R32: 돌진 적과 엇갈리며 베기 — ↑라서 오르기(점프)가 나오던 것을 칼로 베는 동작으로
+            if (run.Event != null && run.Event.EventKind == EventCatalog.Charge && r != Judgement.Fail) { PlayOneShot(BodyMoves.SwordSlash); return; }
             Play(run.HasCategory ? run.Category : (ObstacleCategory?)null, key, r);
         }
 
@@ -145,6 +152,12 @@ namespace RhythmActionGame
         void OnCueJudged(JudgeCue cue, Judgement r)
         {
             if (r == Judgement.Fail && cue.Tag is CombatStep s && s.Kind == CombatStepKind.Attack) PlayOneShot(BodyMoves.Hit);
+            // 작업 R27: 내 칼로 같이 싸운다 — 내 공격·칼 겨루기 성공은 베기, 적 공격을 ↑로 막으면 칼로 막기 (칼끼리 부딪침)
+            else if (r != Judgement.Fail && cue.Tag is CombatStep c)
+            {
+                if (c.Kind == CombatStepKind.Strike || c.Kind == CombatStepKind.Lock) PlayOneShot(BodyMoves.SwordSlash);
+                else if (c.Kind == CombatStepKind.Attack && c.Key == ArrowKey.Up) PlayOneShot(BodyMoves.SwordBlock);
+            }
         }
 
         /// <summary>원래 속도로 한 번 재생하고 Run으로 (처형·피격).</summary>
@@ -208,6 +221,7 @@ namespace RhythmActionGame
         {
             if (animator == null) return;
             if (lowPosePending) SnapToLowestPose();
+            CapExecution();
             double now = clock != null ? clock.Now : Time.unscaledTimeAsDouble;
             double dt = double.IsNaN(lastNow) ? 0 : now - lastNow;
             lastNow = now;
@@ -220,6 +234,34 @@ namespace RhythmActionGame
         }
 
         float followDt;
+
+        bool swordShown;
+        /// <summary>칼을 1인칭 화면에 보이는 중인지 (작업 R27, 테스트용).</summary>
+        public bool SwordVisible => swordShown;
+
+        /// <summary>작업 R27: 전투 중에는 손에 쥔 칼을 1인칭 화면에도 그린다 (평소에는 그림자만). 3인칭 컷이 켠 것은 건드리지 않는다.</summary>
+        void UpdateSwordVisibility()
+        {
+            if (swordRenderers == null) return;
+            bool want = director != null && director.State == StageState.Combat;
+            if (want == swordShown) return;
+            swordShown = want;
+            foreach (var r in swordRenderers) if (r != null) r.shadowCastingMode = want ? ShadowCastingMode.On : ShadowCastingMode.ShadowsOnly;
+        }
+
+        /// <summary>
+        /// 작업 R34: 처형 동작은 ExecShowBeats 박만 보여 주고 달리기·전투 대기로 넘긴다 — 처형 클립 뒷부분에서 팔이 1인칭 화면을 오래 가렸다.
+        /// </summary>
+        void CapExecution()
+        {
+            if (animator == null || clock == null || string.IsNullOrEmpty(LastState) || !LastState.StartsWith("Exec_") || double.IsNaN(ExecStartBeat)) return;
+            if (clock.CurrentBeat - ExecStartBeat < GameConfig.Body.ExecShowBeats) return;
+            ExecCappedCount++;
+            SetLoopState(BodyMoves.Run);
+        }
+
+        /// <summary>처형 동작을 줄여 끝낸 횟수 (테스트용).</summary>
+        public int ExecCappedCount { get; private set; }
 
         static readonly int RunHash = Animator.StringToHash(BodyMoves.Run);
         static readonly int CombatIdleHash = Animator.StringToHash(BodyMoves.CombatIdle);
@@ -304,8 +346,57 @@ namespace RhythmActionGame
         }
 
         /// <summary>머리 뼈 따라가기는 LateUpdate(Cinemachine Brain보다 먼저, 실행 순서 −50)에서, 시간은 박자 시계 시간으로.</summary>
+        // ---------------- 작업 R27 보강 (사용자 피드백 "손가락을 구부려야"): 칼을 쥔 오른손 손가락 ----------------
+        HumanPoseHandler poseHandler;
+        HumanPose pose;
+        int[] gripMuscles;
+        float[] gripValues;
+        /// <summary>오른손 손가락을 쥔 자세로 덮어쓴 횟수 (테스트용).</summary>
+        public int GripApplied { get; private set; }
+
+        /// <summary>
+        /// 칼을 쥔 오른손: 손가락 근육을 칼자루를 감아쥔 값으로 덮어쓴다 (VARCO 동작에는 손가락 데이터가 없어 손이 펴져 있었다).
+        /// Mixamo 칼 동작은 이미 쥐고 있어 더 많이 굽힌 값만 남긴다.
+        /// </summary>
+        void ApplyGrip()
+        {
+            if (animator == null || animator.avatar == null || !animator.isHuman) return;
+            if (poseHandler == null)
+            {
+                poseHandler = new HumanPoseHandler(animator.avatar, animator.transform);
+                var names = HumanTrait.MuscleName;
+                var ids = new System.Collections.Generic.List<int>(); var vals = new System.Collections.Generic.List<float>();
+                for (int i = 0; i < names.Length; i++)
+                {
+                    string n = names[i].Replace('.', ' ');   // "Right Index 1 Stretched" (곡선 이름 "RightHand.Index.1 Stretched"도 같게)
+                    if (!n.StartsWith("RightHand ") && !n.StartsWith("Right ")) continue;
+                    float v = float.NaN;
+                    foreach (var f in new[] { "Index", "Middle", "Ring", "Little" })
+                    {
+                        if (n.EndsWith(f + " 1 Stretched")) v = GameConfig.Body.GripCurl1;
+                        else if (n.EndsWith(f + " 2 Stretched") || n.EndsWith(f + " 3 Stretched")) v = GameConfig.Body.GripCurl23;
+                        else if (n.EndsWith(f + " Spread")) v = 0f;
+                    }
+                    if (n.EndsWith("Thumb 1 Stretched")) v = GameConfig.Body.GripThumb;
+                    else if (n.EndsWith("Thumb 2 Stretched") || n.EndsWith("Thumb 3 Stretched")) v = GameConfig.Body.GripThumb;
+                    if (!float.IsNaN(v)) { ids.Add(i); vals.Add(v); }
+                }
+                gripMuscles = ids.ToArray(); gripValues = vals.ToArray();
+            }
+            if (gripMuscles.Length == 0) return;
+            poseHandler.GetHumanPose(ref pose);
+            for (int k = 0; k < gripMuscles.Length; k++)
+            {
+                int m = gripMuscles[k];
+                pose.muscles[m] = Mathf.Min(pose.muscles[m], gripValues[k]);   // 더 굽힌 쪽 (값이 작을수록 굽힘)
+            }
+            poseHandler.SetHumanPose(ref pose);
+            GripApplied++;
+        }
+
         void LateUpdate()
         {
+            ApplyGrip();
             float target = actionLeft > 0f ? 1f : 0f;
             // 동작이 시작되면 바로 1 (판정과 함께 카메라 궤적이 튀므로 몸도 같은 프레임에), 끝날 때만 부드럽게 달리기로
             actionBlend = target >= actionBlend ? target : Mathf.Lerp(actionBlend, target, 1f - Mathf.Exp(-GameConfig.Body.ActionBlendSharpness * followDt));
@@ -314,6 +405,7 @@ namespace RhythmActionGame
             FollowHead(followDt, motionPos);
             followDt = 0f;
             UpdateVisibility();
+            UpdateSwordVisibility();
         }
 
         /// <summary>
@@ -352,6 +444,7 @@ namespace RhythmActionGame
                 }
             }
             if (actionBlend <= 0f) inverted = false;
+            if (ThirdPersonCut) hide = true;   // 3인칭 컷(대문·윈드밀)은 머리 있는 원래 몸이 보인다
             BodyHidden = hide;
             VisibleBody.enabled = !hide;
         }

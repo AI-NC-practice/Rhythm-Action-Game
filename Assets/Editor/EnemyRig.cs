@@ -49,7 +49,8 @@ namespace RhythmActionGame.EditorTools
         }
 
         /// <summary>메시가 든 기본 FBX (첫 동작 = 대기).</summary>
-        public static string BaseFbx(string model) => FbxPath(model, EnemyMoves.IdleClip(model));
+        /// <summary>모델(메시·아바타) FBX — 작업 R27 보강: VARCO "humanoid-fingers"로 다시 리깅한 것 (손가락 뼈가 있어 칼자루를 쥘 수 있다).</summary>
+        public static string BaseFbx(string model) => FbxPath(model, "rig_fingers");
 
         public static Built Controller(string model)
         {
@@ -228,6 +229,11 @@ namespace RhythmActionGame.EditorTools
                 animator.Update(0f);
             }
             AttachWeapon(animator, root.transform, kind, out weaponVisual, out tip);
+            animator.Play(EnemyMoves.Idle, 0, 0f);
+            animator.Update(0f);
+            var fg = root.AddComponent<FingerGrip>();   // 작업 R27 보강: 손가락으로 칼자루를 감아쥠
+            fg.animator = animator;
+            fg.leftHand = kind == "spear";            // 창은 두 손으로
             return animator;
         }
 
@@ -246,20 +252,25 @@ namespace RhythmActionGame.EditorTools
             return hi - lo;
         }
 
-        static void AttachWeapon(Animator animator, Transform root, string kind, out Transform weaponVisual, out Transform tip)
+        /// <summary>무기를 오른손 뼈에 쥐게 붙인다 (손잡이 점 = 손바닥). 작업 R27: 플레이어 칼도 이것을 쓴다.</summary>
+        internal static void AttachWeapon(Animator animator, Transform root, string kind, out Transform weaponVisual, out Transform tip)
         {
             string id = EnemyMoves.WeaponOf(kind);
             bool spear = id == "weapon_spear";
             float length = spear ? GameConfig.EnemyBody.SpearLength : GameConfig.EnemyBody.SwordLength;
+            // 작업 R27 보강: T자 기본 자세(손바닥 아래)에서 붙인다 — 대기 자세에서 붙이면 칼이 손끝 연장선처럼 나왔다.
+            animator.Rebind();
             var hand = animator.GetBoneTransform(HumanBodyBones.RightHand);
             var lower = animator.GetBoneTransform(HumanBodyBones.RightLowerArm);
 
             var grip = new GameObject("WeaponGrip").transform;
             grip.SetParent(hand, false);
             var forearm = (hand.position - lower.position).normalized;
-            var blade = Vector3.ProjectOnPlane(root.forward, forearm).normalized;
+            // 칼자루는 팔뚝에 거의 수직으로 주먹 가운데를 가로지르고, 칼날은 엄지 쪽(T자에서 앞)으로 조금 위로
+            var blade = Vector3.ProjectOnPlane(root.forward + root.up * GameConfig.EnemyBody.GripBladeLift, forearm).normalized;
             if (blade.sqrMagnitude < 1e-4f) blade = root.forward;
-            grip.position = hand.position + forearm * 0.07f;
+            var palm = Vector3.ProjectOnPlane(-root.up, forearm).normalized;   // T자에서 손바닥은 아래
+            grip.position = hand.position + forearm * GameConfig.EnemyBody.GripAlongHand + palm * GameConfig.EnemyBody.GripPalmDepth;
             grip.rotation = Quaternion.LookRotation(blade, -forearm);
 
             var w = (GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>($"Assets/Art/Models/{id}.glb"));

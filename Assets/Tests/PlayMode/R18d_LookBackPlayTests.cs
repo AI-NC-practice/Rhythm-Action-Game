@@ -139,11 +139,11 @@ namespace RhythmActionGame.Tests
                 double clock0 = double.NaN, clock1 = double.NaN;
                 var hitTargets = new List<double>();
                 bool shot = false;
-                while (boot.player.VisualRunBeat < cut + GameConfig.Fx.LookBackBeats + 0.6 && frames < 6000)
+                while (boot.player.VisualRunBeat < cut + LookBackCut.LengthOf(k) + 0.6 && frames < 6000)
                 {
                     // 컷 동안 누른 판정 박을 모은다
                     foreach (var c in boot.judge.Cues.ToArray())
-                        if (!c.Judged && c.Appeared && now + 0.01 >= boot.clock.TimeOfBeat(c.TargetBeat) - 1e-6 && lb.Active) hitTargets.Add(c.TargetBeat);
+                        if (!c.Judged && c.Appeared && c.AffectsSpeed && now + 0.01 >= boot.clock.TimeOfBeat(c.TargetBeat) - 1e-6 && lb.Active) hitTargets.Add(c.TargetBeat);   // 작업 R29: 2박 컷 — 장구 노트는 겹칠 수 있음(원은 화면 가장자리에 보임), 방향키 판정은 없어야 함
                     yield return Step();
                     frames++;
                     if (lb.Active)
@@ -153,7 +153,7 @@ namespace RhythmActionGame.Tests
                         clock1 = boot.clock.CurrentBeat;
                         maxYaw = Mathf.Max(maxYaw, Mathf.Abs(lb.CurrentYaw));
                         if (boot.judge.Cues.Any(c => c.AffectsSpeed && c.Appeared && !c.Judged)) ringFrames++;
-                        double u = (boot.player.VisualRunBeat - cut) / GameConfig.Fx.LookBackBeats;
+                        double u = (boot.player.VisualRunBeat - cut) / LookBackCut.LengthOf(k);
                         if (u > 0.4 && u < 0.6)
                         {
                             int n = LookBackCut.Enemies().Count(t => Visible(t.position) && (t.position - view.transform.position).magnitude < 45f);
@@ -170,9 +170,9 @@ namespace RhythmActionGame.Tests
                 Assert.Greater(maxYaw, 150f, "뒤로 150° 넘게: " + line);
                 Assert.AreEqual(0f, endYaw, 0.01f, "끝나면 앞으로: " + line);
                 Assert.AreEqual(0, ringFrames, "판정 원이 떠 있는 동안 없음: " + line);
-                Assert.AreEqual(0, hitTargets.Count, "컷 동안 칠 판정 없음: " + line);
+                Assert.AreEqual(0, hitTargets.Count, "컷 동안 칠 방향키 판정 없음: " + line);
                 Assert.GreaterOrEqual(seenMid, 1, "쫓는 적이 보임: " + line);
-                Assert.AreEqual(GameConfig.Fx.LookBackBeats, (clock1 - clock0), 0.15, "1박 길이: " + line);
+                Assert.AreEqual(LookBackCut.LengthOf(k), (clock1 - clock0), 0.15, "컷 길이 (R29: 2박, 90.5박만 1.5박): " + line);
             }
         }
 

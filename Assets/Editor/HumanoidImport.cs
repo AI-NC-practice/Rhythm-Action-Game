@@ -104,7 +104,7 @@ namespace RhythmActionGame.EditorTools
                 imp.materialImportMode = ModelImporterMaterialImportMode.None;
                 var clips = imp.defaultClipAnimations;
                 string nameMx = Path.GetFileNameWithoutExtension(path);
-                bool loopMx = nameMx == "walk" || nameMx == "falling_idle";   // 작업 R18 후속: 걷기, R18c: 공중 자세는 반복
+                bool loopMx = nameMx == "walk" || nameMx == "falling_idle" || nameMx == "great_sword_idle";   // 작업 R28: 칼 든 대기 반복   // 작업 R18 후속: 걷기, R18c: 공중 자세는 반복
                 foreach (var c in clips) { c.loopTime = loopMx; c.lockRootRotation = false; c.lockRootHeightY = true; c.lockRootPositionXZ = false; c.keepOriginalOrientation = false; c.keepOriginalPositionXZ = false; c.keepOriginalPositionY = false; c.heightFromFeet = true; }   // T13: 앞뒤·좌우 이동과 방향은 루트로 빼서 버림(applyRootMotion 끔 → 제자리), 높이는 자세에 남김(점프), 발 높이 기준
                 imp.clipAnimations = clips;
                 imp.SaveAndReimport();
