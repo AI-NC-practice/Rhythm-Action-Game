@@ -511,3 +511,20 @@ T10은 VARCO 전용 플로우(flow_id 비어 있음)와 포인트 승인을 기�
 - 테스트 T11_CharacterImportTests 2개. unity-verify EditMode 178/178, PlayMode 154/154.
 - 포인트: 이미지 200 + 3D 800 = 1,000 (Remesh·Rig·Animate 0). run_flow 3회.
 평가: evaluator PASS (harness/reports/T11-eval-1.md). 다음: T12 (Mixamo 동작 — 로그인은 사용자).
+
+## T12 Mixamo 동작 받기 — 진행 중 (2026-11-16)
+필요 동작 목록 (VARCO 카탈로그에 없거나 부족한 것, 주인공 1인칭 전신용. Mixamo 검색어 후보 → 쓰는 곳):
+| # | 동작 | Mixamo 검색어(후보) | 쓰는 곳 |
+|---|---|---|---|
+| 1 | 파쿠르 넘기 | Parkour Vault / Running Vault | 수레·낮은 담·항아리 ↑ 넘기 |
+| 2 | 미끄러지기 | Running Slide | 빨랫줄·처마 ↓, 닫히는 대문 |
+| 3 | 벽타기 | Wall Run (없으면 Running + 기울기) | 벽 달리기 ←/→ |
+| 4 | 휘청임 | Stumble Backwards / Tripping | 사건 FAIL |
+| 5 | 부딪혀 튕겨남 | Hit Reaction / Falling Back Death(짧게) | 장애물 FAIL |
+| 6 | 숙여 피하기 | Dodging (duck) | 가로베기 ↓ 회피 |
+| 7 | 옆 비키기 | Dodging Right / Dodging Left | 내려베기 ←/→ 회피 |
+| 8 | 찌르기 | Stabbing / Sword Stab | 내 공격(스트라이크) |
+| 9 | 칼 뺏기 | Disarmed / Sword Disarm | 마무리 처형(칼 빼앗음) |
+| 10 | 발차기 | Mma Kick / Front Kick | 지붕 처형 발차기 |
+| 11 | 윈드밀 | Spin Attack / Great Sword Slash(회전) | 포위 3단계 윈드밀 |
+받기 설정: Without Skin, FBX, 30 fps → Assets/Art/Animations/Mixamo/. 로그인은 사용자(앱 브라우저), 다운로드는 Claude (사용자 결정 2026-11-11).
