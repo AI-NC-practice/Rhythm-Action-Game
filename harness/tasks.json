@@ -1943,8 +1943,8 @@
                                          "PlayMode 테스트: 콤보 단계별로 다른 이펙트 상태",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  1,
+                      "status":  "done",
+                      "attempts":  2,
                       "max_attempts":  3,
                       "notes":  "사용자 요청 2026-11-17: 지금 목표·빌드를 끝낸 뒤 버그 잡고 추가."
                   },
@@ -1962,8 +1962,8 @@
                                          "PlayMode 미리보기 PNG(막기·베기 순간 1인칭)와 칼 손잡이-손 거리 측정",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  1,
+                      "status":  "done",
+                      "attempts":  2,
                       "max_attempts":  3,
                       "notes":  "사용자 피드백 2026-11-17 (빌드 플레이, 묶음 E로 한 번에 구현·검증)."
                   },
@@ -1981,8 +1981,8 @@
                                          "3인칭 미리보기 PNG(무사·병사)",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  2,
                       "max_attempts":  3,
                       "notes":  "사용자 피드백 2026-11-17 (빌드 플레이, 묶음 E로 한 번에 구현·검증)."
                   },

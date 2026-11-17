@@ -104,6 +104,45 @@ namespace RhythmActionGame.Tests
             return l != null && r != null ? Vector3.Distance(l.position, r.position) : -1f;
         }
 
+        /// <summary>적을 플레이어 쪽에서 40° 비스듬히 앞모습으로 찍는다 (모든 LateUpdate 뒤 최종 자세).</summary>
+        IEnumerator FrontShot(Transform who, string path)
+        {
+            var probe = new GameObject("EndProbe").AddComponent<EndProbe>();
+            probe.act = () =>
+            {
+                var p = who.position;
+                var to = view.transform.position - p; to.y = 0f;
+                if (to.sqrMagnitude < 1e-4f) to = who.forward;
+                var from = p + Quaternion.Euler(0f, 40f, 0f) * to.normalized * 3.2f + Vector3.up * 1.5f;
+                var tp = ThirdPerson(p + Vector3.up * 1.1f, from);
+                Shot(tp, path);
+                Object.Destroy(tp.gameObject);
+            };
+            yield return null;
+            Object.Destroy(probe.gameObject);
+        }
+
+        /// <summary>플레이어(머리 있는 원래 몸, 평소 그림자만)를 앞에서 비스듬히 찍는다 — 1인칭용 몸은 잠시 끔.</summary>
+        IEnumerator PlayerShot(string path)
+        {
+            var probe = new GameObject("EndProbe").AddComponent<EndProbe>();
+            probe.act = () =>
+            {
+                var rs = body.animator.GetComponentsInChildren<Renderer>(true).Where(r => r != body.VisibleBody && r.shadowCastingMode == UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly).ToArray();
+                foreach (var r in rs) r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+                bool vb = body.VisibleBody.enabled; body.VisibleBody.enabled = false;
+                var t = body.animator.transform;
+                var fwd = t.forward; fwd.y = 0f; fwd.Normalize();
+                var tp = ThirdPerson(t.position + Vector3.up * 1.1f, t.position + Quaternion.Euler(0f, 35f, 0f) * fwd * 2.8f + Vector3.up * 1.5f);
+                Shot(tp, path);
+                Object.Destroy(tp.gameObject);
+                foreach (var r in rs) r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
+                body.VisibleBody.enabled = vb;
+            };
+            yield return null;
+            Object.Destroy(probe.gameObject);
+        }
+
         static void Log(string line) { Debug.Log("[BundleE] " + line); File.AppendAllText($"{Out}/summary.txt", line + "\n"); }
 
         // ---------------- R27 + R28: 무사 결투 — 칼 쥐기, 막기·베기, 칼 든 대기 ----------------
@@ -125,7 +164,7 @@ namespace RhythmActionGame.Tests
             Assert.IsTrue(body.SwordVisible, "전투 중 1인칭에 내 칼이 보임");
             bool sawSlash = false, sawBlock = false, blockSwordOnScreen = false; float blockGuard = 0f; Vector3 bladeCam = Vector3.zero;
             int clash0 = body.ClashCount;
-            float bossGapIdle = -1f, maxBossGap = 0f;
+            float bossGapIdle = -1f, maxBossGap = 0f; int bossIdleFrames = 0;
             var bossAnim = dir.boss.GetComponentInChildren<Animator>();
             for (int f = 0; f < 3000 && boot.clock.CurrentBeat < enc.StartBeat + 24; f++)
             {
@@ -169,6 +208,8 @@ namespace RhythmActionGame.Tests
                     float g = HandGap(bossAnim);
                     maxBossGap = Mathf.Max(maxBossGap, g);
                     if (bossGapIdle < 0f) bossGapIdle = g;
+                    // 3인칭 미리보기: 무사 대기 자세 — 대기 상태일 때, 플레이어 쪽에서 비스듬히 (앞모습). 플레이어 대기 검사는 일반 전투 테스트에서 (R28 평가 1회차)
+                    if (++bossIdleFrames == 10) yield return FrontShot(dir.boss.transform, $"{Out}/R28_boss_stance_tp.png");
                 }
             }
             Log($"R27 베기 {sawSlash}, 막기 {sawBlock}; R28 무사 대기 두 손 거리 처음 {bossGapIdle:0.00} 최대 {maxBossGap:0.00} m");
@@ -182,20 +223,7 @@ namespace RhythmActionGame.Tests
             Assert.IsTrue(sawBlock, "적 공격 ↑ 성공 → 칼로 막음");
             Assert.Greater(bossGapIdle, 0f, "무사 대기 상태를 봄");
             Assert.Less(maxBossGap, 0.7f, "무사 대기: 두 손으로 칼을 쥔 자세 (팔 벌림 아님)");
-            // 3인칭 미리보기: 무사 대기 자세
-            var bp = dir.boss.transform.position;
-            var tp = ThirdPerson(bp + Vector3.up * 1.1f, bp + dir.boss.transform.forward * 3.5f + Vector3.up * 1.6f);
-            Shot(tp, $"{Out}/R28_boss_stance_tp.png");
-            Object.Destroy(tp.gameObject);
-            // 플레이어 전투 대기도 칼 든 자세
-            for (int f = 0; f < 200 && body.LastState != BodyMoves.CombatIdle; f++) yield return Step();
-            for (int f = 0; f < 30; f++) yield return Step();
-            if (body.LastState == BodyMoves.CombatIdle)
-            {
-                float pg = HandGap(body.animator);
-                Log($"R28 플레이어 전투 대기 두 손 거리 {pg:0.00} m");
-                Assert.Less(pg, 0.7f, "플레이어 대기도 두 손으로 칼");
-            }
+            Assert.GreaterOrEqual(bossIdleFrames, 10, "무사 대기 미리보기를 찍음");
             Assert.IsTrue(File.Exists($"{Out}/R27_slash_fp.png") && File.Exists($"{Out}/R27_block_fp.png"));
         }
 
@@ -230,12 +258,23 @@ namespace RhythmActionGame.Tests
             float maxGap = 0f; int idleFrames = 0;
             bool execStarted = false; double execBeat = double.NaN;
             float bigCoverSeconds = 0f, maxCover = 0f;
-            bool shot = false;
+            bool shot = false, soldierShot = false, playerShot = false;
+            int playerIdleFrames = 0; float playerMaxGap = 0f;
             for (int f = 0; f < 4000 && (dir.State == StageState.Combat || (execStarted && boot.clock.CurrentBeat < execBeat + 4)); f++)
             {
                 yield return Step();
                 var ea = actor.GetComponentInChildren<EnemyAnimator>();
-                if (!actor.Defeated && ea != null && ea.CurrentState == EnemyMoves.Idle && !an.IsInTransition(0) && an.GetCurrentAnimatorStateInfo(0).IsName(EnemyMoves.Idle)) { idleFrames++; maxGap = Mathf.Max(maxGap, HandGap(an)); }
+                if (!actor.Defeated && ea != null && ea.CurrentState == EnemyMoves.Idle && !an.IsInTransition(0) && an.GetCurrentAnimatorStateInfo(0).IsName(EnemyMoves.Idle))
+                {
+                    idleFrames++; maxGap = Mathf.Max(maxGap, HandGap(an));
+                    if (!soldierShot && idleFrames >= 10) { soldierShot = true; yield return FrontShot(actor.transform, $"{Out}/R28_soldier_stance_tp.png"); }
+                }
+                // R28 평가 1회차: 플레이어 전투 대기(CombatIdle)도 반드시 확인
+                if (dir.State == StageState.Combat && body.LastState == BodyMoves.CombatIdle && !body.animator.IsInTransition(0) && body.animator.GetCurrentAnimatorStateInfo(0).IsName(BodyMoves.CombatIdle))
+                {
+                    playerIdleFrames++; playerMaxGap = Mathf.Max(playerMaxGap, HandGap(body.animator));
+                    if (!playerShot && playerIdleFrames >= 10) { playerShot = true; yield return PlayerShot($"{Out}/R28_player_stance_tp.png"); }
+                }
                 if (!execStarted && body.LastState.StartsWith("Exec_")) { execStarted = true; execBeat = boot.clock.CurrentBeat; }
                 if (execStarted && boot.clock.CurrentBeat < execBeat + 4)
                 {
@@ -246,8 +285,12 @@ namespace RhythmActionGame.Tests
                 }
             }
             Log($"R28 병사 대기 프레임 {idleFrames}, 두 손 거리 최대 {maxGap:0.00} m; R34 처형 {body.LastState} 화면 25% 넘게 가린 시간 {bigCoverSeconds:0.00} s, 최대 가림 {maxCover:0.000}, 줄인 횟수 {body.ExecCappedCount}");
+            Log($"R28 플레이어 전투 대기 프레임 {playerIdleFrames}, 두 손 거리 최대 {playerMaxGap:0.00} m");
             Assert.Greater(idleFrames, 0);
             Assert.Less(maxGap, 0.7f, "병사 대기: 두 손으로 칼 (팔 벌림 아님)");
+            Assert.Greater(playerIdleFrames, 0, "플레이어 전투 대기(CombatIdle) 상태를 봄");
+            Assert.Less(playerMaxGap, 0.7f, "플레이어 대기도 두 손으로 칼 (팔 벌림 아님)");
+            Assert.IsTrue(File.Exists($"{Out}/R28_soldier_stance_tp.png") && File.Exists($"{Out}/R28_player_stance_tp.png"), "병사·플레이어 3인칭 미리보기");
             Assert.IsTrue(execStarted, "처형");
             Assert.Less(bigCoverSeconds, 0.6f, "팔이 화면을 크게 가리는 시간이 짧음");
             Assert.Greater(body.ExecCappedCount, 0, "처형 동작을 줄여 끝냄");
