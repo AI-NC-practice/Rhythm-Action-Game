@@ -1,5 +1,5 @@
 ﻿# Unity verify report
-time: 2026-11-17 08:25:37
+time: 2026-11-17 09:41:14
 
 ## EditMode : total=208 passed=208 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
@@ -211,8 +211,7 @@ time: 2026-11-17 08:25:37
   - [Passed] RhythmActionGame.Tests.T14_EnemyRigTests.T14_GameScene_EveryEnemy_HasModel_WeaponOnHandBone_NoCapsule
   - [Passed] RhythmActionGame.Tests.T14_EnemyRigTests.T14_PlayerController_HasExecutionAndHitStates
 
-## PlayMode : total=208 passed=206 failed=1 skipped=1 result=Failed(Child)
-- FAIL RhythmActionGame.Tests.R06_FirstPersonViewPlayTests.R06_Chapter4Surround_BodyTurnsWithCamera_NoScreenCover: 내 몸이 화면을 30% 넘게 가린 프레임 17/789 Expected: less than or equal to 15 But was: 17
+## PlayMode : total=208 passed=207 failed=0 skipped=1 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -349,7 +348,7 @@ time: 2026-11-17 08:25:37
   - [Passed] RhythmActionGame.Tests.R03_MapScenePlayTests.R03_EnemiesAndForeshadow_StandOnVisibleRoofWallOrGround
   - [Passed] RhythmActionGame.Tests.R04_NoGrayShapesPlayTests.R04_EventPropPreviews_Png
   - [Passed] RhythmActionGame.Tests.R04_NoGrayShapesPlayTests.R04_GameScene_NoVisibleGrayPrimitive
-  - [Failed] RhythmActionGame.Tests.R06_FirstPersonViewPlayTests.R06_Chapter4Surround_BodyTurnsWithCamera_NoScreenCover
+  - [Passed] RhythmActionGame.Tests.R06_FirstPersonViewPlayTests.R06_Chapter4Surround_BodyTurnsWithCamera_NoScreenCover
   - [Passed] RhythmActionGame.Tests.R06_FirstPersonViewPlayTests.R06_Fail_HeadlessBodyNeverInFront
   - [Passed] RhythmActionGame.Tests.R06_FirstPersonViewPlayTests.R06_Normal_WallRunLeans_SlideCoverCapped
   - [Passed] RhythmActionGame.Tests.R06_FirstPersonViewPlayTests.R06_Perfect_WallRunLeans45_SlideCoverCapped
@@ -422,4 +421,4 @@ time: 2026-11-17 08:25:37
   - [Passed] RhythmActionGame.Tests.T15_DrawCallTests.T15_DrawCalls_BeforeAfter_Recorded_AndReduced
   - [Passed] RhythmActionGame.Tests.T15_DrawCallTests.T15_Map_ModelsReplaceGrayBoxes_Atmosphere
 
-OVERALL: FAIL
+OVERALL: PASS

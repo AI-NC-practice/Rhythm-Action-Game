@@ -106,6 +106,7 @@ namespace RhythmActionGame
 
         void Start()
         {
+            if (GetComponent<PlayerBodyLateVisibility>() == null) gameObject.AddComponent<PlayerBodyLateVisibility>().body = this;
             if (head != null) headRest = transform.InverseTransformPoint(head.position);
             Hook();
             UpdateRunSpeed();
@@ -527,6 +528,23 @@ namespace RhythmActionGame
             if (ThirdPersonCut) hide = true;   // 3인칭 컷(대문·윈드밀)은 머리 있는 원래 몸이 보인다
             BodyHidden = hide;
             VisibleBody.enabled = !hide;
+        }
+
+        /// <summary>
+        /// 모든 LateUpdate 뒤(카메라 연출이 자리를 정한 뒤) 목 규칙 (2)(5)를 한 번 더 — UpdateVisibility(−50)는 카메라가 움직이기 전이라
+        /// 경계 프레임 하나에서 목 단면이 보였다 (R06 Dodge NORMAL 1/183). 숨기기만 하고 다시 보이게 하지는 않는다.
+        /// </summary>
+        internal void LateVisibilityCheck()
+        {
+            if (VisibleBody == null || !VisibleBody.enabled || viewCamera == null || head == null || animator == null) return;
+            var neck = animator.GetBoneTransform(HumanBodyBones.Neck) ?? head;
+            var vp = viewCamera.WorldToViewportPoint(neck.position);
+            float m = GameConfig.Body.NeckViewMargin;
+            bool hide = vp.z > 0f && vp.x > -m && vp.x < 1f + m && vp.y > -m && vp.y < 1f + m;
+            if (viewCamera.transform.position.y < neck.position.y) hide = true;
+            if (!hide) return;
+            BodyHidden = true;
+            VisibleBody.enabled = false;
         }
 
         /// <summary>

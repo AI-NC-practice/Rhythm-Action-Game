@@ -349,6 +349,7 @@ namespace RhythmActionGame.Tests
                     if (!float.IsNegativeInfinity(top) && ap.y < top - 0.05f && ap.y > top - 6f) clipFrames++;
                 }
             }
+            if (!actor.KickLanded) Debug.Log($"[R07] kick not landed: start {start} now {actor.transform.position} landing {actor.kickLanding} timeScale {Time.timeScale} frozen {actor.Frozen} state {dir.State} beat {boot.player.RunBeat:0.00}");
             Assert.IsTrue(actor.KickLanded, "아래 면에 닿음");
             var end = actor.transform.position;
             float lat = Vector3.Dot(end - p0, right0);

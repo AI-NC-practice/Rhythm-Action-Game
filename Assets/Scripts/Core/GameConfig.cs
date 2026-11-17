@@ -908,7 +908,7 @@ namespace RhythmActionGame
             /// 작업 R27 (평가 1회차): 막기 칼 자세 — 오른손 자리(카메라 기준 m: 오른쪽·위·앞), 칼날 방향(카메라 기준, 왼쪽 위로 가로지름),
             /// 들어 올리기·유지·내리기 시간(박자 시계 초), 부딪칠 때 불꽃 수.
             /// </summary>
-            public static readonly UnityEngine.Vector3 SwordGuardHand = new UnityEngine.Vector3(0.14f, -0.16f, 0.42f);
+            public static readonly UnityEngine.Vector3 SwordGuardHand = new UnityEngine.Vector3(0.2f, -0.22f, 0.42f);   // R06 포위 전투 화면 가림 때문에 조금 아래·옆으로 (0.14, −0.16 → 0.2, −0.22)
             public static readonly UnityEngine.Vector3 SwordGuardBlade = new UnityEngine.Vector3(-0.8f, 0.55f, 0.25f);
             public const float SwordGuardIn = 0.08f;
             public const float SwordGuardHold = 0.3f;
@@ -985,6 +985,10 @@ namespace RhythmActionGame
             public const float KickOffRoofFlightSeconds = 1.0f;
             /// <summary>처음 위로 튀는 속도 (m/s)와 중력 (m/s²).</summary>
             public const float KickOffRoofLift = 2.5f;
+            /// <summary>빌드 때 고른 착지 자리로 날아갈 때 처음 위 속도 상한 (m/s). 바로 옆 높은 집 때문에 너무 높이 솟지 않게.</summary>
+            public const float KickOffRoofMaxLift = 10f;
+            /// <summary>빌드 때 고른 착지 자리로 날아갈 때 수평 이동을 끝내는 비행 시간 비율 — 나머지는 그 자리로 떨어짐 (착지 자리 앞 담을 넘게).</summary>
+            public const float KickOffRoofHorizontalShare = 0.75f;
             public const float Gravity = 9.8f;
             /// <summary>떨어지는 것을 카메라가 따라보는 시간 (초)과 최대 고개 각도 (도, CameraFx 한도 35°).</summary>
             public const float KickFallLookSeconds = 1.4f;

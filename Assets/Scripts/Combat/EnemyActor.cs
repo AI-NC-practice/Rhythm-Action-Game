@@ -332,13 +332,15 @@ namespace RhythmActionGame
             KickLanded = false;
             transform.rotation = Quaternion.LookRotation(-dir, Vector3.up);   // 등 쪽으로 날아감
             float T = GameConfig.EnemyBody.KickOffRoofFlightSeconds;
-            float vy = float.IsNaN(landY) ? GameConfig.EnemyBody.KickOffRoofLift : LiftToClear(start, dir, dist, T);
+            float vy = GameConfig.EnemyBody.KickOffRoofLift;
+            if (!float.IsNaN(landY)) vy = LiftToClear(start, dir, dist, landY, out T);
             float y = start.y, t = 0f;
             while (t < 4f)
             {
                 float dt = Frozen ? 0f : Time.deltaTime;
                 t += dt;
-                float k = Mathf.Clamp01(t / T);
+                // 빌드 때 고른 자리: 수평은 비행 시간의 앞 HorizontalShare 안에 끝내고 마지막은 그 자리로 떨어진다 (착지 자리 바로 앞 담·지붕을 넘게)
+                float k = Mathf.Clamp01(t / (float.IsNaN(landY) ? T : T * GameConfig.EnemyBody.KickOffRoofHorizontalShare));
                 // 빌드 때 고른 자리로는 곧게(지붕들을 넘는 포물선), 아니면 처음에 빠르게
                 var p = start + dir * (dist * (float.IsNaN(landY) ? 1f - (1f - k) * (1f - k) : k));
                 vy -= GameConfig.EnemyBody.Gravity * dt;
@@ -352,25 +354,39 @@ namespace RhythmActionGame
         }
 
         /// <summary>
-        /// 떨어질 자리까지 가는 길에 있는 지붕(충돌면·길 옆 장식 윗면)을 모두 0.3 m 넘게 넘는 처음 위 속도 (m/s).
-        /// 수평은 T초 동안 고르게 간다. 막 떠난 지붕(1.5 m 안)과 떨어질 자리 앞 1 m는 빼고 잰다.
+        /// 떨어질 자리까지 가는 길에 있는 지붕(충돌면·길 옆 장식 윗면)을 모두 0.3 m 넘게 넘는 가장 작은 처음 위 속도 (m/s)와 비행 시간 T.
+        /// 수평은 T초 동안 고르게 가고, T는 그 위 속도로 떨어질 자리 높이까지 내려오는 시간이다 (착지 직전 수직 낙하 없음).
+        /// 막 떠난 지붕(1.5 m 안)과 떨어질 자리 앞 1 m는 빼고 잰다. 위 속도는 KickOffRoofMaxLift까지
+        /// (바로 옆 더 높은 집을 T=1초로 넘으려다 20 m/s 가까이 나와 십몇 m 위로 솟았다).
         /// </summary>
-        float LiftToClear(Vector3 start, Vector3 dir, float dist, float T)
+        float LiftToClear(Vector3 start, Vector3 dir, float dist, float landY, out float T)
         {
-            float g = GameConfig.EnemyBody.Gravity, vy = GameConfig.EnemyBody.KickOffRoofLift;
-            for (int i = 1; i < 24; i++)
+            float g = GameConfig.EnemyBody.Gravity, drop = start.y - landY;
+            var tops = new System.Collections.Generic.List<Vector2>();   // (f, 넘어야 할 높이)
+            for (int i = 1; i < 32; i++)
             {
-                float f = i / 24f, along = dist * f;
+                float f = i / 32f, along = dist * f;
                 if (along < 1.5f || dist - along < 1f) continue;
                 var q = start + dir * along;
                 float top = DressingInstancer.TopBelow(q, 999f);
                 foreach (var h in Physics.RaycastAll(q + Vector3.up * 40f, Vector3.down, 80f, ~0, QueryTriggerInteraction.Ignore))
                     if (!h.transform.IsChildOf(transform)) top = Mathf.Max(top, h.point.y);
-                if (float.IsNegativeInfinity(top)) continue;
-                float ti = f * T;
-                vy = Mathf.Max(vy, (top + 0.3f - start.y + 0.5f * g * ti * ti) / ti);
+                if (!float.IsNegativeInfinity(top)) tops.Add(new Vector2(f, top + 0.3f));
             }
-            return vy;
+            float max = GameConfig.EnemyBody.KickOffRoofMaxLift;
+            for (float vy = GameConfig.EnemyBody.KickOffRoofLift; ; vy += 0.25f)
+            {
+                if (vy > max) vy = max;
+                float disc = vy * vy + 2f * g * drop;
+                T = disc >= 0f ? (vy + Mathf.Sqrt(disc)) / g : vy / g;
+                bool clear = true;
+                foreach (var tp in tops)
+                {
+                    float ti = tp.x * T * GameConfig.EnemyBody.KickOffRoofHorizontalShare;
+                    if (start.y + vy * ti - 0.5f * g * ti * ti < tp.y) { clear = false; break; }
+                }
+                if (clear || vy >= max) { T = Mathf.Max(T, 0.3f); return vy; }
+            }
         }
 
         /// <summary>지붕 가장자리 쪽: 길 가운데에서 이 적이 벗어난 쪽 (가운데면 오른쪽).</summary>
