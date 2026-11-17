@@ -193,6 +193,9 @@ namespace RhythmActionGame.EditorTools
         /// 삼각형과 발 위치를 지나는 수직선이 만나는 높이를 직접 계산한다 (물리 충돌체 없이 — 빌드 중 메시 충돌체가 광선에 안 잡히는 경우가 있었다).
         /// 복선 그림자와 달리며 나오는 적은 그 지지면 높이로 맞춘다. 결과는 MapSupportReport에 남긴다.
         /// </summary>
+        const float LookBackRoofStep = 0.25f;
+        static (float[] d0, int n, float[] ys) LookBackRoofProfile;
+
         static void CheckSupports(Transform map, Transform eventProps, EnemySet enemies)
         {
             var exclude = new HashSet<Transform>(eventProps.GetComponentsInChildren<Transform>(true));
@@ -276,6 +279,49 @@ namespace RhythmActionGame.EditorTools
                 // 작업 R07 후속: 머리 위 2 m 안에 다른 면(좌판·처마·집)이 있으면 그 속을 지나가므로 못 씀
                 if (all.Any(h => h.y > y + 0.3f && h.y < y + 2.0f)) return null;
                 return y;
+            }
+
+            // 작업 R29 (평가 2회차): 지붕 위 뒤돌아보기 컷의 쫓는 무리 발 높이 — 지붕 길 충돌 상자는 보이는 기와보다 2 m 넘게 높은 곳이 있어
+            // 실행 중 광선으로는 떠 보였다. 컷 구간 경로를 0.5 m마다, 무리마다 옆 거리에서 보이는 면 높이를 잰다 (없으면 NaN = 뛰어넘는 중).
+            {
+                var beats = GameConfig.Fx.LookBackRunBeats;
+                int K = GameConfig.Fx.PursuerGaps.Length;
+                float step = LookBackRoofStep;
+                float maxGap = GameConfig.Fx.PursuerGaps.Max();
+                int n = 0;
+                var d0s = new float[beats.Length];
+                for (int i = 0; i < beats.Length; i++)
+                {
+                    d0s[i] = float.NaN;
+                    if (!LookBackCut.OnRoof(beats[i])) continue;
+                    float from = (float)((beats[i] - GameConfig.Fx.PursuerLeadBeats) * GameConfig.MetersPerBeat) - maxGap - 1f;
+                    float to = (float)((beats[i] + LookBackCut.LengthOf(i) + 1.5) * GameConfig.MetersPerBeat) - 2f;
+                    d0s[i] = Mathf.Max(0f, from);
+                    n = Mathf.Max(n, Mathf.CeilToInt((to - d0s[i]) / step) + 1);
+                }
+                var ys = new float[beats.Length * K * Mathf.Max(1, n)];
+                for (int x = 0; x < ys.Length; x++) ys[x] = float.NaN;
+                int found = 0, total = 0;
+                for (int i = 0; i < beats.Length; i++)
+                {
+                    if (float.IsNaN(d0s[i])) continue;
+                    for (int k = 0; k < K; k++)
+                    {
+                        float lat = GameConfig.Fx.PursuerLaterals[k % GameConfig.Fx.PursuerLaterals.Length];
+                        for (int j = 0; j < n; j++)
+                        {
+                            float d = d0s[i] + j * step;
+                            var at = MapLayout.PointAt(d, out var fwd);
+                            float l = at.y > GameConfig.Fx.PursuerRoofHeight ? lat * GameConfig.Fx.PursuerRoofLateralScale : lat;
+                            var q = at + MapLayout.RightOf(fwd) * l;
+                            var s = Surface(q, at.y);
+                            total++;
+                            if (s.HasValue) { ys[(i * K + k) * n + j] = s.Value; found++; }
+                        }
+                    }
+                }
+                LookBackRoofProfile = (d0s, n, ys);
+                Debug.Log($"[SceneBuilder] R29 지붕 위 뒤돌아보기 쫓는 무리 발 높이: {found}/{total}칸에 보이는 면");
             }
             foreach (var prop in eventProps.GetComponentsInChildren<EventProp>(true))
             {

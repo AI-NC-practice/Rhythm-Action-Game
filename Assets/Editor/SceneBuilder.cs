@@ -224,6 +224,13 @@ namespace RhythmActionGame.EditorTools
                     list.Add(f);
                 }
                 lookBack.pursuers = list.ToArray();
+                if (LookBackRoofProfile.d0 != null)
+                {
+                    lookBack.roofD0 = LookBackRoofProfile.d0;
+                    lookBack.roofN = LookBackRoofProfile.n;
+                    lookBack.roofY = LookBackRoofProfile.ys;
+                    lookBack.roofStep = LookBackRoofStep;
+                }
             }
             lookBack.cameraFx = cameraFx;
             lookBack.presentation = presentation;

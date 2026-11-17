@@ -452,6 +452,8 @@ namespace RhythmActionGame
             public const double PursuerLeadBeats = 1.0;
             /// <summary>길 높이가 이보다 높으면 지붕 위 (쫓는 무리를 한 줄로).</summary>
             public const float PursuerRoofHeight = 1.5f;
+            /// <summary>지붕 위에서 옆 거리 배율 (용마루 가까이 — 앞뒤로 겹쳐 하나로 보이지 않을 만큼만 벌림).</summary>
+            public const float PursuerRoofLateralScale = 0.4f;
             // 4장 겹침 규칙
             /// <summary>기울기(롤) 합계 한도 (도).</summary>
             public const float RollLimit = 10f;

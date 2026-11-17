@@ -313,23 +313,26 @@ namespace RhythmActionGame.Tests
             {
                 yield return Load(lb0[k] - 6);
                 var lb = Object.FindAnyObjectByType<LookBackCut>();
-                int visibleMid = 0; bool shot = false;
+                int visibleMid = 0, maxTogether = 0; bool shot = false;
                 for (int f = 0; f < 3000 && boot.player.VisualRunBeat < lb0[k] + LookBackCut.LengthOf(k) + 1.3; f++)
                 {
                     yield return Step();
                     if (lb.Active && Mathf.Abs(lb.CurrentYaw) > 150f)
                     {
-                        foreach (var p in LookBackCut.Enemies())   // 쫓는 무리 + 그 밖의 쫓는 적 (지붕 위 컷은 지붕 위 적)
+                        int together = 0;
+                        foreach (var p in LookBackCut.Enemies())   // 쫓는 무리 + 그 밖의 쫓는 적
                         {
                             if (p == null || !p.gameObject.activeInHierarchy) continue;
                             var vp = view.WorldToViewportPoint(p.position + Vector3.up * 1.1f);
-                            if (vp.z > 0f && vp.z < 45f && vp.x > 0f && vp.x < 1f && vp.y > 0f && vp.y < 1f) visibleMid++;
+                            if (vp.z > 0f && vp.z < 45f && vp.x > 0f && vp.x < 1f && vp.y > 0f && vp.y < 1f) { visibleMid++; together++; }
                         }
-                        if (!LookBackCut.OnRoof(lb0[k])) Assert.IsTrue(lb.PursuersShown, $"땅 위 컷 {k}: 쫓는 무리");
+                        maxTogether = Mathf.Max(maxTogether, together);
+                        Assert.IsTrue(lb.PursuersShown, $"컷 {k}: 쫓는 무리 (지붕 위 컷 포함, R29 평가 1회차)");
                         if (!shot) { shot = true; Shot(view, $"{Out}/R29_lookback_{k}.png"); }
                     }
                 }
-                Log($"R29 컷 {k} ({lb0[k]}박): 돌아본 화면에 쫓는 적 보인 프레임·명 {visibleMid}");
+                Log($"R29 컷 {k} ({lb0[k]}박, 지붕 {LookBackCut.OnRoof(lb0[k])}): 돌아본 화면에 쫓는 적 보인 프레임·명 {visibleMid}, 한 화면 최대 {maxTogether}명");
+                Assert.GreaterOrEqual(maxTogether, 3, $"컷 {k}: 돌아본 한 화면에 쫓는 적 3명 이상 (무리)");
                 if (visibleMid > 0) seen++;
                 Assert.IsFalse(lb.PursuersShown, "컷이 끝나면 숨김");
             }
