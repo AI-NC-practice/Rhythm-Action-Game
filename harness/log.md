@@ -901,3 +901,4 @@ VARCO MCP: 3D 생성(Generate3D)은 이미지 1장만 받고 멀티뷰 노드가
 - R29 평가 2회차 FAIL: 지붕 위 컷 쫓는 무리가 R07 발밑 검사에서 뜸(3챕터, 최대 2.4 m) — 지붕 길·집 충돌 상자(5.5 m)가 보이는 기와(3.2~5.0 m)보다 높음. 제가 R07_AllEnemies만 돌리고 R07_EventFigures를 안 돌려 놓침. → SceneBuilder.CheckSupports가 지붕 위 컷 구간 경로를 0.25 m마다·무리마다 보이는 메시 높이로 재서 LookBackCut.roofY에 넣고(456/534칸), 실행 중 그 높이를 씀. 면 없음·0.3 m 넘는 계단은 뛰어넘는 중. R07 4개·R29·R18d 통과, R29_lookback_2.png 직접 확인(기와 위 3명).
 - 평가 확인 요청(사용자): 뒤돌아보기 2·3·4번째 컷 1.5박은 GDD-beta B21(2박)과 다름 (바로 뒤 전투 때문).
 - R29 3회차 평가 PASS → done. 11:16 안전용 최종 빌드(R26~R29 반영, R30~R34 구현 포함·평가 전) BuildFinal + smoke OK → 루트 tempFinal.zip(420 MB, git 제외).
+- R30 평가 PASS (1회차) → done. 사용자 요청: FullHD(1920×1080, GameConfig.Display, BuildScript PlayerSettings + DisplaySetup 실행 시작 때 SetResolution) 빌드 → smoke OK → 루트 FFinalProject.zip(420 MB, 안에 FFinalProject/ 폴더, git 제외). R31~R34 평가 전 코드 포함.

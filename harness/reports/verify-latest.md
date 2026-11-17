@@ -1,5 +1,5 @@
 ﻿# Unity verify report
-time: 2026-11-17 11:05:25
+time: 2026-11-17 11:16:32
 
 ## EditMode : total=208 passed=208 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse

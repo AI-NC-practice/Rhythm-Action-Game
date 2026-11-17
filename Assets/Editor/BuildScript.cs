@@ -26,6 +26,11 @@ namespace RhythmActionGame.EditorTools
             if (scenes.Length == 0) throw new Exception("Build Settings에 씬이 없다. SceneBuilder.BuildAll을 먼저 실행할 것.");
 
             Directory.CreateDirectory(dir);
+            // 제출 빌드는 FullHD (사용자 요청 2026-11-17)
+            PlayerSettings.defaultIsNativeResolution = false;
+            PlayerSettings.defaultScreenWidth = GameConfig.Display.Width;
+            PlayerSettings.defaultScreenHeight = GameConfig.Display.Height;
+            PlayerSettings.fullScreenMode = FullScreenMode.FullScreenWindow;
             var options = new BuildPlayerOptions
             {
                 scenes = scenes,

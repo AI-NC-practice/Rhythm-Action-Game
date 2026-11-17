@@ -427,6 +427,13 @@ namespace RhythmActionGame
         /// <summary>판정 중 비네트 세기 (URP Vignette intensity).</summary>
         public const float JudgeVignette = 0.3f;
 
+        /// <summary>제출 빌드 해상도 (사용자 요청 2026-11-17: FullHD). 빌드 설정과 실행 시작 때 둘 다 적용한다.</summary>
+        public static class Display
+        {
+            public const int Width = 1920;
+            public const int Height = 1080;
+        }
+
         // ---------------- GDD-beta B5 연출 시스템 (제안서 2~4장) ----------------
         /// <summary>연출 수치. 제안서 2장 표와 3장 등급표, 4장 겹침 규칙의 값.</summary>
         public static class Fx
