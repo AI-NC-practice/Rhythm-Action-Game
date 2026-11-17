@@ -1,5 +1,11 @@
 # 작업 인계 문서 (beta1-1)
 
+> **2026-11-17 12:30 갱신 (새 컴퓨터):** 묶음 E R26~R34 모두 evaluator PASS → done. 전체 검증 EditMode 208/208, PlayMode 208/209(+1 skip).
+> 제출 빌드: FullHD(1920×1080, `GameConfig.Display`) `Builds/Final` → smoke OK → 루트 `FFinalProject.zip`(420 MB, 안에 `FFinalProject/`, git 제외). `tempFinal.zip`은 11:16 안전용.
+> 이번에 고친 것: R06 막기 손 자리·목 단면 늦은 검사(`PlayerBodyLateVisibility`), 지붕 발차기 포물선(`LiftToClear` 위 속도 상한·수평 75%), R28 대기 자세 검사·미리보기, R29 지붕 위 뒤돌아보기 쫓는 무리(빌드 때 보이는 기와 높이 `LookBackCut.roofY`), R34 처형 가림 전·후 측정(`R34_cover.md`).
+> 사용자 확인 대기(직접 해 보고 알려 주기로 함): 뒤돌아보기 2·3·4번째 컷 1.5박(B21은 2박), 2·3·5챕터 컷과 장구 노트 겹침(B19.1), R25 랭크 경계·체력 0 패널티, R30 하늘 위주 화면. 사용자 말: "많이 좋아지긴 했는데 아직도 아쉽다" → 나중에 이야기.
+> 남은 작업: R13·R14·R22·R24(연출), R18e·R21·R08·R09·R12·B40(미룸), R10, 사람 R11·T16. 알려진 흔들림: R07_EventFigures 3챕터 Enemy_02_sword 가끔 뜸 초과.
+
 - 작성: 2026-11-16, **마지막 갱신: 2026-11-17 08:45** (사용자 출근으로 이 컴퓨터 작업 중단 — 다른 컴퓨터에서 이어서)
 - **⏰ 제출 마감: 2026-11-17 13:20.**
 - 브랜치: **`beta1-1`** (GitHub `AI-NC-practice/Rhythm-Action-Game`, 비공개). `main`에는 개발자 모드까지만.

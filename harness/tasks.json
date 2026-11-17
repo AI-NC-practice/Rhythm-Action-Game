@@ -2091,8 +2091,8 @@
                                          "R06 방식 측정 결과와 미리보기 PNG",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  1,
+                      "status":  "done",
+                      "attempts":  2,
                       "max_attempts":  3,
                       "notes":  "사용자 피드백 2026-11-17 (빌드 플레이, 묶음 E로 한 번에 구현·검증)."
                   }

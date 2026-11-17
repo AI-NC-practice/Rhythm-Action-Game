@@ -906,3 +906,4 @@ VARCO MCP: 3D 생성(Generate3D)은 이미지 1장만 받고 멀티뷰 노드가
 - R32 평가 PASS (1회차) → done. 참고: 1인칭 미리보기에는 적이 화면 밖(옆으로 비켜서).
 - R33 평가 PASS (1회차) → done.
 - R34 평가 1회차 FAIL: 가림 측정이 0.000만 나와 근거가 못 됨(Step 직후 측정, 첫 전투만), 기준선 없음. → 새 테스트 R34_ExecutionArmCover_BeforeAfterCap: 프레임 끝(32000) 매 프레임 내 몸·칼만 그려 측정, 일반 전투 4곳(92·128·152·240박)을 줄이기 전(PlayerBody.CapExecutionEnabled=false)·후로. 결과 BundleE/R34_cover.md: 줄이기 전 >10% 합 0.96 s·최대 0.506(152박 지붕 위) → 줄인 뒤 0.12 s·최대 0.275. 첫 전투(92박)는 원래 3.6%뿐.
+- R34 재평가 PASS (2회차) → done. 묶음 E 전부 done. 12:29 최종 FullHD 빌드 다시 → smoke OK → FFinalProject.zip 갱신. HANDOFF 맨 위 갱신.
