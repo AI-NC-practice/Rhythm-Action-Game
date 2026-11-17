@@ -912,3 +912,4 @@ VARCO MCP: 3D 생성(Generate3D)은 이미지 1장만 받고 멀티뷰 노드가
 - TitleRunner(러닝머신): 가운데 giwa_long 8채(16 m, 틈 1.3 m)·양옆 giwa_s 4줄이 −z로 흐르고 22 m 뒤로 빠지면 맨 앞에 다시 붙임(새로 만들기·지우기 없음, 1200프레임 동안 53번, 물체 수 149→149). 틈은 0.42초 0.45 m 뛰어넘음. 시작 → 메뉴·제목 숨김 → 옆으로 미끄러져 떨어짐(5 m→−5 m, 옆 4.4 m) + 어두워짐 1.35초 → 게임 씬. -startGame은 바로.
 - SceneBuilder.Title.cs (해·안개·하늘·파노라마 원통, 바닥, 주인공 달리기 동작), GameConfig.Title. T08 시작 테스트는 떨어지기를 기다리게 고침.
 - R35_TitleRunPlayTests·T08_Title 통과, R35/title_run.png·title_fall.png 직접 확인. 빌드 → smoke OK → FFinalProject.zip 12:48 갱신. 평가 전.
+- R35 평가 PASS (1회차) → done. 참고: 먼 지평선 쪽 바닥이 갈색 평면으로 보임(사용자 판단), 떨어지기 미리보기는 초기 장면.
