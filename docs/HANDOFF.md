@@ -1,33 +1,77 @@
 # 작업 인계 문서 (beta1-1)
 
-> **2026-11-17 12:30 갱신 (새 컴퓨터):** 묶음 E R26~R34 모두 evaluator PASS → done. 전체 검증 EditMode 208/208, PlayMode 208/209(+1 skip).
-> 제출 빌드: FullHD(1920×1080, `GameConfig.Display`) `Builds/Final` → smoke OK → 루트 `FFinalProject.zip`(420 MB, 안에 `FFinalProject/`, git 제외). `tempFinal.zip`은 11:16 안전용.
-> 이번에 고친 것: R06 막기 손 자리·목 단면 늦은 검사(`PlayerBodyLateVisibility`), 지붕 발차기 포물선(`LiftToClear` 위 속도 상한·수평 75%), R28 대기 자세 검사·미리보기, R29 지붕 위 뒤돌아보기 쫓는 무리(빌드 때 보이는 기와 높이 `LookBackCut.roofY`), R34 처형 가림 전·후 측정(`R34_cover.md`).
-> 사용자 확인 대기(직접 해 보고 알려 주기로 함): 뒤돌아보기 2·3·4번째 컷 1.5박(B21은 2박), 2·3·5챕터 컷과 장구 노트 겹침(B19.1), R25 랭크 경계·체력 0 패널티, R30 하늘 위주 화면. 사용자 말: "많이 좋아지긴 했는데 아직도 아쉽다" → 나중에 이야기.
-> 남은 작업: R13·R14·R22·R24(연출), R18e·R21·R08·R09·R12·B40(미룸), R10, 사람 R11·T16. 알려진 흔들림: R07_EventFigures 3챕터 Enemy_02_sword 가끔 뜸 초과.
-
-- 작성: 2026-11-16, **마지막 갱신: 2026-11-17 08:45** (사용자 출근으로 이 컴퓨터 작업 중단 — 다른 컴퓨터에서 이어서)
-- **⏰ 제출 마감: 2026-11-17 13:20.**
+- 작성: 2026-11-16, **마지막 갱신: 2026-11-17 14:00** (새 컴퓨터에서 이어서 작업, 제출 빌드 완료)
 - 브랜치: **`beta1-1`** (GitHub `AI-NC-practice/Rhythm-Action-Game`, 비공개). `main`에는 개발자 모드까지만.
-- 작업 목록의 진실은 언제나 `harness/tasks.json`. 작업별 기록은 `harness/log.md`(맨 아래가 최신), 평가 보고서는 evaluator가 돌려준 결과(대화) — log.md에 요약.
-- **지금 상태 한 줄:** 묶음 A(R19·R20·R23·R16·R15)와 점수 개편 R25는 **done**. 사용자 빌드 플레이 피드백 묶음 E(R26~R34)는 **구현 끝, 평가 중**(R26·R27은 평가 1회차 FAIL → 고침, 재평가 필요. R28~R34는 아직 평가 전). 마지막 커밋에 묶음 E 수정이 모두 들어 있다.
-- 마지막 전체 검증(08:33, 마지막 커밋과 같은 코드): EditMode 208/208, PlayMode 206/208 — **실패 1: `R06_Chapter4Surround_BodyTurnsWithCamera_NoScreenCover`** "내 몸이 화면을 30% 넘게 가린 프레임 17/789 (기준 15 이하)". 원인 추정: R27 막기 때 오른손·칼을 눈앞에 두는 IK(PlayerSwordIK, GameConfig.Body.SwordGuardHand)가 4장 포위 전투의 ↑ 막기에서도 켜져 화면을 가림. **다음 컴퓨터에서 가장 먼저 고칠 것** — 방법 후보: 막기 손 자리를 조금 아래·옆으로(SwordGuardHand y −0.16 → −0.22, x 0.14 → 0.2) 하거나, 측정에서 칼 렌더러를 빼고 손·팔만 보는지 확인. 고친 뒤 `-Platform PlayMode -Filter 'R06_|BundleE_'` → 전체 검증.
-- 최종 빌드: 06:19에 R25까지 반영한 `Builds/Final` + smoke test 통과, 루트 `tempFinal.zip`(약 420 MB, git에 안 올림 — 이 컴퓨터에만 있음). 묶음 E는 빌드에 **안 들어 있음** → 마지막에 다시 빌드.
+- 작업 목록의 진실은 언제나 `harness/tasks.json`. 작업별 기록은 `harness/log.md`(맨 아래가 최신). 평가 보고서는 evaluator가 돌려준 결과 — log.md에 요약.
+- **지금 상태 한 줄:** done 96개(오늘 R26~R36 11개 포함). 남은 작업 14개(사람 확인 2·blocked 1 포함, 아래 "할 일"). 마지막 전체 검증 EditMode 208/208, PlayMode 211/212(실패 0, 건너뜀 1 = Explicit 리뷰 캡처).
+- **제출 빌드:** 루트 `FFinalProject.zip`(2026-11-17 13:49, 422 MB, 안에 `FFinalProject/RhythmActionGame.exe`). FullHD 1920×1080 전체 화면 창. smoke test 통과. **git에 없음**(`.gitignore`: `FFinalProject.zip`, `FFinalProject/`, `tempFinal.zip`, `tempFinal/`) — 다시 만들려면 0장 3번.
+- **아직 아무도 직접 못 본 것:** 빌드 exe를 창으로 띄웠을 때 시작화면(R36). 에디터·배치 모드·smoke test에서는 시작화면 없이 바로 게임이 시작된다(의도).
 
-## 0. 다음 컴퓨터에서 바로 할 일 (순서대로)
+## 0. 다음에 바로 할 일 (순서대로)
 
-1. 1장 절차대로 받고 Unity로 한 번 열었다 닫기 → `HumanoidImport.ConfigureAll` → `SceneBuilder.BuildAll` → **R06 포위 전투 화면 가림 실패(위 "마지막 전체 검증") 고치기** → `unity-verify.ps1` 전체.
-   - 이번에 적 3종 모델 바탕이 `Assets/Art/Models/<id>/<id>_rig_fingers.fbx`(손가락 리그)로 바뀌었다. ConfigureAll이 꼭 필요하다(아바타 손가락 뼈 52개).
-2. 전체 검증이 통과하면 **evaluator를 하나씩**(동시에 띄우면 Unity 배치가 서로 막힌다 — 이번에 겪음): R26 → R27 → R28 → R29 → R30 → R31 → R32 → R33 → R34. 프롬프트는 "R26 작업을 평가해줘."만.
-   - PASS면 tasks.json status done·attempts 올리고 log.md에 한 줄. FAIL이면 지적대로 고치고 같은 작업 다시(최대 3회).
-3. 사용자 확인이 필요한 것(아래 "열린 질문")을 물어본다.
-4. 빌드: `BuildScript.BuildFinal` → `smoke-test-build.ps1` → 필요하면 루트에 `tempFinal.zip`으로 압축(사용자 요청 방식, .gitignore에 있음).
-5. 시간이 남으면 R13·R14·R22·R24(연출 다듬기). R18e·R21·R08·R09·R12·B40은 미루기 추천. 마지막 R10(최적화·GitHub Releases — 공개·업로드는 승인 필요), R11·T16(사용자 플레이).
+1. 새 컴퓨터면 1장 절차(Unity Hub 라이선스 활성화 먼저 — 안 하면 배치 모드가 코드 198) → `HumanoidImport.ConfigureAll` → `SceneBuilder.BuildAll` → `unity-verify.ps1`.
+2. **사용자가 FFinalProject.zip을 플레이해 보고 줄 피드백**을 받는다 (사용자: "많이 좋아지긴 했는데 아직도 아쉽다 — 나중에 이야기"). 아래 "사용자 확인 대기"도 같이 묻는다.
+3. 빌드·패키징: `BuildScript.BuildFinal` → `smoke-test-build.ps1` → 루트에 `FFinalProject.zip`(안에 `FFinalProject/` 폴더)로 압축. **커밋 전에 스테이징 목록에 빌드 폴더·20 MB 넘는 파일이 없는지 확인**(오늘 두 번 사고 — 사용자가 루트에 zip을 풀어 둔 폴더가 커밋에 들어가 push 거부).
+4. 남은 작업은 아래 "할 일" 표 순서 추천. evaluator는 **하나씩**(Unity 배치가 끝난 뒤 다음 — `Get-CimInstance Win32_Process`로 이 프로젝트 Unity가 0개인지 확인).
 
-### 열린 질문 (사용자 확인 필요)
-- R25: 체력 0 챕터 되감기도 "챕터 시작 점수 − 1000"으로 한 것(사용자는 무사·윈드밀만 말함)과 랭크 경계값(SSS 97·SS 93·S 88·A 80·B 70·C 60·D 50 %)은 Claude 제안. GDD-beta B20에 "사용자 확인 필요"로 적음.
-- R29: 2·3·4번째 뒤돌아보기는 바로 뒤 전투 때문에 1.5박(1번째만 2박). 장구 노트가 컷과 1~2개 겹칠 수 있음(원은 화면 가장자리에 보여 칠 수 있음). 지붕 위 컷(126.5박)에서는 쫓는 무리를 안 씀(지붕 길 충돌 상자 높이 때문에 떠 보였음) — 지붕 위 적이 대신 보임.
-- R30: 매트릭스 회피 때 NearMiss 카메라가 위를 보며 화면 대부분이 하늘 — 칼날은 잘 보이지만 방향감이 흔들릴 수 있음.
+### 사용자 확인 대기 (직접 해 보고 알려 주기로 함)
+- 뒤돌아보기 2·3·4번째 컷 1.5박 (GDD-beta B21은 2박, 바로 뒤 전투 때문에 줄임).
+- 2·3·5챕터 뒤돌아보기 컷과 장구 노트 1~2개 겹침 (GDD-beta B19.1은 1챕터만 예외).
+- R25: 체력 0 챕터 되감기도 "챕터 시작 점수 − 1000", 랭크 경계(SSS 97·SS 93·S 88·A 80·B 70·C 60·D 50 %) — Claude 제안.
+- R30: 매트릭스 회피 때 화면 대부분이 하늘 (방향감).
+- R26: 콤보 5·10·20·50 단계 이펙트 방법(사전 확인 없이 구현).
+- R36: 시작화면 진입로·카메라·옮겨 가는 속도(1.6~3초) 느낌.
+
+## 2026-11-17 한 일 (새 컴퓨터, 09:20~14:00)
+
+| 작업 | 내용 | 평가 |
+|---|---|---|
+| 검증 실패 3건 | R06 포위 전투 화면 가림(막기 손 자리 `SwordGuardHand` 0.2·−0.22), 회피 목 단면 1프레임(`PlayerBodyLateVisibility` — 모든 LateUpdate 뒤 목 규칙 다시), 지붕 발차기 착지 못 함(`EnemyActor.LiftToClear` 위 속도 상한 10 m/s·실제 낙하 시간·수평 75%) | 전체 검증 통과 |
+| R26 | 콤보 단계 이펙트 | PASS (2회차) |
+| R27 | 칼 쥐기·막기·베기·불꽃 | PASS (2회차) |
+| R28 | 칼 든 대기 자세 — 플레이어 대기 검사를 필수로, 무사·병사·플레이어 앞모습 미리보기 | PASS (2회차) |
+| R29 | 뒤돌아보기 — 지붕 위 컷에도 쫓는 무리, 발 높이는 빌드 때 보이는 기와로 잰 `LookBackCut.roofY` | PASS (3회차) |
+| R30 | 매트릭스 회피 칼날 | PASS |
+| R31 | 윈드밀 3인칭 컷·쓰러진 적·칼 날아감 | PASS |
+| R32 | 5챕터 돌진 적 엇갈림 | PASS |
+| R33 | 벽타기 막는 수레·독 | PASS |
+| R34 | 처형 팔 가림 — 일반 전투 4곳 줄이기 전·후 측정(`harness/reports/BundleE/R34_cover.md`: 10% 넘게 가린 시간 0.96 s → 0.12 s) | PASS (2회차) |
+| FullHD | `GameConfig.Display` 1920×1080, `BuildScript` PlayerSettings + `DisplaySetup`(실행 시작 때) | — |
+| R35 | 시작화면 지붕 위 끝없이 달리기(러닝머신 재사용) + 시작 시 떨어지며 게임 | PASS — **R36으로 대체**(사용자: "실제 게임이 시작되는 느낌"). Title 씬·`TitleRunner`는 테스트용으로 남음 |
+| R36 | **시작화면 = 게임 씬 (A안)**: `AttractMode` — 메뉴 동안 시작선 뒤 진입로(`SceneBuilder.Attract.cs`)를 3인칭 뒤 따라가기로 달림, 시작 → 계속 달려 카메라가 1인칭으로 → 시작선에서 1챕터 (끊김 없음). 일시정지·결과 "타이틀로"도 여기로. 빌드 첫 씬 = Game | PASS (2회차) |
+
+### 오늘 구조에서 바뀐 것 (다음 작업자가 알아야 할 것)
+- **빌드 첫 씬이 Game**(`EditorBuildSettings`: Game, Title). `AttractMode.AttractOnLoad`가 빌드 실행(에디터·배치 모드·`-startGame`·`-devChapter` 아님)과 "타이틀로"에서 켜진다. `GameBootstrap.Start`가 켜져 있으면 `attract.Begin()`, `StartRun`은 시작화면 중이면 먼저 끝낸다. 테스트에서 시작화면을 보려면 `AttractMode.AttractOnLoad = true` 후 Game 로드(`R36_AttractPlayTests`).
+- `PlayerBody.CapExecutionEnabled`(기본 켬) — R34 기준선 측정용 스위치. `PlayerBody.LateVisibilityCheck` + `PlayerBodyLateVisibility`(실행 순서 30000).
+- `LookBackCut.roofY/roofD0/roofN/roofStep` — `SceneBuilder.CheckSupports`가 채움(지붕 위 컷 구간 0.25 m 간격·무리마다).
+- `GameConfig.Title`(R35), `GameConfig.Attract`(R36), `GameConfig.Display`, `GameConfig.EnemyBody.KickOffRoofMaxLift/HorizontalShare`, `GameConfig.Fx.PursuerRoofLateralScale`.
+- 알려진 흔들림: `R07_EventFigures_RunWhileMoving_NoGlide`에서 3챕터 Enemy_02_sword가 가끔 뜸 허용치 초과(616 중 17, 허용 12) — 다시 돌리면 통과.
+
+## 할 일 (남은 작업 14개, tasks.json 기준)
+
+| 순서 추천 | 작업 | 내용 | 비고 |
+|---|---|---|---|
+| 1 | **R11** [사용자] | 다시 플레이 확인 | 사용자 피드백 → 새 작업으로 나눔 |
+| 2 | R13 | 낮은 처마 장애물을 지붕 위에서 말이 되는 모양으로 | 연출 |
+| 3 | R14 | 닫히는 대문 아슬아슬 통과 동작 + 문 양옆 막기 | 연출 |
+| 4 | R22 | 4장 광장이 비어 보임 (쓰러진 적이 남는 부분은 R31로 해결) | 연출 |
+| 5 | R24 | 지붕 위 복선 적이 오래 가만히 서 있지 않게 | 연출 |
+| 6 | R10 | 최적화: LOD + 임포스터 + GPU Resident Drawer + 최종 빌드 (+ GitHub Releases — 공개·업로드는 승인 필요) | 아래 "최적화 현황" |
+| 7 | R21 | 마을 밖 빈 평지와 배경 그림 이음 | 미룸 |
+| 8 | R08 | 슬로모션 성공/실패 차이 + 리듬감 다듬기 | 미룸 |
+| 9 | R09 | 전투 동작·테스트 다듬기 | 미룸 |
+| 10 | R18e | 시민 3종 (VARCO 약 900포인트 승인됨) | 미룸 |
+| 11 | R12 | 효과음·환경음 (VARCO Sound) | 비용 견적·승인 |
+| 12 | B40 | 실제 효과음으로 교체 | 미룸 |
+| — | T16 [사용자] | 최종 플레이 확인 | needs_user |
+| — | B46 | "합" 주고받기 | blocked(사용자 취소, git stash에 보관) |
+
+### 최적화 현황 (R10 참고)
+- **한 것:** 머티리얼 공유(SRP Batcher)·툰 셰이더 GPU 인스턴싱·맵 정적 배칭, 길가 장식 `DressingInstancer`(RenderMeshInstanced, 충돌체 없음) + 칸 컬링(건물 320 m·소품 40 m), 그림자 캐스케이드 4→2·먼 줄/작은 소품 그림자 끔, 작은 소품 70 m 밖 안 그림. 그리기 호출 780 → 294(T15) → 맵 재구성 뒤 약 365(사용자 승인, 테스트 기준 +30%). VARCO 고폴리 → Remesh(기와집 3만 → 5천 등), 먼 배경은 파노라마 한 장. 무거운 계산은 빌드 때(적 발밑 프로필·높이 격자·숨은 자리·발차기 착지·뒤돌아보기 지붕 높이). 시작화면은 이미 불러온 게임 맵을 그대로 씀(씬 다시 불러오기 없음).
+- **안 한 것:** LOD·임포스터, GPU Resident Drawer·오클루전 컬링, 지붕 길·골목 담 인스턴싱, 텍스처 아틀라스, 고폴리 노멀 맵 굽기.
+
+## 지난 상태 기록 (2026-11-17 08:45, 이전 컴퓨터)
+- 묶음 A(R19·R20·R23·R16·R15)와 R25 done, 묶음 E(R26~R34) 구현 끝 → 위 표대로 오늘 모두 done.
 - R27: 막기는 한 손 가로막기(손목을 꺾지 않는 범위). 두 손 막기는 왼손 방향을 맞추는 IK가 필요해 뺐다.
 
 ## 1. 다른 컴퓨터·다른 계정에서 이어서 시작하기
@@ -84,7 +128,7 @@
 - `git stash`에 B46("합" 주고받기, 사용자가 취소) 구현 — 필요 없음.
 - `Builds/` 빌드 — 5번으로 다시 만든다.
 
-## 2. 지금 멈춘 곳과 다음 할 일
+## 2. (지난 기록, 2026-11-17 08:45) 묶음 E 계획 — 지금 상태는 맨 위 표
 
 - 마지막 커밋: 이 문서 갱신 커밋(묶음 E 칼 쥐기 마지막 수정 포함). 그 앞 `ae3038f`(묶음 E 구현), `ff4bcb6`(R25), `a71bdc3`(R15), `f2a387b`(묶음 A).
 - tasks.json: done 86 (R15·R16·R19·R20·R23·R25 포함), pending — 묶음 E R26(시도 1)·R27(시도 1)·R28~R34(평가 전), R13·R14·R21·R22·R24, R18e·R08·R09·R12·B40, R10, 사람 R11·T16, blocked B46(취소).
@@ -165,6 +209,13 @@
 | 10 | 콤보 단계 이펙트 | R26 |
 | 11 | 점수·실패 규칙 (장구 50/20+콤보 보너스, 방향키 100/50, 무사·윈드밀 초입 − 1000, 랭크 SSS~F) | R25 done, GDD-beta B20 |
 
+### 시작화면 (2026-11-17 오후, 사용자)
+| # | 사용자 말 | 처리 |
+|---|---|---|
+| 1 | 시작화면에서 주인공이 플로우처럼 지붕 위를 계속 달리게, 2D 무한 배경처럼 최적화, 시작 누르면 지붕에서 떨어지며 시작 | R35 (done) |
+| 2 | "이런 느낌이 아니라 실제 게임이 시작되는 느낌" → A안(시작선 뒤 진입로를 달리다 그대로 1챕터), 카메라 3인칭 뒤 따라가기 | R36 (done) |
+| 3 | 제출 빌드는 FullHD, 루트에 FFinalProject로 압축 | FFinalProject.zip |
+
 ## 4. 세션별 한 일
 
 | 작업 | 내용 | 커밋 |
@@ -184,6 +235,7 @@
 | 묶음 A | R19 대문 컷 낮은 자세, R20 하늘 띠(배경 위쪽 투명), R23 길 외곽선 끔·색 대비, R16 전투 대기 자세, R15 되감기 때 자리도 되감기, 파티클 둥근 점 | f2a387b, a71bdc3 |
 | R25 | 점수·콤보·랭크·되감기 패널티 (GDD-beta B20), R26 추가 | ff4bcb6 |
 | 묶음 E | R26~R34 (칼 쥐기·손가락 리그·칼 든 대기·뒤돌아보기·매트릭스·윈드밀 컷·쓰러짐·돌진·벽타기 짐·처형·콤보 단계) | ae3038f + 이 인계 커밋 |
+| 2026-11-17 새 컴퓨터 | 검증 실패 3건, 묶음 E 평가·보강(R28·R29·R34), FullHD, R35, R36 시작화면 = 게임 씬 | 745d2cf~53b80b0 + 이 인계 커밋 |
 
 VARCO 포인트 누적 약 17,400 (R17~R18d는 0) (T10 2,050 + T11 1,000 + T11R 3,550 + R02 10,800). run_flow 17/45회(`harness/varco-usage.log`). 플로우 ID `harness/asset_specs.json`의 `defaults.flow_id` = `7c1eec5d-c366-4ce4-8713-0b6adb6fc1da`.
 Mixamo 동작 16개(`Assets/Art/Animations/Mixamo/`, R07 flying_back, R18 walk, R18c running_jump·falling_idle·hard_landing).
@@ -297,6 +349,8 @@ Mixamo 동작 16개(`Assets/Art/Animations/Mixamo/`, R07 flying_back, R18 walk, 
 - **VARCO 리깅·Mixamo 업로드 (2026-11-17):** "VARCO 리깅 다시 해 보고 안 되면 Mixamo" — VARCO humanoid-fingers로 해결(Mixamo 업로드 안 함).
 - 빌드 공유: 루트에 `tempFinal.zip`으로 압축해 달라고 함(git에 안 올림).
 - **Mixamo 동작은 상시 승인 (2026-11-17):** "공중 동작이나 처음 뛰는 동작 모두 필요하다면 언제든 믹사모에서 추천해주세요. 다 수용하겠습니다." → 필요한 Mixamo 동작은 골라서 받고(FBX Binary·Without Skin·30fps, 가능하면 In Place) 무엇을 왜 받았는지 알린다. VARCO 포인트는 여전히 견적 승인.
+- **제출 빌드 (2026-11-17):** FullHD 1920×1080, 루트 `FFinalProject.zip`(안에 `FFinalProject/`). 사용자는 루트에 zip을 풀어 둔다 → 그 폴더가 커밋되지 않게(.gitignore).
+- **시작화면 (2026-11-17):** "실제 게임이 시작되는 느낌" — 따로 꾸민 무대보다 실제 게임 맵·흐름을 원함.
 
 ## 9. 꼭 지킬 규칙 (CLAUDE.md 요약)
 - `docs/GDD.md`는 잠겨 있어 수정하지 않는다. 기획 변경은 사용자와 정해 `docs/GDD-beta.md`에 적는다.

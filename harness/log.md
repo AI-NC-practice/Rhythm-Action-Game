@@ -920,3 +920,4 @@ VARCO MCP: 3D 생성(Generate3D)은 이미지 1장만 받고 멀티뷰 노드가
 - R36_AttractPlayTests 통과, R36/attract_run·attract_lead·attract_after_start_fp.png 직접 확인. 처음 시도에서 옮겨 가는 중 머리카락·목 단면이 보여 고침.
 - R36 평가 1회차 FAIL: T04_BuildSettings 테스트가 Title 먼저를 기대(빌드 순서를 Game 먼저로 바꿈 — 의도) → 기대 순서 수정. 권고대로 HUD 숨김·되풀이 암전·일시정지/결과 '타이틀로' 테스트 추가(R36_ToTitle_FromPauseAndResult_OpensAttract). T04·R36 통과.
 - R36 재평가 PASS (2회차) → done. 전체 검증 EditMode 208/208, PlayMode 211/212(+1 skip). 13:49 빌드 → smoke OK → FFinalProject.zip(422 MB) 갱신. 실제 exe 창 실행 확인은 사용자.
+- 14:00 HANDOFF 맨 위를 지금 상태로 정리(오늘 한 일 표, 할 일 14개·순서 추천, 사용자 확인 대기, 최적화 현황, 바뀐 구조). 사용자 요청으로 push.
