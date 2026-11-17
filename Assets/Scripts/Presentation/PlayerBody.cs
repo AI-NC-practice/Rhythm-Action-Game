@@ -335,11 +335,14 @@ namespace RhythmActionGame
         void CapExecution()
         {
             if (animator == null || clock == null || string.IsNullOrEmpty(LastState) || !LastState.StartsWith("Exec_") || double.IsNaN(ExecStartBeat)) return;
+            if (!CapExecutionEnabled) return;
             if (clock.CurrentBeat - ExecStartBeat < GameConfig.Body.ExecShowBeats) return;
             ExecCappedCount++;
             SetLoopState(BodyMoves.Run);
         }
 
+        /// <summary>처형 동작 줄이기 켜기 (테스트에서 줄이기 전 기준선을 잴 때만 끔).</summary>
+        public bool CapExecutionEnabled { get; set; } = true;
         /// <summary>처형 동작을 줄여 끝낸 횟수 (테스트용).</summary>
         public int ExecCappedCount { get; private set; }
 

@@ -292,10 +292,106 @@ namespace RhythmActionGame.Tests
             Assert.Less(playerMaxGap, 0.7f, "플레이어 대기도 두 손으로 칼 (팔 벌림 아님)");
             Assert.IsTrue(File.Exists($"{Out}/R28_soldier_stance_tp.png") && File.Exists($"{Out}/R28_player_stance_tp.png"), "병사·플레이어 3인칭 미리보기");
             Assert.IsTrue(execStarted, "처형");
-            Assert.Less(bigCoverSeconds, 0.6f, "팔이 화면을 크게 가리는 시간이 짧음");
             Assert.Greater(body.ExecCappedCount, 0, "처형 동작을 줄여 끝냄");
+            // 가림 측정은 R34_ExecutionArmCover_BeforeAfterCap (프레임 끝 측정·줄이기 전 기준선 비교, R34 평가 1회차)
             rt.Release();
             Object.Destroy(pc.gameObject);
+        }
+
+        // ---------------- R34: 처형 뒤 팔 가림 — 줄이기 전·후 비교 (R34 평가 1회차) ----------------
+        /// <summary>모든 LateUpdate 뒤(최종 자세) 매 프레임 내 몸·칼만 그려 화면 가림 비율을 잰다 (R06 방식).</summary>
+        [DefaultExecutionOrder(32000)]
+        class CoverProbe : MonoBehaviour
+        {
+            public Camera view, probe; public RenderTexture rt; public Texture2D tex;
+            public bool measuring; public float last; public System.Action<float> onMeasure;
+            void LateUpdate()
+            {
+                if (!measuring) return;
+                probe.transform.SetPositionAndRotation(view.transform.position, view.transform.rotation);
+                probe.fieldOfView = view.fieldOfView; probe.nearClipPlane = view.nearClipPlane; probe.aspect = (float)rt.width / rt.height;
+                probe.Render();
+                var prev = RenderTexture.active; RenderTexture.active = rt;
+                tex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0); RenderTexture.active = prev;
+                int hit = 0; var px = tex.GetPixels32();
+                foreach (var c in px) if (!(c.r > 240 && c.g < 15 && c.b > 240)) hit++;
+                last = hit / (float)px.Length;
+                onMeasure?.Invoke(last);
+            }
+        }
+
+        class ExecCover { public float over25, over10, max, meanVisible; public int frames, bodyVisible; public string state; public int capped; }
+
+        IEnumerator MeasureExecution(bool cap, ExecCover res, string shotPath, double startBeat)
+        {
+            yield return Load(startBeat);
+            body.CapExecutionEnabled = cap;
+            body.VisibleBody.gameObject.layer = BodyLayer;
+            if (body.swordRenderers != null) foreach (var r in body.swordRenderers) if (r != null) r.gameObject.layer = BodyLayer;
+            var go = new GameObject("R34Probe");
+            var cp = go.AddComponent<CoverProbe>();
+            cp.view = view;
+            var pcGo = new GameObject("R34ProbeCam"); pcGo.transform.SetParent(go.transform, false);
+            cp.probe = pcGo.AddComponent<Camera>();
+            cp.probe.enabled = false; cp.probe.clearFlags = CameraClearFlags.SolidColor; cp.probe.backgroundColor = new Color(1f, 0f, 1f, 1f);
+            cp.probe.cullingMask = 1 << BodyLayer;
+            cp.rt = new RenderTexture(192, 108, 24); cp.probe.targetTexture = cp.rt;
+            cp.tex = new Texture2D(192, 108, TextureFormat.RGBA32, false);
+            float shotAt = 0f;
+            cp.onMeasure = c =>
+            {
+                res.frames++;
+                if (body.VisibleBody.enabled) res.bodyVisible++;
+                if (c > 0.25f) res.over25 += 0.01f;
+                if (c > 0.10f) res.over10 += 0.01f;
+                if (c > res.max) res.max = c;
+                if (shotPath != null && c > shotAt + 0.03f) { shotAt = c; Shot(view, shotPath); }   // 가림이 가장 큰 프레임
+            };
+            for (int i = 0; i < 4000 && dir.State != StageState.Combat; i++) yield return Step();
+            bool started = false; double execBeat = double.NaN;
+            for (int f = 0; f < 6000; f++)
+            {
+                if (!started && body.LastState.StartsWith("Exec_")) { started = true; execBeat = boot.clock.CurrentBeat; }
+                cp.measuring = started && boot.clock.CurrentBeat < execBeat + 4;
+                if (started && boot.clock.CurrentBeat >= execBeat + 4) break;
+                yield return Step();
+            }
+            cp.measuring = false;
+            res.state = body.LastState; res.capped = body.ExecCappedCount;
+            Assert.IsTrue(started, "처형");
+            cp.rt.Release();
+            Object.Destroy(go);
+        }
+
+        [UnityTest]
+        public IEnumerator R34_ExecutionArmCover_BeforeAfterCap()
+        {
+            // 모든 일반 전투(결투 사건)의 처형을 줄이기 전·후로 잼 — 처형 종류(칼 뺏어 베기·찌르기·발차기)마다 팔 동작이 다르다
+            var duels = StageChart.Load().events.Where(e => e.IsDuel).OrderBy(e => e.runBeat).ToList();
+            var before = new ExecCover(); var after = new ExecCover();
+            string Row(string n, ExecCover r) => $"| {n} | {r.state} | {r.frames} | {r.bodyVisible} | {r.max:0.000} | {r.over25:0.00} | {r.over10:0.00} | {r.capped} |";
+            var md = "# R34 처형 팔 가림 (처형 시작 후 4박, 프레임 끝 측정, 내 몸·칼만 그림)\n\n| 전투 | 줄이기 | 측정 프레임 | 몸 보인 프레임 | 최대 가림 | 25% 넘은 시간(s) | 10% 넘은 시간(s) | 줄인 횟수 |\n|---|---|---|---|---|---|---|---|\n";
+            float worstBefore = -1f;
+            foreach (var ev in duels)
+            {
+                var b = new ExecCover(); var a = new ExecCover();
+                yield return MeasureExecution(false, b, $"{Out}/R34_tmp_before.png", ev.runBeat - 6);
+                b.state = $"{ev.runBeat}박 전 ({b.state})";
+                if (b.max > worstBefore && File.Exists($"{Out}/R34_tmp_before.png")) { worstBefore = b.max; File.Copy($"{Out}/R34_tmp_before.png", $"{Out}/R34_exec_before_maxcover.png", true); }
+                yield return MeasureExecution(true, a, $"{Out}/R34_tmp_after.png", ev.runBeat - 6);
+                a.state = $"{ev.runBeat}박 후";
+                if (b.max >= worstBefore - 1e-6f && File.Exists($"{Out}/R34_tmp_after.png")) File.Copy($"{Out}/R34_tmp_after.png", $"{Out}/R34_exec_fp.png", true);
+                md += Row($"{ev.runBeat}박", b).Replace($"| {b.state} |", "| 전 |") + "\n" + Row($"{ev.runBeat}박", a).Replace($"| {a.state} |", "| 후 |") + "\n";
+                before.over25 += b.over25; before.over10 += b.over10; before.max = Mathf.Max(before.max, b.max); before.frames += b.frames;
+                after.over25 += a.over25; after.over10 += a.over10; after.max = Mathf.Max(after.max, a.max); after.frames += a.frames; after.capped += a.capped;
+            }
+            md += $"\n합계: 줄이기 전 >10% {before.over10:0.00}s, >25% {before.over25:0.00}s, 최대 {before.max:0.000} / 줄인 뒤 >10% {after.over10:0.00}s, >25% {after.over25:0.00}s, 최대 {after.max:0.000}\n";
+            File.WriteAllText($"{Out}/R34_cover.md", md);
+            Log($"R34 줄이기 전: 최대 {before.max:0.000}, >25% {before.over25:0.00}s, >10% {before.over10:0.00}s / 줄인 뒤: 최대 {after.max:0.000}, >25% {after.over25:0.00}s, >10% {after.over10:0.00}s");
+            Assert.Greater(before.max, 0.05f, "측정이 실제로 내 몸을 그림 (줄이기 전 처형 팔이 화면에 보임)");
+            Assert.Greater(after.capped, 0, "처형 동작을 줄여 끝냄");
+            Assert.Less(after.over10, before.over10, "줄인 뒤 팔이 화면 10% 넘게 가리는 시간이 줄어듦");
+            Assert.LessOrEqual(after.over25, 0.6f, "줄인 뒤 화면 25% 넘게 가리는 시간 0.6초 이하");
         }
 
         // ---------------- R29: 뒤돌아보기 천천히 + 쫓는 무리 ----------------

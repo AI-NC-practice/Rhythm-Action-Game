@@ -2037,8 +2037,8 @@
                                          "미리보기 PNG",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  1,
                       "max_attempts":  3,
                       "notes":  "사용자 피드백 2026-11-17 (빌드 플레이, 묶음 E로 한 번에 구현·검증)."
                   },
@@ -2055,8 +2055,8 @@
                                          "1인칭·3인칭 미리보기 PNG, 측정(적 몸과 내 몸이 겹치지 않음)",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  1,
                       "max_attempts":  3,
                       "notes":  "사용자 피드백 2026-11-17 (빌드 플레이, 묶음 E로 한 번에 구현·검증)."
                   },
@@ -2073,8 +2073,8 @@
                                          "1인칭 미리보기 PNG",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  1,
                       "max_attempts":  3,
                       "notes":  "사용자 피드백 2026-11-17 (빌드 플레이, 묶음 E로 한 번에 구현·검증)."
                   },
@@ -2092,7 +2092,7 @@
                                          "unity-verify.ps1 전체 통과"
                                      ],
                       "status":  "pending",
-                      "attempts":  0,
+                      "attempts":  1,
                       "max_attempts":  3,
                       "notes":  "사용자 피드백 2026-11-17 (빌드 플레이, 묶음 E로 한 번에 구현·검증)."
                   }

@@ -902,3 +902,7 @@ VARCO MCP: 3D 생성(Generate3D)은 이미지 1장만 받고 멀티뷰 노드가
 - 평가 확인 요청(사용자): 뒤돌아보기 2·3·4번째 컷 1.5박은 GDD-beta B21(2박)과 다름 (바로 뒤 전투 때문).
 - R29 3회차 평가 PASS → done. 11:16 안전용 최종 빌드(R26~R29 반영, R30~R34 구현 포함·평가 전) BuildFinal + smoke OK → 루트 tempFinal.zip(420 MB, git 제외).
 - R30 평가 PASS (1회차) → done. 사용자 요청: FullHD(1920×1080, GameConfig.Display, BuildScript PlayerSettings + DisplaySetup 실행 시작 때 SetResolution) 빌드 → smoke OK → 루트 FFinalProject.zip(420 MB, 안에 FFinalProject/ 폴더, git 제외). R31~R34 평가 전 코드 포함.
+- R31 평가 PASS (1회차) → done. 경고: R07_EventFigures가 한 번 흔들림(3챕터 Enemy_02_sword 616 중 17 뜸, 허용 12, 최대 0.85 m @(129.64,4.18,252.21)) — 재실행 통과. 일반 전투 쓰러짐·칼 날아감, 발차기 비행 거리는 직접 단언하는 테스트 없음 (제안).
+- R32 평가 PASS (1회차) → done. 참고: 1인칭 미리보기에는 적이 화면 밖(옆으로 비켜서).
+- R33 평가 PASS (1회차) → done.
+- R34 평가 1회차 FAIL: 가림 측정이 0.000만 나와 근거가 못 됨(Step 직후 측정, 첫 전투만), 기준선 없음. → 새 테스트 R34_ExecutionArmCover_BeforeAfterCap: 프레임 끝(32000) 매 프레임 내 몸·칼만 그려 측정, 일반 전투 4곳(92·128·152·240박)을 줄이기 전(PlayerBody.CapExecutionEnabled=false)·후로. 결과 BundleE/R34_cover.md: 줄이기 전 >10% 합 0.96 s·최대 0.506(152박 지붕 위) → 줄인 뒤 0.12 s·최대 0.275. 첫 전투(92박)는 원래 3.6%뿐.
