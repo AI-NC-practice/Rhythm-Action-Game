@@ -35,8 +35,8 @@ namespace RhythmActionGame.EditorTools
             BuildGame();
             EditorBuildSettings.scenes = new[]
             {
-                new EditorBuildSettingsScene(TitleScenePath, true),
-                new EditorBuildSettingsScene(GameScenePath, true),
+                new EditorBuildSettingsScene(GameScenePath, true),    // 작업 R36: 시작화면 = 게임 씬 (AttractMode)
+                new EditorBuildSettingsScene(TitleScenePath, true),   // 예전 시작화면 (테스트·설정 화면 검사용으로 남김)
             };
             AssetDatabase.SaveAssets();
             DrawCallReport.BuildNoBatchScene();   // 작업 T15: 드로우콜 비교용 (정적 배칭 없음)
@@ -92,6 +92,7 @@ namespace RhythmActionGame.EditorTools
             BuildObstacles(map, chart);
             var dressing = BuildDressing(map, chart);   // 챕터별 직접 배치 (작업 R03: R01 재설계 안, MapPlan)
             BuildBackdrop(map);        // 먼 외곽 그림 원통 (파노라마 한 장)
+            BuildApproach(map);        // 작업 R36: 시작선 뒤 진입로 (시작화면에서 달림)
             var eventProps = BuildEventProps(map, chart);
             var enemies = BuildEnemies(map, chart);
             CheckSupports(map, eventProps, enemies);   // 적·복선 발밑에 실제 지붕·담·땅 (작업 R03)
@@ -327,6 +328,7 @@ namespace RhythmActionGame.EditorTools
             boot.combatSwing = swing;
 
             BuildGameExtra(boot, chart);
+            BuildAttract(boot);   // 작업 R36: 게임 씬 안 시작화면
             EditorSceneManager.SaveScene(scene, GameScenePath);
         }
 

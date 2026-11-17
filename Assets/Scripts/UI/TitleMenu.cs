@@ -70,6 +70,16 @@ namespace RhythmActionGame
         public void StartGame()
         {
             if (Starting) return;
+            // 작업 R36: 게임 씬 안 시작화면 — 진입로를 계속 달려 시작선에서 1챕터 (끊김 없음)
+            var attract = FindAnyObjectByType<AttractMode>();
+            if (attract != null && attract.Active)
+            {
+                Starting = true;
+                MainPanel.gameObject.SetActive(false);
+                var t = transform.Find("Title"); if (t != null) t.gameObject.SetActive(false);
+                attract.BeginStart();
+                return;
+            }
             var runner = FindAnyObjectByType<TitleRunner>();
             if (runner == null) { LoadGame(); return; }
             Starting = true;

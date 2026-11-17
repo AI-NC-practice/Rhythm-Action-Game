@@ -30,6 +30,8 @@ namespace RhythmActionGame
         /// <summary>박에 맞춘 적 칼 휘두름 (GDD-beta B17.5).</summary>
         public CombatSwingSounds combatSwing;
         public bool autoStart = true;
+        /// <summary>게임 씬 안 시작화면 (작업 R36).</summary>
+        public AttractMode attract;
 
         public static GameBootstrap Instance { get; private set; }
 
@@ -62,6 +64,14 @@ namespace RhythmActionGame
             if (!autoStart) return;
             double b = PendingStartBeat;
             PendingStartBeat = 0;
+            // 작업 R36: 빌드 실행·"타이틀로"는 시작화면(진입로 달리기 + 메뉴)부터. 시작을 누르면 AttractMode가 StartRun(0)을 부른다.
+            if (AttractMode.AttractOnLoad && attract != null && b == 0)
+            {
+                AttractMode.AttractOnLoad = false;
+                attract.Begin();
+                return;
+            }
+            AttractMode.AttractOnLoad = false;
             StartRun(b);
         }
 
@@ -71,6 +81,7 @@ namespace RhythmActionGame
         /// <summary>keepScore면 점수·판정 수를 이어 간다 (챕터 되감기).</summary>
         public void StartRun(double runBeat, bool keepScore)
         {
+            if (attract != null && attract.Active) attract.Cancel();   // 시작화면 중 다른 곳(테스트·개발자 모드)에서 시작
             Time.timeScale = 1f;
             AudioListener.volume = GameSettings.Volume / 100f;
             if (score != null && !keepScore) score.ResetRun();

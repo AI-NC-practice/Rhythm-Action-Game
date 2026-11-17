@@ -913,3 +913,10 @@ VARCO MCP: 3D 생성(Generate3D)은 이미지 1장만 받고 멀티뷰 노드가
 - SceneBuilder.Title.cs (해·안개·하늘·파노라마 원통, 바닥, 주인공 달리기 동작), GameConfig.Title. T08 시작 테스트는 떨어지기를 기다리게 고침.
 - R35_TitleRunPlayTests·T08_Title 통과, R35/title_run.png·title_fall.png 직접 확인. 빌드 → smoke OK → FFinalProject.zip 12:48 갱신. 평가 전.
 - R35 평가 PASS (1회차) → done. 참고: 먼 지평선 쪽 바닥이 갈색 평면으로 보임(사용자 판단), 떨어지기 미리보기는 초기 장면.
+
+### 2026-11-17 13:00~13:40 — R36 시작화면을 게임 씬 안으로 (사용자: "실제 게임이 시작되는 느낌", A안·3인칭 뒤 따라가기)
+- AttractMode(게임 씬): 빌드 실행·"타이틀로"면 시작화면부터 — 메뉴(TitleCanvas+TitleMenu), HUD 숨김, 주인공이 시작선 뒤 진입로(경로 처음 방향을 뒤로 곧게, 40 m→8 m 앞, 실제 달리기 속도 5 m/s)를 달리고 3인칭 카메라가 뒤를 따라감, 끝에서 0.35초 어두워졌다 처음부터. 시작 → 3차 곡선으로 시작선까지(처음·끝 속도 = 달리기 속도, 1.6~3초), 카메라가 1인칭 자리로 섞여 옮겨 감(80% 넘으면 몸은 그림자만, 머리 없는 1인칭 몸은 숨김) → 시작선에서 StartRun(0). 한 프레임 최대 이동 0.16 m.
+- SceneBuilder.Attract.cs: 진입로 길·양옆 집(기와·초가), 메뉴 캔버스. 빌드 씬 순서 Game 먼저, Title은 테스트용으로 남김. 일시정지·결과 "타이틀로" = AttractOnLoad + Game. 에디터·배치 모드·-startGame·-devChapter는 시작화면 없이 바로 (테스트·smoke 영향 없음).
+- R36_AttractPlayTests 통과, R36/attract_run·attract_lead·attract_after_start_fp.png 직접 확인. 처음 시도에서 옮겨 가는 중 머리카락·목 단면이 보여 고침.
+- R36 평가 1회차 FAIL: T04_BuildSettings 테스트가 Title 먼저를 기대(빌드 순서를 Game 먼저로 바꿈 — 의도) → 기대 순서 수정. 권고대로 HUD 숨김·되풀이 암전·일시정지/결과 '타이틀로' 테스트 추가(R36_ToTitle_FromPauseAndResult_OpensAttract). T04·R36 통과.
+- R36 재평가 PASS (2회차) → done. 전체 검증 EditMode 208/208, PlayMode 211/212(+1 skip). 13:49 빌드 → smoke OK → FFinalProject.zip(422 MB) 갱신. 실제 exe 창 실행 확인은 사용자.

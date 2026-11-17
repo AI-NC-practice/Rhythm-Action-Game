@@ -76,7 +76,8 @@ namespace RhythmActionGame
         public void ToTitle()
         {
             Time.timeScale = 1f;
-            SceneManager.LoadScene("Title");
+            AttractMode.AttractOnLoad = true;   // 작업 R36: 시작화면 = 게임 씬 진입로 달리기
+            SceneManager.LoadScene("Game");
         }
     }
 }

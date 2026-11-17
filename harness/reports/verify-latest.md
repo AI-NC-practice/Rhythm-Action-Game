@@ -1,5 +1,5 @@
 ﻿# Unity verify report
-time: 2026-11-17 12:49:33
+time: 2026-11-17 13:38:19
 
 ## EditMode : total=208 passed=208 failed=0 skipped=0 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_RingLayoutTests.B01_Chain_160pxApart_FirstLeft_InsideEllipse
@@ -211,7 +211,7 @@ time: 2026-11-17 12:49:33
   - [Passed] RhythmActionGame.Tests.T14_EnemyRigTests.T14_GameScene_EveryEnemy_HasModel_WeaponOnHandBone_NoCapsule
   - [Passed] RhythmActionGame.Tests.T14_EnemyRigTests.T14_PlayerController_HasExecutionAndHitStates
 
-## PlayMode : total=210 passed=209 failed=0 skipped=1 result=Passed
+## PlayMode : total=212 passed=211 failed=0 skipped=1 result=Passed
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_Chain_SubBeatRings_SideBySide160px
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_GameScene_CanvasOrder_RingOnTop
   - [Passed] RhythmActionGame.Tests.B01_JudgeUiTests.B01_JudgeScreen_ExposureAndVignette
@@ -379,6 +379,8 @@ time: 2026-11-17 12:49:33
   - [Passed] RhythmActionGame.Tests.R25_ScorePlayTests.R25_RealRun_JangdanAndArrowPoints_MaxScoreSet
   - [Passed] RhythmActionGame.Tests.R27_FingerCurlDiagTests.R27_FingerCurl_BendsTowardPalm
   - [Passed] RhythmActionGame.Tests.R35_TitleRunPlayTests.R35_Title_EndlessRoofRun_ThenFallIntoGame
+  - [Passed] RhythmActionGame.Tests.R36_AttractPlayTests.R36_GameScene_AttractRun_ThenSeamlessStart
+  - [Passed] RhythmActionGame.Tests.R36_AttractPlayTests.R36_ToTitle_FromPauseAndResult_OpensAttract
   - [Skipped] RhythmActionGame.Tests.Review_StageWalkthroughPlayTests.Review_Stage1_Walkthrough_Shots
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Font_HasJudgeGlyphs
   - [Passed] RhythmActionGame.Tests.T03_JudgePresentationTests.T03_Fx_GrayAndZoom_EnterAndExit

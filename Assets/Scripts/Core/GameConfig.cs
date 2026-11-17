@@ -457,6 +457,31 @@ namespace RhythmActionGame
             public const float FallCamFollow = 0.55f;
         }
 
+        /// <summary>
+        /// 작업 R36 (사용자 요청 2026-11-17, A안): 시작화면 = 게임 씬. 메뉴가 떠 있는 동안 주인공이 1챕터 시작선 뒤 진입로를 달리고
+        /// 카메라는 3인칭으로 뒤를 따라간다. 시작을 누르면 계속 달리며 카메라가 머리로 붙고(1인칭) 시작선에서 1챕터가 끊김 없이 시작.
+        /// </summary>
+        public static class Attract
+        {
+            /// <summary>진입로: 시작선 뒤 이 거리(m)부터 달리기 시작, 이 거리(시작선 뒤 m)에 닿으면 어두워졌다 처음부터.</summary>
+            public const float ApproachLength = 40f;
+            public const float LoopEnd = 8f;
+            /// <summary>진입로 땅·길·집: 지어 두는 길이 (m, 진입로보다 조금 더), 길 폭 (m), 길가 집 간격 (m).</summary>
+            public const float BuildLength = 70f;
+            public const float RoadHalf = 4.2f;
+            public const float HouseSpacing = 9.5f;
+            /// <summary>3인칭 카메라: 주인공 기준 (오른쪽·위·뒤 m)과 바라보는 자리 (앞 m).</summary>
+            public static readonly UnityEngine.Vector3 CamOffset = new UnityEngine.Vector3(0.6f, 2.3f, -4.4f);
+            public static readonly UnityEngine.Vector3 CamLook = new UnityEngine.Vector3(0f, 1.3f, 5f);
+            /// <summary>되풀이할 때 어두워지는·밝아지는 시간 (초).</summary>
+            public const float FadeSeconds = 0.35f;
+            /// <summary>시작을 누른 뒤 시작선까지 달리는 시간 (초) 범위 — 이 안에서 카메라가 1인칭으로 옮겨 간다.</summary>
+            public const float LeadMinSeconds = 1.6f;
+            public const float LeadMaxSeconds = 3.0f;
+            /// <summary>1인칭으로 옮겨 가는 비율이 이보다 크면 원래 몸(머리 있음)을 그림자만으로 (시작선까지 몸이 화면에 안 보임).</summary>
+            public const float FirstPersonBodyAt = 0.8f;
+        }
+
         /// <summary>제출 빌드 해상도 (사용자 요청 2026-11-17: FullHD). 빌드 설정과 실행 시작 때 둘 다 적용한다.</summary>
         public static class Display
         {

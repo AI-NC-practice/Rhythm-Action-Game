@@ -11,8 +11,9 @@ namespace RhythmActionGame.Tests
         {
             var scenes = UnityEditor.EditorBuildSettings.scenes;
             Assert.AreEqual(2, scenes.Length);
-            Assert.AreEqual("Assets/Scenes/Title.unity", scenes[0].path);
-            Assert.AreEqual("Assets/Scenes/Game.unity", scenes[1].path);
+            // 작업 R36: 첫 씬은 Game (시작화면 = 게임 씬 안 AttractMode). Title은 예전 시작화면으로 테스트용으로 남김.
+            Assert.AreEqual("Assets/Scenes/Game.unity", scenes[0].path);
+            Assert.AreEqual("Assets/Scenes/Title.unity", scenes[1].path);
             Assert.IsTrue(scenes.All(s => s.enabled));
             Assert.IsTrue(System.IO.File.Exists(scenes[0].path) && System.IO.File.Exists(scenes[1].path));
         }
