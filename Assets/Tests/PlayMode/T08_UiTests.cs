@@ -97,7 +97,9 @@ namespace RhythmActionGame.Tests
             yield return SceneManager.LoadSceneAsync("Title");
             yield return null;
             Object.FindAnyObjectByType<TitleMenu>().StartButton.onClick.Invoke();
-            yield return null;
+            // 작업 R35: 지붕에서 떨어지는 연출(FallSeconds) 뒤에 게임 씬
+            float until = Time.realtimeSinceStartup + GameConfig.Title.FallSeconds + 5f;
+            while (SceneManager.GetActiveScene().name != "Game" && Time.realtimeSinceStartup < until) yield return null;
             yield return null;
             Assert.AreEqual("Game", SceneManager.GetActiveScene().name);
         }

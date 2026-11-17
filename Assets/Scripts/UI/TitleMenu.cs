@@ -33,7 +33,7 @@ namespace RhythmActionGame
         void Start()
         {
             // 화면 없는 빌드 검사용: 실행 인자 -startGame 이면 바로 게임 씬으로
-            if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "-startGame") >= 0) StartGame();
+            if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "-startGame") >= 0) LoadGame();
         }
 
         void Build()
@@ -66,7 +66,23 @@ namespace RhythmActionGame
             SettingsPanel.gameObject.SetActive(false);
         }
 
-        public void StartGame() => SceneManager.LoadScene("Game");
+        /// <summary>시작: 시작화면 지붕 달리기가 있으면 지붕에서 떨어지는 연출 뒤에 게임 씬 (작업 R35), 없으면 바로.</summary>
+        public void StartGame()
+        {
+            if (Starting) return;
+            var runner = FindAnyObjectByType<TitleRunner>();
+            if (runner == null) { LoadGame(); return; }
+            Starting = true;
+            MainPanel.gameObject.SetActive(false);
+            var title = transform.Find("Title");
+            if (title != null) title.gameObject.SetActive(false);
+            runner.BeginFall(LoadGame);
+        }
+
+        /// <summary>시작을 눌러 떨어지는 중 (두 번 눌러도 한 번만).</summary>
+        public bool Starting { get; private set; }
+
+        void LoadGame() => SceneManager.LoadScene("Game");
 
         public void OpenSettings()
         {

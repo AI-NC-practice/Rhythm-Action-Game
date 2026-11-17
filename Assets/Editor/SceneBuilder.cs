@@ -48,8 +48,9 @@ namespace RhythmActionGame.EditorTools
         {
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             var cam = CreateCamera("TitleCamera", new Vector3(0, 1.6f, -5f), Quaternion.identity);
-            cam.clearFlags = CameraClearFlags.SolidColor;
+            cam.clearFlags = CameraClearFlags.Skybox;
             cam.backgroundColor = new Color(0.08f, 0.07f, 0.1f);
+            BuildTitleRun(cam);   // 작업 R35: 지붕 위 끝없이 달리기 (SceneBuilder.Title.cs)
             BuildTitleUi();
             EditorSceneManager.SaveScene(scene, TitleScenePath);
         }

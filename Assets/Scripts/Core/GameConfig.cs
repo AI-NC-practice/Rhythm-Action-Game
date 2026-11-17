@@ -427,6 +427,36 @@ namespace RhythmActionGame
         /// <summary>판정 중 비네트 세기 (URP Vignette intensity).</summary>
         public const float JudgeVignette = 0.3f;
 
+        /// <summary>
+        /// 작업 R35 (사용자 요청 2026-11-17): 시작화면 — 주인공이 기와지붕 위를 끝없이 달린다 (러닝머신: 지붕 조각이 뒤로 흘러가고 뒤로 빠진 조각을 맨 앞에 다시 붙임).
+        /// 시작을 누르면 옆으로 미끄러져 지붕에서 떨어지며 어두워지고 게임이 시작된다.
+        /// </summary>
+        public static class Title
+        {
+            /// <summary>달리기 속도 (m/s), 가운데 지붕 줄 조각 수, 조각 사이 틈 (m, 뛰어넘음), 뒤로 이만큼 빠지면 맨 앞으로 (m).</summary>
+            public const float RunSpeed = 6.5f;
+            public const int RidgeCount = 8;
+            public const float RidgeGap = 1.3f;
+            public const float RecycleBehind = 22f;
+            /// <summary>틈을 뛰어넘는 높이 (m)와 뛰는 시간 (초).</summary>
+            public const float HopHeight = 0.45f;
+            public const float HopSeconds = 0.42f;
+            /// <summary>양옆 낮은 지붕 줄: 가운데에서 옆 거리 (m), 줄마다 조각 수, 높이 낮춤 (m).</summary>
+            public static readonly float[] SideRowX = { -8.5f, 8.5f, -17f, 17f };
+            public const int SideCount = 7;
+            public const float SideGap = 2.5f;
+            public const float SideDrop = 1.2f;
+            /// <summary>카메라: 주인공 기준 자리 (m, 오른쪽·위·뒤)와 바라보는 자리 (주인공 기준 앞).</summary>
+            public static readonly UnityEngine.Vector3 CamOffset = new UnityEngine.Vector3(2.6f, 1.7f, -4.6f);
+            public static readonly UnityEngine.Vector3 CamLook = new UnityEngine.Vector3(-0.4f, 1.0f, 4.0f);
+            /// <summary>떨어지기: 옆으로 미끄러지는 속도 (m/s), 처음 위로 튀는 속도 (m/s), 중력, 게임 씬으로 넘어가기까지 (초), 카메라가 아래를 따라가는 비율.</summary>
+            public const float FallSideSpeed = 3.2f;
+            public const float FallLift = 2.2f;
+            public const float FallGravity = 14f;
+            public const float FallSeconds = 1.35f;
+            public const float FallCamFollow = 0.55f;
+        }
+
         /// <summary>제출 빌드 해상도 (사용자 요청 2026-11-17: FullHD). 빌드 설정과 실행 시작 때 둘 다 적용한다.</summary>
         public static class Display
         {

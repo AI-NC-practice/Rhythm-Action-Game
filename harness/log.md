@@ -907,3 +907,8 @@ VARCO MCP: 3D 생성(Generate3D)은 이미지 1장만 받고 멀티뷰 노드가
 - R33 평가 PASS (1회차) → done.
 - R34 평가 1회차 FAIL: 가림 측정이 0.000만 나와 근거가 못 됨(Step 직후 측정, 첫 전투만), 기준선 없음. → 새 테스트 R34_ExecutionArmCover_BeforeAfterCap: 프레임 끝(32000) 매 프레임 내 몸·칼만 그려 측정, 일반 전투 4곳(92·128·152·240박)을 줄이기 전(PlayerBody.CapExecutionEnabled=false)·후로. 결과 BundleE/R34_cover.md: 줄이기 전 >10% 합 0.96 s·최대 0.506(152박 지붕 위) → 줄인 뒤 0.12 s·최대 0.275. 첫 전투(92박)는 원래 3.6%뿐.
 - R34 재평가 PASS (2회차) → done. 묶음 E 전부 done. 12:29 최종 FullHD 빌드 다시 → smoke OK → FFinalProject.zip 갱신. HANDOFF 맨 위 갱신.
+
+### 2026-11-17 12:35~12:50 — R35 시작화면 지붕 달리기 (사용자 요청)
+- TitleRunner(러닝머신): 가운데 giwa_long 8채(16 m, 틈 1.3 m)·양옆 giwa_s 4줄이 −z로 흐르고 22 m 뒤로 빠지면 맨 앞에 다시 붙임(새로 만들기·지우기 없음, 1200프레임 동안 53번, 물체 수 149→149). 틈은 0.42초 0.45 m 뛰어넘음. 시작 → 메뉴·제목 숨김 → 옆으로 미끄러져 떨어짐(5 m→−5 m, 옆 4.4 m) + 어두워짐 1.35초 → 게임 씬. -startGame은 바로.
+- SceneBuilder.Title.cs (해·안개·하늘·파노라마 원통, 바닥, 주인공 달리기 동작), GameConfig.Title. T08 시작 테스트는 떨어지기를 기다리게 고침.
+- R35_TitleRunPlayTests·T08_Title 통과, R35/title_run.png·title_fall.png 직접 확인. 빌드 → smoke OK → FFinalProject.zip 12:48 갱신. 평가 전.
