@@ -921,3 +921,10 @@ VARCO MCP: 3D 생성(Generate3D)은 이미지 1장만 받고 멀티뷰 노드가
 - R36 평가 1회차 FAIL: T04_BuildSettings 테스트가 Title 먼저를 기대(빌드 순서를 Game 먼저로 바꿈 — 의도) → 기대 순서 수정. 권고대로 HUD 숨김·되풀이 암전·일시정지/결과 '타이틀로' 테스트 추가(R36_ToTitle_FromPauseAndResult_OpensAttract). T04·R36 통과.
 - R36 재평가 PASS (2회차) → done. 전체 검증 EditMode 208/208, PlayMode 211/212(+1 skip). 13:49 빌드 → smoke OK → FFinalProject.zip(422 MB) 갱신. 실제 exe 창 실행 확인은 사용자.
 - 14:00 HANDOFF 맨 위를 지금 상태로 정리(오늘 한 일 표, 할 일 14개·순서 추천, 사용자 확인 대기, 최적화 현황, 바뀐 구조). 사용자 요청으로 push.
+
+### 2026-11-17 16:40~17:10 — 버그 점검 + 일시정지 버그 2건 수정 (사용자 요청 "버그·플레이 중 이상한 점 체크")
+- 점검: 빌드 exe 화면 없이 25초 smoke OK, 마지막 전체 검증 이후 코드 변경 없음. 코드 검토는 게임 흐름(GameBootstrap·AttractMode·PauseMenu·ResultScreen·TitleMenu)과 전투·되감기(StageDirector.*) 위주. 리듬·타이밍 내부, 점수, 연출·오디오 풀은 못 봄(보조 검토가 사용 한도로 멈춤).
+- 버그 ①: 피격 연출(0.7초)·되감기(0.8초) 중 Esc → 일시정지 패널이 떠도 되감기는 실제 시간으로 끝나 박자 시계·음악을 다시 켬 → 패널 뒤에서 판정이 흘러 FAIL. 고침: PauseMenu가 그 사이 누른 일시정지를 기다렸다가(PauseQueued) 연출이 끝나면 멈춤, 한 번 더 누르면 취소.
+- 버그 ②: 게임 씬 안 시작화면(R36) 메뉴·시작선까지 옮겨 가는 중 Esc → 패널만 뜨고 달리기 계속, 패널이 뜬 채 1챕터 시작. 고침: 시작화면 중에는 일시정지 무시.
+- 테스트 Bug1117_PauseGuardPlayTests 2개 추가. 관련 PlayMode(Bug1117_PauseGuard·T08_Pause/Result·R36·B53·B19·B30·B11) 23/23 통과. 전체 검증·빌드 다시 만들기는 안 함(FFinalProject.zip은 수정 전 빌드).
+- 확인 필요(사용자): 플레이 중 Alt+Tab — runInBackground 꺼짐, 포커스를 잃어도 자동 일시정지 없음. 돌아왔을 때 박자 건너뜀·FAIL이 몰리는지 직접 확인.

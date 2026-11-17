@@ -33,21 +33,41 @@ namespace RhythmActionGame
             Panel.gameObject.SetActive(false);
         }
 
+        /// <summary>
+        /// 되감기·피격 연출 중에 누른 일시정지 (2026-11-17 버그 수정). 그 연출은 실제 시간으로 흘러 박자 시계를 다시 켜므로
+        /// 그 사이에는 멈추지 않고 기다렸다가, 연출이 끝나 게임이 다시 진행되면 바로 일시정지한다.
+        /// </summary>
+        public bool PauseQueued { get; private set; }
+
+        /// <summary>되감기 또는 되감기 앞 피격 연출 중.</summary>
+        bool InRewind => director != null && (director.Rewinding || director.HitPending);
+
+        /// <summary>게임 씬 안 시작화면(작업 R36) 중: 메뉴가 떠 있고 박자 시계가 돌지 않으므로 일시정지하지 않는다.</summary>
+        static bool InAttract
+        {
+            get { var b = GameBootstrap.Instance; return b != null && b.attract != null && b.attract.Active; }
+        }
+
         void Update()
         {
             var kb = Keyboard.current;
             if (kb != null && kb.escapeKey.wasPressedThisFrame) Toggle();
+            if (PauseQueued && !InRewind) { PauseQueued = false; Pause(); }
         }
 
         public void Toggle()
         {
-            if (IsPaused) Resume(); else Pause();
+            if (IsPaused) Resume();
+            else if (PauseQueued) PauseQueued = false;   // 기다리는 중에 한 번 더 누르면 취소
+            else Pause();
         }
 
         public void Pause()
         {
             if (IsPaused) return;
+            if (InAttract) return;
             if (director != null && (director.State == StageState.GameOver || director.State == StageState.Cleared)) return;
+            if (InRewind) { PauseQueued = true; return; }
             IsPaused = true;
             if (clock != null) clock.Pause();
             Time.timeScale = 0f;
@@ -75,6 +95,7 @@ namespace RhythmActionGame
 
         public void ToTitle()
         {
+            PauseQueued = false;
             Time.timeScale = 1f;
             AttractMode.AttractOnLoad = true;   // 작업 R36: 시작화면 = 게임 씬 진입로 달리기
             SceneManager.LoadScene("Game");
