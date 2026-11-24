@@ -11,10 +11,10 @@
 | clothesline_12 | Normal | 1.46 | 0.88 | 0.56 | 9 |
 | clothesline_12 | Perfect | 1.46 | 0.88 | 0.55 | 11 |
 | clothesline_96 | Normal | 1.46 | 0.88 | 0.55 | 9 |
-| clothesline_96 | Perfect | 1.46 | 0.86 | 0.58 | 8 |
+| clothesline_96 | Perfect | 1.46 | 0.86 | 0.58 | 9 |
 | eave_136 | Normal | 1.89 | 0.88 | 0.99 | 80 |
 | eave_136 | Perfect | 1.89 | 0.88 | 0.99 | 78 |
 | eave_232 | Normal | 1.90 | 0.88 | 1.01 | 80 |
 | eave_232 | Perfect | 1.90 | 0.88 | 1.01 | 81 |
-| eave_80 | Normal | 1.45 | 0.76 | 0.67 | 21 |
-| eave_80 | Perfect | 1.45 | 0.86 | 0.57 | 22 |
+| eave_80 | Normal | 1.45 | 0.76 | 0.68 | 21 |
+| eave_80 | Perfect | 1.45 | 0.86 | 0.58 | 22 |

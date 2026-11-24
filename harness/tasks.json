@@ -2190,10 +2190,10 @@
                                          "GDD-beta에 사용자 결정 기록, EditMode·PlayMode 테스트",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  "사용자 피드백 2026-11-24 4번: '죽어서 처음으로 되돌아갔는데 콤보는 유지되고 있어요. 0으로 초기화해야 해요.'"
+                      "notes":  "사용자 피드백 2026-11-24 4번. ScoreBoard.RewindTo(cp, resetCombo) — 챕터 되감기만 콤보 0, 전투 FAIL 되감기는 유지. 평가 PASS 1회차."
                   },
                   {
                       "id":  "R40",
