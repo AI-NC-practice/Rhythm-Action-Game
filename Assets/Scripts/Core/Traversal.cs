@@ -68,7 +68,9 @@ namespace RhythmActionGame
                         case ObstacleCategory.Slide: pos.y = -1.0f * bell; euler.x = 8f * bell; break;
                         case ObstacleCategory.Drop: pos.y = 0.3f * Mathf.Sin(p * Mathf.PI * 2f) * (1 - p); euler.x = 360f * Smooth(p, 0.45f, 0.8f); break; // 착지 후 앞구르기
                         case ObstacleCategory.Dodge: pos.x = side * 1.0f * bell; euler.z = -side * 8f * bell; break;
-                        case ObstacleCategory.WallRun: pos.x = side * 0.9f * bell; pos.y = 1.2f * bell; euler.z = side * GameConfig.Body.WallRunCameraRoll * bell; break; // R06: 몸처럼 벽 반대쪽으로 기울임
+                        case ObstacleCategory.WallRun:   // R06: 몸처럼 벽 반대쪽으로 기울임. R40: 포물선(점프처럼 보임) 대신 올라 → 벽 따라 같은 높이 → 내려옴
+                            float wp = WallRunProfile(p, r);
+                            pos.x = side * GameConfig.Body.WallRunCameraSide * wp; pos.y = GameConfig.Body.WallRunCameraHeight * wp; euler.z = side * GameConfig.Body.WallRunCameraRoll * wp; break;
                     }
                     break;
 
@@ -82,7 +84,9 @@ namespace RhythmActionGame
                         case ObstacleCategory.Slide: pos.y = -0.7f * bell; euler.z = 6f * wobble; break;
                         case ObstacleCategory.Drop: pos.y = -0.3f * bell; euler.z = 8f * wobble; break;
                         case ObstacleCategory.Dodge: pos.x = side * 0.6f * bell; euler.z = side * 10f * wobble; break;
-                        case ObstacleCategory.WallRun: pos.x = side * 0.7f * bell; pos.y = 0.5f * bell; euler.z = side * GameConfig.Body.WallRunCameraRoll * 0.5f * bell + 6f * wobble; break;
+                        case ObstacleCategory.WallRun:
+                            float wn = WallRunProfile(p, r);
+                            pos.x = side * GameConfig.Body.WallRunCameraSideNormal * wn; pos.y = GameConfig.Body.WallRunCameraHeightNormal * wn; euler.z = side * GameConfig.Body.WallRunCameraRoll * 0.5f * wn + 6f * wobble; break;
                     }
                     break;
 
@@ -99,6 +103,16 @@ namespace RhythmActionGame
         }
 
         static float Smooth(float p, float a, float b) => Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(a, b, p));
+
+        /// <summary>
+        /// 작업 R40 (사용자 피드백 2026-11-24 5번 "벽을 탄 다음 점프해서 가는 느낌"): 벽타기 진행 비율 0~1.
+        /// 벽(사건 가운데 ±4 m = 진행 0.1~0.9)에 빠르게 올라 → 벽 구간 동안 그대로 → 벽 끝에서 내려온다. 몸 기울기·발 자리(PlayerBody)도 같은 모양.
+        /// </summary>
+        public static float WallRunProfile(float p, Judgement r)
+        {
+            var w = r == Judgement.Perfect ? GameConfig.Body.WallRunOnPerfect : GameConfig.Body.WallRunOnNormal;
+            return Smooth(p, w.x, w.y) * (1f - Smooth(p, w.z, w.w));
+        }
     }
 
     /// <summary>체력 (GDD 4.3). 3에서 시작, FAIL마다 −1, 0이면 게임 오버.</summary>

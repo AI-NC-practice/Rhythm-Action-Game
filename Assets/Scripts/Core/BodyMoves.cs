@@ -49,7 +49,9 @@ namespace RhythmActionGame
             {
                 case "Vault": return r == Judgement.Perfect ? "vault" : r == Judgement.Normal ? "player_climb_box" : "hit_obstacle";
                 case "Climb": return r == Judgement.Perfect ? "player_run_jump" : r == Judgement.Normal ? "player_climb_box" : "hit_obstacle";
-                case "Slide": return r == Judgement.Perfect ? "slide" : r == Judgement.Normal ? "duck" : "hit_obstacle";   // R06: NORMAL은 팔이 화면을 가리던 player_box_slide 대신 숙이기
+                // R06: NORMAL은 팔이 화면을 가리던 player_box_slide 대신 숙이기(duck). R41: 숙이기는 머리가 1.4 m라 장애물 속을 지나 → NORMAL도 미끄러지기
+                // (카메라가 머리를 다 따라가 팔이 화면을 가리지 않음, R06 측정), 휘청임은 카메라 흔들림(Traversal)으로.
+                case "Slide": return r == Judgement.Fail ? "hit_obstacle" : "slide";
                 case "Drop": return r == Judgement.Perfect ? "player_forward_roll" : r == Judgement.Normal ? "player_heavy_landing_1" : "player_forward_fall_twist";
                 case "Dodge": return r == Judgement.Perfect ? "dodge_right" : r == Judgement.Normal ? "player_spin_jump_dodge" : "player_heavy_hit_back";
                 default: return r == Judgement.Fail ? "stumble" : RunClip;   // R06: 벽타기는 몸을 45° 눕혀(PlayerBody) 달리기 클립으로 벽을 밟음

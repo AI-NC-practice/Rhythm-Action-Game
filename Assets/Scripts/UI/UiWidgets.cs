@@ -101,15 +101,21 @@ namespace RhythmActionGame
             rt.anchoredPosition = pos;
             var img = go.GetComponent<Image>();
             img.sprite = White;
-            img.color = new Color(0.15f, 0.13f, 0.12f, 0.9f);
+            // 작업 R38: 그림 색은 흰색, 상태별 색은 ColorBlock에 (예전에는 그림 색 0.15가 ColorBlock에 곱해져 마우스를 올려도 거의 안 바뀌었다)
+            img.color = Color.white;
             var b = go.GetComponent<Button>();
             b.targetGraphic = img;
             b.navigation = new Navigation { mode = Navigation.Mode.None };
             var colors = b.colors;
-            colors.highlightedColor = new Color(0.85f, 0.7f, 0.4f);
-            colors.pressedColor = new Color(0.6f, 0.45f, 0.25f);
+            colors.normalColor = GameConfig.MenuButton.ButtonNormal;
+            colors.highlightedColor = GameConfig.MenuButton.ButtonHover;
+            colors.pressedColor = GameConfig.MenuButton.ButtonPressed;
+            colors.selectedColor = GameConfig.MenuButton.ButtonNormal;
+            colors.colorMultiplier = 1f;
+            colors.fadeDuration = GameConfig.MenuButton.FadeSeconds;
             b.colors = colors;
             var t = UiFactory.CreateText(rt, "Label", label, 40, Color.white, rt.sizeDelta);
+            go.AddComponent<UiHover>().label = t;
             if (onClick != null) b.onClick.AddListener(onClick);
             return b;
         }

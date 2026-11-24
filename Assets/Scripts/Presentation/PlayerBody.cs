@@ -566,7 +566,6 @@ namespace RhythmActionGame
             if (run != null && run.HasResult && actionBlend > 0f && director.motion != null)
             {
                 float p = director.TraversalProgress;
-                float bell = Mathf.Sin(Mathf.Clamp01(p) * Mathf.PI);
                 string action = run.HasCategory ? BodyMoves.ActionOf(run.Category) : null;
                 bool fail = run.Result == Judgement.Fail;
                 bool slide = action == "Slide" || (action == null && LastState.StartsWith("Slide"));
@@ -578,8 +577,9 @@ namespace RhythmActionGame
                     {
                         if (wallRunFor != run) { wallRunFor = run; wallFootOffset = MeasureWall(run.Side); }
                         float deg = run.Result == Judgement.Perfect ? GameConfig.Body.WallRunLeanDegrees : GameConfig.Body.WallRunNormalLeanDegrees;
-                        pos = new Vector3(run.Side * wallFootOffset * bell, motionPos.y, 0f);
-                        lean = run.Side * deg * bell;
+                        float on = Traversal.WallRunProfile(p, run.Result);   // 작업 R40: 포물선 대신 벽 구간 내내 벽을 밟음
+                        pos = new Vector3(run.Side * wallFootOffset * on, motionPos.y, 0f);
+                        lean = run.Side * deg * on;
                     }
                     else
                     {

@@ -30,6 +30,21 @@ namespace RhythmActionGame
         {
             var boot = GameBootstrap.Instance;
             if (boot != null) { player = boot.player; director = boot.director; }
+            SetupBarricades();
+        }
+
+        /// <summary>쫓는 무리를 다시 달리는 자세로 (새 컷, 되감기).</summary>
+        void ResetPursuers()
+        {
+            chargeCut = -1;
+            if (tripped != null) for (int k = 0; k < tripped.Length; k++) tripped[k] = false;
+            if (pursuers == null) return;
+            foreach (var p in pursuers)
+            {
+                if (p == null) continue;
+                var fr = p.GetComponent<EnemyFigureRun>();
+                if (fr != null && fr.Down && p.gameObject.activeInHierarchy) fr.ResetFigure();
+            }
         }
 
         /// <summary>컷 i의 진행 (0~1)에서 카메라 각도 비율: 빠르게 돌아보고, 잠깐 보고, 돌아온다.</summary>
@@ -88,7 +103,119 @@ namespace RhythmActionGame
         /// <summary>쫓는 무리가 보이는 중 (테스트용).</summary>
         public bool PursuersShown { get; private set; }
 
-        /// <summary>작업 R29: 컷 1박 전 ~ 컷 뒤 1박 동안 플레이어 뒤 경로 위를 달려 따라온다 (조금씩 좁혀 옴). 그 밖에는 숨김.</summary>
+        // ---------------- 작업 R42: 막는 것 (지게·짚단 / 지붕 위 기와 더미) ----------------
+
+        /// <summary>
+        /// 작업 R42 (사용자 피드백 2026-11-24 7번 "뒤돌아보면 바로 뒤에 적이 있는데 앞의 적과 싸울 때 안 덮친다 — 지게 같은 걸 쓰러뜨려 방해"):
+        /// 컷마다 막는 것 (SceneBuilder가 만든 모델들, barricades[i]의 자식). 컷 자리 BarricadeBehind m 뒤 길가에 서 있다가(땅: 지게·짚단, 지붕: 기와 더미)
+        /// 컷이 시작되면 길을 가로질러 쓰러지고, 쫓아오던 무리는 달려들다 거기 걸려 넘어진다 → 앞의 적과 싸우는 동안 뒤의 적이 덮치지 않는 이유.
+        /// </summary>
+        public Transform[] barricades;
+        Pose[][] restPose, fallPose;
+        bool[] tripped;
+        int chargeCut = -1;
+        float[] chargeFrom;
+        double chargeV0;
+
+        /// <summary>컷 i의 막는 것 자리 (경로 거리 m).</summary>
+        public static float BarricadeDistance(int i) => (float)(GameConfig.Fx.LookBackRunBeats[i] * GameConfig.MetersPerBeat) - GameConfig.Fx.BarricadeBehind;
+        /// <summary>쫓는 무리 k가 막는 것에 걸려 넘어졌는지 (테스트용).</summary>
+        public bool PursuerTripped(int k) => tripped != null && k >= 0 && k < tripped.Length && tripped[k];
+        /// <summary>컷 i의 막는 것이 쓰러진 정도 (0 서 있음 ~ 1 길을 가로질러 누움). 테스트용.</summary>
+        public float BarricadeFall(int i) => barricadeFall != null && i >= 0 && i < barricadeFall.Length ? barricadeFall[i] : 0f;
+        float[] barricadeFall;
+
+        /// <summary>막는 것이 놓일 면 높이: 지붕 위 컷은 빌드 때 보이는 메시로 잰 높이(무리 k 옆 거리), 아니면 광선으로 길 바닥.</summary>
+        float SurfaceY(int i, int k, Vector3 at, float fallbackY)
+        {
+            if (OnRoof(GameConfig.Fx.LookBackRunBeats[i]))
+            {
+                var d = BarricadeDistance(i);
+                for (float dd = 0f; dd <= 1.5f; dd += 0.25f)
+                {
+                    float y = RoofY(i, k, d - dd);
+                    if (!float.IsNaN(y)) return y;
+                }
+                return fallbackY;
+            }
+            float best = float.NegativeInfinity;
+            foreach (var h in Physics.RaycastAll(at + Vector3.up * 1.5f, Vector3.down, 6f, ~0, QueryTriggerInteraction.Ignore))
+                if (h.point.y > best && h.point.y <= fallbackY + 0.3f && (barricades == null || !System.Array.Exists(barricades, b => b != null && h.transform.IsChildOf(b)))) best = h.point.y;
+            return float.IsNegativeInfinity(best) ? fallbackY : best;
+        }
+
+        void SetupBarricades()
+        {
+            var beats = GameConfig.Fx.LookBackRunBeats;
+            if (barricades == null || barricades.Length != beats.Length) return;
+            restPose = new Pose[beats.Length][];
+            fallPose = new Pose[beats.Length][];
+            barricadeFall = new float[beats.Length];
+            for (int i = 0; i < beats.Length; i++)
+            {
+                var root = barricades[i];
+                if (root == null) continue;
+                var at = MapLayout.PointAt(BarricadeDistance(i), out var fwd);
+                var right = MapLayout.RightOf(fwd);
+                var look = Quaternion.LookRotation(fwd, Vector3.up);
+                int n = root.childCount;
+                restPose[i] = new Pose[n];
+                fallPose[i] = new Pose[n];
+                bool roof = OnRoof(beats[i]);
+                for (int j = 0; j < n; j++)
+                {
+                    if (roof)
+                    {
+                        // 기와 더미: 길 오른쪽 용마루 가에 쌓여 있다가 무리가 달려오는 길 위로 흩어진다
+                        int k = j % Mathf.Max(1, pursuers != null ? pursuers.Length : 3);
+                        float lat = GameConfig.Fx.PursuerLaterals[k % GameConfig.Fx.PursuerLaterals.Length] * GameConfig.Fx.PursuerRoofLateralScale;
+                        var stackAt = at + right * GameConfig.Fx.BarricadeRoofStackSide;
+                        float ys = SurfaceY(i, 1, stackAt, at.y);
+                        restPose[i][j] = new Pose(new Vector3(stackAt.x, ys + j * GameConfig.Fx.BarricadeTileHeight, stackAt.z) + fwd * 0.05f * j, look * Quaternion.Euler(0f, 12f * j, 0f));
+                        var fallAt = at + right * lat - fwd * (0.35f * j);
+                        float yf = SurfaceY(i, k, fallAt, at.y);
+                        fallPose[i][j] = new Pose(new Vector3(fallAt.x, yf, fallAt.z), look * Quaternion.Euler(0f, 35f * j - 30f, 8f));
+                    }
+                    else
+                    {
+                        // 지게(왼쪽)·짚단(오른쪽): 길가에 서 있다가 길 가운데 쪽으로 넘어져 길을 가로막는다
+                        float side = j % 2 == 0 ? -1f : 1f;
+                        var standAt = at + right * side * GameConfig.Fx.BarricadeSide;
+                        float y = SurfaceY(i, 0, standAt, at.y);
+                        var rest = look;
+                        restPose[i][j] = new Pose(new Vector3(standAt.x, y, standAt.z), rest);
+                        var tip = Quaternion.FromToRotation(Vector3.up, -side * right);   // 위가 길 가운데 쪽으로
+                        fallPose[i][j] = new Pose(new Vector3(standAt.x, y + GameConfig.Fx.BarricadeLyingLift, standAt.z), tip * rest);
+                    }
+                }
+                PoseBarricade(i, 0f);
+            }
+        }
+
+        void PoseBarricade(int i, float f)
+        {
+            if (barricades == null || restPose == null || i < 0 || i >= barricades.Length || barricades[i] == null || restPose[i] == null) return;
+            barricadeFall[i] = f;
+            float e = f * f;   // 처음엔 천천히, 넘어질수록 빨리
+            var root = barricades[i];
+            for (int j = 0; j < root.childCount && j < restPose[i].Length; j++)
+                root.GetChild(j).SetPositionAndRotation(Vector3.Lerp(restPose[i][j].position, fallPose[i][j].position, e),
+                    Quaternion.Slerp(restPose[i][j].rotation, fallPose[i][j].rotation, e));
+        }
+
+        void UpdateBarricades(double v)
+        {
+            if (restPose == null) return;
+            var beats = GameConfig.Fx.LookBackRunBeats;
+            for (int i = 0; i < beats.Length; i++)
+            {
+                float f = v < beats[i] ? 0f : Mathf.Clamp01((float)((v - beats[i]) / GameConfig.Fx.BarricadeFallBeats));   // 되감기로 컷 앞이 되면 다시 선다
+                if (!Mathf.Approximately(f, barricadeFall[i])) PoseBarricade(i, f);
+            }
+        }
+
+        /// <summary>작업 R29: 컷 1박 전 ~ 컷 뒤 1박 동안 플레이어 뒤 경로 위를 달려 따라온다 (조금씩 좁혀 옴). 그 밖에는 숨김.
+        /// 작업 R42: 컷이 시작되면 막는 것 쪽으로 달려들다 걸려 넘어진다.</summary>
         void UpdatePursuers(double v, bool fighting)
         {
             if (pursuers == null || pursuers.Length == 0 || player == null) return;
@@ -103,17 +230,40 @@ namespace RhythmActionGame
             {
                 PursuersShown = show;
                 foreach (var p in pursuers) if (p != null) p.gameObject.SetActive(show);
+                if (show) ResetPursuers();
             }
             if (!show) return;
+            if (tripped == null || tripped.Length != pursuers.Length) tripped = new bool[pursuers.Length];
             float since = (float)(v - (beats[near] - GameConfig.Fx.PursuerLeadBeats));
             float d0 = player.VisualDistance;
+            bool charging = v >= beats[near] && barricades != null && near < barricades.Length && barricades[near] != null;
+            if (!charging && chargeCut == near) ResetPursuers();   // 되감기로 컷 앞으로 돌아옴
+            if (charging && chargeCut != near)
+            {
+                chargeCut = near; chargeV0 = v;
+                if (chargeFrom == null || chargeFrom.Length != pursuers.Length) chargeFrom = new float[pursuers.Length];
+                for (int k = 0; k < pursuers.Length; k++)
+                    chargeFrom[k] = d0 - Mathf.Max(3f, GameConfig.Fx.PursuerGaps[k % GameConfig.Fx.PursuerGaps.Length] - GameConfig.Fx.PursuerGainPerBeat * since);
+            }
+            float stopAt = BarricadeDistance(near) - GameConfig.Fx.PursuerTripGap;
             for (int k = 0; k < pursuers.Length; k++)
             {
                 var p = pursuers[k];
                 if (p == null) continue;
                 float gap = GameConfig.Fx.PursuerGaps[k % GameConfig.Fx.PursuerGaps.Length] - GameConfig.Fx.PursuerGainPerBeat * since;
                 float lat = GameConfig.Fx.PursuerLaterals[k % GameConfig.Fx.PursuerLaterals.Length];
-                var at = MapLayout.PointAt(Mathf.Max(0f, d0 - Mathf.Max(3f, gap)), out var fwd);
+                float pd = Mathf.Max(0f, d0 - Mathf.Max(3f, gap));
+                if (charging)
+                {
+                    // 막는 것으로 달려든다 (플레이어보다 빠르게) → 닿으면 걸려 넘어져 그 자리에
+                    pd = chargeFrom[k] + (GameConfig.MetersPerBeat + GameConfig.Fx.PursuerChargeGainPerBeat) * (float)(v - chargeV0);
+                    if (pd >= stopAt - 0.3f * k)
+                    {
+                        pd = stopAt - 0.3f * k;
+                        if (!tripped[k]) { tripped[k] = true; var fr = p.GetComponent<EnemyFigureRun>(); if (fr != null) fr.PlayDefeat(); }
+                    }
+                }
+                var at = MapLayout.PointAt(pd, out var fwd);
                 if (at.y > GameConfig.Fx.PursuerRoofHeight) lat *= GameConfig.Fx.PursuerRoofLateralScale;   // 지붕 위: 용마루 가까이 (멀리 비키면 경사 아래 공중), 겹쳐 보이지 않을 만큼만
                 at += MapLayout.RightOf(fwd) * lat;
                 // 발은 그 자리 아래 가까운 면(지붕·담·땅)에. 1 m 넘게 아래뿐이면 지붕 사이 틈 — 플레이어처럼 길 높이로 뛰어넘는 중(Hopping)
@@ -123,13 +273,13 @@ namespace RhythmActionGame
                 // 지붕 구간: 충돌 상자(지붕 길)는 보이는 기와보다 높다 → 보이는 장식 지붕 윗면(용마루)이 더 낮으면 그 높이
                 float vis = DressingInstancer.TopBelow(at + Vector3.up * 1.5f, at.y + 0.3f);
                 if (!float.IsNegativeInfinity(vis) && vis < best && best - vis < 3f) best = vis;
-                bool hop = float.IsNegativeInfinity(best) || best < at.y - 1.0f || InObstacle((d0 - Mathf.Max(3f, gap)) / GameConfig.MetersPerBeat);   // 장애물(지붕 뛰어넘기·오르기 등)은 플레이어처럼 넘어가는 중
+                bool hop = float.IsNegativeInfinity(best) || best < at.y - 1.0f || InObstacle(pd / GameConfig.MetersPerBeat);   // 장애물(지붕 뛰어넘기·오르기 등)은 플레이어처럼 넘어가는 중
                 // 지붕 위 컷: 빌드 때 보이는 메시로 잰 발 높이 (없는 칸 = 지붕 사이 틈을 뛰어넘는 중)
-                float roof = RoofY(near, k, Mathf.Max(0f, d0 - Mathf.Max(3f, gap)));
+                float roof = RoofY(near, k, pd);
                 if (OnRoof(beats[near]) && roofY != null && roofY.Length > 0)
                 {
                     if (float.IsNaN(roof)) hop = true;
-                    else { best = roof; hop = InObstacle((d0 - Mathf.Max(3f, gap)) / GameConfig.MetersPerBeat); }
+                    else { best = roof; hop = InObstacle(pd / GameConfig.MetersPerBeat); }
                 }
                 if (!hop) at.y = best;
                 if (hopping == null || hopping.Length != pursuers.Length) hopping = new bool[pursuers.Length];
@@ -146,6 +296,7 @@ namespace RhythmActionGame
             bool enabledFx = presentation == null || presentation.Enabled;
             bool fighting = director != null && (director.CurrentEncounter != null || director.Rewinding);
             UpdatePursuers(v, fighting);
+            UpdateBarricades(v);
             if (active < 0 && !double.IsNaN(lastV) && enabledFx && !fighting)
                 for (int i = 0; i < beats.Length; i++)
                     if (lastV < beats[i] && v >= beats[i] && v < beats[i] + 0.5) { Begin(i); break; }

@@ -233,6 +233,23 @@ namespace RhythmActionGame.EditorTools
                     lookBack.roofY = LookBackRoofProfile.ys;
                     lookBack.roofStep = LookBackRoofStep;
                 }
+                // 작업 R42: 컷마다 막는 것 (땅: 지게·짚단, 지붕 위: 기와 더미 3개). 자리·자세는 LookBackCut이 실행 때 정한다 (지붕은 보이는 면 높이).
+                var beatsLb = GameConfig.Fx.LookBackRunBeats;
+                var bars = new Transform[beatsLb.Length];
+                for (int i = 0; i < beatsLb.Length; i++)
+                {
+                    var root = new GameObject($"LookBackBarricade_{i}").transform;
+                    root.position = MapLayout.PointAt(LookBackCut.BarricadeDistance(i));
+                    if (LookBackCut.OnRoof(beatsLb[i]))
+                        for (int j = 0; j < 3; j++) BarricadePiece(root, "eave_low", $"Tiles_{j}", GameConfig.Fx.BarricadeTileSize);
+                    else
+                    {
+                        BarricadePiece(root, "jige", "Jige", new Vector3(0f, GameConfig.Fx.BarricadeJigeHeight, 0f));
+                        BarricadePiece(root, "straw", "Straw", new Vector3(0f, GameConfig.Fx.BarricadeStrawHeight, 0f));
+                    }
+                    bars[i] = root;
+                }
+                lookBack.barricades = bars;
             }
             lookBack.cameraFx = cameraFx;
             lookBack.presentation = presentation;
@@ -435,11 +452,29 @@ namespace RhythmActionGame.EditorTools
                             LocalBox(root, "Prop_clothesline_PostL", new Vector3(-1.7f, 1.0f, 0), new Vector3(0.1f, 2.0f, 0.1f), cl).transform,
                             LocalBox(root, "Prop_clothesline_PostR", new Vector3(1.7f, 1.0f, 0), new Vector3(0.1f, 2.0f, 0.1f), cl).transform,
                             LocalBox(root, "Prop_clothesline", new Vector3(0, 1.4f, 0), new Vector3(3.4f, 0.4f, 0.05f), cl).transform);
+                        LiftOverhang(root, root.Find("ModelPivot_clothesline"), GameConfig.Map.SlideCorridorHalf, GameConfig.Map.ClotheslineUnderside);   // 작업 R41: 옷 밑을 미끄러져 지나도 닿지 않게
                         break;
                     case "eave":
-                        // 작업 R04: 낮은 처마 모델 (기둥 2개 위 기와 처마, 처마 밑 약 1.25 m)
-                        ReplaceBoxes(root, "eave_low", new Vector3(0, 0.78f, 0), new Vector3(4.0f, 1.55f, 1.2f),
-                            LocalBox(root, "Prop_eave", new Vector3(0, 1.4f, 0), new Vector3(3.4f, 0.3f, 1.0f), Mat("Eave", new Color(0.3f, 0.3f, 0.33f))).transform);
+                        var eaveBox = LocalBox(root, "Prop_eave", new Vector3(0, 1.4f, 0), new Vector3(3.4f, 0.3f, 1.0f), Mat("Eave", new Color(0.3f, 0.3f, 0.33f))).transform;
+                        if (p.y > GameConfig.Map.OverhangRoofHeight)
+                        {
+                            // 작업 R13: 지붕 길 위 — 지붕에 올려놓은 낮은 처마(대문처럼 보임) 대신 길 옆 땅에 선 높은 건물의 처마 밑으로 미끄러진다
+                            bool palace = MapLayout.SectionOf((int)e.runBeat).Number >= 5;
+                            string bid = palace ? "palace_hall" : "pavilion";
+                            float bh = palace ? GameConfig.Map.OverhangPalaceHeight : GameConfig.Map.OverhangPavilionHeight;
+                            var placed = PlaceOverhangBuilding(root, bid, bh, 1f, p.y, GameConfig.Map.SlideCorridorHalf, GameConfig.Map.EaveUnderside)
+                                ?? PlaceOverhangBuilding(root, bid, bh, -1f, p.y, GameConfig.Map.SlideCorridorHalf, GameConfig.Map.EaveUnderside);
+                            if (placed != null)
+                            {
+                                eaveBox.GetComponent<MeshRenderer>().enabled = false;
+                                Debug.Log($"[R13] {e.runBeat}박 지붕 처마: {bid} 크기 {placed.Value.k:0.00}, 옆 {placed.Value.s:0.0} m, 처마 밑 {placed.Value.u:0.00} m");
+                                break;
+                            }
+                            Debug.LogWarning($"[R13] {e.runBeat}박: 높은 건물 처마 자리를 찾지 못해 낮은 처마 모델로 둔다");
+                        }
+                        // 작업 R04: 낮은 처마 모델 (기둥 2개 위 기와 처마). R41: 기둥을 늘려 처마 밑 EaveUnderside
+                        ReplaceBoxes(root, "eave_low", new Vector3(0, 0.78f, 0), new Vector3(4.0f, 1.55f, 1.2f), eaveBox);
+                        LiftOverhang(root, root.Find("ModelPivot_eave_low"), GameConfig.Map.SlideCorridorHalf, GameConfig.Map.EaveUnderside);   // 작업 R41
                         break;
                     case "wall_run":
                         TileIntoBox(LocalBox(root, "Prop_wall_stone", new Vector3(side * 2.0f, 1.75f, 0), new Vector3(0.5f, 3.5f, 8f), Mat("WallRun", new Color(0.66f, 0.64f, 0.6f))).transform, "wall_stone");

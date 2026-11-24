@@ -79,10 +79,14 @@ namespace RhythmActionGame
 
         public Checkpoint Save() => new Checkpoint { Score = Score, Perfect = Perfect, Normal = Normal, Fail = Fail, Valid = true };
 
-        /// <summary>기억한 점수·판정 수로 돌아가고 패널티를 뺀다 (0 아래로 안 감). 콤보는 그대로.</summary>
-        public void RewindTo(Checkpoint cp)
+        /// <summary>
+        /// 기억한 점수·판정 수로 돌아가고 패널티를 뺀다 (0 아래로 안 감). 전투 되감기(체력 그대로)는 콤보 그대로,
+        /// 체력 0 챕터 되감기(resetCombo)는 콤보 0 (작업 R39, 사용자 결정 2026-11-24 = GDD-beta B22).
+        /// </summary>
+        public void RewindTo(Checkpoint cp, bool resetCombo = false)
         {
             if (cp.Valid) { Score = cp.Score; Perfect = cp.Perfect; Normal = cp.Normal; Fail = cp.Fail; }
+            if (resetCombo) Combo = 0;
             Score = Mathf.Max(0, Score - GameConfig.RewindScorePenalty);
             Rewinds++;
             Changed?.Invoke();

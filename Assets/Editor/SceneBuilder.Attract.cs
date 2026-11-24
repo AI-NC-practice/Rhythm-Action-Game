@@ -18,14 +18,16 @@ namespace RhythmActionGame.EditorTools
             float L = GameConfig.Attract.BuildLength;
             var road = Box(root, "ApproachPath", p0 - fwd * (L * 0.5f) + Vector3.up * 0.02f, new Vector3(GameConfig.PathWidth, 0.04f, L), Quaternion.LookRotation(fwd, Vector3.up), pathMat);
             road.isStatic = true;
-            // 길가 집: 긴 축을 길 방향으로, 양옆에 번갈아 기와집·초가
-            string[] mods = { "giwa_s", "choga", "giwa_long", "house_giwa", "choga_L" };
+            // 길가 집: 긴 축을 길 방향으로, 양옆에 번갈아 기와집·초가.
+            // 작업 R37: 집 두 채(TilePeriod = 집 간격 × 2)마다 똑같이 되풀이 — 시작화면이 TilePeriod만큼 뒤로 옮겨도 화면이 같다
+            string[][] mods = { new[] { "giwa_s", "choga" }, new[] { "choga_L", "giwa_long" } };
             var rot = Quaternion.LookRotation(fwd, Vector3.up) * Quaternion.Euler(0f, -90f, 0f);
             int k = 0;
             foreach (float side in new[] { -1f, 1f })
-                for (float z = -GameConfig.Attract.HouseSpacing * 0.5f; z > -L; z -= GameConfig.Attract.HouseSpacing, k++)
+                for (int j = 0; -GameConfig.Attract.HouseSpacing * (j + 0.5f) > -L; j++, k++)
                 {
-                    string id = mods[(k + (side > 0 ? 2 : 0)) % mods.Length];
+                    float z = -GameConfig.Attract.HouseSpacing * (j + 0.5f);
+                    string id = mods[side > 0 ? 1 : 0][j % 2];
                     var w = Wrap(id, root, $"ApproachHouse_{k}");
                     var sz = FitModule(w, id);
                     if (sz.x > GameConfig.Attract.HouseSpacing - 0.6f)
@@ -58,6 +60,8 @@ namespace RhythmActionGame.EditorTools
             attract.menu = canvas.gameObject;
             var hud = GameObject.Find("HudCanvas");
             attract.hideDuringAttract = hud != null ? new[] { hud } : new GameObject[0];
+            var bd = GameObject.Find("Backdrop");
+            if (bd != null) attract.backdrop = bd.GetComponent<Renderer>();
             boot.attract = attract;
         }
     }

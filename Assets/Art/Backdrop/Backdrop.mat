@@ -30,6 +30,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _FogBlend: 0.35
+    - _Mist: 0
     - _TopFade: 0.55
     - _TopToFog: 0
     - _Warm: 0.3

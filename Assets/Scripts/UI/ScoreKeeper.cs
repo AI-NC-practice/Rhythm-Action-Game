@@ -57,7 +57,8 @@ namespace RhythmActionGame
 
         void OnRewindStarted(RewindKind kind)
         {
-            Board.RewindTo(kind == RewindKind.Chapter ? chapterCp : encounterCp);
+            // 작업 R39: 체력 0 챕터 되감기는 콤보도 0 (전투 되감기는 콤보 유지, GDD-beta B20·B22)
+            Board.RewindTo(kind == RewindKind.Chapter ? chapterCp : encounterCp, resetCombo: kind == RewindKind.Chapter);
         }
 
         void Update()

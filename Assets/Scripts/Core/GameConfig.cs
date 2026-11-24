@@ -463,23 +463,50 @@ namespace RhythmActionGame
         /// </summary>
         public static class Attract
         {
-            /// <summary>진입로: 시작선 뒤 이 거리(m)부터 달리기 시작, 이 거리(시작선 뒤 m)에 닿으면 어두워졌다 처음부터.</summary>
-            public const float ApproachLength = 40f;
-            public const float LoopEnd = 8f;
-            /// <summary>진입로 땅·길·집: 지어 두는 길이 (m, 진입로보다 조금 더), 길 폭 (m), 길가 집 간격 (m).</summary>
-            public const float BuildLength = 70f;
+            /// <summary>
+            /// 작업 R37 (사용자 피드백 2026-11-24 2번 "어두워졌다 처음으로 돌아가지 말고 계속 달리게, 안 보이게 자연스럽게"):
+            /// 진입로 집은 TilePeriod(m)마다 똑같이 되풀이한다. 주인공은 시작선 뒤 −LoopNear − TilePeriod ~ −LoopNear (m) 사이를 달리다
+            /// −LoopNear에 닿으면 TilePeriod만큼 뒤로 옮긴다 — 카메라에 보이는 것(되풀이하는 집·길·땅, 안개에 묻힌 먼 곳)이 같아서 보이지 않는다.
+            /// 시작선 너머 실제 맵은 시작화면 안개(Mist) 끝보다 멀어 보이지 않고, 시작을 누르면 안개가 걷히며 드러난다.
+            /// </summary>
+            public const float TilePeriod = 19f;
+            public const float LoopNear = 32f;
+            /// <summary>시작화면에서 처음 서는 자리 (시작선 뒤 m).</summary>
+            public const float ApproachLength = LoopNear + TilePeriod * 0.5f;
+            /// <summary>진입로 땅·길·집: 지어 두는 길이 (m, 되풀이 구간 + 카메라 뒤 여유), 길 폭 (m), 길가 집 간격 (m, TilePeriod의 절반).</summary>
+            public const float BuildLength = LoopNear + TilePeriod * 2f + 20f;
             public const float RoadHalf = 4.2f;
-            public const float HouseSpacing = 9.5f;
+            public const float HouseSpacing = TilePeriod * 0.5f;
+            /// <summary>시작화면 새벽 안개 (선형, 카메라에서 m)와 먼 배경 그림이 안개 색에 묻히는 정도 (0~1).</summary>
+            public const float MistFogStart = 3f;
+            public const float MistFogEnd = 26f;
+            public const float MistBackdrop = 0.85f;
+            /// <summary>시작을 누른 뒤: 안개가 다 걷히는 진행 비율 (시작선까지 0~1 중).</summary>
+            public const float MistClearAt = 0.85f;
+            /// <summary>시작선까지 달리기: 평균 빠르기 = 달리기 속도 × 이 배율 (처음·끝은 달리기 속도).</summary>
+            public const float LeadSpeedFactor = 1.6f;
             /// <summary>3인칭 카메라: 주인공 기준 (오른쪽·위·뒤 m)과 바라보는 자리 (앞 m).</summary>
             public static readonly UnityEngine.Vector3 CamOffset = new UnityEngine.Vector3(0.6f, 2.3f, -4.4f);
             public static readonly UnityEngine.Vector3 CamLook = new UnityEngine.Vector3(0f, 1.3f, 5f);
-            /// <summary>되풀이할 때 어두워지는·밝아지는 시간 (초).</summary>
-            public const float FadeSeconds = 0.35f;
-            /// <summary>시작을 누른 뒤 시작선까지 달리는 시간 (초) 범위 — 이 안에서 카메라가 1인칭으로 옮겨 간다.</summary>
+            /// <summary>시작을 누른 뒤 시작선까지 달리는 시간 (초) 범위 — 이 안에서 카메라가 1인칭으로 옮겨 가고 안개가 걷힌다 (R37: 진입로가 길어져 3 → 5초).</summary>
             public const float LeadMinSeconds = 1.6f;
-            public const float LeadMaxSeconds = 3.0f;
+            public const float LeadMaxSeconds = 5.0f;
             /// <summary>1인칭으로 옮겨 가는 비율이 이보다 크면 원래 몸(머리 있음)을 그림자만으로 (시작선까지 몸이 화면에 안 보임).</summary>
             public const float FirstPersonBodyAt = 0.8f;
+        }
+
+        /// <summary>작업 R38: 메뉴 버튼 마우스 반응 (사용자 피드백 2026-11-24). 배경 색은 상태별, 크기·글자 색은 UiHover.</summary>
+        public static class MenuButton
+        {
+            public static readonly UnityEngine.Color ButtonNormal = new UnityEngine.Color(0.15f, 0.13f, 0.12f, 0.9f);
+            public static readonly UnityEngine.Color ButtonHover = new UnityEngine.Color(0.62f, 0.42f, 0.16f, 0.97f);
+            public static readonly UnityEngine.Color ButtonPressed = new UnityEngine.Color(0.38f, 0.25f, 0.1f, 1f);
+            public static readonly UnityEngine.Color LabelHover = new UnityEngine.Color(1f, 0.9f, 0.55f, 1f);
+            public const float FadeSeconds = 0.08f;
+            public const float HoverScale = 1.08f;
+            public const float PressedScale = 0.96f;
+            /// <summary>크기·글자 색이 목표로 따라가는 빠르기 (1/초, 지수).</summary>
+            public const float Sharpness = 18f;
         }
 
         /// <summary>제출 빌드 해상도 (사용자 요청 2026-11-17: FullHD). 빌드 설정과 실행 시작 때 둘 다 적용한다.</summary>
@@ -508,10 +535,28 @@ namespace RhythmActionGame
             public const float LookBackTurnPart = 0.3f;
             public const float LookBackReturnPart = 0.4f;
             /// <summary>작업 R29: 뒤에서 쫓아오는 무리 (컷 1박 전부터 컷 뒤 1박까지만 보임). 플레이어 뒤 거리(m)·옆(m), 좁혀 오는 빠르기(m/박).</summary>
-            public static readonly float[] PursuerGaps = { 7f, 10f, 13f };
+            /// <summary>작업 R42: 7·10·13 → 5·7·9 m (컷 동안 막는 것에 걸려 넘어지는 장면이 돌아본 화면 안에서 일어나게).</summary>
+            public static readonly float[] PursuerGaps = { 5f, 7f, 9f };
             public static readonly float[] PursuerLaterals = { -1.1f, 1.0f, 0.1f };
             public const float PursuerGainPerBeat = 0.8f;
             public const double PursuerLeadBeats = 1.0;
+            /// <summary>
+            /// 작업 R42 (사용자 피드백 2026-11-24 7번): 컷이 시작되면 컷 자리 BarricadeBehind m 뒤에서 막는 것이 BarricadeFallBeats 박 만에 길을 가로질러 쓰러지고,
+            /// 쫓는 무리는 플레이어보다 PursuerChargeGainPerBeat m/박 빠르게 달려들다 막는 것 PursuerTripGap m 앞에서 걸려 넘어진다.
+            /// 땅: 지게·짚단이 길가 BarricadeSide m에 서 있다가 넘어짐 (누우면 BarricadeLyingLift m 들림). 지붕: 기와 더미가 오른쪽 BarricadeRoofStackSide m에 쌓여 있다가 흩어짐.
+            /// </summary>
+            public const float BarricadeBehind = 2.0f;
+            public const double BarricadeFallBeats = 0.3;
+            public const float PursuerChargeGainPerBeat = 2.5f;
+            public const float PursuerTripGap = 0.6f;
+            public const float BarricadeSide = 2.3f;
+            public const float BarricadeLyingLift = 0.25f;
+            public const float BarricadeRoofStackSide = 0.9f;
+            public const float BarricadeTileHeight = 0.3f;
+            /// <summary>막는 것 모델 크기: 지게 높이, 짚단 높이 (m, 누우면 길을 가로지르는 길이), 기와 한 무더기 (가로·높이·깊이 m).</summary>
+            public const float BarricadeJigeHeight = 2.3f;
+            public const float BarricadeStrawHeight = 2.0f;
+            public static readonly UnityEngine.Vector3 BarricadeTileSize = new UnityEngine.Vector3(1.0f, 0.3f, 0.7f);
             /// <summary>길 높이가 이보다 높으면 지붕 위 (쫓는 무리를 한 줄로).</summary>
             public const float PursuerRoofHeight = 1.5f;
             /// <summary>지붕 위에서 옆 거리 배율 (용마루 가까이 — 앞뒤로 겹쳐 하나로 보이지 않을 만큼만 벌림).</summary>
@@ -982,6 +1027,18 @@ namespace RhythmActionGame
             public const float SwordGuardLeftHandGap = 0.11f;
             /// <summary>벽타기 카메라 기울기 (도, 몸과 같은 방향 = 벽 반대쪽으로). NORMAL은 절반에 흔들림.</summary>
             public const float WallRunCameraRoll = 20f;
+            /// <summary>
+            /// 작업 R40: 벽타기 카메라 — 벽 쪽 (m)·높이 (m). 포물선 꼭대기(1.2 m) 대신 벽 구간 동안 이 높이 그대로.
+            /// 벽에 오르는·내리는 진행 구간 (x~y 오름, z~w 내림; 벽 = 0.1~0.9).
+            /// </summary>
+            public const float WallRunCameraSide = 0.9f;
+            public const float WallRunCameraHeight = 0.85f;
+            public const float WallRunCameraSideNormal = 0.7f;
+            public const float WallRunCameraHeightNormal = 0.4f;
+            public static readonly UnityEngine.Vector4 WallRunOnPerfect = new UnityEngine.Vector4(0.06f, 0.2f, 0.8f, 0.94f);
+            public static readonly UnityEngine.Vector4 WallRunOnNormal = new UnityEngine.Vector4(0.1f, 0.26f, 0.72f, 0.9f);
+            /// <summary>작업 R41: 아래로 피하기 장애물 밑을 지나는 동안 카메라가 밑면보다 낮아야 하는 여유 (m, 실제 stage1 측정).</summary>
+            public const float SlideClearance = 0.3f;
             /// <summary>아래로 피하기(미끄러지기) 중 내 몸(팔·다리)이 화면을 가리는 비율 상한 (0~1, PlayMode 측정).</summary>
             public const float SlideMaxScreenCover = 0.2f;
             /// <summary>목 단면이 화면 가장자리 밖 이 비율(뷰포트) 안에만 있어도 몸을 숨긴다 (카메라 흔들림 여유).</summary>
@@ -1247,6 +1304,18 @@ namespace RhythmActionGame
             /// <summary>작업 R32: 돌진 적이 엇갈려 지나가는 쪽(+1 오른쪽)·옆 거리(m)·비켜 오기 시작하는 판정 전 박.</summary>
             /// <summary>작업 R33: 벽타기 구간에서 길을 막는 수레의 가운데 옆 거리 (m, 벽 반대쪽). 플레이어는 벽 쪽 0.9 m·높이 1.2 m로 지나간다.</summary>
             public const float WallRunBlockX = 0.5f;
+            /// <summary>
+            /// 작업 R41 (사용자 피드백 2026-11-24 6번): 아래로 피하기 장애물 밑면 높이 (길에서 m, 달리는 길 가운데 ±SlideCorridorHalf m).
+            /// 모델은 기둥만 늘려 올린다 (예전: 빨랫줄 옷 0.59 m, 낮은 처마 0.96 m — 미끄러지는 카메라 0.95 m가 그 속을 지났다). 서 있는 눈높이(1.65 m)보다는 낮다.
+            /// </summary>
+            public const float ClotheslineUnderside = 1.4f;
+            public const float EaveUnderside = 1.45f;
+            public const float SlideCorridorHalf = 0.8f;
+            /// <summary>작업 R13: 길 높이가 이보다 높으면(지붕·궁궐 담 위) 낮은 처마 대신 옆 높은 건물(누각·궁궐 전각)의 처마 (m).</summary>
+            public const float OverhangRoofHeight = 1.5f;
+            /// <summary>작업 R13: 옆 높은 건물의 실제 높이 (m, asset_specs height_m). 처마 높이를 맞추려 0.6~1.5배 안에서 크기를 고른다.</summary>
+            public const float OverhangPavilionHeight = 9f;
+            public const float OverhangPalaceHeight = 14f;
             public const float ChargePassSide = 1f;
             public const float ChargePassOffset = 1.4f;
             public const float ChargePassBeats = 1.5f;

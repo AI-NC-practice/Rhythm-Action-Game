@@ -81,6 +81,109 @@ namespace RhythmActionGame.EditorTools
             FitModelCentered(pivot, id, size);
         }
 
+        /// <summary>
+        /// 작업 R41 (사용자 피드백 2026-11-24 6번 "아래로 피하는 거 부딪히면서 가는 것 같아요"): 아래로 피하기 장애물(빨랫줄·낮은 처마)의
+        /// 기둥만 늘려 밑면(달리는 길 위 가운데 ±corridorHalf m에서 가장 낮은 곳)을 target m로 올린다. 밑면보다 위(옷·처마 지붕)는 모양 그대로 올리고,
+        /// 그 아래(기둥)만 세로로 늘린다. 장애물 축(root)은 길 바닥·수평 회전만이라고 본다. 같은 모양은 메시를 한 번만 만들어 나눠 쓴다.
+        /// </summary>
+        static void LiftOverhang(Transform root, Transform model, float corridorHalf, float target)
+        {
+            var mfs = model.GetComponentsInChildren<MeshFilter>(true);
+            float u0 = float.PositiveInfinity;
+            foreach (var mf in mfs)
+                foreach (var v in mf.sharedMesh.vertices)
+                {
+                    var p = root.InverseTransformPoint(mf.transform.TransformPoint(v));
+                    if (Mathf.Abs(p.x) < corridorHalf && p.y > 0.15f) u0 = Mathf.Min(u0, p.y);
+                }
+            if (float.IsPositiveInfinity(u0) || u0 >= target) return;
+            float cut = u0 - 0.02f, newCut = target - 0.02f;
+            const string dir = "Assets/Art/Models/_derived";
+            if (!AssetDatabase.IsValidFolder(dir)) AssetDatabase.CreateFolder("Assets/Art/Models", "_derived");
+            foreach (var mf in mfs)
+            {
+                var src = mf.sharedMesh;
+                string path = $"{dir}/{src.name}_lift{Mathf.RoundToInt(target * 100)}_{Mathf.RoundToInt(cut * 1000)}.asset";
+                var lifted = AssetDatabase.LoadAssetAtPath<Mesh>(path);
+                if (lifted == null)
+                {
+                    lifted = Object.Instantiate(src);
+                    lifted.name = System.IO.Path.GetFileNameWithoutExtension(path);
+                    var vs = src.vertices;
+                    for (int i = 0; i < vs.Length; i++)
+                    {
+                        var p = root.InverseTransformPoint(mf.transform.TransformPoint(vs[i]));
+                        p.y = p.y < cut ? p.y * newCut / cut : p.y + (newCut - cut);
+                        vs[i] = mf.transform.InverseTransformPoint(root.TransformPoint(p));
+                    }
+                    lifted.vertices = vs;
+                    lifted.RecalculateBounds();
+                    AssetDatabase.CreateAsset(lifted, path);
+                }
+                mf.sharedMesh = lifted;
+            }
+        }
+
+        /// <summary>
+        /// 작업 R13 (사용자 피드백 2026-11-16 2번·2026-11-24 8번 "지붕 위에 밑으로 피하는 거 어색"): 지붕 길 위 아래로 피하기 장애물.
+        /// 지붕 위에 기둥 달린 낮은 처마를 올려놓는 대신, 길 옆 땅에 선 더 높은 건물(id)의 처마가 지붕 길 위로 나와 있게 한다.
+        /// 모델 꼭짓점으로 크기(k)와 옆 거리(s)를 찾는다: 길 가운데 ±corridorHalf m·앞뒤 ±1.5 m 위에서 가장 낮은 면 = 길 + target m(±0.12),
+        /// 그 아래(길 높이 ~ target)에는 건물이 없음(기둥·난간이 길을 막지 않음). 건물 바닥은 땅(길 높이 − pathY). 찾은 (k, s)를 돌려준다.
+        /// </summary>
+        static (float k, float s, float u)? PlaceOverhangBuilding(Transform root, string id, float realHeight, float side, float pathY, float corridorHalf, float target)
+        {
+            var w = Wrap(id, root, $"Overhang_{id}");
+            // 긴 축(감싼 물체 x)을 길 방향(root z)으로
+            var rot = Quaternion.Euler(0f, 90f, 0f);
+            var local = new List<Vector3>();
+            foreach (var mf in w.Go.GetComponentsInChildren<MeshFilter>(true))
+            {
+                var m = mf.sharedMesh; var vs = m.vertices; var tris = m.triangles;
+                var pts = vs.Select(v => w.Go.transform.InverseTransformPoint(mf.transform.TransformPoint(v))).ToArray();
+                local.AddRange(pts);
+                for (int t = 0; t + 2 < tris.Length; t += 3) local.Add((pts[tris[t]] + pts[tris[t + 1]] + pts[tris[t + 2]]) / 3f);   // 큰 삼각형도 잡게 무게중심
+            }
+            (float k, float s, float u)? best = null;
+            float unit = realHeight / Mathf.Max(0.01f, w.Size.y);   // 모델 단위 → m (실제 높이 기준), k는 그 배율 0.6~1.5
+            var diag = new System.Text.StringBuilder();
+            for (float kk = 0.6f; kk <= 1.5f + 1e-3f; kk += 0.025f)
+                for (float s = 25f; s >= 0.5f; s -= 0.1f)
+                {
+                    float u = float.PositiveInfinity; bool blocked = false;
+                    float k = kk * unit;
+                    foreach (var v in local)
+                    {
+                        var p = rot * (v * k) + new Vector3(side * s, -pathY, 0f);
+                        if (Mathf.Abs(p.x) >= corridorHalf || Mathf.Abs(p.z) > 1.5f || p.y < -0.3f) continue;
+                        if (p.y < target - 0.12f) { blocked = true; break; }
+                        u = Mathf.Min(u, p.y);
+                    }
+                    if (blocked) { if (Mathf.Abs(kk * 10f - Mathf.Round(kk * 10f)) < 0.01f) diag.Append($" k{kk:0.0}:막힘@{s:0.0}"); break; }   // 더 가까이 오면 더 막힌다
+                    if (float.IsPositiveInfinity(u)) continue;
+                    if (u > target + 0.12f && Mathf.Abs(kk * 10f - Mathf.Round(kk * 10f)) < 0.01f && Mathf.Abs(s * 2f - Mathf.Round(s * 2f)) < 0.01f && diag.Length < 4000) diag.Append($" k{kk:0.0}s{s:0.0}u{u:0.00}");
+                    if (Mathf.Abs(u - target) <= 0.12f) { if (best == null || Mathf.Abs(kk - 1f) < Mathf.Abs(best.Value.k / unit - 1f)) best = (k, s, u); break; }
+                }
+            if (best == null) { Debug.LogWarning($"[R13] {id} 옆 {side}: 처마 자리 없음 (길 높이 {pathY:0.00}, 목표 {target:0.00}).{diag}"); Object.DestroyImmediate(w.Go); return null; }
+            var b = best.Value;
+            w.Go.transform.localRotation = rot;
+            w.Go.transform.localPosition = new Vector3(side * b.s, -pathY, 0f);
+            w.Go.transform.localScale = Vector3.one * b.k;
+            foreach (var t in w.Go.GetComponentsInChildren<Transform>(true)) t.gameObject.isStatic = true;
+            return best;
+        }
+
+        /// <summary>
+        /// 작업 R42: 뒤돌아보기 막는 것 한 조각 (움직이므로 정적 아님, 충돌체 없음). 감싼 물체 원점 = 모델 바닥 가운데.
+        /// size.x·z가 0이면 높이(size.y)에 맞춰 같은 비율로, 아니면 가로·높이·깊이에 맞춘다.
+        /// </summary>
+        static void BarricadePiece(Transform root, string id, string name, Vector3 size)
+        {
+            var w = Wrap(id, root, name);
+            var s = size.x <= 0f ? Vector3.one * (size.y / w.Size.y) : new Vector3(size.x / w.Size.x, size.y / w.Size.y, size.z / w.Size.z);
+            w.Go.transform.localScale = s;
+            foreach (var t in w.Go.GetComponentsInChildren<Transform>(true)) t.gameObject.isStatic = false;
+        }
+
         /// <summary>상자 자리에 모델을 꽉 맞춘다(크기·방향). 상자는 충돌만 남기고 그리기를 끈다.</summary>
         static void FitIntoBox(Transform box, string id, int tiles = 1, string centerId = null, int centerIndex = -1)
         {
@@ -1132,7 +1235,7 @@ namespace RhythmActionGame.EditorTools
             mr.sharedMaterial = mat;
             mr.shadowCastingMode = ShadowCastingMode.Off;
             mr.receiveShadows = false;
-            go.isStatic = true;
+            go.isStatic = false;   // 작업 R37: 시작화면 되풀이 동안 AttractMode가 옮긴다 (정적 배칭이면 그려지는 자리가 안 바뀜)
         }
 
         static Vector3 MapCenter()

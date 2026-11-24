@@ -57,11 +57,10 @@ namespace RhythmActionGame.Tests
             foreach (var g in attract.hideDuringAttract) Assert.IsFalse(g.activeSelf, $"시작화면 동안 {g.name} 숨김");
             Assert.Greater(attract.hideDuringAttract.Length, 0, "HUD를 숨길 목록");
             float d0 = attract.ApproachDistance;
-            int loops = 0; float last = d0; bool shot = false; float maxFade = 0f;
+            int loops = 0; float last = d0; bool shot = false;
             for (int f = 0; f < 900; f++)
             {
                 yield return null;
-                maxFade = Mathf.Max(maxFade, attract.FadeAlpha);
                 bool jumped = attract.ApproachDistance < last - 5f;   // 되풀이한 프레임: 카메라는 LateUpdate에서 따라옴 (코루틴은 그 전에 깸)
                 if (jumped) loops++;
                 last = attract.ApproachDistance;
@@ -73,12 +72,12 @@ namespace RhythmActionGame.Tests
                 if (!shot && f == 150) { shot = true; Shot(attract.AttractCamera, $"{Out}/attract_run.png"); }
             }
             Debug.Log($"[R36] 진입로 {d0:0.0} m부터, 되풀이 {loops}번, 지금 {attract.ApproachDistance:0.0} m");
-            Assert.Greater(loops, 0, "진입로 끝에서 처음부터 되풀이");
-            Assert.Greater(maxFade, 0.95f, "되풀이할 때 어두워졌다 밝아짐");
+            Assert.Greater(loops, 0, "진입로 끝에서 되풀이");
+            Assert.AreEqual(loops, attract.Wraps, "되풀이 = 집 두 채만큼 뒤로 (작업 R37: 어두워지지 않음)");
             Assert.IsFalse(boot.clock.IsRunning, "메뉴 동안 시작 안 함");
 
             // 시작 → 계속 달려 시작선에서 1인칭으로
-            for (int f = 0; f < 60; f++) yield return null;   // 페이드 중이 아닐 때
+            for (int f = 0; f < 60; f++) yield return null;
             menu.StartButton.onClick.Invoke();
             Assert.IsTrue(attract.Leading, "시작을 누르면 시작선까지 달림");
             Assert.IsFalse(menu.MainPanel.gameObject.activeSelf, "메뉴 숨김");
