@@ -39,7 +39,7 @@ namespace RhythmActionGame.Tests
                 {
                     Assert.IsTrue(b.enabled, $"{name}: 충돌 유지");
                     Assert.IsFalse(b.GetComponent<MeshRenderer>().enabled, $"{name}: 상자는 그리지 않음");
-                    Assert.IsNotNull(b.transform.parent.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name.StartsWith("Model_")), $"{name}: 모델이 대신 보임");
+                    Assert.IsNotNull(b.transform.parent.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name.StartsWith("Model_") || t.name.StartsWith("Overhang_")), $"{name}: 모델이 대신 보임");
                 }
             }
             // 사건 소품 부품은 모델 (움직이는 부품 이름·개수 그대로)

@@ -62,6 +62,8 @@ namespace RhythmActionGame
         bool followFull;
         StageDirector.ObstacleRun wallRunFor;
         float wallFootOffset = GameConfig.Body.WallRunFootOffset;
+        float wallOn, wallHoldY; bool wallHoldSet;   // 작업 R40: 벽 구간 동안 카메라 높이 고정
+        float slideHold, slideLowY; bool slideHoldSet;   // 작업 R41: 미끄러지는 동안 가장 낮은 카메라 높이 유지
 
         /// <summary>벽타기 발 옆 거리 (m, 테스트용).</summary>
         public float WallFootOffset => wallFootOffset;
@@ -561,6 +563,7 @@ namespace RhythmActionGame
             motionPos = Vector3.zero;
             Vector3 pos = Vector3.zero;
             float lean = 0f;
+            wallOn = 0f; slideHold = 0f;
             var run = director != null ? director.Current : null;
             followFull = failAction && actionLeft > 0f;
             if (run != null && run.HasResult && actionBlend > 0f && director.motion != null)
@@ -580,11 +583,15 @@ namespace RhythmActionGame
                         float on = Traversal.WallRunProfile(p, run.Result);   // 작업 R40: 포물선 대신 벽 구간 내내 벽을 밟음
                         pos = new Vector3(run.Side * wallFootOffset * on, motionPos.y, 0f);
                         lean = run.Side * deg * on;
+                        wallOn = on * actionBlend;
                     }
                     else
                     {
                         pos = motionPos;
                         pos.y = 0f;   // 높이는 클립이 낸다 (미끄러지기·쓰러짐)
+                        // 작업 R41: 미끄러지기 클립은 가운데를 지나자마자 일어서서 카메라가 장애물(처마) 밑면에 닿았다 → 낮은 높이를 잠시 유지
+                        if (slide && !fail && p >= GameConfig.Body.SlideHoldFrom)
+                            slideHold = (1f - Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(GameConfig.Body.SlideRiseStart, GameConfig.Body.SlideRiseEnd, p))) * actionBlend;
                     }
                     motionPos *= actionBlend;
                     pos *= actionBlend;
@@ -615,6 +622,21 @@ namespace RhythmActionGame
             float full = followFull ? actionBlend : 0f;
             float w = Mathf.Lerp(GameConfig.Body.HeadFollowWeight, GameConfig.Body.ActionHeadFollowWeight, full);
             var target = (now - headRest) * w;
+            // 작업 R40: 벽 구간 동안 클립의 머리 오르내림을 따라가지 않는다 (카메라가 벽에서 점점 올라 점프처럼 보였음).
+            // 벽에 다 오른 순간의 머리 높이에 두고, 오를 때·내릴 때는 그 비율(wallOn)로 섞는다.
+            if (wallOn >= 0.99f && !wallHoldSet) { wallHoldY = target.y; wallHoldSet = true; }
+            if (wallOn <= 0f) wallHoldSet = false;
+            if (wallHoldSet) target.y = Mathf.Lerp(target.y, wallHoldY, wallOn);
+            // 작업 R41: 미끄러지는 동안 가장 낮았던 머리 높이에 카메라를 잠시 둔다. 몸도 같은 만큼 내려 카메라와 몸 사이는 클립 그대로 (몸이 화면을 가리지 않게)
+            float slideDrop = 0f;
+            if (slideHold > 0f)
+            {
+                if (!slideHoldSet) { slideLowY = target.y; slideHoldSet = true; }
+                slideLowY = Mathf.Min(slideLowY, target.y);
+                slideDrop = (slideLowY - target.y) * slideHold;
+            }
+            else slideHoldSet = false;
+            if (bodyOffset != null && slideDrop < 0f) bodyOffset.localPosition += Vector3.up * slideDrop;
             // 동작 중에는 머리를 그대로 따라감 (부드럽게 늦추면 몸이 먼저 일어설 때 카메라가 몸통 안에 남음). 달리기는 출렁임을 부드럽게.
             float k = Mathf.Lerp(1f - Mathf.Exp(-GameConfig.Body.HeadFollowSharpness * dt), 1f, full);
             rigOffset = Vector3.Lerp(rigOffset, target, k);

@@ -460,10 +460,19 @@ namespace RhythmActionGame.EditorTools
                         {
                             // 작업 R13: 지붕 길 위 — 지붕에 올려놓은 낮은 처마(대문처럼 보임) 대신 길 옆 땅에 선 높은 건물의 처마 밑으로 미끄러진다
                             bool palace = MapLayout.SectionOf((int)e.runBeat).Number >= 5;
-                            string bid = palace ? "palace_hall" : "pavilion";
-                            float bh = palace ? GameConfig.Map.OverhangPalaceHeight : GameConfig.Map.OverhangPavilionHeight;
-                            var placed = PlaceOverhangBuilding(root, bid, bh, 1f, p.y, GameConfig.Map.SlideCorridorHalf, GameConfig.Map.EaveUnderside)
-                                ?? PlaceOverhangBuilding(root, bid, bh, -1f, p.y, GameConfig.Map.SlideCorridorHalf, GameConfig.Map.EaveUnderside);
+                            // 후보 건물 차례대로 (처마가 길 가운데를 짧게 덮는 자리가 있는 첫 건물): 궁궐 구간은 전각, 마을은 누각 → 큰 기와 전각
+                            // (2026-11-24 사용자 결정: 마을 지붕 136박도 누각 자리가 없으면 큰 기와 전각 처마. 누각·시전·문루는 처마가 길 방향으로 너무 길었음)
+                            var cands = palace ? new[] { ("palace_hall", GameConfig.Map.OverhangPalaceHeight) }
+                                : new[] { ("pavilion", GameConfig.Map.OverhangPavilionHeight), ("palace_hall", GameConfig.Map.OverhangPalaceHeight) };
+                            (float k, float s, float u)? placed = null; string bid = null;
+                            foreach (var (cid, ch) in cands)
+                            {
+                                bid = cid;
+                                // 왼쪽 먼저: 오른쪽은 추격·매복 적이 달려오는 쪽이라 큰 건물이 그 길을 막는다 (R07: 244박 추격 적이 232박 전각 속을 지남)
+                                placed = PlaceOverhangBuilding(root, cid, ch, -1f, p.y, GameConfig.Map.SlideCorridorHalf, GameConfig.Map.EaveUnderside)
+                                    ?? PlaceOverhangBuilding(root, cid, ch, 1f, p.y, GameConfig.Map.SlideCorridorHalf, GameConfig.Map.EaveUnderside);
+                                if (placed != null) break;
+                            }
                             if (placed != null)
                             {
                                 eaveBox.GetComponent<MeshRenderer>().enabled = false;

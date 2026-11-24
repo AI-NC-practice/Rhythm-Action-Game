@@ -73,7 +73,7 @@ Shader "RhythmActionGame/Toon"
                 o.normalWS = n.normalWS;
                 o.tangentWS = float4(n.tangentWS, i.tangentOS.w * GetOddNegativeScale());
                 o.uv = TRANSFORM_TEX(i.uv, _BaseMap);
-                o.fog = ComputeFogFactor(p.positionCS.z);
+                o.fog = p.positionCS.z;   // 작업 R37: 안개는 픽셀마다 (꼭짓점에서 saturate로 잘라 보간하면 큰 면에서 안개가 틀어짐)
                 return o;
             }
 
@@ -89,7 +89,7 @@ Shader "RhythmActionGame/Toon"
                 half q = floor(lit * steps) / (steps - 1);           // 0 .. 1 계단
                 half level = lerp(_ShadowLevel, 1.0h, saturate(q));
                 half3 col = baseCol.rgb * light.color * level + baseCol.rgb * SampleSH(nWS) * 0.25h;
-                col = MixFog(col, i.fog);
+                col = MixFog(col, ComputeFogFactor(i.fog));
                 return half4(col, 1);
             }
             ENDHLSL
@@ -118,11 +118,11 @@ Shader "RhythmActionGame/Toon"
                 off.x *= _ScreenParams.y / _ScreenParams.x;          // 화면 비율 보정: 두께는 화면 높이 기준
                 cs.xy += off * _OutlineWidth * 2.0 * cs.w;
                 o.positionCS = cs;
-                o.fog = ComputeFogFactor(cs.z);
+                o.fog = cs.z;
                 return o;
             }
 
-            half4 frag(Varyings i) : SV_Target { return half4(MixFog(_OutlineColor.rgb, i.fog), 1); }
+            half4 frag(Varyings i) : SV_Target { return half4(MixFog(_OutlineColor.rgb, ComputeFogFactor(i.fog)), 1); }
             ENDHLSL
         }
 

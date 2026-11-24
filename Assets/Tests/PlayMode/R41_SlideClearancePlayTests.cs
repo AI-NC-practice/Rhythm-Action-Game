@@ -43,7 +43,8 @@ namespace RhythmActionGame.Tests
 
         IEnumerator Load(double startBeat)
         {
-            yield return SceneManager.LoadSceneAsync("Game");
+            // 정적 배칭된 합친 메시는 읽을 수 없어 검사용 충돌체를 못 만든다 → 정적 플래그만 뺀 같은 씬(BuildAll이 만듦)
+            yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Test/Game_NoBatch.unity", new LoadSceneParameters(LoadSceneMode.Single));
             yield return null;
             boot = GameBootstrap.Instance;
             dir = boot.director;
@@ -110,6 +111,15 @@ namespace RhythmActionGame.Tests
                 foreach (float lat in new[] { -0.3f, 0f, 0.3f })
                     u = Mathf.Min(u, Underside(g + right * lat));
                 if (!float.IsPositiveInfinity(u)) unders.Add((s, u));
+            }
+            if (name.StartsWith("banner_slide"))
+            {
+                // 깃발 줄 타고 내려오기: 깃대·깃발은 길 옆이라 길 위(가운데 ±0.3 m, 3.5 m 안)에 부딪힐 것이 없어야 한다
+                Assert.AreEqual(0, unders.Count, $"{name}: 길 위에 막는 것이 없음");
+                Results[$"{name}_{tag}"] = (float.PositiveInfinity, float.NaN, float.PositiveInfinity, 99);
+                Debug.Log($"[R41] {name} {tag}: 길 위 3.5 m 안에 아무것도 없음 (줄을 타고 내려오는 사건)");
+                WriteTable();
+                yield break;
             }
             Assert.Greater(unders.Count, 0, $"{name}: 길 위에서 장애물 밑면을 찾지 못함");
             float underMin = unders.Min(x => x.u);

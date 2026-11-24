@@ -133,43 +133,116 @@ namespace RhythmActionGame.EditorTools
         static (float k, float s, float u)? PlaceOverhangBuilding(Transform root, string id, float realHeight, float side, float pathY, float corridorHalf, float target)
         {
             var w = Wrap(id, root, $"Overhang_{id}");
-            // 긴 축(감싼 물체 x)을 길 방향(root z)으로
-            var rot = Quaternion.Euler(0f, 90f, 0f);
+            // 건물 방향: 긴 축(감싼 물체 x)을 길 방향(root z)으로 먼저, 안 되면 다른 방향 (처마 깊이가 면마다 다름)
             var local = new List<Vector3>();
+            var triPts = new List<Vector3>();   // 삼각형 세 점씩 (덮었는지 광선 검사용)
             foreach (var mf in w.Go.GetComponentsInChildren<MeshFilter>(true))
             {
                 var m = mf.sharedMesh; var vs = m.vertices; var tris = m.triangles;
                 var pts = vs.Select(v => w.Go.transform.InverseTransformPoint(mf.transform.TransformPoint(v))).ToArray();
                 local.AddRange(pts);
-                for (int t = 0; t + 2 < tris.Length; t += 3) local.Add((pts[tris[t]] + pts[tris[t + 1]] + pts[tris[t + 2]]) / 3f);   // 큰 삼각형도 잡게 무게중심
+                for (int t = 0; t + 2 < tris.Length; t += 3)
+                {
+                    local.Add((pts[tris[t]] + pts[tris[t + 1]] + pts[tris[t + 2]]) / 3f);   // 큰 삼각형도 잡게 무게중심
+                    triPts.Add(pts[tris[t]]); triPts.Add(pts[tris[t + 1]]); triPts.Add(pts[tris[t + 2]]);
+                }
             }
             (float k, float s, float u)? best = null;
+            Quaternion bestRot = Quaternion.identity; float bestDz = 0f;
+            // (방향, 길 방향 옮김): 나란히 놓으면 처마가 길게 덮으니, 비스듬히 돌려 처마 모서리만 길 위로 나오게 앞뒤로도 옮겨 본다
+            var tries = new List<(float yaw, float dz)> { (90f, 0f), (-90f, 0f), (0f, 0f), (180f, 0f) };
+            foreach (float yw in new[] { 45f, -45f, 135f, -135f })
+                for (float dz = -4f; dz <= 4f + 1e-3f; dz += 1f) tries.Add((yw, dz));
             float unit = realHeight / Mathf.Max(0.01f, w.Size.y);   // 모델 단위 → m (실제 높이 기준), k는 그 배율 0.6~1.5
             var diag = new System.Text.StringBuilder();
-            for (float kk = 0.6f; kk <= 1.5f + 1e-3f; kk += 0.025f)
-                for (float s = 25f; s >= 0.5f; s -= 0.1f)
-                {
-                    float u = float.PositiveInfinity; bool blocked = false;
-                    float k = kk * unit;
-                    foreach (var v in local)
+            foreach (var (yaw, dz) in tries)
+            {
+                if (best != null) break;
+                var rot = Quaternion.Euler(0f, yaw, 0f);
+                for (float kk = 0.6f; kk <= 1.5f + 1e-3f; kk += dz == 0f && Mathf.Abs(yaw) % 90f < 1f ? 0.025f : 0.05f)
+                    for (float s = 25f; s >= 0.5f; s -= 0.1f)
                     {
-                        var p = rot * (v * k) + new Vector3(side * s, -pathY, 0f);
-                        if (Mathf.Abs(p.x) >= corridorHalf || Mathf.Abs(p.z) > 1.5f || p.y < -0.3f) continue;
-                        if (p.y < target - 0.12f) { blocked = true; break; }
-                        u = Mathf.Min(u, p.y);
+                        float u = float.PositiveInfinity; bool blocked = false, tooLong = false;
+                        float k = kk * unit;
+                        foreach (var v in local)
+                        {
+                            var p = rot * (v * k) + new Vector3(side * s, -pathY, dz);
+                            // 처마가 길 앞뒤로 너무 길면 미끄러지기 전·후(서서 달리는 카메라)에 닿는다
+                            if (Mathf.Abs(p.x) < corridorHalf && Mathf.Abs(p.z) < 4f && p.y > -0.3f && p.y < OverhangClearNeeded(p.z, target)) tooLong = true;
+                            if (Mathf.Abs(p.x) >= corridorHalf || Mathf.Abs(p.z) > 1.5f || p.y < -0.3f) continue;
+                            if (p.y < target - 0.12f) { blocked = true; break; }
+                            u = Mathf.Min(u, p.y);
+                        }
+                        if (blocked) { if (Mathf.Abs(kk * 10f - Mathf.Round(kk * 10f)) < 0.01f) diag.Append($" k{kk:0.0}:막힘@{s:0.0}"); break; }   // 더 가까이 오면 더 막힌다
+                        if (float.IsPositiveInfinity(u)) continue;
+                        if (u > target + 0.12f && Mathf.Abs(kk * 10f - Mathf.Round(kk * 10f)) < 0.01f && Mathf.Abs(s * 2f - Mathf.Round(s * 2f)) < 0.01f && diag.Length < 4000) diag.Append($" k{kk:0.0}s{s:0.0}u{u:0.00}");
+                        if (Mathf.Abs(u - target) <= 0.12f)
+                        {
+                            if (tooLong) { if (diag.Length < 6000) diag.Append($" y{yaw:0}z{dz:0}k{kk:0.00}s{s:0.0}:길다"); continue; }
+                            // 처마 끝 몇 점만 길 가장자리에 걸친 자리는 안 됨: 달리는 길 가운데 3×3 점 위를 모두 덮어야 한다 (아니면 더 가까이)
+                            if (!CoversCorridor(triPts, rot, k, new Vector3(side * s, -pathY, dz), corridorHalf, target)) { if (diag.Length < 6000) diag.Append($" y{yaw:0}z{dz:0}k{kk:0.00}s{s:0.0}:덮지않음"); continue; }
+                            if (best == null || Mathf.Abs(kk - 1f) < Mathf.Abs(best.Value.k / unit - 1f)) { best = (k, s, u); bestRot = rot; bestDz = dz; }
+                            break;
+                        }
                     }
-                    if (blocked) { if (Mathf.Abs(kk * 10f - Mathf.Round(kk * 10f)) < 0.01f) diag.Append($" k{kk:0.0}:막힘@{s:0.0}"); break; }   // 더 가까이 오면 더 막힌다
-                    if (float.IsPositiveInfinity(u)) continue;
-                    if (u > target + 0.12f && Mathf.Abs(kk * 10f - Mathf.Round(kk * 10f)) < 0.01f && Mathf.Abs(s * 2f - Mathf.Round(s * 2f)) < 0.01f && diag.Length < 4000) diag.Append($" k{kk:0.0}s{s:0.0}u{u:0.00}");
-                    if (Mathf.Abs(u - target) <= 0.12f) { if (best == null || Mathf.Abs(kk - 1f) < Mathf.Abs(best.Value.k / unit - 1f)) best = (k, s, u); break; }
-                }
+            }
             if (best == null) { Debug.LogWarning($"[R13] {id} 옆 {side}: 처마 자리 없음 (길 높이 {pathY:0.00}, 목표 {target:0.00}).{diag}"); Object.DestroyImmediate(w.Go); return null; }
             var b = best.Value;
-            w.Go.transform.localRotation = rot;
-            w.Go.transform.localPosition = new Vector3(side * b.s, -pathY, 0f);
+            w.Go.transform.localRotation = bestRot;
+            w.Go.transform.localPosition = new Vector3(side * b.s, -pathY, bestDz);
+            Debug.Log($"[R13] {id} 방향 {bestRot.eulerAngles.y:0}°, 길 방향 옮김 {bestDz:0.0} m");
             w.Go.transform.localScale = Vector3.one * b.k;
-            foreach (var t in w.Go.GetComponentsInChildren<Transform>(true)) t.gameObject.isStatic = true;
+            foreach (var t in w.Go.GetComponentsInChildren<Transform>(true)) t.gameObject.isStatic = false;   // 정적 배칭에서 뺌: 위에 선 적의 발밑 검사(R07)가 보이는 메시 그대로 잡게 (건물 2채라 드로우콜 영향 작음)
             return best;
+        }
+
+        /// <summary>
+        /// 작업 R13 수정: 길 가운데 ±OverhangCoverHalf(가로 3점)·앞뒤 OverhangZMin+0.6 ~ OverhangZMax−0.2 m(3점)에서 위로 쏜 광선이 모두 건물 면에 닿고,
+        /// 처음 닿는 면이 target − 0.12 ~ target + OverhangCoverSlack 안이면 처마가 길을 덮었다고 본다 (삼각형마다 위에서 본 2D 안쪽 검사).
+        /// </summary>
+        /// <summary>작업 R13 수정: 길 가운데 기준 z(m)에서 처마 밑면이 비켜야 할 높이 — 미끄러지는 동안(OverhangZMin~ZMax)은 target − 0.12(막힘 검사가 맡음),
+        /// 그 밖은 카메라가 일어서는 만큼 앞으로 OverhangRiseAhead m·뒤로 OverhangRiseBehind m에 걸쳐 OverhangRunClearHeight까지 오른다.</summary>
+        static float OverhangClearNeeded(float z, float target)
+        {
+            var m = GameConfig.Map.OverhangZMax; var n = GameConfig.Map.OverhangZMin;
+            float t = z > m ? Mathf.InverseLerp(m, m + GameConfig.Map.OverhangRiseAhead, z) : z < n ? Mathf.InverseLerp(n, n - GameConfig.Map.OverhangRiseBehind, z) : -1f;
+            if (t < 0f) return target - 0.12f;
+            return Mathf.Lerp(target - 0.12f, GameConfig.Map.OverhangRunClearHeight, Mathf.SmoothStep(0f, 1f, t));
+        }
+
+        static bool CoversCorridor(List<Vector3> triPts, Quaternion rot, float k, Vector3 offset, float corridorHalf, float target)
+        {
+            const int nx = 3, nz = 3;
+            float coverHalf = GameConfig.Map.OverhangCoverHalf;
+            var lowest = new float[nx * nz];
+            for (int i = 0; i < lowest.Length; i++) lowest[i] = float.PositiveInfinity;
+            var xs = new float[nx]; var zs = new float[nz];
+            for (int i = 0; i < nx; i++) xs[i] = Mathf.Lerp(-coverHalf, coverHalf, i / (float)(nx - 1));
+            for (int j = 0; j < nz; j++) zs[j] = Mathf.Lerp(GameConfig.Map.OverhangZMin + 0.6f, GameConfig.Map.OverhangZMax - 0.2f, j / (float)(nz - 1));
+            for (int t = 0; t + 2 < triPts.Count; t += 3)
+            {
+                var a = rot * (triPts[t] * k) + offset; var b = rot * (triPts[t + 1] * k) + offset; var c = rot * (triPts[t + 2] * k) + offset;
+                float minX = Mathf.Min(a.x, Mathf.Min(b.x, c.x)), maxX = Mathf.Max(a.x, Mathf.Max(b.x, c.x));
+                float minZ = Mathf.Min(a.z, Mathf.Min(b.z, c.z)), maxZ = Mathf.Max(a.z, Mathf.Max(b.z, c.z));
+                if (maxX < -corridorHalf || minX > corridorHalf || maxZ < zs[0] - 0.1f || minZ > zs[nz - 1] + 0.1f) continue;
+                float det = (b.z - c.z) * (a.x - c.x) + (c.x - b.x) * (a.z - c.z);
+                if (Mathf.Abs(det) < 1e-9f) continue;   // 세로로 선 삼각형
+                for (int i = 0; i < nx; i++)
+                    for (int j = 0; j < nz; j++)
+                    {
+                        float x = xs[i], z = zs[j];
+                        if (x < minX || x > maxX || z < minZ || z > maxZ) continue;
+                        float l1 = ((b.z - c.z) * (x - c.x) + (c.x - b.x) * (z - c.z)) / det;
+                        float l2 = ((c.z - a.z) * (x - c.x) + (a.x - c.x) * (z - c.z)) / det;
+                        float l3 = 1f - l1 - l2;
+                        if (l1 < 0f || l2 < 0f || l3 < 0f) continue;
+                        float y = l1 * a.y + l2 * b.y + l3 * c.y;
+                        if (y > -0.3f && y < lowest[i * nz + j]) lowest[i * nz + j] = y;
+                    }
+            }
+            foreach (var y in lowest)
+                if (y < target - 0.12f || y > target + GameConfig.Map.OverhangCoverSlack) return false;
+            return true;
         }
 
         /// <summary>
@@ -339,7 +412,7 @@ namespace RhythmActionGame.EditorTools
             string Owner(Transform t)
             {
                 for (var x = t; x != null; x = x.parent)
-                    if (x.name.StartsWith("Dress_") || x.name.StartsWith("Model_") || x.name == "Ground" || x.name.StartsWith("Path_")) return x.name;
+                    if (x.name.StartsWith("Dress_") || x.name.StartsWith("Model_") || x.name.StartsWith("Overhang_") || x.name == "Ground" || x.name.StartsWith("Path_")) return x.name;
                 return t.name;
             }
 
@@ -1154,7 +1227,7 @@ namespace RhythmActionGame.EditorTools
         /// <summary>달리는 발판으로 쓰지 않는 장식 (나무 꼭대기·등·깃발·빨랫줄 등).</summary>
         static bool IsNotGround(string owner)
         {
-            foreach (var k in new[] { "pine", "zelkova", "lantern", "banner", "clothes", "rope", "jangseung", "cloth_rack", "straw", "jige", "firewood", "basket" })
+            foreach (var k in new[] { "pine", "zelkova", "lantern", "banner", "clothes", "rope", "jangseung", "cloth_rack", "straw", "jige", "firewood", "basket", "Overhang_" })   // Overhang_: 지붕 처마용 큰 전각 (R13) — 적이 디디지 않음
                 if (owner.Contains(k)) return true;
             return false;
         }

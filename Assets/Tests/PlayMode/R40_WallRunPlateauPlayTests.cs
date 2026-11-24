@@ -72,6 +72,7 @@ namespace RhythmActionGame.Tests
 
         IEnumerator WallRun(double beat, double delay, string tag)
         {
+            Directory.CreateDirectory(Out);
             yield return Load(beat - 4);
             var view = GameObject.Find("PlayerCamera").GetComponent<Camera>();
             var body = Object.FindAnyObjectByType<PlayerBody>();

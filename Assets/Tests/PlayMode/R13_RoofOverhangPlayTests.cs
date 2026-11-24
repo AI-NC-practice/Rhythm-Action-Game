@@ -36,12 +36,13 @@ namespace RhythmActionGame.Tests
         {
             yield return SceneManager.LoadSceneAsync("Game");
             yield return null;
-            foreach (var (beat, id) in new[] { (136.0, "pavilion"), (232.0, "palace_hall") })
+            foreach (var beat in new[] { 136.0, 232.0 })
             {
                 var o = Obstacle(beat);
                 Assert.IsNull(o.Find("ModelPivot_eave_low"), $"{beat}박: 지붕 위에 낮은 처마 모델이 없음");
-                var b = o.Find($"Overhang_{id}");
-                Assert.IsNotNull(b, $"{beat}박: 옆 높은 건물 {id}");
+                var b = o.Cast<Transform>().FirstOrDefault(t => t.name.StartsWith("Overhang_"));
+                Assert.IsNotNull(b, $"{beat}박: 옆 높은 건물");
+                string id = b.name.Substring("Overhang_".Length);
                 var rs = b.GetComponentsInChildren<Renderer>();
                 var bnd = rs[0].bounds; foreach (var r in rs) bnd.Encapsulate(r.bounds);
                 float groundY = 0f;

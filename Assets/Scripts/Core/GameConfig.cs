@@ -543,14 +543,14 @@ namespace RhythmActionGame
             /// <summary>
             /// 작업 R42 (사용자 피드백 2026-11-24 7번): 컷이 시작되면 컷 자리 BarricadeBehind m 뒤에서 막는 것이 BarricadeFallBeats 박 만에 길을 가로질러 쓰러지고,
             /// 쫓는 무리는 플레이어보다 PursuerChargeGainPerBeat m/박 빠르게 달려들다 막는 것 PursuerTripGap m 앞에서 걸려 넘어진다.
-            /// 땅: 지게·짚단이 길가 BarricadeSide m에 서 있다가 넘어짐 (누우면 BarricadeLyingLift m 들림). 지붕: 기와 더미가 오른쪽 BarricadeRoofStackSide m에 쌓여 있다가 흩어짐.
+            /// 땅: 지게·짚단이 길가 BarricadeSide m에 서 있다가 넘어짐 (누운 모습의 보이는 바닥이 면 위 BarricadeLyingLift m). 지붕: 기와 더미가 오른쪽 BarricadeRoofStackSide m에 쌓여 있다가 흩어짐.
             /// </summary>
             public const float BarricadeBehind = 2.0f;
             public const double BarricadeFallBeats = 0.3;
             public const float PursuerChargeGainPerBeat = 2.5f;
             public const float PursuerTripGap = 0.6f;
             public const float BarricadeSide = 2.3f;
-            public const float BarricadeLyingLift = 0.25f;
+            public const float BarricadeLyingLift = 0.02f;
             public const float BarricadeRoofStackSide = 0.9f;
             public const float BarricadeTileHeight = 0.3f;
             /// <summary>막는 것 모델 크기: 지게 높이, 짚단 높이 (m, 누우면 길을 가로지르는 길이), 기와 한 무더기 (가로·높이·깊이 m).</summary>
@@ -1036,9 +1036,13 @@ namespace RhythmActionGame
             public const float WallRunCameraSideNormal = 0.7f;
             public const float WallRunCameraHeightNormal = 0.4f;
             public static readonly UnityEngine.Vector4 WallRunOnPerfect = new UnityEngine.Vector4(0.06f, 0.2f, 0.8f, 0.94f);
-            public static readonly UnityEngine.Vector4 WallRunOnNormal = new UnityEngine.Vector4(0.1f, 0.26f, 0.72f, 0.9f);
+            public static readonly UnityEngine.Vector4 WallRunOnNormal = new UnityEngine.Vector4(0.1f, 0.24f, 0.76f, 0.9f);
             /// <summary>작업 R41: 아래로 피하기 장애물 밑을 지나는 동안 카메라가 밑면보다 낮아야 하는 여유 (m, 실제 stage1 측정).</summary>
             public const float SlideClearance = 0.3f;
+            /// <summary>작업 R41: 미끄러지기 진행 SlideHoldFrom부터 가장 낮은 카메라 높이를 유지하고, SlideRiseStart~SlideRiseEnd 동안 부드럽게 일어선다 (클립만 따르면 0.5 지나 곧바로 일어섰음).</summary>
+            public const float SlideHoldFrom = 0.3f;
+            public const float SlideRiseStart = 0.72f;
+            public const float SlideRiseEnd = 0.92f;
             /// <summary>아래로 피하기(미끄러지기) 중 내 몸(팔·다리)이 화면을 가리는 비율 상한 (0~1, PlayMode 측정).</summary>
             public const float SlideMaxScreenCover = 0.2f;
             /// <summary>목 단면이 화면 가장자리 밖 이 비율(뷰포트) 안에만 있어도 몸을 숨긴다 (카메라 흔들림 여유).</summary>
@@ -1316,6 +1320,17 @@ namespace RhythmActionGame
             /// <summary>작업 R13: 옆 높은 건물의 실제 높이 (m, asset_specs height_m). 처마 높이를 맞추려 0.6~1.5배 안에서 크기를 고른다.</summary>
             public const float OverhangPavilionHeight = 9f;
             public const float OverhangPalaceHeight = 14f;
+            /// <summary>작업 R13 수정: 처마가 달리는 길 가운데 ±OverhangCoverHalf m·앞뒤 −1~+1 m(3×3점) 위를 모두 덮고, 처음 닿는 면이 밑면 + OverhangCoverSlack m 안이어야 한다
+            /// (예전엔 처마 끝 몇 점만 길 가장자리에 걸쳐도 받아들여, 지붕 위 136박 누각 처마가 길 옆에만 있었음).</summary>
+            public const float OverhangCoverHalf = 0.3f;
+            public const float OverhangCoverSlack = 1.5f;
+            /// <summary>작업 R13 수정: 미끄러지는 카메라는 장애물 가운데 2 m 앞부터 낮고 가운데를 지나 1.1 m(진행 0.72, SlideRiseStart)부터 일어선다.
+            /// 그래서 처마는 길 위 가운데 기준 OverhangZMin ~ OverhangZMax m만 덮고, 그 밖(±4 m까지)은 카메라가 일어서는 만큼(앞 OverhangRiseAhead·뒤 OverhangRiseBehind m에 걸쳐) OverhangRunClearHeight m까지 아래가 비어야 한다.</summary>
+            public const float OverhangZMin = -2.0f;
+            public const float OverhangZMax = 1.2f;
+            public const float OverhangRunClearHeight = 2.1f;
+            public const float OverhangRiseAhead = 1.0f;
+            public const float OverhangRiseBehind = 1.5f;
             public const float ChargePassSide = 1f;
             public const float ChargePassOffset = 1.4f;
             public const float ChargePassBeats = 1.5f;

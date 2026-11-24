@@ -172,8 +172,16 @@ namespace RhythmActionGame
                         var stackAt = at + right * GameConfig.Fx.BarricadeRoofStackSide;
                         float ys = SurfaceY(i, 1, stackAt, at.y);
                         restPose[i][j] = new Pose(new Vector3(stackAt.x, ys + j * GameConfig.Fx.BarricadeTileHeight, stackAt.z) + fwd * 0.05f * j, look * Quaternion.Euler(0f, 12f * j, 0f));
-                        var fallAt = at + right * lat - fwd * (0.35f * j);
-                        float yf = SurfaceY(i, k, fallAt, at.y);
+                        // 흩어지는 자리 = 그 거리의 보이는 지붕 칸 (지붕 사이 틈이면 앞뒤로 가까운 칸으로 옮김 — 예전엔 틈 위 3 m 공중에 뜸)
+                        float back = 0.35f * j, yf = float.NaN;
+                        for (float dd = 0f; dd <= 2f && float.IsNaN(yf); dd += 0.25f)
+                            foreach (float sg in new[] { 1f, -1f })
+                            {
+                                float y = RoofY(i, k, BarricadeDistance(i) - back - sg * dd);
+                                if (!float.IsNaN(y)) { yf = y; back += sg * dd; break; }
+                            }
+                        var fallAt = at + right * lat - fwd * back;
+                        if (float.IsNaN(yf)) yf = SurfaceY(i, k, fallAt, at.y);
                         fallPose[i][j] = new Pose(new Vector3(fallAt.x, yf, fallAt.z), look * Quaternion.Euler(0f, 35f * j - 30f, 8f));
                     }
                     else
@@ -186,6 +194,15 @@ namespace RhythmActionGame
                         restPose[i][j] = new Pose(new Vector3(standAt.x, y, standAt.z), rest);
                         var tip = Quaternion.FromToRotation(Vector3.up, -side * right);   // 위가 길 가운데 쪽으로
                         fallPose[i][j] = new Pose(new Vector3(standAt.x, y + GameConfig.Fx.BarricadeLyingLift, standAt.z), tip * rest);
+                        // 쓰러진 모습의 실제 바닥(보이는 메시 경계)을 면 높이에 맞춘다 (예전: 짚단이 땅속 0.7 m·지게 0.4 m 박힘)
+                        var piece = root.GetChild(j);
+                        piece.SetPositionAndRotation(fallPose[i][j].position, fallPose[i][j].rotation);
+                        var rs = piece.GetComponentsInChildren<Renderer>();
+                        if (rs.Length > 0)
+                        {
+                            var bnd = rs[0].bounds; foreach (var r in rs) bnd.Encapsulate(r.bounds);
+                            fallPose[i][j].position += Vector3.up * (y + GameConfig.Fx.BarricadeLyingLift - bnd.min.y);
+                        }
                     }
                 }
                 PoseBarricade(i, 0f);
@@ -260,6 +277,10 @@ namespace RhythmActionGame
                     if (pd >= stopAt - 0.3f * k)
                     {
                         pd = stopAt - 0.3f * k;
+                        // 지붕 위 컷: 넘어지는 자리가 지붕 사이 틈이면(보이는 지붕 칸 없음) 공중에 뜨므로 뒤쪽 가까운 지붕 칸에서 넘어진다
+                        if (OnRoof(beats[near]) && roofY != null && roofY.Length > 0 && float.IsNaN(RoofY(near, k, pd)))
+                            for (float dd = 0.25f; dd <= 2.5f; dd += 0.25f)
+                                if (!float.IsNaN(RoofY(near, k, pd - dd))) { pd -= dd; break; }
                         if (!tripped[k]) { tripped[k] = true; var fr = p.GetComponent<EnemyFigureRun>(); if (fr != null) fr.PlayDefeat(); }
                     }
                 }
@@ -279,7 +300,7 @@ namespace RhythmActionGame
                 if (OnRoof(beats[near]) && roofY != null && roofY.Length > 0)
                 {
                     if (float.IsNaN(roof)) hop = true;
-                    else { best = roof; hop = InObstacle(pd / GameConfig.MetersPerBeat); }
+                    else { best = roof; hop = !tripped[k] && InObstacle(pd / GameConfig.MetersPerBeat); }   // 넘어진 무리는 지붕 면 위에
                 }
                 if (!hop) at.y = best;
                 if (hopping == null || hopping.Length != pursuers.Length) hopping = new bool[pursuers.Length];

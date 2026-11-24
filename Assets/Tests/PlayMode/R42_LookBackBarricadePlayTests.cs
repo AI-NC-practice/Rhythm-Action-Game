@@ -33,7 +33,8 @@ namespace RhythmActionGame.Tests
 
         IEnumerator Load(double startBeat)
         {
-            yield return SceneManager.LoadSceneAsync("Game");
+            // 정적 배칭된 합친 메시는 읽을 수 없어 검사용 충돌체를 못 만든다 → 정적 플래그만 뺀 같은 씬(BuildAll이 만듦)
+            yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Test/Game_NoBatch.unity", new LoadSceneParameters(LoadSceneMode.Single));
             yield return null;
             boot = GameBootstrap.Instance;
             dir = boot.director;
@@ -157,6 +158,7 @@ namespace RhythmActionGame.Tests
             {
                 if (p == null || !p.gameObject.activeInHierarchy) continue;
                 float g = GapBelow(p.position);
+                Debug.Log($"[R42diag] 컷 {i} {p.name} 자리 {p.position} 길 높이 {MapLayout.PointAt(LookBackCut.BarricadeDistance(i) + Vector3.Dot(p.position - at, fwd)).y:0.00} 발밑 거리 {g:0.00}");
                 Assert.Less(Mathf.Abs(g), 0.35f, $"넘어진 무리 {p.name} 발밑 면과의 거리 {g:0.00} m (공중·속)");
             }
             var root = lb.barricades[i];
@@ -166,6 +168,7 @@ namespace RhythmActionGame.Tests
                 var rs = piece.GetComponentsInChildren<Renderer>();
                 var bnd = rs[0].bounds; foreach (var r in rs) bnd.Encapsulate(r.bounds);
                 float g = GapBelow(new Vector3(bnd.center.x, bnd.min.y, bnd.center.z));
+                Debug.Log($"[R42diag] 컷 {i} 조각 {piece.name} 경계 {bnd.min}~{bnd.max} 렌더러 {rs.Length}개 아래 거리 {g:0.00}");
                 Assert.Less(g, 0.5f, $"쓰러진 {piece.name} 아래가 비어 있음 ({g:0.00} m)");
             }
             Shot(view, $"{Out}/cut{i}_after.png");
