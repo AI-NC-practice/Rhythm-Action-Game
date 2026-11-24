@@ -2209,10 +2209,10 @@
                                          "PlayMode 테스트·미리보기 PNG(2챕터 60박 벽타기 1인칭 몇 장)",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "in_progress",
+                      "status":  "done",
                       "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  "사용자 피드백 2026-11-24 5번: '2단계 처음 부분 벽을 탄 다음에 점프해서 가는 느낌.' 원인: Traversal 벽타기 궤적이 sin 포물선(높이 1.2 m)."
+                      "notes":  "사용자 피드백 2026-11-24 5번. WallRunProfile(빠르게 올라 → 벽 구간 유지 → 내려옴), 벽 구간 동안 카메라가 클립 머리 오르내림을 따라가지 않게 고정. 평가 PASS 1회차."
                   },
                   {
                       "id":  "R41",
