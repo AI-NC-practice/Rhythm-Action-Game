@@ -1672,10 +1672,10 @@
                                          "챕터별 해당 장애물 미리보기 PNG (사용자 확인용)",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "done",
+                      "attempts":  1,
                       "max_attempts":  3,
-                      "notes":  "사용자 피드백(2026-11-16 2번): '건물 위에 저 건물은 왜 있는 거야?' — R04에서 eave를 eave_low 모델로 바꿨는데 지붕 길 위에서 대문처럼 보임."
+                      "notes":  "사용자 피드백 2026-11-16 2번·11-24 8번. 지붕 길 ↓는 길 왼쪽 땅에 선 큰 기와 전각(45° 비스듬히)의 처마 모서리 밑 (136박도 전각 — 2026-11-24 사용자 결정). 평가 PASS 1회차."
                   },
                   {
                       "id":  "R14",
@@ -2209,8 +2209,8 @@
                                          "PlayMode 테스트·미리보기 PNG(2챕터 60박 벽타기 1인칭 몇 장)",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "in_progress",
+                      "attempts":  1,
                       "max_attempts":  3,
                       "notes":  "사용자 피드백 2026-11-24 5번: '2단계 처음 부분 벽을 탄 다음에 점프해서 가는 느낌.' 원인: Traversal 벽타기 궤적이 sin 포물선(높이 1.2 m)."
                   },
@@ -2228,8 +2228,8 @@
                                          "PlayMode 측정 테스트·미리보기 PNG(장애물 밑을 지나는 순간 1인칭)",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "in_progress",
+                      "attempts":  1,
                       "max_attempts":  3,
                       "notes":  "사용자 피드백 2026-11-24 6번: '아래로 피하는 거 카메라 각을 좀 낮추던가 장애물을 조금 높여야 해요. 부딪히면서 가는 것 같아요.'"
                   },
@@ -2248,8 +2248,8 @@
                                          "PlayMode 테스트·미리보기 PNG(컷 4곳)",
                                          "unity-verify.ps1 전체 통과"
                                      ],
-                      "status":  "pending",
-                      "attempts":  0,
+                      "status":  "in_progress",
+                      "attempts":  1,
                       "max_attempts":  3,
                       "notes":  "사용자 피드백 2026-11-24 7번: '뒤돌아보면 적이 바로 뒤에 있는데 앞에 적이 막아서면 뒤 적이 덮칠 거리인데 안 덮친다. 뒤돌아보고 지게 같은 걸 쓰러뜨려 방해했다거나.' 방식은 Claude 추천(지게·수레 쓰러뜨리기)."
                   }
